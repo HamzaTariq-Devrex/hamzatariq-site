@@ -67,6 +67,14 @@ Portfolio and inbound lead site for Hamza Tariq (freelance developer: React/Next
 - `npm run lint`: ESLint (includes the Next.js plugin).
 - `npm run typecheck`: TypeScript only.
 
+## SEO conventions
+
+- Every route exports `metadata` or `generateMetadata` with a canonical URL. Build titles and descriptions with `fitTitle`, `fitDescription` (`src/lib/seo.ts`); never pad them with invented facts.
+- Every route has an `opengraph-image.tsx` using `renderOg` (`src/lib/og.tsx`).
+- JSON-LD goes in a `<script type="application/ld+json">` via `jsonLd()`. The `Person` node lives on the home page with `@id` `https://hamzatariq.site/#person`; other pages reference it.
+- New routes must be added to `src/app/sitemap.ts`.
+- IndexNow: `.github/workflows/indexnow.yml` runs on every push to `main`, waits until `/version.txt` serves the pushed commit, then submits the sitemap. The key file is `public/718bcb0be670c128fd877ee016f03bef.txt`; do not delete it.
+
 ## Deploy
 
 - GitHub: `HamzaTariq-Devrex/hamzatariq-site`, branch `main`. Pushing to `main` deploys to production on Vercel (project `hamzatariq-site`, account `pulsefire-hamza`).
