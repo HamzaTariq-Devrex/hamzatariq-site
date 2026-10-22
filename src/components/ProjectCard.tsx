@@ -1,23 +1,25 @@
-import { useEffect, type RefObject } from "react";
-import { Link } from "react-router-dom";
-import { IMAGE_BASE, type Project } from "../data/projects";
+import Image from "next/image";
+import Link from "next/link";
+import { IMAGE_BASE, type Project } from "@/data/projects";
 import "./styles/ProjectCard.css";
 
 type Props = {
   project: Project;
   index: number;
-  spa?: boolean;
+  fullReload?: boolean;
+  priority?: boolean;
 };
 
-const ProjectCard = ({ project, index, spa = false }: Props) => {
+const ProjectCard = ({ project, index, fullReload = false, priority = false }: Props) => {
   const content = (
     <>
       <div className="project-card-media">
-        <img
+        <Image
           src={IMAGE_BASE + project.image}
-          alt={`${project.title} website`}
-          loading="lazy"
-          decoding="async"
+          alt={`${project.title} website homepage`}
+          fill
+          sizes="(max-width: 768px) 100vw, (max-width: 1100px) 50vw, 420px"
+          priority={priority}
         />
         <span className="project-card-cta">
           View project
@@ -44,35 +46,15 @@ const ProjectCard = ({ project, index, spa = false }: Props) => {
     style: { transitionDelay: `${(index % 3) * 0.08}s` },
   };
 
-  return spa ? (
-    <Link to={`/work/${project.slug}`} {...props}>
-      {content}
-    </Link>
-  ) : (
+  return fullReload ? (
     <a href={`/work/${project.slug}`} {...props}>
       {content}
     </a>
+  ) : (
+    <Link href={`/work/${project.slug}`} {...props}>
+      {content}
+    </Link>
   );
 };
 
 export default ProjectCard;
-
-export const useCardReveal = (container: RefObject<HTMLElement>, deps: unknown[]) => {
-  useEffect(() => {
-    const root = container.current;
-    if (!root) return;
-    const observer = new IntersectionObserver(
-      (entries) =>
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("is-in");
-            observer.unobserve(entry.target);
-          }
-        }),
-      { rootMargin: "0px 0px -8% 0px" }
-    );
-    root.querySelectorAll(".project-card:not(.is-in)").forEach((card) => observer.observe(card));
-    return () => observer.disconnect();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, deps);
-};

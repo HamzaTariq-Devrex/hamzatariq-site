@@ -23,6 +23,7 @@
   color: inherit;
 }
 
+.project-grid.is-static .project-card,
 .project-card.is-in {
   opacity: 1;
   transform: translateY(0);

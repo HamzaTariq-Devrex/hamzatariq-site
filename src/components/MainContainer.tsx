@@ -1,11 +1,7 @@
-import {
-  lazy,
-  PropsWithChildren,
-  Suspense,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+"use client";
+
+import { PropsWithChildren, useEffect, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import About from "./About";
 import Career from "./Career";
 import Contact from "./Contact";
@@ -17,12 +13,13 @@ import WhatIDo from "./WhatIDo";
 import Work from "./Work";
 import setSplitText from "./utils/splitText";
 
-const TechStack = lazy(() => import("./TechStack"));
+const TechStack = dynamic(() => import("./TechStack"), {
+  ssr: false,
+  loading: () => <div className="techstack" />,
+});
 
 const MainContainer = ({ children }: PropsWithChildren) => {
-  const [isDesktopView, setIsDesktopView] = useState<boolean>(
-    window.innerWidth > 1024
-  );
+  const [isDesktopView, setIsDesktopView] = useState<boolean | null>(null);
   const [showTechStack, setShowTechStack] = useState(false);
   const techStackAnchorRef = useRef<HTMLDivElement>(null);
 
@@ -36,7 +33,7 @@ const MainContainer = ({ children }: PropsWithChildren) => {
     return () => {
       window.removeEventListener("resize", resizeHandler);
     };
-  }, [isDesktopView]);
+  }, []);
 
   useEffect(() => {
     if (!isDesktopView || showTechStack) return;
@@ -60,21 +57,17 @@ const MainContainer = ({ children }: PropsWithChildren) => {
       <Cursor />
       <Navbar />
       <SocialIcons />
-      {isDesktopView && children}
+      {isDesktopView === true && children}
       <div id="smooth-wrapper">
         <div id="smooth-content">
           <div className="container-main">
-            <Landing>{!isDesktopView && children}</Landing>
+            <Landing>{isDesktopView === false && children}</Landing>
             <About />
             <WhatIDo />
             <Career />
             <Work />
             {isDesktopView && <div ref={techStackAnchorRef} />}
-            {isDesktopView && showTechStack && (
-              <Suspense fallback={<div>Loading....</div>}>
-                <TechStack />
-              </Suspense>
-            )}
+            {isDesktopView && showTechStack && <TechStack />}
             <Contact />
           </div>
         </div>

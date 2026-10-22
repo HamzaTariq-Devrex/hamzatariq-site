@@ -1,3 +1,5 @@
+import Image from "next/image";
+import { SITE } from "@/lib/site";
 import { useEffect, useRef, useState } from "react";
 import "./styles/Loading.css";
 import { useLoading } from "../context/LoadingProvider";
@@ -47,17 +49,20 @@ const Loading = ({ percent }: { percent: number }) => {
       clearTimeout(t2);
       clearTimeout(t3);
     };
-  }, [complete]);
+  }, [complete, setIsLoading]);
 
   return (
     <div className={`preloader preloader-${stage}`}>
       <div className="preloader-curtain">
         <div className="preloader-inner">
           <header className="preloader-header">
-            <img
-              src="https://dataofclient.nyc3.cdn.digitaloceanspaces.com/Portfolio/Hamza%20Tariq%20Portfolio%20Logo.png"
+            <Image
+              src={SITE.logo}
               alt="Hamza Tariq"
               className="preloader-logo"
+              width={779}
+              height={320}
+              priority
             />
             <span className="preloader-tag">Portfolio &copy;{new Date().getFullYear()}</span>
           </header>
@@ -110,6 +115,10 @@ export const setProgress = (setLoading: (value: number) => void) => {
     }
   }, 60);
 
+  function stop() {
+    clearInterval(interval);
+  }
+
   function clear() {
     clearInterval(interval);
     setLoading(100);
@@ -122,5 +131,5 @@ export const setProgress = (setLoading: (value: number) => void) => {
     return Promise.resolve(percent);
   }
 
-  return { loaded, percent, clear };
+  return { loaded, percent, clear, stop };
 };

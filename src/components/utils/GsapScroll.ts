@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import gsap from "gsap";
+import type { ScreenMesh } from "../Character/utils/lighting";
 
 export function setCharTimeline(
   character: THREE.Object3D<THREE.Object3DEventMap> | null,
@@ -36,10 +37,13 @@ export function setCharTimeline(
       invalidateOnRefresh: true,
     },
   });
-  let screenLight: any, monitor: any;
-  character?.children.forEach((object: any) => {
+  let screenLight!: ScreenMesh;
+  let monitor!: ScreenMesh;
+  character?.children.forEach((child3d) => {
+    const object = child3d as ScreenMesh;
     if (object.name === "Plane004") {
-      object.children.forEach((child: any) => {
+      object.children.forEach((nested) => {
+        const child = nested as ScreenMesh;
         child.material.transparent = true;
         child.material.opacity = 0;
         if (child.material.name === "Material.018") {
@@ -60,7 +64,7 @@ export function setCharTimeline(
       screenLight = object;
     }
   });
-  let neckBone = character?.getObjectByName("spine005");
+  const neckBone = character?.getObjectByName("spine005");
   if (window.innerWidth > 1024) {
     if (character) {
       tl1

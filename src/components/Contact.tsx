@@ -24,23 +24,13 @@ const Contact = () => {
             <h4>Social</h4>
 
             <a
-              href="https://github.com/Pulsefire-Hamza"
+              href="https://github.com/HamzaTariq-Devrex"
               target="_blank"
               rel="noreferrer"
               data-cursor="disable"
               className="contact-social"
             >
               Github <MdArrowOutward />
-            </a>
-
-            <a
-              href="https://www.linkedin.com/3"
-              target="_blank"
-              rel="noreferrer"
-              data-cursor="disable"
-              className="contact-social"
-            >
-              Linkedin <MdArrowOutward />
             </a>
 
             <a

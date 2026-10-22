@@ -1,5 +1,5 @@
 :root {
-  font-family: "Geist", sans-serif;
+  font-family: var(--font-geist), sans-serif;
 
   font-optical-sizing: auto;
   font-style: normal;
@@ -28,10 +28,10 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: "Geist", sans-serif;
+  font-family: var(--font-geist), sans-serif;
 }
 
-body {
+body:has(.main-body) {
   overflow: hidden;
 }
 

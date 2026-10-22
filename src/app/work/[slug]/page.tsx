@@ -1,7 +1,32 @@
-import { Link, useParams } from "react-router-dom";
-import PageShell from "./PageShell";
-import NotFound from "./NotFound";
-import { IMAGE_BASE, PROJECTS } from "../data/projects";
+import type { Metadata } from "next";
+import Image from "next/image";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import SiteShell from "@/components/site/SiteShell";
+import { IMAGE_BASE, PROJECTS } from "@/data/projects";
+import { SITE } from "@/lib/site";
+
+type Params = { params: Promise<{ slug: string }> };
+
+const findProject = (slug: string) => PROJECTS.findIndex((p) => p.slug === slug);
+
+export const dynamicParams = false;
+
+export function generateStaticParams() {
+  return PROJECTS.map((p) => ({ slug: p.slug }));
+}
+
+export async function generateMetadata({ params }: Params): Promise<Metadata> {
+  const { slug } = await params;
+  const project = PROJECTS[findProject(slug)];
+  if (!project) return {};
+  return {
+    title: `${project.title}: ${project.label} Website`,
+    description: project.description,
+    alternates: { canonical: `/work/${project.slug}` },
+    openGraph: { images: [{ url: IMAGE_BASE + project.image }] },
+  };
+}
 
 const Arrow = ({ diagonal = false }: { diagonal?: boolean }) => (
   <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -9,27 +34,22 @@ const Arrow = ({ diagonal = false }: { diagonal?: boolean }) => (
   </svg>
 );
 
-const ProjectPage = () => {
-  const { slug } = useParams();
-  const index = PROJECTS.findIndex((p) => p.slug === slug);
-  if (index === -1) return <NotFound />;
+export default async function ProjectPage({ params }: Params) {
+  const { slug } = await params;
+  const index = findProject(slug);
+  if (index === -1) notFound();
 
   const project = PROJECTS[index];
   const prev = PROJECTS[(index - 1 + PROJECTS.length) % PROJECTS.length];
   const next = PROJECTS[(index + 1) % PROJECTS.length];
-  const enquiry = `mailto:hamzabuildsweb@gmail.com?subject=${encodeURIComponent(
-    `A website like ${project.title}`
-  )}`;
+  const enquiry = `mailto:${SITE.email}?subject=${encodeURIComponent(`A website like ${project.title}`)}`;
 
   return (
-    <PageShell
-      title={`${project.title} | Work by Hamza Tariq`}
-      description={project.description}
-    >
+    <SiteShell active="work">
       <nav className="project-crumbs" aria-label="Breadcrumb">
-        <Link to="/work">Work</Link>
+        <Link href="/work">Work</Link>
         <span>/</span>
-        <Link to={`/work?category=${encodeURIComponent(project.category)}`}>{project.category}</Link>
+        <Link href={`/work?category=${encodeURIComponent(project.category)}`}>{project.category}</Link>
         <span>/</span>
         <span aria-current="page">{project.title}</span>
       </nav>
@@ -46,7 +66,7 @@ const ProjectPage = () => {
                 <Arrow diagonal />
               </a>
             ) : (
-              <span className="project-offline">This client's site is currently offline</span>
+              <span className="project-offline">This client&apos;s site is currently offline</span>
             )}
             <a href={enquiry} className="page-btn page-btn-ghost">
               Get a site like this
@@ -59,8 +79,12 @@ const ProjectPage = () => {
             <dd>{project.label}</dd>
           </div>
           <div>
-            <dt>Category</dt>
-            <dd>{project.category}</dd>
+            <dt>Built at</dt>
+            <dd>
+              <a href={SITE.agency.url} target="_blank" rel="noreferrer">
+                {SITE.agency.name}
+              </a>
+            </dd>
           </div>
           <div>
             <dt>Website</dt>
@@ -81,11 +105,24 @@ const ProjectPage = () => {
             <span />
             <em>{project.domain}</em>
           </div>
-          <img src={IMAGE_BASE + project.image} alt={`${project.title} website on desktop`} />
+          <Image
+            src={IMAGE_BASE + project.image}
+            alt={`${project.title} website on desktop`}
+            width={1440}
+            height={1200}
+            sizes="(max-width: 760px) 100vw, (max-width: 1000px) 70vw, 900px"
+            priority
+          />
         </figure>
         {project.mobileImage && (
           <figure className="project-phone">
-            <img src={IMAGE_BASE + project.mobileImage} alt={`${project.title} website on mobile`} />
+            <Image
+              src={IMAGE_BASE + project.mobileImage}
+              alt={`${project.title} website on mobile`}
+              width={390}
+              height={844}
+              sizes="(max-width: 760px) 62vw, 260px"
+            />
           </figure>
         )}
       </section>
@@ -107,14 +144,14 @@ const ProjectPage = () => {
       )}
 
       <nav className="project-pager" aria-label="More projects">
-        <Link to={`/work/${prev.slug}`} className="project-pager-link">
+        <Link href={`/work/${prev.slug}`} className="project-pager-link">
           <span>Previous project</span>
           <strong>{prev.title}</strong>
         </Link>
-        <Link to="/work" className="project-pager-all">
+        <Link href="/work" className="project-pager-all">
           All projects
         </Link>
-        <Link to={`/work/${next.slug}`} className="project-pager-link is-next">
+        <Link href={`/work/${next.slug}`} className="project-pager-link is-next">
           <span>Next project</span>
           <strong>
             {next.title}
@@ -122,8 +159,6 @@ const ProjectPage = () => {
           </strong>
         </Link>
       </nav>
-    </PageShell>
+    </SiteShell>
   );
-};
-
-export default ProjectPage;
+}

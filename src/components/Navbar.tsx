@@ -1,3 +1,5 @@
+import Image from "next/image";
+import { SITE } from "@/lib/site";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import HoverLinks from "./HoverLinks";
@@ -120,10 +122,13 @@ const Navbar = () => {
         } ${menuOpen ? "is-menu-open" : ""}`}
       >
         <a href="/#" className="navbar-title" data-cursor="disable" aria-label="Home">
-          <img
-            src="https://dataofclient.nyc3.cdn.digitaloceanspaces.com/Portfolio/Hamza%20Tariq%20Portfolio%20Logo.png"
+          <Image
+            src={SITE.logo}
             alt="Hamza Tariq"
             className="navbar-logo"
+            width={779}
+            height={320}
+            priority
           />
         </a>
 

@@ -12,7 +12,11 @@ Portfolio and inbound lead site for Hamza Tariq (freelance developer: React/Next
 
 ## Stack
 
-- **Current:** Vite 5 + React 18 + TypeScript (strict) SPA, `react-router-dom` 6. Pending owner decision: migration to Next.js 15 App Router (see `AUDIT.md` section 4). When migrated, update this section.
+- **Framework:** Next.js 15 App Router, React 19, TypeScript (strict). All pages are statically generated unless they need request data.
+- **Home page** (`/`) is one client tree (`src/components/HomeClient.tsx`): preloader, GSAP ScrollSmoother, Three.js character and R3F tech stack (both loaded with `next/dynamic`, `ssr: false`). Links into and out of the home page are plain `<a>` (full page load) on purpose, so ScrollSmoother and WebGL state never leak into other routes. Every other route uses `next/link`.
+- **Other routes** use the server component `SiteShell` (`src/components/site/SiteShell.tsx`) for header, footer and CTA.
+- **Images:** `next/image` everywhere. Remote hosts are allow-listed in `next.config.ts`.
+- **Site facts** (URL, email, social links, agency) live in `src/lib/site.ts`. Do not hard-code them elsewhere.
 - **Backend:** Supabase only, for all dynamic data: Postgres (`leads`, `chat_sessions`, `chat_messages`, `events`), `pgvector` (`site_chunks`), Auth (owner-only `/admin`), Storage, Edge Functions (lead emails). Do not add any other database or auth provider.
   - Every schema change is a migration in `supabase/migrations/` with RLS enabled on every table.
   - Regenerate TypeScript types from the schema after each migration.
@@ -22,9 +26,12 @@ Portfolio and inbound lead site for Hamza Tariq (freelance developer: React/Next
 
 ## Folders
 
+- `src/app/` routes (App Router): `/`, `/work`, `/work/[slug]`, `not-found`.
 - `src/components/` home page sections; styles in `src/components/styles/<Component>.css`.
-- `src/pages/` standalone pages (`/work`, `/work/:slug`, 404) sharing `PageShell` and `Pages.css`.
-- `src/data/projects.ts` project list (generated from devrexdigital.site/portfolio).
+- `src/components/site/` shell and client widgets for non-home pages.
+- `src/data/projects.ts` project list (generated from devrexdigital.site/portfolio). Show projects as "Built at Devrex Digital" unless the owner marks one as a personal client.
+- `src/lib/` shared helpers and site constants.
+- Do not create `src/pages/`: Next.js would treat it as the Pages Router.
 - `public/` CV, 3D model, Draco decoder.
 - Planned: `content/owner/` (facts), `content/backlog.json` (keyword queue), `content/STYLE.md` (writing rules), `supabase/`, `reports/`.
 
@@ -46,14 +53,21 @@ Portfolio and inbound lead site for Hamza Tariq (freelance developer: React/Next
 7. Titles under 60 characters; meta descriptions 150–160 characters.
 8. Simple, clear English. Answer the reader's question in the first 2–3 lines.
 
-## Known facts that still need owner confirmation
+## Confirmed owner facts
 
-- "45+ brands and clients" (shown on the site) vs "40+ projects delivered" (devrexdigital.site).
-- Projects are Devrex Digital client work; confirm each may be shown as a case study.
-- LinkedIn URL (current link is broken).
+- Client count: 45+ brands and clients (owner confirmed).
+- Projects are shown as "Built at Devrex Digital" unless the owner marks one as their own client.
+- No LinkedIn profile. GitHub (`https://github.com/HamzaTariq-Devrex`) is the main profile link.
+- AI assistant provider: Google Gemini (chat and embeddings).
 
 ## Commands
 
 - `npm run dev`: dev server.
-- `npm run build`: type-check (`tsc -b`) and production build. Must pass before any commit.
-- `npm run lint`: ESLint.
+- `npm run build`: lint, type-check and production build. Must pass before any commit.
+- `npm run lint`: ESLint (includes the Next.js plugin).
+- `npm run typecheck`: TypeScript only.
+
+## Deploy
+
+- GitHub: `HamzaTariq-Devrex/hamzatariq-site`, branch `main`. Pushing to `main` deploys to production on Vercel (project `hamzatariq-site`, account `pulsefire-hamza`).
+- Domains: `hamzatariq.site` (primary) and `www.hamzatariq.site` (redirects to primary in `next.config.ts`).

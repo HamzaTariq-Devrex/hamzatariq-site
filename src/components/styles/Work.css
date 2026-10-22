@@ -100,6 +100,10 @@
 }
 
 @media (max-width: 768px) {
+  .project-grid.is-home > :nth-child(n + 5) {
+    display: none;
+  }
+
   .work-section {
     padding: 70px 0 60px;
   }
