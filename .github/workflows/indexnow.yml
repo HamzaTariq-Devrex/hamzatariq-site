@@ -1,16 +1,27 @@
 name: IndexNow
 
 on:
-  deployment_status:
+  push:
+    branches: [main]
+  workflow_dispatch:
 
 jobs:
   submit:
-    if: github.event.deployment_status.state == 'success' && github.event.deployment.environment == 'Production'
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Wait until Vercel serves this commit
+        if: github.event_name == 'push'
+        run: |
+          for i in $(seq 1 60); do
+            live=$(curl -fsS https://hamzatariq.site/version.txt || true)
+            if [ "$live" = "$GITHUB_SHA" ]; then echo "Live: $live"; exit 0; fi
+            sleep 20
+          done
+          echo "Deployment for $GITHUB_SHA not live after 20 minutes"; exit 1
       - name: Submit sitemap URLs to IndexNow
         run: node scripts/indexnow.mjs https://hamzatariq.site
