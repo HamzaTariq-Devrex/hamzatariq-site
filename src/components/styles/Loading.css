@@ -1,0 +1,233 @@
+.preloader {
+  --pl-bg: #0a0e17;
+  --pl-accent: #2dd4bf;
+  --pl-text: #f1f5f9;
+  --pl-muted: rgba(241, 245, 249, 0.5);
+  --pl-ease: cubic-bezier(0.76, 0, 0.24, 1);
+  --pl-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  position: fixed;
+  inset: 0;
+  height: var(--vh);
+  z-index: 999999999;
+  color: var(--pl-text);
+  overflow: hidden;
+}
+
+.preloader-exit {
+  pointer-events: none;
+}
+
+.preloader-curtain {
+  position: absolute;
+  inset: 0;
+  background-color: var(--pl-bg);
+  transition: transform 0.95s var(--pl-ease), border-radius 0.95s var(--pl-ease);
+  will-change: transform;
+}
+
+.preloader-exit .preloader-curtain {
+  transform: translateY(-102%);
+  border-bottom-left-radius: 50% 12vh;
+  border-bottom-right-radius: 50% 12vh;
+}
+
+.preloader-inner {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 24px max(16px, 4vw) 0;
+  box-sizing: border-box;
+  transition: transform 0.95s var(--pl-ease);
+}
+
+.preloader-exit .preloader-inner {
+  transform: translateY(30vh);
+}
+
+.preloader-inner::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 70vmax;
+  height: 70vmax;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(45, 212, 191, 0.08) 0%, transparent 55%);
+  pointer-events: none;
+}
+
+.preloader-header {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  opacity: 0;
+  animation: preloaderFade 0.8s var(--pl-ease-out) 0.1s forwards;
+}
+
+.preloader-logo {
+  height: 48px;
+  width: auto;
+  object-fit: contain;
+  display: block;
+}
+
+.preloader-tag,
+.preloader-status,
+.preloader-eyebrow {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--pl-muted);
+}
+
+.preloader-center {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  text-align: center;
+}
+
+.preloader-eyebrow,
+.preloader-name,
+.preloader-status,
+.preloader-count {
+  display: block;
+  overflow: hidden;
+}
+
+.preloader-eyebrow > span,
+.preloader-name > span,
+.preloader-status > span,
+.preloader-count > span {
+  display: inline-block;
+  transform: translateY(105%);
+  animation: preloaderReveal 1s var(--pl-ease-out) forwards;
+}
+
+.preloader-eyebrow > span {
+  animation-delay: 0.25s;
+}
+
+.preloader-name {
+  margin: 0;
+  font-size: clamp(44px, 9vw, 140px);
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+  padding-bottom: 0.05em;
+}
+
+.preloader-name > span {
+  animation-delay: 0.1s;
+}
+
+.preloader-done .preloader-eyebrow > span,
+.preloader-done .preloader-name > span {
+  animation: preloaderHide 0.55s var(--pl-ease) forwards;
+}
+
+.preloader-done .preloader-eyebrow > span {
+  animation-delay: 0.06s;
+}
+
+.preloader-footer {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding-bottom: 20px;
+}
+
+.preloader-status {
+  margin-bottom: 0.6em;
+}
+
+.preloader-status > span {
+  animation-delay: 0.35s;
+}
+
+.preloader-count {
+  font-size: clamp(48px, 8vw, 120px);
+  font-weight: 300;
+  line-height: 0.9;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.04em;
+}
+
+.preloader-count > span {
+  animation-delay: 0.3s;
+}
+
+.preloader-bar {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.preloader-bar-fill {
+  height: 100%;
+  width: 100%;
+  transform: scaleX(0);
+  transform-origin: left;
+  background: var(--pl-accent);
+  box-shadow: 0 0 12px rgba(45, 212, 191, 0.6);
+  will-change: transform;
+}
+
+@keyframes preloaderReveal {
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes preloaderHide {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-105%);
+  }
+}
+
+@keyframes preloaderFade {
+  to {
+    opacity: 1;
+  }
+}
+
+@media (min-width: 1200px) {
+  .preloader-inner {
+    padding-top: 35px;
+  }
+
+  .preloader-logo {
+    height: 64px;
+  }
+
+  .preloader-tag,
+  .preloader-status,
+  .preloader-eyebrow {
+    font-size: 13px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .preloader-header,
+  .preloader-eyebrow > span,
+  .preloader-name > span,
+  .preloader-status > span,
+  .preloader-count > span {
+    animation: none;
+    transform: none;
+    opacity: 1;
+  }
+}

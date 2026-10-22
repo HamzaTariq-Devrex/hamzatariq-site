@@ -1,0 +1,117 @@
+.work-section {
+  position: relative;
+  z-index: 1;
+  background-color: var(--backgroundColor);
+  padding: 100px 0 80px;
+}
+
+.work-container {
+  margin: auto;
+}
+
+.work-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 32px;
+  margin-bottom: 40px;
+}
+
+.work-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 16px;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: var(--accentColor);
+}
+
+.work-eyebrow::before {
+  content: "";
+  width: 36px;
+  height: 1px;
+  background: var(--accentColor);
+}
+
+.work-section h2 {
+  margin: 0;
+  font-size: clamp(44px, 5vw, 76px);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.work-section h2 > span {
+  color: var(--accentColor);
+  font-style: italic;
+  font-weight: 500;
+}
+
+.work-intro {
+  max-width: 380px;
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: rgba(226, 232, 240, 0.6);
+}
+
+.work-more {
+  display: flex;
+  justify-content: center;
+  margin-top: 44px;
+}
+
+.work-more-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 26px;
+  border-radius: 100px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #04221f;
+  background: var(--accentColor);
+  box-shadow: 0 8px 24px rgba(45, 212, 191, 0.25);
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease;
+}
+
+.work-more-btn:hover {
+  color: #04221f;
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(45, 212, 191, 0.4);
+}
+
+.work-more-btn svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.work-more-btn:hover svg {
+  transform: translateX(3px);
+}
+
+@media (max-width: 768px) {
+  .work-section {
+    padding: 70px 0 60px;
+  }
+
+  .work-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .work-intro {
+    font-size: 14px;
+  }
+}
