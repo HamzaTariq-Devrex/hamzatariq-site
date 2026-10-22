@@ -48,8 +48,8 @@ const Career = () => {
               </div>
               <span className="career-node" aria-hidden="true" />
               <div className="career-card">
-                <h4>{job.role}</h4>
-                <h5>{job.company}</h5>
+                <h3>{job.role}</h3>
+                <p className="career-company">{job.company}</p>
                 <p>{job.body}</p>
                 <ul className="career-tags">
                   {job.tags.map((tag) => (

@@ -58,9 +58,9 @@ const Contact = () => {
             <h2>
               Designed and Developed <br /> by <span>Hamza Tariq</span>
             </h2>
-            <h5>
+            <p className="contact-copyright">
               <MdCopyright /> 2026
-            </h5>
+            </p>
           </div>
         </div>
       </div>

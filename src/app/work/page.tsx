@@ -1,9 +1,9 @@
-import { Suspense } from "react";
 import type { Metadata } from "next";
 import SiteShell from "@/components/site/SiteShell";
 import WorkBrowser from "@/components/site/WorkBrowser";
-import ProjectCard from "@/components/ProjectCard";
-import { PROJECTS } from "@/data/projects";
+import { IMAGE_BASE, PROJECTS } from "@/data/projects";
+import { SITE } from "@/lib/site";
+import { jsonLd } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: "Work: 31 Custom Websites and Online Stores",
@@ -12,17 +12,40 @@ export const metadata: Metadata = {
   alternates: { canonical: "/work" },
 };
 
-const StaticGrid = () => (
-  <div className="project-grid is-static">
-    {PROJECTS.map((project, i) => (
-      <ProjectCard key={project.slug} project={project} index={i} />
-    ))}
-  </div>
-);
+const structuredData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Home", item: SITE.url },
+        { "@type": "ListItem", position: 2, name: "Work", item: `${SITE.url}/work` },
+      ],
+    },
+    {
+      "@type": "CollectionPage",
+      name: "Work by Hamza Tariq",
+      url: `${SITE.url}/work`,
+      author: { "@id": `${SITE.url}/#person` },
+      mainEntity: {
+        "@type": "ItemList",
+        numberOfItems: PROJECTS.length,
+        itemListElement: PROJECTS.map((p, i) => ({
+          "@type": "ListItem",
+          position: i + 1,
+          url: `${SITE.url}/work/${p.slug}`,
+          name: p.title,
+          image: IMAGE_BASE + p.image,
+        })),
+      },
+    },
+  ],
+};
 
 export default function WorkPage() {
   return (
     <SiteShell active="work">
+      <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(structuredData)} />
       <section className="page-hero">
         <span className="page-eyebrow">Portfolio</span>
         <h1>
@@ -34,9 +57,8 @@ export default function WorkPage() {
         </p>
       </section>
 
-      <Suspense fallback={<StaticGrid />}>
-        <WorkBrowser />
-      </Suspense>
+      <h2 className="sr-only">Projects</h2>
+      <WorkBrowser />
     </SiteShell>
   );
 }

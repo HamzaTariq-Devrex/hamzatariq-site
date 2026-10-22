@@ -50,7 +50,7 @@ a.contact-social {
   color: var(--accentColor);
 }
 
-.contact-box h5 {
+.contact-box .contact-copyright {
   font-size: 20px;
   font-weight: 500;
   line-height: 20px;

@@ -12,15 +12,17 @@ export function initialFX() {
     delay: 1,
   });
 
-  const landingText = new SplitText(
-    [".landing-info h3", ".landing-intro h2", ".landing-intro h1"],
-    {
-      type: "chars,lines",
-      linesClass: "split-line",
-    }
-  );
+  const landingText = new SplitText([".landing-intro h2", ".landing-intro h1"], {
+    type: "chars,lines",
+    linesClass: "split-line",
+  });
+  const roleText = new SplitText(".landing-info .landing-role", {
+    type: "chars,lines",
+    linesClass: "split-line",
+    aria: "none",
+  });
   gsap.fromTo(
-    landingText.chars,
+    [...roleText.chars, ...landingText.chars],
     { opacity: 0, y: 80, filter: "blur(5px)" },
     {
       opacity: 1,
@@ -33,7 +35,7 @@ export function initialFX() {
     }
   );
 
-  const TextProps = { type: "chars,lines", linesClass: "split-h2" };
+  const TextProps = { type: "chars,lines", linesClass: "split-h2", aria: "none" as const };
 
   const landingText2 = new SplitText(".landing-h2-info", TextProps);
   gsap.fromTo(

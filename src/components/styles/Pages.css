@@ -204,7 +204,7 @@ body.page-body {
 }
 
 .page-filter.is-active span {
-  color: rgba(4, 34, 31, 0.65);
+  color: #04221f;
 }
 
 .page-btn {

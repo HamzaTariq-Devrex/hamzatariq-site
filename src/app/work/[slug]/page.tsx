@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import SiteShell from "@/components/site/SiteShell";
 import { IMAGE_BASE, PROJECTS } from "@/data/projects";
 import { SITE } from "@/lib/site";
+import { jsonLd, projectDescription, projectTitle } from "@/lib/seo";
 
 type Params = { params: Promise<{ slug: string }> };
 
@@ -20,11 +21,13 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params;
   const project = PROJECTS[findProject(slug)];
   if (!project) return {};
+  const title = projectTitle(project);
+  const description = projectDescription(project);
   return {
-    title: `${project.title}: ${project.label} Website`,
-    description: project.description,
+    title,
+    description,
     alternates: { canonical: `/work/${project.slug}` },
-    openGraph: { images: [{ url: IMAGE_BASE + project.image }] },
+    openGraph: { title, description, url: `/work/${project.slug}`, type: "article" },
   };
 }
 
@@ -42,14 +45,41 @@ export default async function ProjectPage({ params }: Params) {
   const project = PROJECTS[index];
   const prev = PROJECTS[(index - 1 + PROJECTS.length) % PROJECTS.length];
   const next = PROJECTS[(index + 1) % PROJECTS.length];
+  const pageUrl = `${SITE.url}/work/${project.slug}`;
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Home", item: SITE.url },
+          { "@type": "ListItem", position: 2, name: "Work", item: `${SITE.url}/work` },
+          { "@type": "ListItem", position: 3, name: project.title, item: pageUrl },
+        ],
+      },
+      {
+        "@type": "CreativeWork",
+        "@id": `${pageUrl}#project`,
+        name: `${project.title} website`,
+        description: project.description,
+        url: pageUrl,
+        image: IMAGE_BASE + project.image,
+        genre: project.label,
+        creator: { "@id": `${SITE.url}/#person` },
+        publisher: { "@type": "Organization", name: SITE.agency.name, url: SITE.agency.url },
+        ...(project.url ? { sameAs: project.url } : {}),
+      },
+    ],
+  };
   const enquiry = `mailto:${SITE.email}?subject=${encodeURIComponent(`A website like ${project.title}`)}`;
 
   return (
     <SiteShell active="work">
+      <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(structuredData)} />
       <nav className="project-crumbs" aria-label="Breadcrumb">
         <Link href="/work">Work</Link>
         <span>/</span>
-        <Link href={`/work?category=${encodeURIComponent(project.category)}`}>{project.category}</Link>
+        <a href={`/work?category=${encodeURIComponent(project.category)}`}>{project.category}</a>
         <span>/</span>
         <span aria-current="page">{project.title}</span>
       </nav>

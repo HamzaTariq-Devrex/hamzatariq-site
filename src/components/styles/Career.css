@@ -156,7 +156,7 @@
   transform: translateY(-3px);
 }
 
-.career-card h4 {
+.career-card h3 {
   margin: 0;
   font-size: 24px;
   font-weight: 600;
@@ -165,7 +165,7 @@
   color: #f8fafc;
 }
 
-.career-card h5 {
+.career-card .career-company {
   margin: 6px 0 16px;
   font-size: 14px;
   font-weight: 500;
@@ -298,7 +298,7 @@
     border-radius: 18px;
   }
 
-  .career-card h4 {
+  .career-card h3 {
     font-size: 19px;
   }
 
