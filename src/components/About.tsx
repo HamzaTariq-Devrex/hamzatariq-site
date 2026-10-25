@@ -2,20 +2,14 @@ import { useEffect } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import "./styles/About.css";
+import { SERVICES } from "@/data/services";
 
 gsap.registerPlugin(ScrollTrigger);
 
 const STATS = [
-  { value: "45+", label: "Brands & clients served" },
-  { value: "100%", label: "Custom-coded, no templates" },
-  { value: "React", label: "+ Tailwind CSS stack" },
-];
-
-const SPECIALTIES = [
-  "eCommerce stores",
-  "Corporate websites",
-  "Travel agency platforms",
-  "Restaurant websites",
+  { value: "45+", label: "Brands helped at Devrex Digital" },
+  { value: "100%", label: "Custom code, no templates" },
+  { value: "Next.js", label: "+ React specialist" },
 ];
 
 const About = () => {
@@ -48,16 +42,12 @@ const About = () => {
       <div className="about-me">
         <h3 className="title">About Me</h3>
         <p className="para">
-          I'm a Founder and Web Developer &amp; Designer with hands-on experience
-          working with <span className="about-hl">45+ brands and clients</span>{" "}
-          across multiple industries. I specialize in building modern,
-          high-performance websites using{" "}
-          <span className="about-hl">React and Tailwind CSS</span>: custom
-          eCommerce stores, corporate websites, travel agency platforms, and
-          restaurant websites. My builds go beyond templates, delivering fully
-          custom themes and experiences that{" "}
-          <span className="about-hl">outperform Shopify and WordPress</span> in
-          both speed and design flexibility.
+          I&apos;m Hamza Tariq, a full-stack developer specializing in{" "}
+          <span className="about-hl">React and Next.js</span>. At Devrex Digital I&apos;ve helped build websites and web
+          apps for <span className="about-hl">45+ brands</span>, from landing pages and ecommerce stores to admin
+          dashboards and AI chatbots. I write everything in{" "}
+          <span className="about-hl">custom code, with no templates</span>, so every site is fast, secure, SEO-ready
+          and built around the business it serves.
         </p>
         <div className="about-extra">
           <div className="about-stats">
@@ -69,8 +59,12 @@ const About = () => {
             ))}
           </div>
           <ul className="about-tags">
-            {SPECIALTIES.map((item) => (
-              <li key={item}>{item}</li>
+            {SERVICES.map((service) => (
+              <li key={service.slug}>
+                <a href={`/services/${service.slug}`} data-cursor="disable">
+                  {service.name}
+                </a>
+              </li>
             ))}
           </ul>
         </div>

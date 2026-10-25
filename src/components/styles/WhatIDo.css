@@ -25,6 +25,12 @@
   box-sizing: border-box;
 }
 
+.what-box-cards {
+  justify-content: flex-end;
+  padding-right: 3%;
+  box-sizing: border-box;
+}
+
 .what-box h2 {
   font-size: calc(3.5vw + 20px);
   line-height: calc(3.5vw + 16px);
@@ -40,12 +46,6 @@
   color: var(--accentColor);
 }
 
-.what-box-cards {
-  justify-content: flex-end;
-  padding-right: 3%;
-  box-sizing: border-box;
-}
-
 .what-lead {
   margin: 24px 0 0;
   max-width: 240px;
@@ -57,195 +57,122 @@
 .what-box-in {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  width: 440px;
+  gap: 16px;
+  width: 460px;
   max-width: 100%;
 }
 
-.what-card {
-  position: relative;
-  padding: 26px 28px;
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.025);
+.what-list {
+  list-style: none;
+  margin: 0;
+  padding: 6px;
+  border-radius: 22px;
+  background: rgba(10, 14, 23, 0.72);
   border: 1px solid rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  overflow: hidden;
-  outline: none;
-  transition: border-color 0.4s ease, background-color 0.4s ease, opacity 0.4s ease,
-    transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.what-card::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at 100% 0%, rgba(45, 212, 191, 0.14), transparent 55%);
-  opacity: 0;
-  transition: opacity 0.5s ease;
-  pointer-events: none;
-}
-
-.what-box-in:hover .what-card:not(:hover) {
-  opacity: 0.55;
-}
-
-.what-card:hover,
-.what-card:focus-visible {
-  border-color: rgba(45, 212, 191, 0.35);
-  background: rgba(255, 255, 255, 0.04);
-}
-
-.what-card:hover::before,
-.what-card:focus-visible::before {
-  opacity: 1;
-}
-
-.what-card-top {
-  display: flex;
-  justify-content: space-between;
+.what-item {
+  display: grid;
+  grid-template-columns: 30px 1fr auto 18px;
   align-items: center;
-  margin-bottom: 18px;
+  gap: 14px;
+  padding: 18px 16px;
+  border-radius: 16px;
+  color: inherit;
+  transition: background-color 0.35s ease;
 }
 
-.what-card-num {
+.what-list li + li {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.what-item:hover,
+.what-item:focus-visible {
+  color: inherit;
+  background: rgba(45, 212, 191, 0.07);
+}
+
+.what-item-num {
   font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.15em;
+  font-weight: 700;
+  letter-spacing: 0.12em;
   color: var(--accentColor);
 }
 
-.what-card-toggle {
-  position: relative;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.4s ease;
+.what-item-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
 }
 
-.what-card-toggle::before,
-.what-card-toggle::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 10px;
-  height: 1.5px;
-  background: #e2e8f0;
-  transform: translate(-50%, -50%);
-}
-
-.what-card-toggle::after {
-  transform: translate(-50%, -50%) rotate(90deg);
-}
-
-.what-card:hover .what-card-toggle,
-.what-card:focus-visible .what-card-toggle {
-  transform: rotate(135deg);
-  border-color: rgba(45, 212, 191, 0.6);
-}
-
-.what-card h3 {
-  margin: 0;
-  font-size: 26px;
+.what-item-title {
+  font-size: 18px;
   font-weight: 600;
   letter-spacing: -0.01em;
-  line-height: 1.15;
+  color: #f8fafc;
 }
 
-.what-card h4 {
-  margin: 6px 0 14px;
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: rgba(226, 232, 240, 0.45);
+.what-item-desc {
+  font-size: 13px;
+  line-height: 1.45;
+  color: rgba(226, 232, 240, 0.6);
 }
 
-.what-card p {
-  margin: 0;
-  font-size: 14px;
-  line-height: 1.65;
-  color: rgba(226, 232, 240, 0.7);
-}
-
-.what-hidden {
-  display: grid;
-  grid-template-rows: 0fr;
-  opacity: 0;
-  transition: grid-template-rows 0.55s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s ease;
-}
-
-.what-hidden-in {
-  overflow: hidden;
-  min-height: 0;
-}
-
-.what-card:hover .what-hidden,
-.what-card:focus-visible .what-hidden {
-  grid-template-rows: 1fr;
-  opacity: 1;
-}
-
-.what-card h5 {
-  margin: 20px 0 10px;
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: rgba(226, 232, 240, 0.45);
-}
-
-.what-tags {
-  list-style: none;
-  margin: 0;
-  padding: 0;
+.what-item-price {
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+  flex-direction: column;
+  align-items: flex-end;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--accentColor);
+  white-space: nowrap;
 }
 
-.what-tags li {
-  padding: 5px 11px;
-  border-radius: 100px;
-  font-size: 12px;
+.what-item-price span {
+  font-size: 10px;
   font-weight: 500;
-  color: rgba(226, 232, 240, 0.85);
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(226, 232, 240, 0.45);
 }
 
-@media (hover: none) {
-  .what-hidden {
-    grid-template-rows: 1fr;
-    opacity: 1;
-  }
+.what-item-arrow {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: rgba(226, 232, 240, 0.5);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), stroke 0.3s ease;
+}
 
-  .what-card-toggle {
-    display: none;
-  }
+.what-item:hover .what-item-arrow {
+  transform: translateX(4px);
+  stroke: var(--accentColor);
+}
 
-  .what-box-in:hover .what-card:not(:hover) {
-    opacity: 1;
-  }
+.what-all {
+  align-self: flex-end;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accentColor);
 }
 
 @media (max-width: 1400px) {
   .what-box-in {
-    width: 400px;
+    width: 420px;
   }
 
-  .what-card {
-    padding: 22px 24px;
+  .what-item {
+    padding: 16px 14px;
   }
 
-  .what-card h3 {
-    font-size: 23px;
-  }
-
-  .what-card p {
-    font-size: 13px;
+  .what-item-title {
+    font-size: 17px;
   }
 }
 
@@ -269,12 +196,9 @@
     margin: 0 auto;
   }
 
-  .what-box-title {
-    padding-left: 0;
-  }
-
+  .what-box-title,
   .what-box-cards {
-    padding-right: 0;
+    padding: 0;
   }
 
   .what-box h2 {
@@ -283,6 +207,7 @@
   }
 
   .what-lead {
+    max-width: none;
     margin: 16px 0 28px;
     font-size: 14px;
   }
@@ -291,13 +216,17 @@
     width: 100%;
   }
 
-  .what-card {
-    padding: 22px;
-    border-radius: 18px;
+  .what-item {
+    grid-template-columns: 26px 1fr auto;
+    gap: 12px;
   }
 
-  .what-card h3 {
-    font-size: 22px;
+  .what-item-arrow {
+    display: none;
+  }
+
+  .what-all {
+    align-self: flex-start;
   }
 }
 
@@ -308,6 +237,6 @@
   }
 
   .what-box-in {
-    width: 500px;
+    width: 520px;
   }
 }

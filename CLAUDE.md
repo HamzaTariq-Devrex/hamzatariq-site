@@ -26,14 +26,17 @@ Portfolio and inbound lead site for Hamza Tariq (freelance developer: React/Next
 
 ## Folders
 
-- `src/app/` routes (App Router): `/`, `/work`, `/work/[slug]`, `not-found`.
-- `src/components/` home page sections; styles in `src/components/styles/<Component>.css`.
-- `src/components/site/` shell and client widgets for non-home pages.
+- `src/app/` routes (App Router): `/`, `/services`, `/services/[slug]`, `/work`, `/work/hamzatariq-site` (own case study), `/work/[slug]`, `/about`, `/hire`, `/contact`, `not-found`.
+- `src/components/` home page sections; styles in `src/components/styles/<Component>.css`. Non-home page styles live in `Pages.css` (shell) and `Content.css` (sections).
+- `src/components/site/` shell and widgets for non-home pages: `SiteShell`, `BookCall`, `AuthorBox`, `OwnerTodo`, `CaseStudyCard`, `WorkBrowser`.
+- `src/data/services.ts` the four services (copy, process, features, pricing, FAQs). `src/data/caseStudies.ts` case studies with measured results. `src/data/experience.ts` career timeline.
 - `src/data/projects.ts` project list (generated from devrexdigital.site/portfolio). Show projects as "Built at Devrex Digital" unless the owner marks one as a personal client.
+- `content/owner/` owner facts (`profile.md`, `projects/*.md`); `content/backlog.json` blog keyword queue.
+- Missing owner facts: wrap the spot in `<OwnerTodo what="...">fallback</OwnerTodo>` (visible on non-production builds, fallback on production) and list it in `OWNER_TODO.md`.
 - `src/lib/` shared helpers and site constants.
 - Do not create `src/pages/`: Next.js would treat it as the Pages Router.
 - `public/` CV, 3D model, Draco decoder.
-- Planned: `content/owner/` (facts), `content/backlog.json` (keyword queue), `content/STYLE.md` (writing rules), `supabase/`, `reports/`.
+- Planned: `content/STYLE.md` (writing rules), `supabase/`, `reports/`.
 
 ## Design conventions
 
@@ -58,7 +61,9 @@ Portfolio and inbound lead site for Hamza Tariq (freelance developer: React/Next
 - Client count: 45+ brands and clients (owner confirmed).
 - Projects are shown as "Built at Devrex Digital" unless the owner marks one as their own client.
 - No LinkedIn profile. GitHub (`https://github.com/HamzaTariq-Devrex`) is the main profile link.
-- AI assistant provider: Google Gemini (chat and embeddings).
+- AI assistant provider: Google Gemini (chat and embeddings). Phase 4 builds on the owner's `/bot` skill, adapted to Supabase (leads, chat history, pgvector) and site-content-only answers.
+- Positioning line, bio, pricing and services: see `content/owner/profile.md` (mirrored in `src/lib/site.ts` and `src/data/services.ts`; keep them in sync).
+- Main keywords (one page each): Next.js website development → `/services/nextjs-websites`; custom dashboard development → `/services/dashboards`; AI chatbot for website → `/services/ai-chatbots`; React SEO services → `/services/react-nextjs-seo`.
 
 ## Commands
 

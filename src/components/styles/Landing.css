@@ -515,3 +515,30 @@ h2.landing-info-h2 {
     animation: none;
   }
 }
+
+.landing-positioning {
+  display: none;
+}
+
+@media screen and (min-width: 1025px) {
+  .landing-positioning {
+    display: block;
+    max-width: 380px;
+    margin: 22px 0 0;
+    font-size: 15px;
+    line-height: 1.6;
+    color: rgba(226, 232, 240, 0.7);
+    opacity: 0;
+  }
+
+  .main-active .landing-positioning {
+    animation: landingRise 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.7s forwards;
+  }
+}
+
+@media screen and (min-width: 1600px) {
+  .landing-positioning {
+    max-width: 460px;
+    font-size: 17px;
+  }
+}

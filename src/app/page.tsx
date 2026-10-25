@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import HomeClient from "@/components/HomeClient";
 import { SITE } from "@/lib/site";
 import { jsonLd } from "@/lib/seo";
+import { SERVICES } from "@/data/services";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/" },
@@ -16,10 +17,12 @@ const structuredData = {
       name: SITE.name,
       url: SITE.url,
       jobTitle: SITE.jobTitle,
+      description: SITE.bio,
+      image: `${SITE.url}${SITE.photo.src}`,
       email: `mailto:${SITE.email}`,
       sameAs: [SITE.social.github, SITE.social.instagram],
       worksFor: { "@type": "Organization", name: SITE.agency.name, url: SITE.agency.url },
-      knowsAbout: ["React", "Next.js", "TypeScript", "Tailwind CSS", "GSAP", "eCommerce websites", "Web design"],
+      knowsAbout: ["React", "Next.js", "TypeScript", "Tailwind CSS", "GSAP", "Ecommerce websites", "Dashboards", "AI chatbots", "Technical SEO"],
     },
     {
       "@type": "ProfessionalService",
@@ -29,9 +32,16 @@ const structuredData = {
       email: SITE.email,
       image: SITE.logo,
       founder: { "@id": `${SITE.url}/#person` },
-      description:
-        "Custom-coded React and Next.js websites, online stores and dashboards, built from scratch for brands in Pakistan and abroad.",
-      serviceType: ["Custom website development", "eCommerce development", "Dashboard development", "AI chatbots"],
+      description: SITE.positioning,
+      serviceType: SERVICES.map((s) => s.keyword),
+      hasOfferCatalog: {
+        "@type": "OfferCatalog",
+        name: "Services",
+        itemListElement: SERVICES.map((s) => ({
+          "@type": "Offer",
+          itemOffered: { "@id": `${SITE.url}/services/${s.slug}#service` },
+        })),
+      },
     },
     {
       "@type": "WebSite",

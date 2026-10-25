@@ -1,6 +1,8 @@
 import { useRef } from "react";
 import "./styles/Work.css";
 import ProjectCard from "./ProjectCard";
+import CaseStudyCard from "./site/CaseStudyCard";
+import { CASE_STUDIES } from "@/data/caseStudies";
 import { useCardReveal } from "./useCardReveal";
 import { PROJECTS } from "@/data/projects";
 
@@ -19,13 +21,16 @@ const Work = () => {
             </h2>
           </div>
           <p className="work-intro">
-            Custom websites and online stores I&apos;ve built at Devrex Digital for brands in Pakistan and abroad.
+            My own site, plus custom websites and online stores built at Devrex Digital for brands in Pakistan and abroad.
           </p>
         </div>
 
         <div className="project-grid is-home" ref={gridRef}>
-          {PROJECTS.slice(0, 6).map((project, i) => (
-            <ProjectCard key={project.slug} project={project} index={i} fullReload />
+          {CASE_STUDIES.map((study) => (
+            <CaseStudyCard key={study.slug} study={study} fullReload />
+          ))}
+          {PROJECTS.slice(0, 6 - CASE_STUDIES.length).map((project, i) => (
+            <ProjectCard key={project.slug} project={project} index={i + CASE_STUDIES.length} fullReload />
           ))}
         </div>
 

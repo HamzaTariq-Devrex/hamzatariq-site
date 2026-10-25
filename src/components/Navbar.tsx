@@ -13,13 +13,14 @@ export let smoother: ScrollSmoother;
 const EMAIL = "hamzabuildsweb@gmail.com";
 const LINKS = [
   { id: "about", label: "About" },
+  { id: "services", label: "Services" },
   { id: "work", label: "Work" },
   { id: "contact", label: "Contact" },
 ];
 const SECTION_MAP: [string, string | null][] = [
   [".landing-section", null],
   ["#about", "about"],
-  [".whatIDO", "about"],
+  [".whatIDO", "services"],
   [".career-section", "about"],
   ["#work", "work"],
   ["#contact", "contact"],

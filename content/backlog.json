@@ -1,0 +1,101 @@
+{
+  "pillars": [
+    {
+      "id": "react-nextjs-seo",
+      "name": "React & Next.js SEO",
+      "servicePage": "/services/react-nextjs-seo"
+    }
+  ],
+  "items": [
+    {
+      "keyword": "react website not ranking on google",
+      "title": "Why Your React Website Is Not Ranking on Google",
+      "pillar": "react-nextjs-seo",
+      "reader": "business owner",
+      "targetPage": "/services/react-nextjs-seo",
+      "status": "queued",
+      "publishedSlug": null
+    },
+    {
+      "keyword": "react vs next.js for seo",
+      "title": "React vs Next.js for SEO: Which One Ranks Better?",
+      "pillar": "react-nextjs-seo",
+      "reader": "founder",
+      "targetPage": "/services/react-nextjs-seo",
+      "status": "queued",
+      "publishedSlug": null
+    },
+    {
+      "keyword": "migrate vite to next.js",
+      "title": "How to Migrate From Vite or CRA to Next.js Without Losing Your Design",
+      "pillar": "react-nextjs-seo",
+      "reader": "founder",
+      "targetPage": "/services/react-nextjs-seo",
+      "status": "queued",
+      "publishedSlug": null
+    },
+    {
+      "keyword": "next.js seo checklist",
+      "title": "Next.js SEO Checklist for 2026",
+      "pillar": "react-nextjs-seo",
+      "reader": "founder",
+      "targetPage": "/services/react-nextjs-seo",
+      "status": "queued",
+      "publishedSlug": null
+    },
+    {
+      "keyword": "core web vitals react",
+      "title": "Core Web Vitals for React Sites: What to Fix First",
+      "pillar": "react-nextjs-seo",
+      "reader": "founder",
+      "targetPage": "/services/react-nextjs-seo",
+      "status": "queued",
+      "publishedSlug": null
+    },
+    {
+      "keyword": "google not indexing react pages",
+      "title": "Google Is Not Indexing My React Pages: How to Fix It",
+      "pillar": "react-nextjs-seo",
+      "reader": "business owner",
+      "targetPage": "/services/react-nextjs-seo",
+      "status": "queued",
+      "publishedSlug": null
+    },
+    {
+      "keyword": "meta tags in react",
+      "title": "Meta Tags in React: Why Every Page Needs Its Own Title",
+      "pillar": "react-nextjs-seo",
+      "reader": "founder",
+      "targetPage": "/services/react-nextjs-seo",
+      "status": "queued",
+      "publishedSlug": null
+    },
+    {
+      "keyword": "structured data for small business website",
+      "title": "Structured Data for Small Business Websites, Explained Simply",
+      "pillar": "react-nextjs-seo",
+      "reader": "business owner",
+      "targetPage": "/services/react-nextjs-seo",
+      "status": "queued",
+      "publishedSlug": null
+    },
+    {
+      "keyword": "client side rendering vs server side rendering seo",
+      "title": "Client-Side vs Server-Side Rendering: What It Means for Your SEO",
+      "pillar": "react-nextjs-seo",
+      "reader": "business owner",
+      "targetPage": "/services/react-nextjs-seo",
+      "status": "queued",
+      "publishedSlug": null
+    },
+    {
+      "keyword": "seo audit for react website",
+      "title": "What a React SEO Audit Checks (and What It Costs)",
+      "pillar": "react-nextjs-seo",
+      "reader": "business owner",
+      "targetPage": "/services/react-nextjs-seo",
+      "status": "queued",
+      "publishedSlug": null
+    }
+  ]
+}

@@ -1,29 +1,31 @@
 # Owner to-do
 
 Facts and access only Hamza can provide. Nothing on the site may be invented to fill these gaps.
+`TODO(owner)` boxes are visible on local and preview builds and hidden on the live site, which shows a working fallback instead.
 
-## Needed for Phase 2 (core pages)
+## Open
 
-- [ ] Positioning line (one sentence: who you help and with what).
-- [ ] Short bio for `/about` and a professional photo.
-- [ ] Pricing range for each service: Next.js websites, dashboards, AI chatbots.
-- [ ] Booking link (Cal.com or Calendly).
-- [ ] 3–5 case studies with: client type, problem, what was built, stack, results, testimonial (if any). Say which projects are your own clients rather than Devrex Digital work.
-- [ ] Current CV, if `public/Hamza Tariq Resume.pdf` is out of date.
+- [ ] **Cal.com booking link.** Set `bookingUrl` in `src/lib/site.ts`. Until then every "Book a free call" button goes to `/contact` (email + WhatsApp), and the contact page shows a short note instead of the booking embed.
+- [ ] **New CV PDF.** Put it in `public/` and set `cvUrl` in `src/lib/site.ts`; the "Download CV" button on `/hire` appears automatically. (The home page Resume button still links the old `public/Hamza Tariq Resume.pdf`.)
+- [ ] **More case studies.** For each: client type, problem, what you built, stack, results, screenshots, testimonial (if any), and whether it was your own client or Devrex Digital work. Dashboards and AI chatbots have no related case study yet, so their "Related work" sections are hidden on the live site.
+- [ ] **Availability for roles** (`/hire`): open to full-time, contract or remote work?
+- [ ] **Google Search Console verification code**, then submit `https://hamzatariq.site/sitemap.xml`.
 
 ## Needed for Phase 4 (AI assistant)
 
-- [ ] Supabase project (or permission to create one) and its URL and keys.
+- [ ] Supabase project (or permission to create one) with its URL and keys.
 - [ ] Google Gemini API key.
 - [ ] Email provider for lead notifications (e.g. Resend) and the address leads should go to.
 
 ## Needed for Phase 8 (analytics)
 
-- [ ] Google Search Console: verify `hamzatariq.site` and submit `https://hamzatariq.site/sitemap.xml`.
 - [ ] Bing Webmaster Tools: verify the site (can import from Search Console).
 
 ## Done
 
+- [x] Positioning line, short bio and photo (`public/images/hamza-tariq.webp`).
+- [x] Pricing for all four services.
+- [x] First case study: `/work/hamzatariq-site`.
 - [x] Client count confirmed: 45+.
 - [x] LinkedIn removed; GitHub `HamzaTariq-Devrex` is the main profile link.
 - [x] Projects labelled "Built at Devrex Digital".

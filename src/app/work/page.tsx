@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import SiteShell from "@/components/site/SiteShell";
 import WorkBrowser from "@/components/site/WorkBrowser";
+import CaseStudyCard from "@/components/site/CaseStudyCard";
+import { CASE_STUDIES } from "@/data/caseStudies";
 import { IMAGE_BASE, PROJECTS } from "@/data/projects";
 import { SITE } from "@/lib/site";
 import { jsonLd } from "@/lib/seo";
@@ -57,7 +59,16 @@ export default function WorkPage() {
         </p>
       </section>
 
-      <h2 className="sr-only">Projects</h2>
+      <section className="work-featured">
+        <h2>Case study</h2>
+        <div className="project-grid is-static">
+          {CASE_STUDIES.map((c) => (
+            <CaseStudyCard key={c.slug} study={c} />
+          ))}
+        </div>
+      </section>
+
+      <h2 className="work-clients-title">Client projects built at Devrex Digital</h2>
       <WorkBrowser />
     </SiteShell>
   );

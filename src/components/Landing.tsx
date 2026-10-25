@@ -1,5 +1,6 @@
 import { PropsWithChildren } from "react";
 import { smoother } from "./Navbar";
+import { SITE } from "@/lib/site";
 import "./styles/Landing.css";
 
 const goTo = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
@@ -49,6 +50,7 @@ const Landing = ({ children }: PropsWithChildren) => {
               <br />
               <span>TARIQ</span>
             </h1>
+            <p className="landing-positioning">{SITE.positioning}</p>
             <HeroActions className="landing-cta-desktop" />
           </div>
 

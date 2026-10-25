@@ -8,11 +8,11 @@ const geist = Geist({ subsets: ["latin"], variable: "--font-geist", display: "sw
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
   title: {
-    default: "Hamza Tariq | Founder & Web Developer",
+    default: "Hamza Tariq | React & Next.js Developer",
     template: "%s | Hamza Tariq",
   },
   description:
-    "Hamza Tariq builds fast, custom-coded React and Next.js websites, online stores and dashboards for brands in Pakistan and abroad. See 31 client projects.",
+    "Custom-coded Next.js websites, dashboards and AI chatbots, plus SEO fixes for React sites that don't rank on Google. Built by Hamza Tariq for 45+ brands.",
   applicationName: SITE.name,
   authors: [{ name: SITE.name, url: SITE.url }],
   creator: SITE.name,
