@@ -11,11 +11,11 @@ Facts and access only Hamza can provide. Nothing on the site may be invented to 
 - [ ] **Availability for roles** (`/hire`): open to full-time, contract or remote work?
 - [ ] **Google Search Console verification code**, then submit `https://hamzatariq.site/sitemap.xml`.
 
-## Needed for Phase 4 (AI assistant)
+## Needed before Phase 4 goes live
 
-- [ ] Supabase project (or permission to create one) with its URL and keys.
-- [ ] Google Gemini API key.
-- [ ] Email provider for lead notifications (e.g. Resend) and the address leads should go to.
+- [ ] **Gemini plan.** The free tier allows only 20 chat replies per day on the fast model, and the free Flash-Lite models took 13–40 s per reply when tested (2026-10-26). Turn on billing for the Gemini API project in Google AI Studio, or accept slow replies and a daily cap.
+- [ ] **Resend DNS records** for `hamzatariq.site` (Resend → Domains): send them so they can be added on Vercel and the domain verified. Until then visitor emails from `hello@hamzatariq.site` cannot be sent.
+- [ ] **Supabase Auth URLs** (Supabase → Authentication → URL Configuration): Site URL `https://hamzatariq.site`; Redirect URLs `http://localhost:3000/**`. Needed for the `/admin` sign-in link on the live site.
 
 ## Needed for Phase 8 (analytics)
 
@@ -23,6 +23,8 @@ Facts and access only Hamza can provide. Nothing on the site may be invented to 
 
 ## Done
 
+- [x] Supabase project (hamzabuildsweb account), Gemini API key, Resend API key; lead emails go to `hamzabuildsweb@gmail.com`.
+- [x] Home page Resume button stays.
 - [x] Positioning line, short bio and photo (`public/images/hamza-tariq-2026.webp`).
 - [x] Pricing for all four services.
 - [x] First case study: `/work/hamzatariq-site`.

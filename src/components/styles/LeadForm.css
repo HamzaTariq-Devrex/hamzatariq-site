@@ -1,0 +1,156 @@
+.lead-form {
+  --lf-text: #f1f5f9;
+  --lf-muted: rgba(226, 232, 240, 0.62);
+  --lf-line: rgba(255, 255, 255, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  color: var(--lf-text);
+}
+
+.lead-form-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.lead-form-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.lead-form label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--lf-muted);
+}
+
+.lead-form input,
+.lead-form select,
+.lead-form textarea {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 46px;
+  padding: 11px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--lf-line);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--lf-text);
+  font: inherit;
+  font-size: 16px;
+  transition: border-color 0.2s ease;
+}
+
+.lead-form textarea {
+  resize: vertical;
+  min-height: 96px;
+}
+
+.lead-form select option {
+  background: #0f1420;
+}
+
+.lead-form input:focus,
+.lead-form select:focus,
+.lead-form textarea:focus {
+  outline: none;
+  border-color: #2dd4bf;
+}
+
+.lead-form-trap {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.lead-form-error {
+  margin: 0;
+  font-size: 14px;
+  color: #fca5a5;
+}
+
+.lead-form-submit {
+  align-self: flex-start;
+  min-height: 48px;
+  padding: 0 24px;
+  border: 0;
+  border-radius: 100px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: #04221f;
+  background: #2dd4bf;
+  box-shadow: 0 8px 24px rgba(45, 212, 191, 0.25);
+  cursor: pointer;
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.2s ease;
+}
+
+.lead-form-submit:hover {
+  transform: translateY(-2px);
+}
+
+.lead-form-submit:disabled {
+  opacity: 0.6;
+  cursor: wait;
+  transform: none;
+}
+
+.lead-form-done strong {
+  font-size: 16px;
+  color: #5eead4;
+}
+
+.lead-form-done p {
+  margin: 0;
+  color: var(--lf-muted);
+  line-height: 1.6;
+}
+
+/* Chat panel version */
+.lead-form.is-compact {
+  gap: 10px;
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(45, 212, 191, 0.3);
+  background: rgba(45, 212, 191, 0.05);
+}
+
+.lead-form.is-compact input,
+.lead-form.is-compact select,
+.lead-form.is-compact textarea {
+  min-height: 44px;
+  padding: 9px 12px;
+}
+
+.lead-form.is-compact textarea {
+  min-height: 64px;
+}
+
+.lead-form.is-compact .lead-form-pair {
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.lead-form.is-compact .lead-form-submit {
+  align-self: stretch;
+}
+
+@media (max-width: 560px) {
+  .lead-form-pair {
+    grid-template-columns: 1fr;
+  }
+
+  .lead-form-submit {
+    align-self: stretch;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lead-form-submit {
+    transition: none;
+  }
+}

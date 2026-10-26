@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import SiteShell from "@/components/site/SiteShell";
 import OwnerTodo from "@/components/site/OwnerTodo";
+import LeadForm from "@/components/assistant/LeadForm";
 import { SERVICES } from "@/data/services";
 import { SITE } from "@/lib/site";
 import { jsonLd } from "@/lib/seo";
@@ -44,6 +45,12 @@ export default function ContactPage() {
           Tell me what you want to build or fix. We&apos;ll go through it on a free call, and you&apos;ll get a clear
           quote afterwards.
         </p>
+      </section>
+
+      <section className="contact-form" id="project-form" aria-labelledby="project-form-title">
+        <h2 id="project-form-title">Send your project details</h2>
+        <p>Takes a minute. I&apos;ll reply by email within 24 hours.</p>
+        <LeadForm source="form" />
       </section>
 
       <section className="contact-grid" id="book">

@@ -8,13 +8,18 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "postbuild": "node scripts/embed-content.mjs --soft",
+    "embed": "node --env-file-if-exists=.env.local scripts/embed-content.mjs"
   },
   "dependencies": {
+    "@google/genai": "^2.31.0",
     "@react-three/drei": "^10.7.9",
     "@react-three/fiber": "^9.8.2",
     "@react-three/postprocessing": "^3.2.2",
     "@react-three/rapier": "^2.2.0",
+    "@supabase/ssr": "^0.12.7",
+    "@supabase/supabase-js": "^2.118.0",
     "@types/three": "^0.168.0",
     "@vercel/analytics": "^1.4.1",
     "gsap": "^3.14.2",

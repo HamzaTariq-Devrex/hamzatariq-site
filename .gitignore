@@ -35,3 +35,6 @@ backup/
 next-env.d.ts
 
 .vercel
+
+# Supabase CLI local state
+supabase/.temp

@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Hamza's AI assistant">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0f2a2c"/>
+      <stop offset="100%" stop-color="#0a0e17"/>
+    </linearGradient>
+    <linearGradient id="shell" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#d6e4e8"/>
+    </linearGradient>
+  </defs>
+
+  <!-- background + thin brand ring -->
+  <circle cx="64" cy="64" r="64" fill="url(#bg)"/>
+  <circle cx="64" cy="64" r="61" fill="none" stroke="#5eead4" stroke-opacity="0.35" stroke-width="2"/>
+
+  <g transform="translate(0 6)">
+    <!-- antenna -->
+    <rect x="62" y="20" width="4" height="12" rx="2" fill="#d6e4e8"/>
+    <circle cx="64" cy="18" r="5" fill="#5eead4"/>
+
+    <!-- side panels -->
+    <rect x="22" y="52" width="9" height="20" rx="4.5" fill="#2dd4bf"/>
+    <rect x="97" y="52" width="9" height="20" rx="4.5" fill="#2dd4bf"/>
+
+    <!-- head -->
+    <rect x="29" y="31" width="70" height="62" rx="22" fill="url(#shell)"/>
+
+    <!-- face screen -->
+    <rect x="37" y="41" width="54" height="40" rx="14" fill="#0a1418"/>
+
+    <!-- eyes -->
+    <rect x="48" y="52" width="10" height="15" rx="5" fill="#5eead4"/>
+    <rect x="70" y="52" width="10" height="15" rx="5" fill="#5eead4"/>
+    <circle cx="55" cy="56" r="1.8" fill="#ffffff" opacity="0.9"/>
+    <circle cx="77" cy="56" r="1.8" fill="#ffffff" opacity="0.9"/>
+
+    <!-- mouth -->
+    <path d="M58 73 Q64 77 70 73" fill="none" stroke="#2dd4bf" stroke-width="2.6" stroke-linecap="round"/>
+  </g>
+</svg>
