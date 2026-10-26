@@ -22,33 +22,16 @@ async function handle(req: Request) {
       : new Response(null, { status: result.status, headers: NO_STORE });
   }
 
-  // Wait for the first chunk (or an error) so a failure can still return a proper status code.
+  // The reply never fails (offline answers back up Gemini), so the stream can start right away.
   const encoder = new TextEncoder();
   let controller!: ReadableStreamDefaultController<Uint8Array>;
-  let resolveFirst!: (outcome: { ok: true } | { ok: false; status: number; message: string }) => void;
-  const first = new Promise<Parameters<typeof resolveFirst>[0]>((r) => (resolveFirst = r));
   const stream = new ReadableStream<Uint8Array>({ start: (c) => void (controller = c) });
-
   const done = result
-    .stream(
-      (text) => {
-        resolveFirst({ ok: true });
-        controller.enqueue(encoder.encode(text));
-      },
-      (status, message) => resolveFirst({ ok: false, status, message }),
-    )
-    .finally(() => {
-      resolveFirst({ ok: true });
-      try {
-        controller.close();
-      } catch {
-        // already closed
-      }
-    });
+    .stream((text) => controller.enqueue(encoder.encode(text)))
+    .catch((error) => console.error("chat stream failed:", error))
+    .finally(() => controller.close());
   after(() => done.then(result.log));
 
-  const outcome = await first;
-  if (!outcome.ok) return Response.json({ error: outcome.message }, { status: outcome.status, headers: NO_STORE });
   return new Response(stream, {
     headers: { "Content-Type": "text/plain; charset=utf-8", "X-Accel-Buffering": "no", ...NO_STORE },
   });

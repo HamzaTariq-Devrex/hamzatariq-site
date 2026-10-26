@@ -346,6 +346,7 @@
   font: inherit;
   font-size: 13.5px;
   font-weight: 600;
+  white-space: nowrap;
   text-decoration: none;
   cursor: pointer;
   transition: background 0.2s ease;
@@ -370,6 +371,17 @@
 
 .ai-chat-action.is-whatsapp:hover {
   background: rgba(34, 197, 94, 0.18);
+}
+
+.ai-chat-action.is-email {
+  flex: 0 0 auto;
+  color: var(--ai-text);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.ai-chat-action.is-email:hover {
+  border-color: rgba(45, 212, 191, 0.6);
 }
 
 .ai-chat-compose {

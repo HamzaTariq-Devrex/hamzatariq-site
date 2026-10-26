@@ -13,9 +13,17 @@ Facts and access only Hamza can provide. Nothing on the site may be invented to 
 
 ## Needed before Phase 4 goes live
 
-- [ ] **Gemini plan.** The free tier allows only 20 chat replies per day on the fast model, and the free Flash-Lite models took 13–40 s per reply when tested (2026-10-26). Turn on billing for the Gemini API project in Google AI Studio, or accept slow replies and a daily cap.
 - [ ] **Resend DNS records** for `hamzatariq.site` (Resend → Domains): send them so they can be added on Vercel and the domain verified. Until then visitor emails from `hello@hamzatariq.site` cannot be sent.
 - [ ] **Supabase Auth URLs** (Supabase → Authentication → URL Configuration): Site URL `https://hamzatariq.site`; Redirect URLs `http://localhost:3000/**`. Needed for the `/admin` sign-in link on the live site.
+
+## Chatbot answer bank (`content/chatbot/answers.json`)
+
+Until these are filled in, the chatbot says they are agreed with Hamza directly and offers the lead form.
+
+- [ ] **Payment terms**: advance or milestones, payment methods, currency.
+- [ ] **Revisions**: how many revision rounds are included.
+- [ ] **Support and maintenance** after launch: included period, monthly plan and price.
+- [ ] **Typical timelines** per service (for example landing page, ecommerce store, dashboard).
 
 ## Needed for Phase 8 (analytics)
 

@@ -1,0 +1,897 @@
+{
+  "_about": "Offline answer bank for Hamza's AI. Used when Gemini fails or its free quota runs out (src/lib/assistant/offline.ts). Facts only from content/owner/profile.md, src/data/services.ts, src/data/caseStudies.ts and src/data/experience.ts. keywords: single words (2 points each, typos allowed); phrases: exact phrases (3 points each). The highest score of 2+ wins; on a tie the earlier entry wins, so specific entries come before general ones. lead: true opens the lead form. todo: facts the owner still has to provide (also listed in OWNER_TODO.md); the answer avoids inventing them.",
+  "offTopic": "I can only help with questions about Hamza's services and projects.",
+  "personal": "Hamza will answer this personally. Leave your name and email below and he'll get back to you, or message him on WhatsApp or by email.",
+  "topicWords": [
+    "hamza",
+    "website",
+    "site",
+    "web",
+    "app",
+    "store",
+    "shop",
+    "ecommerce",
+    "dashboard",
+    "chatbot",
+    "bot",
+    "seo",
+    "google",
+    "rank",
+    "nextjs",
+    "react",
+    "price",
+    "cost",
+    "quote",
+    "budget",
+    "project",
+    "service",
+    "services",
+    "hire",
+    "work",
+    "job",
+    "devrex",
+    "portfolio",
+    "client",
+    "design",
+    "developer",
+    "kaam",
+    "banwana",
+    "banwani",
+    "banana",
+    "chahiye",
+    "based",
+    "located",
+    "location",
+    "office",
+    "city",
+    "country",
+    "team",
+    "nda",
+    "contract",
+    "language",
+    "weekend",
+    "refund",
+    "domain",
+    "hosting",
+    "apps",
+    "mobile",
+    "android",
+    "ios",
+    "application"
+  ],
+  "offTopicPhrases": [
+    "write code",
+    "write a code",
+    "write me",
+    "fix my code",
+    "debug",
+    "error in my code",
+    "python",
+    "java ",
+    "c++",
+    "leetcode",
+    "algorithm",
+    "homework",
+    "assignment",
+    "exam",
+    "essay",
+    "poem",
+    "story",
+    "joke",
+    "funny",
+    "capital of",
+    "weather",
+    "news",
+    "cricket",
+    "football",
+    "movie",
+    "song",
+    "recipe",
+    "translate",
+    "math",
+    "solve",
+    "what is the meaning",
+    "who is the president",
+    "prime minister",
+    "chatgpt",
+    "explain quantum"
+  ],
+  "answers": [
+    {
+      "id": "greeting",
+      "maxWords": 4,
+      "answer": "Hi! Ask me about Hamza's services, prices, past work or how a project works. What are you planning to build?",
+      "keywords": [
+        "hi",
+        "hello",
+        "hey",
+        "salam",
+        "aoa",
+        "assalam",
+        "assalamualaikum",
+        "hola",
+        "yo"
+      ],
+      "phrases": [
+        "good morning",
+        "good evening",
+        "kya haal",
+        "kaise ho",
+        "how are you"
+      ]
+    },
+    {
+      "id": "thanks",
+      "maxWords": 5,
+      "answer": "You're welcome! If you'd like to talk about your project, leave your details below or message Hamza on WhatsApp.",
+      "keywords": [
+        "thanks",
+        "thank",
+        "thx",
+        "shukriya",
+        "shukria",
+        "jazakallah",
+        "ok",
+        "okay",
+        "great",
+        "nice",
+        "acha",
+        "theek"
+      ],
+      "phrases": [
+        "thank you",
+        "thanks a lot",
+        "bohat shukriya"
+      ]
+    },
+    {
+      "id": "bot-identity",
+      "answer": "I'm Hamza's AI, an AI assistant on this site. I answer from the site's own content about Hamza's services, prices and work. For anything I can't answer, Hamza replies personally. What would you like to know?",
+      "keywords": [
+        "human",
+        "robot"
+      ],
+      "phrases": [
+        "who are you",
+        "are you human",
+        "are you a bot",
+        "are you real",
+        "are you ai",
+        "tum kon ho",
+        "aap kon ho",
+        "kya tum insaan ho",
+        "is this hamza"
+      ]
+    },
+    {
+      "id": "nextjs-websites",
+      "answer": "Hamza builds custom-coded Next.js websites, from landing pages and portfolios to ecommerce stores with an admin dashboard and full ecommerce apps. No templates: every site is designed around your brand, loads fast and is SEO-ready from day one. https://hamzatariq.site/services/nextjs-websites",
+      "keywords": [
+        "website",
+        "websites",
+        "site",
+        "nextjs",
+        "landing",
+        "portfolio",
+        "ecommerce",
+        "store",
+        "shop",
+        "online",
+        "business"
+      ],
+      "phrases": [
+        "build a website",
+        "make a website",
+        "online store",
+        "ecommerce website",
+        "next js website"
+      ]
+    },
+    {
+      "id": "dashboards",
+      "answer": "Hamza builds custom admin dashboards and web apps around how your business works: secure logins for your team, products, orders, customers or bookings in one place, and charts for the numbers you track. They work on desktop and mobile. https://hamzatariq.site/services/dashboards",
+      "keywords": [
+        "dashboard",
+        "dashboards",
+        "admin",
+        "panel",
+        "webapp",
+        "crm",
+        "portal",
+        "inventory",
+        "orders",
+        "bookings",
+        "reports",
+        "spreadsheet",
+        "spreadsheets"
+      ],
+      "phrases": [
+        "web app",
+        "admin panel",
+        "dashboard banwana",
+        "dashboard chahiye",
+        "management system"
+      ]
+    },
+    {
+      "id": "ai-chatbots",
+      "answer": "Hamza builds AI chatbots that answer your customers from your own content, day and night, say when they don't know instead of guessing, and pass real leads to you on WhatsApp or email. This assistant is one of them. https://hamzatariq.site/services/ai-chatbots",
+      "keywords": [
+        "chatbot",
+        "chatbots",
+        "bot",
+        "assistant",
+        "gemini",
+        "automation",
+        "whatsapp"
+      ],
+      "phrases": [
+        "ai chatbot",
+        "chat bot",
+        "chatbot lagwana",
+        "chatbot chahiye",
+        "bot lagao",
+        "ai assistant",
+        "like this chatbot",
+        "is jaisa bot"
+      ]
+    },
+    {
+      "id": "react-seo",
+      "answer": "Many React sites don't rank because Google first sees an almost empty HTML page. Hamza fixes this with server-rendered pages, unique titles and descriptions, structured data and a sitemap, or a move to Next.js, without changing your design. https://hamzatariq.site/services/react-nextjs-seo",
+      "keywords": [
+        "seo",
+        "google",
+        "rank",
+        "ranking",
+        "ranked",
+        "search",
+        "indexed",
+        "indexing",
+        "vite",
+        "cra",
+        "traffic",
+        "audit",
+        "migration",
+        "migrate"
+      ],
+      "phrases": [
+        "not ranking",
+        "google pe nahi",
+        "google par nahi",
+        "rank nahi",
+        "website not showing",
+        "react seo",
+        "nextjs seo"
+      ]
+    },
+    {
+      "id": "seo-time",
+      "answer": "Fixes are live as soon as they're deployed, but Google needs time to recrawl your pages. Nobody can honestly promise a ranking or a date, so Hamza focuses on fixing what is measurably wrong. Would you like to start with an SEO audit?",
+      "keywords": [
+        "guarantee",
+        "guaranteed",
+        "promise"
+      ],
+      "phrases": [
+        "how soon",
+        "how long to rank",
+        "first page guarantee",
+        "guarantee ranking",
+        "kab tak rank",
+        "ranking kab",
+        "first page on google",
+        "guarantee first page",
+        "rank first",
+        "number one on google"
+      ]
+    },
+    {
+      "id": "pricing-websites",
+      "answer": "Next.js websites start from $400 for a landing page or portfolio site, $1,000 for an ecommerce store with an admin dashboard, and $2,000 for a full ecommerce app with user logins, accounts and orders. Every project is quoted after a free call. https://hamzatariq.site/services/nextjs-websites",
+      "keywords": [
+        "price",
+        "prices",
+        "pricing",
+        "cost",
+        "costs",
+        "rate",
+        "rates",
+        "charges",
+        "charge",
+        "fee",
+        "fees",
+        "budget",
+        "kitne",
+        "kitna",
+        "paise",
+        "rupees",
+        "dollars",
+        "website",
+        "landing",
+        "portfolio",
+        "ecommerce",
+        "store",
+        "shop",
+        "nextjs",
+        "quote",
+        "quotation"
+      ],
+      "phrases": [
+        "website price",
+        "website cost",
+        "how much for a website",
+        "website kitne ka",
+        "website kitne ki",
+        "website ka rate",
+        "store price",
+        "ecommerce price",
+        "landing page price",
+        "website banwane ka kharcha",
+        "website kitne mein"
+      ]
+    },
+    {
+      "id": "pricing-dashboards",
+      "answer": "A custom dashboard starts from $1,200 and a custom web app from $2,500. Every project is quoted after a free call, and the final price depends on features. https://hamzatariq.site/services/dashboards",
+      "keywords": [
+        "price",
+        "prices",
+        "pricing",
+        "cost",
+        "costs",
+        "rate",
+        "charges",
+        "fee",
+        "budget",
+        "kitne",
+        "kitna",
+        "dashboard",
+        "dashboards",
+        "admin",
+        "panel",
+        "webapp",
+        "crm",
+        "portal"
+      ],
+      "phrases": [
+        "dashboard price",
+        "dashboard cost",
+        "web app price",
+        "web app cost",
+        "admin panel price",
+        "dashboard kitne ka",
+        "dashboard ka rate"
+      ]
+    },
+    {
+      "id": "pricing-chatbots",
+      "answer": "An AI chatbot for your website starts from $350. Every project is quoted after a free call, and the final price depends on features. https://hamzatariq.site/services/ai-chatbots",
+      "keywords": [
+        "price",
+        "prices",
+        "pricing",
+        "cost",
+        "costs",
+        "rate",
+        "charges",
+        "fee",
+        "budget",
+        "kitne",
+        "kitna",
+        "chatbot",
+        "chatbots",
+        "bot",
+        "assistant"
+      ],
+      "phrases": [
+        "chatbot price",
+        "chatbot cost",
+        "bot price",
+        "chatbot kitne ka",
+        "chatbot ka rate",
+        "ai chatbot price"
+      ]
+    },
+    {
+      "id": "pricing-seo",
+      "answer": "React and Next.js SEO: an SEO audit (report plus prioritized fix list) is $150, technical SEO setup starts from $500, a React (Vite/CRA) to Next.js migration from $800, and monthly SEO plus content from $400 a month. https://hamzatariq.site/services/react-nextjs-seo",
+      "keywords": [
+        "price",
+        "prices",
+        "pricing",
+        "cost",
+        "costs",
+        "rate",
+        "charges",
+        "fee",
+        "budget",
+        "kitne",
+        "kitna",
+        "seo",
+        "audit",
+        "migration",
+        "monthly"
+      ],
+      "phrases": [
+        "seo price",
+        "seo cost",
+        "audit price",
+        "seo kitne ka",
+        "seo ka rate",
+        "migration price",
+        "monthly seo"
+      ]
+    },
+    {
+      "id": "pricing-overview",
+      "answer": "Starting prices: websites from $400, ecommerce stores from $1,000, custom dashboards from $1,200, web apps from $2,500, AI chatbots from $350 and SEO audits from $150. Every project is quoted after a free call. Which one are you interested in?",
+      "keywords": [
+        "price",
+        "prices",
+        "pricing",
+        "cost",
+        "costs",
+        "rate",
+        "rates",
+        "charges",
+        "charge",
+        "fee",
+        "fees",
+        "budget",
+        "quote",
+        "quotation",
+        "kitne",
+        "kitna",
+        "paise",
+        "kharcha",
+        "expensive",
+        "cheap",
+        "package",
+        "packages"
+      ],
+      "phrases": [
+        "how much",
+        "kitne ka",
+        "kitne ki",
+        "kitna lagega",
+        "price kya hai",
+        "rate kya hai",
+        "kya charges",
+        "price list",
+        "kitne paise"
+      ]
+    },
+    {
+      "id": "services-overview",
+      "answer": "Hamza offers four services: custom Next.js websites and online stores, dashboards and web apps, AI chatbots for websites, and React and Next.js SEO for sites that don't rank. Everything is custom code, no templates. Which one fits your project? https://hamzatariq.site/services",
+      "keywords": [
+        "services",
+        "service",
+        "offer",
+        "offers",
+        "provide",
+        "skills"
+      ],
+      "phrases": [
+        "what do you do",
+        "what services",
+        "what does hamza do",
+        "what can you build",
+        "kya karte ho",
+        "kya kaam",
+        "kon si services",
+        "aap kya banate"
+      ]
+    },
+    {
+      "id": "process",
+      "answer": "It starts with a free call about your goals and the features you need, then you get a clear quote. Hamza plans and designs the pages first, builds in custom code while you review each part as it's ready, then launches with SEO set up. https://hamzatariq.site/contact",
+      "keywords": [
+        "process",
+        "steps",
+        "workflow",
+        "method",
+        "approach",
+        "tarika"
+      ],
+      "phrases": [
+        "how do you work",
+        "how does it work",
+        "how it works",
+        "what is the process",
+        "kaise kaam",
+        "process kya hai",
+        "kaise hota hai"
+      ]
+    },
+    {
+      "id": "timeline",
+      "todo": "Typical delivery times per service.",
+      "answer": "The timeline depends on the pages and features you need, so Hamza confirms it with your quote after a free call. Leave your project details below and he'll get back to you with a plan.",
+      "lead": true,
+      "keywords": [
+        "timeline",
+        "deadline",
+        "days",
+        "weeks",
+        "duration",
+        "delivery",
+        "time",
+        "din",
+        "hafte",
+        "urgent",
+        "fast",
+        "jaldi"
+      ],
+      "phrases": [
+        "how long",
+        "how much time",
+        "kitne din",
+        "kitna time",
+        "kab tak",
+        "kitne time mein",
+        "when can you deliver",
+        "kab milegi"
+      ]
+    },
+    {
+      "id": "tech-stack",
+      "answer": "Hamza works with React, Next.js and TypeScript, with Tailwind CSS, GSAP and Three.js for design and animation, a real database for dashboards and web apps, Google Gemini for AI chatbots, and Vercel for hosting.",
+      "keywords": [
+        "stack",
+        "technology",
+        "technologies",
+        "tech",
+        "tools",
+        "framework",
+        "frameworks",
+        "language",
+        "languages",
+        "typescript",
+        "tailwind",
+        "gsap",
+        "threejs",
+        "vercel",
+        "database"
+      ],
+      "phrases": [
+        "tech stack",
+        "which technology",
+        "kon si technology",
+        "what do you use",
+        "built with",
+        "kis mein banate"
+      ]
+    },
+    {
+      "id": "custom-code",
+      "answer": "No templates. Hamza writes everything in custom code, so each site is built around your business. Next.js pre-renders pages into HTML, so they load fast and Google can read them, without the weight of theme plugins. https://hamzatariq.site/services/nextjs-websites",
+      "keywords": [
+        "template",
+        "templates",
+        "theme",
+        "themes",
+        "plugin",
+        "plugins",
+        "custom",
+        "wordpress",
+        "shopify",
+        "wix",
+        "elementor"
+      ],
+      "phrases": [
+        "why nextjs",
+        "why not wordpress",
+        "instead of wordpress",
+        "instead of shopify",
+        "do you use templates",
+        "custom code"
+      ]
+    },
+    {
+      "id": "own-case-study",
+      "answer": "Hamza moved this site from a Vite and React app to Next.js 15, keeping the 3D design. On mobile, the home page SEO score went from 83 to 100 and its main content now loads in 2.6 seconds instead of 18. https://hamzatariq.site/work/hamzatariq-site",
+      "keywords": [
+        "case",
+        "study",
+        "results",
+        "lighthouse",
+        "score",
+        "speed"
+      ],
+      "phrases": [
+        "case study",
+        "this website",
+        "this site",
+        "your own site",
+        "results kya",
+        "how fast is this site"
+      ]
+    },
+    {
+      "id": "projects",
+      "answer": "At Devrex Digital Hamza has built websites and web apps for 45+ brands, such as Dulhahouse (a Lahore groom-wear store), Nagina Jewels (an online jewellery store) and The Trekkerz Pakistan (a tour agency). You can browse 31 of them here: https://hamzatariq.site/work",
+      "keywords": [
+        "projects",
+        "project",
+        "portfolio",
+        "work",
+        "examples",
+        "samples",
+        "clients",
+        "client",
+        "dulhahouse",
+        "nagina",
+        "trekkerz",
+        "previous",
+        "past",
+        "kaam"
+      ],
+      "phrases": [
+        "show me your work",
+        "past work",
+        "previous work",
+        "your portfolio",
+        "kaam dikhao",
+        "pehle ka kaam",
+        "kis ke liye banaya",
+        "examples of your work"
+      ]
+    },
+    {
+      "id": "experience",
+      "answer": "Hamza is a full-stack developer specializing in React and Next.js with a BSc in Artificial Intelligence. He was a Junior Frontend Developer at Ruya Solutions (2023 to 2024) and since 2024 runs Devrex Digital, building for 45+ brands. https://hamzatariq.site/about",
+      "keywords": [
+        "experience",
+        "experienced",
+        "background",
+        "education",
+        "degree",
+        "qualification",
+        "years",
+        "ruya",
+        "about",
+        "tajurba"
+      ],
+      "phrases": [
+        "about hamza",
+        "who is hamza",
+        "how much experience",
+        "kitna experience",
+        "kitne saal",
+        "tell me about yourself",
+        "hamza kon hai"
+      ]
+    },
+    {
+      "id": "devrex",
+      "answer": "Devrex Digital is the web development agency Hamza founded in 2024. It builds fully custom websites and has worked with 45+ brands, startups and businesses. Projects built there appear on this site as \"Built at Devrex Digital\". https://www.devrexdigital.site",
+      "keywords": [
+        "devrex",
+        "agency",
+        "company",
+        "team",
+        "firm"
+      ],
+      "phrases": [
+        "devrex digital",
+        "your agency",
+        "your company",
+        "do you have a team"
+      ]
+    },
+    {
+      "id": "revisions",
+      "todo": "Number of revision rounds included.",
+      "answer": "You review the work as each part is ready, so changes happen along the way rather than at the end. How many revision rounds are included is agreed with Hamza in your quote. Want to share your project details?",
+      "lead": true,
+      "keywords": [
+        "revision",
+        "revisions",
+        "changes",
+        "change",
+        "edits",
+        "modify",
+        "tabdeeli"
+      ],
+      "phrases": [
+        "how many revisions",
+        "can i make changes",
+        "changes kar sakte",
+        "revision milegi",
+        "unlimited revisions"
+      ]
+    },
+    {
+      "id": "support",
+      "todo": "Support and maintenance terms after launch (included period, monthly plan, pricing).",
+      "answer": "Ongoing support and maintenance are agreed with Hamza directly. Dashboards and web apps launch with a walkthrough of how to use them, and for SEO there is a monthly SEO and content plan from $400 a month. What kind of support do you need?",
+      "keywords": [
+        "support",
+        "maintenance",
+        "maintain",
+        "updates",
+        "update",
+        "hosting",
+        "bugs",
+        "after",
+        "launch",
+        "handover"
+      ],
+      "phrases": [
+        "after launch",
+        "after delivery",
+        "do you provide support",
+        "support milega",
+        "maintenance karte",
+        "baad mein support",
+        "who will update"
+      ]
+    },
+    {
+      "id": "payment",
+      "todo": "Payment terms (advance/milestones, methods, currencies).",
+      "answer": "Payment terms are agreed with Hamza directly when he sends your quote. Leave your details below, or message him on WhatsApp, and he'll explain how it works for your project.",
+      "lead": true,
+      "keywords": [
+        "payment",
+        "payments",
+        "pay",
+        "advance",
+        "upfront",
+        "deposit",
+        "installments",
+        "milestone",
+        "milestones",
+        "invoice",
+        "paypal",
+        "bank",
+        "wise",
+        "payoneer"
+      ],
+      "phrases": [
+        "payment terms",
+        "how to pay",
+        "payment kaise",
+        "advance kitna",
+        "half payment",
+        "50 percent"
+      ]
+    },
+    {
+      "id": "hiring-jobs",
+      "todo": "Open to full-time, contract or remote roles?",
+      "answer": "For recruiters and teams, Hamza's experience, skills and contact details are on the hire page. The quickest way to reach him about a role is email: hamzabuildsweb@gmail.com. https://hamzatariq.site/hire",
+      "keywords": [
+        "job",
+        "jobs",
+        "role",
+        "roles",
+        "position",
+        "fulltime",
+        "remote",
+        "contract",
+        "recruiter",
+        "recruiting",
+        "resume",
+        "cv",
+        "salary",
+        "naukri",
+        "employee",
+        "interview"
+      ],
+      "phrases": [
+        "full time",
+        "part time",
+        "hire you for a job",
+        "are you open to work",
+        "job offer",
+        "join our team",
+        "naukri chahiye"
+      ]
+    },
+    {
+      "id": "availability",
+      "answer": "Yes, Hamza is available for new projects. The best next step is a free call or leaving your project details, and he'll reply with a clear quote. Would you like to share your details?",
+      "lead": true,
+      "keywords": [
+        "available",
+        "availability",
+        "free",
+        "busy",
+        "capacity"
+      ],
+      "phrases": [
+        "are you available",
+        "can you take",
+        "new projects",
+        "available ho",
+        "free ho",
+        "abhi kaam le sakte"
+      ]
+    },
+    {
+      "id": "start-project",
+      "answer": "Great, let's get it started. Leave your name, email, project type and budget in the form below, and Hamza will reply within 24 hours with next steps.",
+      "lead": true,
+      "keywords": [
+        "hire",
+        "hiring",
+        "start",
+        "begin",
+        "proceed",
+        "interested",
+        "order",
+        "book"
+      ],
+      "phrases": [
+        "i want to hire",
+        "hire hamza",
+        "want to start",
+        "start a project",
+        "i need a website",
+        "i want a website",
+        "let's start",
+        "work with you",
+        "kaam karwana",
+        "project dena",
+        "website banwani hai",
+        "i am interested",
+        "website chahiye",
+        "website bana do",
+        "website banwana"
+      ]
+    },
+    {
+      "id": "book-call",
+      "todo": "Cal.com booking link (SITE.bookingUrl).",
+      "answer": "Every project starts with a free call. Leave your details below or use the contact page, and Hamza will set up a time that suits you. https://hamzatariq.site/contact",
+      "lead": true,
+      "keywords": [
+        "call",
+        "meeting",
+        "meet",
+        "zoom",
+        "schedule",
+        "appointment",
+        "consultation",
+        "discuss"
+      ],
+      "phrases": [
+        "book a call",
+        "free call",
+        "schedule a call",
+        "call karo",
+        "baat karni",
+        "meeting karni"
+      ]
+    },
+    {
+      "id": "contact",
+      "answer": "You can reach Hamza by email at hamzabuildsweb@gmail.com or on WhatsApp at +92 305 4122637, or send your project details through the form on https://hamzatariq.site/contact",
+      "keywords": [
+        "contact",
+        "email",
+        "mail",
+        "whatsapp",
+        "number",
+        "phone",
+        "reach",
+        "rabta",
+        "message"
+      ],
+      "phrases": [
+        "how to contact",
+        "how can i contact",
+        "contact details",
+        "phone number",
+        "whatsapp number",
+        "email address",
+        "rabta kaise",
+        "number do",
+        "number dein"
+      ]
+    }
+  ]
+}

@@ -1,11 +1,14 @@
 // "Ask Hamza's AI": server logic for /api/chat. Adapted from the /bot skill's chatbot-core:
 // answers come only from site content retrieved from Supabase (pgvector), chats are logged,
 // and the reply ends with LEAD_SIGNAL when the visitor is ready to share project details.
+// No rate limits (owner's decision). If Gemini fails, is slow or is out of free quota, the reply
+// comes from the offline answer bank (./offline.ts), so the visitor never sees an error.
 import { ThinkingLevel } from "@google/genai";
 import { SITE } from "@/lib/site";
 import { SERVICES } from "@/data/services";
 import { hashIp, rpcClient, serverSecret } from "@/lib/supabase/server";
 import { CHAT_MODELS, embedQuery, gemini } from "./gemini";
+import { OFF_TOPIC_REPLY, isOffTopic, offlineReply } from "./offline";
 
 /** Sent after the reply text when the widget should show the lead form. Never part of the visible text. */
 export const LEAD_SIGNAL = "\u001eLEAD";
@@ -14,10 +17,11 @@ const LEAD_MARKER = "[[LEAD]]";
 const MAX_MESSAGES = 20;
 const MAX_MESSAGE_CHARS = 1500;
 const MAX_TOTAL_CHARS = 12000;
-const RATE_LIMIT = 20; // visitor messages per IP per window
-const RATE_WINDOW_MIN = 10;
 const MATCH_COUNT = 6;
 const MIN_SIMILARITY = 0.45;
+// Free-tier Gemini can take 30+ s to start; past these limits the offline answer is used instead.
+const FIRST_TOKEN_MS = 7000;
+const TOTAL_WAIT_MS = 12000;
 
 const ALLOWED_ORIGINS = [SITE.url, SITE.url.replace("://", "://www.")];
 const CONTACT_URL = `${SITE.url}/contact`;
@@ -34,7 +38,7 @@ ANSWERING
 - Never invent prices, clients, results, timelines or guarantees. Prices on the site are starting prices, and every project is quoted after a free call.
 - Details about a client (such as "Lahore-based") describe that client, not Hamza.
 - Client projects were built at ${SITE.agency.name}; describe them that way.
-- Stay on topic: Hamza, his services, work and process. Politely decline anything else.
+- If the question is not about Hamza, his services, projects, process, prices or hiring him (for example coding help, general knowledge, jokes or homework), don't answer it. Reply with exactly this one line and nothing else: ${OFF_TOPIC_REPLY}
 - You are an AI assistant, not Hamza. Say so if asked. Talk about Hamza in the third person.
 
 STYLE
@@ -52,32 +56,6 @@ export type ChatMessage = { role: "user" | "assistant"; content: string };
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const PAGE = /^\/[a-z0-9\-/]{0,100}$/i;
-
-const memoryHits = new Map<string, { start: number; count: number }>();
-// Fallback when the database count is unavailable (per warm instance only).
-const memoryLimited = (key: string) => {
-  const now = Date.now();
-  const entry = memoryHits.get(key);
-  if (!entry || now - entry.start > RATE_WINDOW_MIN * 60_000) {
-    memoryHits.set(key, { start: now, count: 1 });
-    return false;
-  }
-  entry.count += 1;
-  return entry.count > RATE_LIMIT;
-};
-
-const rateLimited = async (ipHash: string) => {
-  const db = rpcClient();
-  if (db) {
-    const { data, error } = await db.rpc("app_chat_recent_count", {
-      p_secret: serverSecret(),
-      p_ip_hash: ipHash,
-      p_minutes: RATE_WINDOW_MIN,
-    });
-    if (!error && typeof data === "number") return data >= RATE_LIMIT;
-  }
-  return memoryLimited(ipHash);
-};
 
 /** Clean, size-limited history that starts and ends with a visitor turn, or null if invalid. */
 const sanitizeMessages = (input: unknown): ChatMessage[] | null => {
@@ -148,43 +126,51 @@ const leadFilter = (write: (text: string) => void) => {
   };
 };
 
-const FALLBACK_REPLY = `Sorry, I can't help with that here. You can ask Hamza directly at ${CONTACT_URL}`;
+// Models that ran out of free quota are skipped for a while, so replies don't wait on a known 429.
+const coolingDown = new Map<string, number>();
 
-const describeError = (error: unknown): [number, string] => {
-  const status = (error as { status?: number })?.status;
-  if (status === 429 || status === 503)
-    return [status, `The assistant is busy right now. Please try again in a moment, or use ${CONTACT_URL}`];
-  return [502, `The assistant is unavailable right now. Please use ${CONTACT_URL}`];
-};
-
+/** Streams a Gemini reply and resolves true if any text was written. Never throws. */
 const streamReply = async (messages: ChatMessage[], system: string, write: (text: string) => void) => {
-  const ai = gemini()!;
-  const request = {
-    contents: messages.map((m) => ({ role: m.role === "assistant" ? "model" : "user", parts: [{ text: m.content }] })),
-    config: {
-      systemInstruction: system,
-      maxOutputTokens: 1024,
-      temperature: 0.4,
-      // Short answers from given content need no reasoning; this keeps the first token fast.
-      thinkingConfig: { thinkingLevel: ThinkingLevel.MINIMAL },
-    },
-  };
-  const models = [...new Set(CHAT_MODELS)];
-  for (let i = 0; i < models.length; i++) {
+  const ai = gemini();
+  if (!ai) return false;
+  const contents = messages.map((m) => ({ role: m.role === "assistant" ? "model" : "user", parts: [{ text: m.content }] }));
+  const deadline = Date.now() + TOTAL_WAIT_MS;
+  for (const model of [...new Set(CHAT_MODELS)]) {
+    if ((coolingDown.get(model) ?? 0) > Date.now()) continue;
+    const wait = Math.min(FIRST_TOKEN_MS, deadline - Date.now());
+    if (wait < 1000) break;
+    const abort = new AbortController();
+    const timer = setTimeout(() => abort.abort(), wait);
     let wrote = false;
     try {
-      const stream = await ai.models.generateContentStream({ ...request, model: models[i] });
+      const stream = await ai.models.generateContentStream({
+        model,
+        contents,
+        config: {
+          systemInstruction: system,
+          maxOutputTokens: 1024,
+          temperature: 0.4,
+          // Short answers from given content need no reasoning; this keeps the first token fast.
+          thinkingConfig: { thinkingLevel: ThinkingLevel.MINIMAL },
+          abortSignal: abort.signal,
+        },
+      });
       for await (const chunk of stream) {
         const text = chunk.text;
-        if (text) {
-          wrote = true;
-          write(text);
-        }
+        if (!text) continue;
+        clearTimeout(timer);
+        wrote = true;
+        write(text);
       }
       return wrote;
     } catch (error) {
-      const busy = [429, 503].includes((error as { status?: number })?.status ?? 0);
-      if (wrote || !busy || i === models.length - 1) throw error;
+      if (wrote) return true; // keep the partial answer rather than mixing in another one
+      const status = (error as { status?: number })?.status;
+      // The daily free quota resets once a day; per-minute limits clear sooner.
+      if (status === 429) coolingDown.set(model, Date.now() + (/per ?day/i.test(String(error)) ? 3_600_000 : 120_000));
+      if (!abort.signal.aborted) console.error(`gemini ${model} failed (${status ?? "error"})`);
+    } finally {
+      clearTimeout(timer);
     }
   }
   return false;
@@ -194,8 +180,8 @@ type Request = { method: string; origin: string | null; ip: string; userAgent: s
 type Prepared =
   | { status: number; json?: { error: string } }
   | {
-      /** Writes the reply, then LEAD_SIGNAL if needed. onError is only called before anything was written. */
-      stream: (write: (text: string) => void, onError: (status: number, message: string) => void) => Promise<void>;
+      /** Writes the reply, then LEAD_SIGNAL if needed. Never fails: falls back to the offline answers. */
+      stream: (write: (text: string) => void) => Promise<void>;
       /** Saves the exchange; call once the stream has finished. */
       log: () => Promise<void>;
     };
@@ -206,17 +192,16 @@ export const prepareChat = async ({ method, origin, ip, userAgent, body }: Reque
   if (origin && !ALLOWED_ORIGINS.includes(origin) && !/^http:\/\/localhost(:\d+)?$/.test(origin)) {
     return { status: 403, json: { error: "Forbidden" } };
   }
-  if (!gemini()) return { status: 503, json: { error: "The assistant is not configured yet." } };
 
   const data = (body ?? {}) as { messages?: unknown; page?: unknown; session?: unknown };
   const messages = sanitizeMessages(data.messages);
   if (!messages) return { status: 400, json: { error: "Invalid conversation." } };
   const page = typeof data.page === "string" && PAGE.test(data.page) ? data.page : null;
   const session = typeof data.session === "string" && UUID.test(data.session) ? data.session : null;
-  const ipHash = hashIp(ip || "unknown");
-
-  const [limited, context] = await Promise.all([rateLimited(ipHash), siteContext(messages)]);
-  if (limited) return { status: 429, json: { error: "Too many messages. Please try again in a few minutes." } };
+  const question = messages[messages.length - 1].content;
+  // Clear off-topic questions get the fixed line without spending Gemini quota.
+  const offTopic = isOffTopic(question);
+  const context = offTopic ? "" : await siteContext(messages);
 
   const system = [
     SYSTEM_PROMPT,
@@ -228,39 +213,42 @@ export const prepareChat = async ({ method, origin, ip, userAgent, body }: Reque
 
   let reply = "";
   let lead = false;
+  let source = "gemini";
 
   return {
-    stream: async (write, onError) => {
-      let started = false;
+    stream: async (write) => {
       const out = (text: string) => {
-        started = true;
         reply += text;
         write(text);
       };
-      const filter = leadFilter(out);
-      try {
-        const wrote = await streamReply(messages, system, (text) => filter.push(text));
-        lead = filter.end();
-        if (!wrote || !reply.trim()) out((started ? "\n\n" : "") + FALLBACK_REPLY);
-        if (lead) write(LEAD_SIGNAL);
-      } catch (error) {
-        filter.end();
-        const [status, message] = describeError(error);
-        if (!started) onError(status, message);
-        else write(`\n\n${message}`);
+      if (offTopic) {
+        source = "off-topic";
+        out(OFF_TOPIC_REPLY);
+        return;
       }
+      const filter = leadFilter(out);
+      const wrote = await streamReply(messages, system, (text) => filter.push(text));
+      lead = filter.end();
+      if (!wrote || !reply.trim()) {
+        const saved = offlineReply(question);
+        source = `offline:${saved.id}`;
+        out(saved.text);
+        lead = saved.lead;
+      }
+      if (lead) write(LEAD_SIGNAL);
     },
     log: async () => {
       const db = rpcClient();
       if (!db || !session || !reply.trim()) return;
+      const notes = [source === "gemini" ? "" : `[${source}]`, lead ? "[lead form shown]" : ""].filter(Boolean);
       const { error } = await db.rpc("app_log_chat", {
         p_secret: serverSecret(),
         p_session: session,
         p_page: page ?? "",
-        p_ip_hash: ipHash,
+        p_ip_hash: hashIp(ip || "unknown"),
         p_user_agent: userAgent.slice(0, 300),
-        p_user_message: messages[messages.length - 1].content,
-        p_assistant_message: reply.trim() + (lead ? "\n[lead form shown]" : ""),
+        p_user_message: question,
+        p_assistant_message: [reply.trim(), ...notes].join("\n"),
       });
       if (error) console.error("chat log failed:", error.message);
     },

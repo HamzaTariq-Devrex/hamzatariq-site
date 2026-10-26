@@ -47,6 +47,17 @@ const whatsappHandoff = (messages: Message[]) => {
   return `${WHATSAPP_URL}?text=${encodeURIComponent(text)}`;
 };
 
+// Same context for email: the visitor's recent questions in the body.
+const emailHandoff = (messages: Message[]) => {
+  const asked = messages
+    .filter((m) => m.role === "user")
+    .slice(-5)
+    .map((m) => `- ${m.content.slice(0, 200)}`)
+    .join("\n");
+  const body = "Hi Hamza,\n\n" + (asked ? `I asked your website assistant:\n${asked}\n\n` : "") + "I'd like to discuss my project.";
+  return `mailto:${SITE.email}?subject=${encodeURIComponent("Project enquiry")}&body=${encodeURIComponent(body)}`;
+};
+
 // Short, readable label for a URL: "WhatsApp", a page name from the path, or the domain.
 const linkLabel = (url: string) => {
   try {
@@ -385,16 +396,25 @@ export default function ChatWidget() {
             )}
           </div>
 
-          {hasUserMessage && !sending && !formOpen && !leadSent && (
+          {hasUserMessage && !sending && (
             <div className="ai-chat-actions">
-              <button type="button" className="ai-chat-action is-primary" onClick={() => setFormOpen(true)}>
-                Share project details
-              </button>
+              {!formOpen && !leadSent && (
+                <button type="button" className="ai-chat-action is-primary" onClick={() => setFormOpen(true)}>
+                  Get a quote
+                </button>
+              )}
               <a className="ai-chat-action is-whatsapp" href={whatsappHandoff(messages)} target="_blank" rel="noopener noreferrer">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                   <path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.2 14.2c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.5-3.9-4.7-4.1-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.3 0 .5l-.4.6-.4.4c-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.3 2.4 1.5.3.1.5.1.6-.1l.9-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.6-.1 1.2z" />
                 </svg>
                 WhatsApp
+              </a>
+              <a className="ai-chat-action is-email" href={emailHandoff(messages)}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <rect x="3" y="5" width="18" height="14" rx="2" />
+                  <path d="m3 7 9 6 9-6" />
+                </svg>
+                Email
               </a>
             </div>
           )}
