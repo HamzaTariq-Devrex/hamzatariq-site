@@ -9,7 +9,7 @@ Facts and access only Hamza can provide. Nothing on the site may be invented to 
 - [ ] **New CV PDF.** Put it in `public/` and set `cvUrl` in `src/lib/site.ts`; the "Download CV" button on `/hire` appears automatically. (The home page Resume button still links the old `public/Hamza Tariq Resume.pdf`.)
 - [ ] **More case studies.** For each: client type, problem, what you built, stack, results, screenshots, testimonial (if any), and whether it was your own client or Devrex Digital work. Dashboards and AI chatbots have no related case study yet, so their "Related work" sections are hidden on the live site.
 - [ ] **Availability for roles** (`/hire`): open to full-time, contract or remote work?
-- [ ] **Google Search Console verification code**, then submit `https://hamzatariq.site/sitemap.xml`.
+- [ ] **Google Search Console:** the verification file is live (`/google0a499a204a55eeb8.html`). Click Verify in Search Console, then submit `https://hamzatariq.site/sitemap.xml`.
 
 ## Needed before Phase 4 goes live
 

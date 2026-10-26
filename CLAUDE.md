@@ -95,6 +95,7 @@ Portfolio and inbound lead site for Hamza Tariq (freelance developer: React/Next
 - JSON-LD goes in a `<script type="application/ld+json">` via `jsonLd()`. The `Person` node lives on the home page with `@id` `https://hamzatariq.site/#person`; other pages reference it.
 - New routes must be added to `src/app/sitemap.ts`.
 - IndexNow: `.github/workflows/indexnow.yml` runs on every push to `main`, waits until `/version.txt` serves the pushed commit, then submits the sitemap. The key file is `public/718bcb0be670c128fd877ee016f03bef.txt`; do not delete it.
+- Google Search Console verification: `public/google0a499a204a55eeb8.html`, served at `/google0a499a204a55eeb8.html`. Never delete or edit it, and never let middleware, redirects or robots rules cover that path.
 
 ## Deploy
 
