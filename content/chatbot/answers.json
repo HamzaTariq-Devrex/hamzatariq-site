@@ -507,8 +507,7 @@
     },
     {
       "id": "timeline",
-      "todo": "Typical delivery times per service.",
-      "answer": "The timeline depends on the pages and features you need, so Hamza confirms it with your quote after a free call. Leave your project details below and he'll get back to you with a plan.",
+      "answer": "Usual timelines: a landing page 5–7 days, an AI chatbot 3–5 days, an SEO audit 2–3 days, an ecommerce store 2–3 weeks, a custom dashboard 2–4 weeks and a custom web app 4–8 weeks. Hamza confirms the exact timeline with your quote. Want to share your project details?",
       "lead": true,
       "keywords": [
         "timeline",
@@ -532,7 +531,13 @@
         "kab tak",
         "kitne time mein",
         "when can you deliver",
-        "kab milegi"
+        "kab milegi",
+        "how long does a website take",
+        "how long for a chatbot",
+        "how long for a dashboard",
+        "audit kitne din",
+        "website kitne din",
+        "chatbot kitne din"
       ]
     },
     {
@@ -683,8 +688,7 @@
     },
     {
       "id": "revisions",
-      "todo": "Number of revision rounds included.",
-      "answer": "You review the work as each part is ready, so changes happen along the way rather than at the end. How many revision rounds are included is agreed with Hamza in your quote. Want to share your project details?",
+      "answer": "Every project includes 2 free revision rounds, and you review the work as each part is ready. Want to share your project details?",
       "lead": true,
       "keywords": [
         "revision",
@@ -705,8 +709,7 @@
     },
     {
       "id": "support",
-      "todo": "Support and maintenance terms after launch (included period, monthly plan, pricing).",
-      "answer": "Ongoing support and maintenance are agreed with Hamza directly. Dashboards and web apps launch with a walkthrough of how to use them, and for SEO there is a monthly SEO and content plan from $400 a month. What kind of support do you need?",
+      "answer": "You get 30 days of free bug fixes after launch. Ongoing maintenance is quoted separately, and for SEO there is a monthly SEO and content plan from $400 a month. What kind of support do you need?",
       "keywords": [
         "support",
         "maintenance",
@@ -731,8 +734,7 @@
     },
     {
       "id": "payment",
-      "todo": "Payment terms (advance/milestones, methods, currencies).",
-      "answer": "Payment terms are agreed with Hamza directly when he sends your quote. Leave your details below, or message him on WhatsApp, and he'll explain how it works for your project.",
+      "answer": "Payment is 50% upfront and 50% on delivery. Every project is quoted after a free call. Want to share your project details?",
       "lead": true,
       "keywords": [
         "payment",
@@ -748,7 +750,9 @@
         "paypal",
         "bank",
         "wise",
-        "payoneer"
+        "payoneer",
+        "50",
+        "half"
       ],
       "phrases": [
         "payment terms",

@@ -465,6 +465,43 @@
   color: rgba(226, 232, 240, 0.6);
 }
 
+.svc-price p.svc-price-time {
+  color: #5eead4;
+}
+
+.svc-terms {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin: 20px 0 0;
+}
+
+.svc-terms div {
+  padding: 16px 18px;
+  border-radius: 16px;
+  border: 1px solid var(--page-line);
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.svc-terms dt {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(226, 232, 240, 0.45);
+}
+
+.svc-terms dd {
+  margin: 6px 0 0;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+@media (max-width: 760px) {
+  .svc-terms {
+    grid-template-columns: 1fr;
+  }
+}
+
 .svc-proof {
   display: flex;
   flex-wrap: wrap;

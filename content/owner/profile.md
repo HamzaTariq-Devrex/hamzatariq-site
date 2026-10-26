@@ -27,18 +27,24 @@ I'm Hamza Tariq, a full-stack developer specializing in React and Next.js. At De
 
 Every project is quoted after a free call. Final price depends on features.
 
-| Service | Package | From |
-| --- | --- | --- |
-| Next.js websites (`/services/nextjs-websites`) | Landing page / portfolio website | $400 |
-| | Ecommerce store with admin dashboard | $1,000 |
-| | Full ecommerce app (user logins, accounts, orders) | $2,000 |
-| Dashboards & web apps (`/services/dashboards`) | Custom dashboard | $1,200 |
-| | Custom web app | $2,500 |
-| AI chatbots (`/services/ai-chatbots`) | AI chatbot | $350 |
-| React & Next.js SEO (`/services/react-nextjs-seo`) | SEO audit (report + prioritized fix list) | $150 |
-| | Technical SEO setup for React/Next.js | $500 |
-| | React (Vite/CRA) to Next.js migration for SEO | $800 |
-| | Monthly SEO + content | $400/month |
+| Service | Package | From | Delivery |
+| --- | --- | --- | --- |
+| Next.js websites (`/services/nextjs-websites`) | Landing page / portfolio website | $400 | 5–7 days |
+| | Ecommerce store with admin dashboard | $1,000 | 2–3 weeks |
+| | Full ecommerce app (user logins, accounts, orders) | $2,000 | |
+| Dashboards & web apps (`/services/dashboards`) | Custom dashboard | $1,200 | 2–4 weeks |
+| | Custom web app | $2,500 | 4–8 weeks |
+| AI chatbots (`/services/ai-chatbots`) | AI chatbot | $350 | 3–5 days |
+| React & Next.js SEO (`/services/react-nextjs-seo`) | SEO audit (report + prioritized fix list) | $150 | 2–3 days |
+| | Technical SEO setup for React/Next.js | $500 | |
+| | React (Vite/CRA) to Next.js migration for SEO | $800 | |
+| | Monthly SEO + content | $400/month | |
+
+## Project terms (all services)
+
+- Payment: 50% upfront, 50% on delivery.
+- Revisions: 2 free revision rounds.
+- Support: 30 days of free bug fixes after launch. Ongoing maintenance is quoted separately.
 
 Main keywords: Next.js website development; custom dashboard development; AI chatbot for website; React SEO services (secondary: Next.js SEO, React website not ranking on Google).
 

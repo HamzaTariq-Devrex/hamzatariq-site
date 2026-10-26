@@ -13,17 +13,7 @@ Facts and access only Hamza can provide. Nothing on the site may be invented to 
 
 ## Needed before Phase 4 goes live
 
-- [ ] **Resend DNS records** for `hamzatariq.site` (Resend → Domains): send them so they can be added on Vercel and the domain verified. Until then visitor emails from `hello@hamzatariq.site` cannot be sent.
-- [ ] **Supabase Auth URLs** (Supabase → Authentication → URL Configuration): Site URL `https://hamzatariq.site`; Redirect URLs `http://localhost:3000/**`. Needed for the `/admin` sign-in link on the live site.
-
-## Chatbot answer bank (`content/chatbot/answers.json`)
-
-Until these are filled in, the chatbot says they are agreed with Hamza directly and offers the lead form.
-
-- [ ] **Payment terms**: advance or milestones, payment methods, currency.
-- [ ] **Revisions**: how many revision rounds are included.
-- [ ] **Support and maintenance** after launch: included period, monthly plan and price.
-- [ ] **Typical timelines** per service (for example landing page, ecommerce store, dashboard).
+- [ ] **Verify `hamzatariq.site` in Resend** (Resend → Domains → Verify). The DNS records are on Vercel and live (2026-10-26). Until verified, visitor emails from `hello@hamzatariq.site` cannot be sent.
 
 ## Needed for Phase 8 (analytics)
 
@@ -33,6 +23,9 @@ Until these are filled in, the chatbot says they are agreed with Hamza directly 
 
 - [x] Supabase project (hamzabuildsweb account), Gemini API key, Resend API key; lead emails go to `hamzabuildsweb@gmail.com`.
 - [x] Home page Resume button stays.
+- [x] Project terms: 50% upfront / 50% on delivery, 2 free revision rounds, 30 days of free bug fixes (maintenance quoted separately), and delivery times per service.
+- [x] Supabase Auth URLs: Site URL `https://hamzatariq.site`, redirects `https://hamzatariq.site/**` and `http://localhost:3000/**`.
+- [x] Resend DNS records added on Vercel (old records from an earlier Resend setup replaced).
 - [x] Positioning line, short bio and photo (`public/images/hamza-tariq-2026.webp`).
 - [x] Pricing for all four services.
 - [x] First case study: `/work/hamzatariq-site`.

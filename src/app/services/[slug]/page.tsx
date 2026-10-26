@@ -7,7 +7,7 @@ import AuthorBox from "@/components/site/AuthorBox";
 import OwnerTodo from "@/components/site/OwnerTodo";
 import ProjectCard from "@/components/ProjectCard";
 import CaseStudyCard from "@/components/site/CaseStudyCard";
-import { SERVICES, PRICE_NOTE, formatPrice, getService } from "@/data/services";
+import { SERVICES, PRICE_NOTE, PROJECT_TERMS, formatPrice, getService } from "@/data/services";
 import { PROJECTS } from "@/data/projects";
 import { CASE_STUDIES } from "@/data/caseStudies";
 import { SITE, isProductionSite } from "@/lib/site";
@@ -194,6 +194,7 @@ export default async function ServicePage({ params }: Params) {
               <div>
                 <h3>{tier.name}</h3>
                 {tier.detail && <p>{tier.detail}</p>}
+                {tier.timeline && <p className="svc-price-time">Delivery: {tier.timeline}</p>}
               </div>
               <div className="svc-price-value">
                 <span>Starting from</span>
@@ -203,6 +204,14 @@ export default async function ServicePage({ params }: Params) {
           ))}
         </div>
         <p className="svc-note">{PRICE_NOTE}</p>
+        <dl className="svc-terms">
+          {PROJECT_TERMS.map((t) => (
+            <div key={t.label}>
+              <dt>{t.label}</dt>
+              <dd>{t.text}</dd>
+            </div>
+          ))}
+        </dl>
         <div className="project-actions">
           <BookCall label="Get a quote on a free call" />
         </div>

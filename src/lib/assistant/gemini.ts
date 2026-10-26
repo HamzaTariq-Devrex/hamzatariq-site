@@ -5,8 +5,9 @@ import { GoogleGenAI } from "@google/genai";
 export const EMBED_MODEL = "gemini-embedding-001";
 export const EMBED_DIMENSIONS = 768;
 // Measured 2026-10-26 on the free tier: gemini-3.5-flash with minimal thinking starts replying in 1-2 s,
-// while gemini-flash-lite-latest took 13-40 s. If the first model is busy (503/429), the chat tries the next.
-export const CHAT_MODELS = [process.env.GEMINI_MODEL || "gemini-3.5-flash", "gemini-3.5-flash-lite"];
+// while the Flash-Lite models took 13-40 s. So there is no second model: when this one is busy or out of
+// quota, the chat answers from the offline answer bank straight away (owner's decision).
+export const CHAT_MODEL = process.env.GEMINI_MODEL || "gemini-3.5-flash";
 
 let client: GoogleGenAI | null = null;
 

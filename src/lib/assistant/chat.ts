@@ -7,7 +7,7 @@ import { ThinkingLevel } from "@google/genai";
 import { SITE } from "@/lib/site";
 import { SERVICES } from "@/data/services";
 import { hashIp, rpcClient, serverSecret } from "@/lib/supabase/server";
-import { CHAT_MODELS, embedQuery, gemini } from "./gemini";
+import { CHAT_MODEL, embedQuery, gemini } from "./gemini";
 import { OFF_TOPIC_REPLY, isOffTopic, offlineReply } from "./offline";
 
 /** Sent after the reply text when the widget should show the lead form. Never part of the visible text. */
@@ -19,9 +19,8 @@ const MAX_MESSAGE_CHARS = 1500;
 const MAX_TOTAL_CHARS = 12000;
 const MATCH_COUNT = 6;
 const MIN_SIMILARITY = 0.45;
-// Free-tier Gemini can take 30+ s to start; past these limits the offline answer is used instead.
+// If Gemini hasn't started replying by then, the offline answer is used instead.
 const FIRST_TOKEN_MS = 7000;
-const TOTAL_WAIT_MS = 12000;
 
 const ALLOWED_ORIGINS = [SITE.url, SITE.url.replace("://", "://www.")];
 const CONTACT_URL = `${SITE.url}/contact`;
@@ -126,54 +125,48 @@ const leadFilter = (write: (text: string) => void) => {
   };
 };
 
-// Models that ran out of free quota are skipped for a while, so replies don't wait on a known 429.
-const coolingDown = new Map<string, number>();
+// After a 429 the model is skipped until this time, so replies come from the answer bank at once.
+let quotaOutUntil = 0;
+const geminiReady = () => !!gemini() && quotaOutUntil <= Date.now();
 
 /** Streams a Gemini reply and resolves true if any text was written. Never throws. */
 const streamReply = async (messages: ChatMessage[], system: string, write: (text: string) => void) => {
   const ai = gemini();
-  if (!ai) return false;
-  const contents = messages.map((m) => ({ role: m.role === "assistant" ? "model" : "user", parts: [{ text: m.content }] }));
-  const deadline = Date.now() + TOTAL_WAIT_MS;
-  for (const model of [...new Set(CHAT_MODELS)]) {
-    if ((coolingDown.get(model) ?? 0) > Date.now()) continue;
-    const wait = Math.min(FIRST_TOKEN_MS, deadline - Date.now());
-    if (wait < 1000) break;
-    const abort = new AbortController();
-    const timer = setTimeout(() => abort.abort(), wait);
-    let wrote = false;
-    try {
-      const stream = await ai.models.generateContentStream({
-        model,
-        contents,
-        config: {
-          systemInstruction: system,
-          maxOutputTokens: 1024,
-          temperature: 0.4,
-          // Short answers from given content need no reasoning; this keeps the first token fast.
-          thinkingConfig: { thinkingLevel: ThinkingLevel.MINIMAL },
-          abortSignal: abort.signal,
-        },
-      });
-      for await (const chunk of stream) {
-        const text = chunk.text;
-        if (!text) continue;
-        clearTimeout(timer);
-        wrote = true;
-        write(text);
-      }
-      return wrote;
-    } catch (error) {
-      if (wrote) return true; // keep the partial answer rather than mixing in another one
-      const status = (error as { status?: number })?.status;
-      // The daily free quota resets once a day; per-minute limits clear sooner.
-      if (status === 429) coolingDown.set(model, Date.now() + (/per ?day/i.test(String(error)) ? 3_600_000 : 120_000));
-      if (!abort.signal.aborted) console.error(`gemini ${model} failed (${status ?? "error"})`);
-    } finally {
+  if (!ai || !geminiReady()) return false;
+  const abort = new AbortController();
+  const timer = setTimeout(() => abort.abort(), FIRST_TOKEN_MS);
+  let wrote = false;
+  try {
+    const stream = await ai.models.generateContentStream({
+      model: CHAT_MODEL,
+      contents: messages.map((m) => ({ role: m.role === "assistant" ? "model" : "user", parts: [{ text: m.content }] })),
+      config: {
+        systemInstruction: system,
+        maxOutputTokens: 1024,
+        temperature: 0.4,
+        // Short answers from given content need no reasoning; this keeps the first token fast.
+        thinkingConfig: { thinkingLevel: ThinkingLevel.MINIMAL },
+        abortSignal: abort.signal,
+      },
+    });
+    for await (const chunk of stream) {
+      const text = chunk.text;
+      if (!text) continue;
       clearTimeout(timer);
+      wrote = true;
+      write(text);
     }
+    return wrote;
+  } catch (error) {
+    if (wrote) return true; // keep the partial answer rather than mixing in another one
+    const status = (error as { status?: number })?.status;
+    // The daily free quota resets once a day; per-minute limits clear sooner.
+    if (status === 429) quotaOutUntil = Date.now() + (/per ?day/i.test(String(error)) ? 3_600_000 : 120_000);
+    if (!abort.signal.aborted) console.error(`gemini ${CHAT_MODEL} failed (${status ?? "error"})`);
+    return false;
+  } finally {
+    clearTimeout(timer);
   }
-  return false;
 };
 
 type Request = { method: string; origin: string | null; ip: string; userAgent: string; body: unknown };
@@ -199,9 +192,10 @@ export const prepareChat = async ({ method, origin, ip, userAgent, body }: Reque
   const page = typeof data.page === "string" && PAGE.test(data.page) ? data.page : null;
   const session = typeof data.session === "string" && UUID.test(data.session) ? data.session : null;
   const question = messages[messages.length - 1].content;
-  // Clear off-topic questions get the fixed line without spending Gemini quota.
+  // Clear off-topic questions get the fixed line without spending Gemini quota, and while the
+  // quota is out there is no point fetching context: the answer bank replies immediately.
   const offTopic = isOffTopic(question);
-  const context = offTopic ? "" : await siteContext(messages);
+  const context = offTopic || !geminiReady() ? "" : await siteContext(messages);
 
   const system = [
     SYSTEM_PROMPT,
