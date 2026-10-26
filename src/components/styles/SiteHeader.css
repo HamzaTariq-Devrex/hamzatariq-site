@@ -1,0 +1,317 @@
+/* The one site header (SiteHeader.tsx). Self-contained tokens, so it looks the same on the home page. */
+.site-header {
+  --sh-text: #f1f5f9;
+  --sh-muted: rgba(226, 232, 240, 0.62);
+  --sh-line: rgba(255, 255, 255, 0.08);
+  --sh-accent: #5eead4;
+  --sh-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  position: sticky;
+  top: 12px;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: min(1240px, calc(100% - 32px));
+  margin: 12px auto 0;
+  padding: 10px 12px 10px 20px;
+  border-radius: 100px;
+  border: 1px solid var(--sh-line);
+  box-sizing: border-box;
+  color: var(--sh-text);
+  font-family: var(--font-geist), system-ui, sans-serif;
+  isolation: isolate;
+}
+
+/* The frosted background sits on a pseudo-element: Chrome paints the overflowing dropdown wrongly
+   when backdrop-filter is on the header itself (page text showed through the menu). */
+.site-header::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: rgba(15, 20, 32, 0.6);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+}
+
+/* Home: the page scrolls inside GSAP ScrollSmoother, so the header is fixed above it. */
+.site-header.is-home {
+  position: fixed;
+  left: 50%;
+  margin: 0;
+  transform: translateX(-50%);
+  z-index: 9999;
+}
+
+.site-header a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.site-logo img {
+  display: block;
+  height: 64px;
+  width: auto;
+  margin: -22px -26px;
+}
+
+.site-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.site-nav > a,
+.site-nav-services {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 16px;
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--sh-muted);
+  transition: color 0.3s ease, background-color 0.3s ease;
+}
+
+.site-nav > a:hover,
+.site-nav-services:hover {
+  color: var(--sh-text);
+}
+
+.site-nav > a.is-active,
+.site-nav-services.is-active {
+  color: var(--sh-accent);
+  background: rgba(45, 212, 191, 0.1);
+}
+
+.site-nav-drop {
+  position: relative;
+}
+
+.site-nav-services::after {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-left: 8px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: translateY(-3px) rotate(45deg);
+}
+
+/* Opens directly under "Services", aligned to its left edge. */
+.site-nav-menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  width: 340px;
+  padding: 8px;
+  border-radius: 18px;
+  background: rgba(13, 18, 30, 0.97);
+  border: 1px solid var(--sh-line);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(6px);
+  transition: opacity 0.25s ease, transform 0.3s var(--sh-ease), visibility 0s linear 0.3s;
+}
+
+/* Hover bridge across the gap between the link and the menu. */
+.site-nav-menu::before {
+  content: "";
+  position: absolute;
+  inset: -14px 0 auto;
+  height: 14px;
+}
+
+.site-nav-drop:hover .site-nav-menu,
+.site-nav-drop:focus-within .site-nav-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition: opacity 0.25s ease, transform 0.3s var(--sh-ease), visibility 0s;
+}
+
+.site-nav-menu a {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  transition: background-color 0.2s ease;
+}
+
+.site-nav-menu a:hover,
+.site-nav-menu a.is-active {
+  background: rgba(45, 212, 191, 0.08);
+}
+
+.site-nav-menu strong {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--sh-text);
+}
+
+.site-nav-menu a.is-active strong {
+  color: var(--sh-accent);
+}
+
+.site-nav-menu span {
+  font-size: 12px;
+  line-height: 1.45;
+  color: rgba(226, 232, 240, 0.55);
+}
+
+.site-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 42px;
+  padding: 0 18px;
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  color: #04221f !important;
+  background: #2dd4bf;
+  box-shadow: 0 8px 24px rgba(45, 212, 191, 0.25);
+  transition: transform 0.35s var(--sh-ease), box-shadow 0.3s ease;
+}
+
+.site-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(45, 212, 191, 0.4);
+}
+
+/* ---------- Mobile ---------- */
+.site-mobile {
+  display: none;
+  position: relative;
+}
+
+.site-burger {
+  position: relative;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid var(--sh-line);
+  background: transparent;
+  cursor: pointer;
+}
+
+.site-burger span {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 16px;
+  height: 1.5px;
+  background: var(--sh-text);
+  transition: transform 0.35s var(--sh-ease);
+}
+
+.site-burger span:first-child {
+  transform: translate(-50%, -4px);
+}
+
+.site-burger span:last-child {
+  transform: translate(-50%, 3px);
+}
+
+.site-burger.is-open span:first-child {
+  transform: translate(-50%, 0) rotate(45deg);
+}
+
+.site-burger.is-open span:last-child {
+  transform: translate(-50%, 0) rotate(-45deg);
+}
+
+.site-mobile-panel {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 12px);
+  width: min(320px, calc(100vw - 32px));
+  max-height: calc(100dvh - 110px);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px;
+  border-radius: 20px;
+  background: rgba(13, 18, 30, 0.98);
+  border: 1px solid var(--sh-line);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+  animation: siteMenuIn 0.25s var(--sh-ease);
+}
+
+@keyframes siteMenuIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.site-mobile-panel a:not(.site-cta) {
+  padding: 11px 12px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.site-mobile-panel a.is-sub {
+  padding: 8px 12px 8px 26px;
+  font-size: 14px;
+  color: rgba(226, 232, 240, 0.65);
+}
+
+.site-mobile-panel a.is-active {
+  color: var(--sh-accent);
+  background: rgba(45, 212, 191, 0.08);
+}
+
+.site-mobile-panel .site-cta {
+  margin-top: 10px;
+  height: 46px;
+}
+
+@media (max-width: 960px) {
+  .site-nav,
+  .site-cta-wrap {
+    display: none;
+  }
+
+  .site-mobile {
+    display: block;
+  }
+}
+
+@media (max-width: 760px) {
+  .site-header {
+    padding: 8px 8px 8px 16px;
+  }
+
+  .site-logo img {
+    height: 54px;
+    margin: -18px -22px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-nav-menu,
+  .site-cta,
+  .site-burger span,
+  .site-mobile-panel {
+    transition: none;
+    animation: none;
+  }
+}

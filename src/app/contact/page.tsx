@@ -34,7 +34,7 @@ const structuredData = {
 
 export default function ContactPage() {
   return (
-    <SiteShell active="contact" hideCta>
+    <SiteShell hideCta>
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(structuredData)} />
       <section className="page-hero">
         <span className="page-eyebrow">Contact</span>

@@ -74,7 +74,7 @@ export default async function ProjectPage({ params }: Params) {
   const enquiry = `mailto:${SITE.email}?subject=${encodeURIComponent(`A website like ${project.title}`)}`;
 
   return (
-    <SiteShell active="work">
+    <SiteShell>
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(structuredData)} />
       <nav className="project-crumbs" aria-label="Breadcrumb">
         <Link href="/work">Work</Link>

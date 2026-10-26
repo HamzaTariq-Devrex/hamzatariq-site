@@ -1,5 +1,5 @@
 import { PropsWithChildren } from "react";
-import { smoother } from "./Navbar";
+import { smoother } from "./SmoothScroll";
 import { SITE } from "@/lib/site";
 import "./styles/Landing.css";
 

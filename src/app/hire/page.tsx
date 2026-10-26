@@ -45,7 +45,7 @@ const structuredData = {
 
 export default function HirePage() {
   return (
-    <SiteShell active="hire">
+    <SiteShell>
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(structuredData)} />
       <section className="about-hero">
         <div className="about-hero-text">

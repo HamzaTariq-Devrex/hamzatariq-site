@@ -1,6 +1,6 @@
 import { SplitText } from "gsap/SplitText";
 import gsap from "gsap";
-import { smoother } from "../Navbar";
+import { smoother } from "../SmoothScroll";
 
 export function initialFX() {
   document.body.style.overflowY = "auto";
@@ -64,7 +64,7 @@ export function initialFX() {
     }
   );
   gsap.fromTo(
-    [".header", ".icons-section", ".nav-fade"],
+    [".site-header", ".icons-section", ".nav-fade"],
     { opacity: 0 },
     {
       opacity: 1,

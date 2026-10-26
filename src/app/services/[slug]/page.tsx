@@ -110,7 +110,7 @@ export default async function ServicePage({ params }: Params) {
   };
 
   return (
-    <SiteShell active="services">
+    <SiteShell>
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(structuredData)} />
       <nav className="project-crumbs" aria-label="Breadcrumb">
         <Link href="/services">Services</Link>

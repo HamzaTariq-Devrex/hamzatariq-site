@@ -46,7 +46,7 @@ const structuredData = {
 
 export default function WorkPage() {
   return (
-    <SiteShell active="work">
+    <SiteShell>
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(structuredData)} />
       <section className="page-hero">
         <span className="page-eyebrow">Portfolio</span>

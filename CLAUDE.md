@@ -14,6 +14,7 @@ Portfolio and inbound lead site for Hamza Tariq (freelance developer: React/Next
 
 - **Framework:** Next.js 15 App Router, React 19, TypeScript (strict). All pages are statically generated unless they need request data.
 - **Home page** (`/`) is one client tree (`src/components/HomeClient.tsx`): preloader, GSAP ScrollSmoother, Three.js character and R3F tech stack (both loaded with `next/dynamic`, `ssr: false`). Links into and out of the home page are plain `<a>` (full page load) on purpose, so ScrollSmoother and WebGL state never leak into other routes. Every other route uses `next/link`.
+- **One navbar everywhere:** `SiteHeader` (`src/components/site/SiteHeader.tsx`, styles `SiteHeader.css`): logo, Services dropdown, Work, About, Contact, Book a free call. Links always open real pages (never `#anchors`); active state comes from the pathname (nested pages included). On the home page it is rendered with `home` (plain `<a>` links, fixed position) and portalled to `<body>`, because inside the home tree it ends up under other fixed layers. GSAP ScrollSmoother lives in `src/components/SmoothScroll.tsx`.
 - **Other routes** use the server component `SiteShell` (`src/components/site/SiteShell.tsx`) for header, footer and CTA.
 - **Images:** `next/image` everywhere. Remote hosts are allow-listed in `next.config.ts`.
 - **Site facts** (URL, email, social links, agency) live in `src/lib/site.ts`. Do not hard-code them elsewhere.
@@ -34,7 +35,7 @@ Portfolio and inbound lead site for Hamza Tariq (freelance developer: React/Next
 
 - `src/app/` routes (App Router): `/`, `/services`, `/services/[slug]`, `/work`, `/work/hamzatariq-site` (own case study), `/work/[slug]`, `/about`, `/hire`, `/contact`, `not-found`.
 - `src/components/` home page sections; styles in `src/components/styles/<Component>.css`. Non-home page styles live in `Pages.css` (shell) and `Content.css` (sections).
-- `src/components/site/` shell and widgets for non-home pages: `SiteShell`, `BookCall`, `AuthorBox`, `OwnerTodo`, `CaseStudyCard`, `WorkBrowser`.
+- `src/components/site/` shell and widgets: `SiteHeader` (all pages), `SiteShell`, `BookCall`, `AuthorBox`, `OwnerTodo`, `CaseStudyCard`, `WorkBrowser`.
 - `src/data/services.ts` the four services (copy, process, features, pricing, FAQs). `src/data/caseStudies.ts` case studies with measured results. `src/data/experience.ts` career timeline.
 - `src/data/projects.ts` project list (generated from devrexdigital.site/portfolio). Show projects as "Built at Devrex Digital" unless the owner marks one as a personal client.
 - `content/owner/` owner facts (`profile.md`, `projects/*.md`); `content/backlog.json` blog keyword queue.

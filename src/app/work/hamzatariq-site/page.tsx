@@ -47,7 +47,7 @@ const structuredData = {
 export default function HamzatariqSiteCaseStudy() {
   const [desktop, mobile, project] = study.images;
   return (
-    <SiteShell active="work">
+    <SiteShell>
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(structuredData)} />
       <nav className="project-crumbs" aria-label="Breadcrumb">
         <Link href="/work">Work</Link>

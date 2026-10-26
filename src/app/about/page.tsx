@@ -35,7 +35,7 @@ const structuredData = {
 
 export default function AboutPage() {
   return (
-    <SiteShell active="about">
+    <SiteShell>
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(structuredData)} />
       <section className="about-hero">
         <div className="about-hero-text">

@@ -1,13 +1,15 @@
 "use client";
 
 import { PropsWithChildren, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import dynamic from "next/dynamic";
 import About from "./About";
 import Career from "./Career";
 import Contact from "./Contact";
 import Cursor from "./Cursor";
 import Landing from "./Landing";
-import Navbar from "./Navbar";
+import SmoothScroll from "./SmoothScroll";
+import SiteHeader from "./site/SiteHeader";
 import SocialIcons from "./SocialIcons";
 import WhatIDo from "./WhatIDo";
 import Work from "./Work";
@@ -22,6 +24,11 @@ const MainContainer = ({ children }: PropsWithChildren) => {
   const [isDesktopView, setIsDesktopView] = useState<boolean | null>(null);
   const [showTechStack, setShowTechStack] = useState(false);
   const techStackAnchorRef = useRef<HTMLDivElement>(null);
+  const [mounted, setMounted] = useState(false);
+
+  // The header is portalled to <body>: inside the home tree it ends up below the chat widget
+  // and other fixed layers whatever its z-index.
+  useEffect(() => setMounted(true), []);
 
   useEffect(() => {
     const resizeHandler = () => {
@@ -55,7 +62,8 @@ const MainContainer = ({ children }: PropsWithChildren) => {
   return (
     <div className="container-main">
       <Cursor />
-      <Navbar />
+      {mounted && createPortal(<SiteHeader home />, document.body)}
+      <SmoothScroll />
       <SocialIcons />
       {isDesktopView === true && children}
       <div id="smooth-wrapper">
