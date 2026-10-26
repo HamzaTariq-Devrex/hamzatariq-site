@@ -23,7 +23,7 @@ Facts and access only Hamza can provide. Nothing on the site may be invented to 
 
 ## Done
 
-- [x] Positioning line, short bio and photo (`public/images/hamza-tariq.webp`).
+- [x] Positioning line, short bio and photo (`public/images/hamza-tariq-2026.webp`).
 - [x] Pricing for all four services.
 - [x] First case study: `/work/hamzatariq-site`.
 - [x] Client count confirmed: 45+.

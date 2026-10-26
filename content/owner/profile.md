@@ -18,7 +18,7 @@ I'm Hamza Tariq, a full-stack developer specializing in React and Next.js. At De
 - Education: BSc in Artificial Intelligence.
 - Email: hamzabuildsweb@gmail.com. WhatsApp: +92 305 4122637.
 - GitHub: https://github.com/HamzaTariq-Devrex (main profile link). No LinkedIn.
-- Photo: `public/images/hamza-tariq.webp`.
+- Photo: `public/images/hamza-tariq-2026.webp`.
 - Availability: available for new projects. TODO(owner): open to full-time or contract roles?
 - Booking link: TODO(owner) (Cal.com).
 - CV: TODO(owner) (new PDF).

@@ -5,7 +5,7 @@ export const SITE = {
   email: "hamzabuildsweb@gmail.com",
   logo: "https://dataofclient.nyc3.cdn.digitaloceanspaces.com/Portfolio/Hamza%20Tariq%20Portfolio%20Logo.png",
   photo: {
-    src: "/images/hamza-tariq.webp",
+    src: "/images/hamza-tariq-2026.webp",
     width: 1024,
     height: 1024,
     alt: "Hamza Tariq, React and Next.js developer",
