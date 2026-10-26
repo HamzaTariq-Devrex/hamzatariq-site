@@ -8,7 +8,7 @@ import LeadForm from "./LeadForm";
 import "../styles/ChatWidget.css";
 
 const BOT_NAME = "Hamza's AI";
-const AVATAR = "/bot-avatar.svg";
+const AVATAR = "/bot-avatar.webp"; // 256px, circle-cropped; source in D:\PROJECTS\ai-assets\hamzatariq-site
 const GREETING =
   "Hi, I'm Hamza's AI assistant. Ask me about his services, prices, past work or how a project works. I answer from this site.";
 const SUGGESTIONS = [

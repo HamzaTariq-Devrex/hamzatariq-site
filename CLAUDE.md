@@ -77,7 +77,7 @@ Portfolio and inbound lead site for Hamza Tariq (freelance developer: React/Next
 
 ## Commands
 
-- `npm run dev`: dev server.
+- `npm run dev`: dev server. It writes to `.next-dev` (see `next.config.ts`), so `npm run build` can run while the owner's dev server is up.
 - `npm run build`: lint, type-check and production build. Must pass before any commit.
 - `npm run lint`: ESLint (includes the Next.js plugin).
 - `npm run typecheck`: TypeScript only.

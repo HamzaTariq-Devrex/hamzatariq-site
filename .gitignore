@@ -32,6 +32,7 @@ backup/
 .env*
 !.env.example
 .next
+.next-dev
 next-env.d.ts
 
 .vercel
