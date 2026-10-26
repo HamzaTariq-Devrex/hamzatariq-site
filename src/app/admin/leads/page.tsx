@@ -54,7 +54,7 @@ export default async function LeadsPage() {
         <form action={signOut} className="admin-account">
           <span>{user.email}</span>
           <button type="submit" className="page-btn page-btn-ghost">
-            Sign out
+            Log out
           </button>
         </form>
       </header>

@@ -1,56 +1,24 @@
 "use client";
 
-import { useState } from "react";
-import { browserClient } from "@/lib/supabase/browser";
+import { useActionState } from "react";
+import { signIn, type SignInState } from "./actions";
 
 const LoginForm = () => {
-  const [email, setEmail] = useState("");
-  const [state, setState] = useState<"idle" | "sending" | "sent">("idle");
-  const [error, setError] = useState("");
-
-  const onSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setState("sending");
-    setError("");
-    const { error: authError } = await browserClient().auth.signInWithOtp({
-      email: email.trim().toLowerCase(),
-      options: { emailRedirectTo: `${window.location.origin}/admin/auth/callback` },
-    });
-    // Sign-ups are limited to the owner email by a database trigger; don't reveal which emails exist.
-    if (authError && authError.status === 429) {
-      setError("Too many sign-in emails. Wait a few minutes and try again.");
-      setState("idle");
-      return;
-    }
-    setState("sent");
-  };
-
-  if (state === "sent") {
-    return (
-      <p className="admin-note" role="status">
-        If that email is allowed, a sign-in link is on its way. Check your inbox.
-      </p>
-    );
-  }
+  const [state, action, pending] = useActionState<SignInState, FormData>(signIn, { error: null });
 
   return (
-    <form className="admin-login-form" onSubmit={onSubmit}>
+    <form className="admin-login-form" action={action}>
       <label htmlFor="admin-email">Email</label>
-      <input
-        id="admin-email"
-        type="email"
-        required
-        autoComplete="email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-      />
-      {error && (
+      <input id="admin-email" name="email" type="email" required autoComplete="username" defaultValue={state.email} key={state.email} />
+      <label htmlFor="admin-password">Password</label>
+      <input id="admin-password" name="password" type="password" required autoComplete="current-password" />
+      {state.error && (
         <p className="admin-error" role="alert">
-          {error}
+          {state.error}
         </p>
       )}
-      <button type="submit" className="page-btn page-btn-primary" disabled={state === "sending"}>
-        {state === "sending" ? "Sending…" : "Send sign-in link"}
+      <button type="submit" className="page-btn page-btn-primary" disabled={pending}>
+        {pending ? "Signing in…" : "Sign in"}
       </button>
     </form>
   );

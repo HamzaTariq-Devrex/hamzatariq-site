@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import { withSessionAge } from "@/lib/supabase/session";
 
 // Refreshes the Supabase session cookie for /admin only; every other route stays static.
 export async function middleware(request: NextRequest) {
@@ -10,7 +11,7 @@ export async function middleware(request: NextRequest) {
       setAll: (list) => {
         list.forEach(({ name, value }) => request.cookies.set(name, value));
         response = NextResponse.next({ request });
-        list.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
+        list.forEach(({ name, value, options }) => response.cookies.set(name, value, withSessionAge(options)));
       },
     },
   });

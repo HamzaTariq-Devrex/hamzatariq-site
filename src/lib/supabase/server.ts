@@ -4,6 +4,7 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { createServerClient } from "@supabase/ssr";
 import { SITE } from "@/lib/site";
 import type { Database } from "./database.types";
+import { withSessionAge } from "./session";
 
 // Server-only. Public writes go through SECURITY DEFINER functions that check SUPABASE_SERVER_SECRET
 // (see supabase/migrations); the owner reads data through Supabase Auth and RLS.
@@ -33,7 +34,7 @@ export const authClient = async () => {
       getAll: () => store.getAll(),
       setAll: (list) => {
         try {
-          list.forEach(({ name, value, options }) => store.set(name, value, options));
+          list.forEach(({ name, value, options }) => store.set(name, value, withSessionAge(options)));
         } catch {
           // Server components cannot set cookies; the middleware refreshes the session instead.
         }
