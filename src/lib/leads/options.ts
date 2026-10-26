@@ -20,9 +20,16 @@ export type LeadInput = {
   projectType: string;
   budget: string;
   message: string;
+  /** Optional WhatsApp number, as typed (validated loosely). */
+  phone: string;
   source: LeadSource;
   page: string;
   session: string | null;
 };
 
 export const EMAIL_PATTERN = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+/** Digits with optional +, spaces, dashes or brackets; 7 to 15 digits (the E.164 maximum). */
+export const isPhone = (value: string) => {
+  const digits = value.replace(/\D/g, "").length;
+  return /^\+?[\d\s\-()]+$/.test(value) && digits >= 7 && digits <= 15;
+};

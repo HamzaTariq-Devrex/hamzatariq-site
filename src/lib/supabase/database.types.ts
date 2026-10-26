@@ -114,8 +114,10 @@ export type Database = {
           id: string
           message: string | null
           name: string
+          notes: string | null
           notified_at: string | null
           page: string | null
+          phone: string | null
           project_type: string | null
           session_id: string | null
           source: string
@@ -128,8 +130,10 @@ export type Database = {
           id?: string
           message?: string | null
           name: string
+          notes?: string | null
           notified_at?: string | null
           page?: string | null
+          phone?: string | null
           project_type?: string | null
           session_id?: string | null
           source: string
@@ -142,8 +146,10 @@ export type Database = {
           id?: string
           message?: string | null
           name?: string
+          notes?: string | null
           notified_at?: string | null
           page?: string | null
+          phone?: string | null
           project_type?: string | null
           session_id?: string | null
           source?: string
@@ -215,6 +221,7 @@ export type Database = {
           p_message: string
           p_name: string
           p_page: string
+          p_phone?: string
           p_project_type: string
           p_secret: string
           p_session: string

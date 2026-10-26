@@ -33,12 +33,13 @@ export const sendOwnerNotification = (lead: LeadInput, id: string) => {
   const rows: [string, string][] = [
     ["Name", lead.name],
     ["Email", lead.email],
+    ["WhatsApp", lead.phone || "-"],
     ["Project", lead.projectType || "-"],
     ["Budget", lead.budget || "-"],
     ["Source", lead.source + (lead.session ? " (chat transcript in admin)" : "")],
     ["Page", lead.page ? `${SITE.url}${lead.page}` : "-"],
   ];
-  const adminUrl = `${SITE.url}/admin/leads#lead-${id}`;
+  const adminUrl = `${SITE.url}/admin/leads?lead=${id}`;
   const html = layout(`<p style="margin:0 0 16px;font-size:18px;font-weight:bold">New lead from ${escape(lead.name)}</p>
 <table style="border-collapse:collapse;width:100%">${rows
     .map(

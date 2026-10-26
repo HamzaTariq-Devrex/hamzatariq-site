@@ -48,6 +48,10 @@
   min-height: 96px;
 }
 
+.lead-form input::placeholder {
+  color: rgba(226, 232, 240, 0.35);
+}
+
 .lead-form select option {
   background: #0f1420;
 }

@@ -2,7 +2,7 @@ import { after } from "next/server";
 import { SITE } from "@/lib/site";
 import { hashIp, rpcClient, serverSecret } from "@/lib/supabase/server";
 import { sendOwnerNotification, sendVisitorReply } from "@/lib/leads/email";
-import { BUDGETS, EMAIL_PATTERN, LEAD_SOURCES, PROJECT_TYPES, type LeadInput, type LeadSource } from "@/lib/leads/options";
+import { BUDGETS, EMAIL_PATTERN, LEAD_SOURCES, PROJECT_TYPES, isPhone, type LeadInput, type LeadSource } from "@/lib/leads/options";
 
 export const runtime = "nodejs";
 
@@ -44,12 +44,14 @@ export async function POST(req: Request) {
     projectType: (PROJECT_TYPES as readonly string[]).includes(str(body.projectType, 80)) ? str(body.projectType, 80) : "",
     budget: (BUDGETS as readonly string[]).includes(str(body.budget, 60)) ? str(body.budget, 60) : "",
     message: str(body.message, 4000),
+    phone: str(body.phone, 40),
     source: (LEAD_SOURCES as readonly string[]).includes(str(body.source, 20)) ? (str(body.source, 20) as LeadSource) : "page",
     page: PAGE.test(str(body.page, 200)) ? str(body.page, 200) : "",
     session: UUID.test(str(body.session, 36)) ? str(body.session, 36) : null,
   };
   if (!lead.name) return fail(400, "Please enter your name.");
   if (!EMAIL_PATTERN.test(lead.email)) return fail(400, "Please enter a valid email address.");
+  if (lead.phone && !isPhone(lead.phone)) return fail(400, "Please enter a valid WhatsApp number, or leave it empty.");
 
   const ip = (req.headers.get("x-forwarded-for") || "").split(",")[0].trim() || "unknown";
   if (limited(hashIp(ip))) return fail(429, "Too many requests. Please try again later or email me directly.");
@@ -67,6 +69,7 @@ export async function POST(req: Request) {
     p_page: lead.page,
     // Generated types mark every argument non-null; the function treats a null session as "no chat".
     p_session: lead.session as string,
+    p_phone: lead.phone || undefined,
   });
   if (error || !id) {
     console.error("lead insert failed:", error?.message);

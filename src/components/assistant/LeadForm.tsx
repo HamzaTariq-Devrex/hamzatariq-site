@@ -1,7 +1,7 @@
 "use client";
 
 import { useId, useState } from "react";
-import { BUDGETS, EMAIL_PATTERN, PROJECT_TYPES, type LeadSource } from "@/lib/leads/options";
+import { BUDGETS, EMAIL_PATTERN, PROJECT_TYPES, isPhone, type LeadSource } from "@/lib/leads/options";
 import "../styles/LeadForm.css";
 
 type Props = {
@@ -25,6 +25,11 @@ const LeadForm = ({ source, session = null, compact = false, onSent }: Props) =>
     const email = String(form.get("email") ?? "").trim();
     if (!EMAIL_PATTERN.test(email)) {
       setStatus({ state: "error", message: "Please enter a valid email address." });
+      return;
+    }
+    const phone = String(form.get("phone") ?? "").trim();
+    if (phone && !isPhone(phone)) {
+      setStatus({ state: "error", message: "Please enter a valid WhatsApp number, or leave it empty." });
       return;
     }
     setStatus({ state: "sending" });
@@ -66,6 +71,10 @@ const LeadForm = ({ source, session = null, compact = false, onSent }: Props) =>
       <div className="lead-form-row">
         <label htmlFor={`${id}-email`}>Email</label>
         <input id={`${id}-email`} name="email" type="email" required maxLength={254} autoComplete="email" />
+      </div>
+      <div className="lead-form-row">
+        <label htmlFor={`${id}-phone`}>WhatsApp number (optional)</label>
+        <input id={`${id}-phone`} name="phone" type="tel" maxLength={40} autoComplete="tel" placeholder="+92 300 1234567" />
       </div>
       <div className="lead-form-pair">
         <div className="lead-form-row">
