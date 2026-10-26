@@ -64,6 +64,14 @@ ${lead.message ? `<p style="margin:16px 0 0;padding:14px;background:#f8fafc;bord
   });
 };
 
+// " about your ecommerce store project": lowercases only plain words, so "AI", "Next.js" and "React" stay as written.
+const projectPhrase = (type: string) => {
+  if (!type || type === "Something else") return "";
+  const words = type.split(" ");
+  if (/^[A-Z][a-z]+$/.test(words[0]) && !["React"].includes(words[0])) words[0] = words[0].toLowerCase();
+  return ` about your ${words.join(" ")} project`;
+};
+
 /** Automatic reply to the visitor. */
 export const sendVisitorReply = (lead: LeadInput) => {
   const first = lead.name.split(/\s+/)[0];
@@ -71,7 +79,7 @@ export const sendVisitorReply = (lead: LeadInput) => {
   const next = SITE.bookingUrl
     ? { line: "If you'd like to talk sooner, you can book a free call:", label: "Book a free call", url: SITE.bookingUrl }
     : { line: "If it's urgent, you can also reach me on WhatsApp:", label: "Chat on WhatsApp", url: SITE.social.whatsapp };
-  const about = lead.projectType ? ` about your ${lead.projectType.toLowerCase()} project` : "";
+  const about = projectPhrase(lead.projectType);
   const html = layout(`<p style="margin:0 0 14px">Hi ${escape(first)},</p>
 <p style="margin:0 0 14px">Thanks for your message${escape(about)}. I've received your details and I'll reply within 24 hours.</p>
 <p style="margin:0 0 20px">${next.line}</p>
