@@ -41,6 +41,12 @@ Every project is quoted after a free call. Final price depends on features.
 | | React (Vite/CRA) to Next.js migration for SEO | $800 | |
 | | Monthly SEO + content | $400/month | |
 
+### Add-ons (website projects, owner confirmed 2026-11-03)
+
+- Extra page beyond the package: $50 each. TODO(owner): how many pages each package includes.
+- Content editing (CMS): +$150.
+- Second language: +$250.
+
 ## Project terms (all services)
 
 - Payment: 50% upfront, 50% on delivery.

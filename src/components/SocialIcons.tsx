@@ -7,6 +7,7 @@ import "./styles/SocialIcons.css";
 import { TbNotes } from "react-icons/tb";
 import { useEffect } from "react";
 import HoverLinks from "./HoverLinks";
+import { trackEvent } from "@/lib/analytics";
 
 const SocialIcons = () => {
   useEffect(() => {
@@ -81,6 +82,7 @@ const SocialIcons = () => {
      className="resume-button"
   href="/Hamza Tariq Resume.pdf"
   download="Hamza Tariq Resume.pdf"
+  onClick={() => trackEvent("cv_downloaded", { from: "home" })}
   target="_blank"
   rel="noreferrer"
 >

@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import SiteShell from "@/components/site/SiteShell";
 import OwnerTodo from "@/components/site/OwnerTodo";
+import CvLink from "@/components/site/CvLink";
 import CaseStudyCard from "@/components/site/CaseStudyCard";
 import ProjectCard from "@/components/ProjectCard";
 import { EDUCATION, JOBS, UNIVERSITY } from "@/data/experience";
@@ -69,9 +70,7 @@ export default function HirePage() {
               GitHub profile
             </a>
             {SITE.cvUrl ? (
-              <a href={SITE.cvUrl} download className="page-btn page-btn-ghost">
-                Download CV
-              </a>
+              <CvLink href={SITE.cvUrl} className="page-btn page-btn-ghost" from="hire" />
             ) : (
               <OwnerTodo what="Upload the new CV PDF and set SITE.cvUrl. The download button appears once it is set." />
             )}

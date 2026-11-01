@@ -2,7 +2,8 @@ import type { MetadataRoute } from "next";
 import { PROJECTS } from "@/data/projects";
 import { SERVICES } from "@/data/services";
 import { CASE_STUDIES } from "@/data/caseStudies";
-import { SEO_AUDIT_TOOL } from "@/data/tools";
+import { TOOLS } from "@/data/tools";
+import { getSolutions } from "@/lib/solutions";
 import { BLOG_CATEGORIES, getPosts, getPostsInCategory } from "@/lib/blog";
 import { SITE } from "@/lib/site";
 
@@ -21,7 +22,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     page("", 1),
     page("/services", 0.9),
     ...SERVICES.map((s) => page(`/services/${s.slug}`, 0.9)),
-    page(SEO_AUDIT_TOOL.href, 0.8),
+    ...TOOLS.map((t) => page(t.href, 0.8)),
+    page("/solutions", 0.8),
+    ...getSolutions().map((s) => page(`/solutions/${s.slug}`, 0.8)),
     page("/blog", 0.8, "weekly"),
     ...posts.map((p) => ({
       url: `${SITE.url}/blog/${p.slug}`,

@@ -52,13 +52,22 @@ const TOOL_KEYWORDS = [...read("src/data/tools.ts").matchAll(/keyword: "([^"]+)"
 const CATEGORIES = JSON.parse(read("content/blog-categories.json") || "[]");
 const POST_FILES = existsSync(POSTS_DIR) ? readdirSync(POSTS_DIR).filter((f) => f.endsWith(".mdx")) : [];
 const POST_SLUGS = POST_FILES.map((f) => f.replace(/\.mdx$/, ""));
-const STATIC_ROUTES = ["/", "/services", "/work", "/about", "/hire", "/contact", "/blog", "/blog/rss.xml", "/tools/free-seo-audit"];
+const TOOL_HREFS = [...read("src/data/tools.ts").matchAll(/href: "([^"]+)"/g)].map((m) => m[1]);
+const SOLUTIONS_DIR = join(ROOT, "content", "solutions");
+const SOLUTION_FILES = existsSync(SOLUTIONS_DIR) ? readdirSync(SOLUTIONS_DIR).filter((f) => f.endsWith(".mdx")) : [];
+const SOLUTIONS = SOLUTION_FILES.map((file) => {
+  const { data, content } = matter(readFileSync(join(SOLUTIONS_DIR, file), "utf8"));
+  return { file, slug: file.replace(/\.mdx$/, ""), data, body: content };
+});
+const SOLUTION_KEYWORDS = SOLUTIONS.map((x) => String(x.data.keyword ?? ""));
+const STATIC_ROUTES = ["/", "/services", "/work", "/about", "/hire", "/contact", "/blog", "/blog/rss.xml", "/solutions", ...TOOL_HREFS];
 const KNOWN_ROUTES = new Set([
   ...STATIC_ROUTES,
   ...SERVICE_SLUGS.map((s) => `/services/${s}`),
   ...[...PROJECT_SLUGS, ...CASE_SLUGS].map((s) => `/work/${s}`),
   ...POST_SLUGS.map((s) => `/blog/${s}`),
   ...CATEGORIES.map((c) => `/blog/category/${c.slug}`),
+  ...SOLUTIONS.map((x) => `/solutions/${x.slug}`),
 ]);
 
 // ---------- Text helpers ----------
@@ -216,6 +225,7 @@ for (const post of posts) {
     if (dupPost) errors.push(`keyword already used by post "${dupPost.slug}"`);
     if (SERVICE_KEYWORDS.some((s) => normalize(s) === k)) errors.push("keyword already targeted by a service page");
     if (TOOL_KEYWORDS.some((s) => normalize(s) === k)) errors.push("keyword already targeted by a tool page");
+    if (SOLUTION_KEYWORDS.some((s) => normalize(s) === k)) errors.push("keyword already targeted by an industry page");
   }
 
   // Category and CTA
@@ -287,6 +297,8 @@ for (const item of backlog.items ?? []) {
   else if (seen.has(k)) backlogErrors.push(`backlog keyword "${item.keyword}" appears twice`);
   else seen.set(k, item);
   if (SERVICE_KEYWORDS.some((s) => normalize(s) === k)) backlogErrors.push(`backlog keyword "${item.keyword}" belongs to a service page`);
+  if (TOOL_KEYWORDS.some((s) => normalize(s) === k)) backlogErrors.push(`backlog keyword "${item.keyword}" belongs to a tool page`);
+  if (SOLUTION_KEYWORDS.some((s) => normalize(s) === k)) backlogErrors.push(`backlog keyword "${item.keyword}" belongs to an industry page`);
   if (item.category && !CATEGORIES.some((c) => c.slug === item.category)) backlogErrors.push(`backlog item "${item.keyword}" has unknown category "${item.category}"`);
   if (item.status === "published") {
     const post = parsed.find((p) => p.slug === item.publishedSlug);
@@ -298,9 +310,63 @@ for (const p of parsed) {
   if (!(backlog.items ?? []).some((i) => i.publishedSlug === p.slug)) backlogErrors.push(`post "${p.slug}" has no published backlog item`);
 }
 
+// Industry pages (content/solutions): same fact, filler, keyword and link rules as posts.
+const solutionResults = only.length
+  ? []
+  : SOLUTIONS.map(({ slug, data, body }) => {
+      const errors = [];
+      const keyword = String(data.keyword ?? "");
+      const seoTitle = String(data.seoTitle ?? data.title ?? "");
+      const description = String(data.description ?? "");
+      const faq = Array.isArray(data.faq) ? data.faq : [];
+      const list = (k) => (Array.isArray(data[k]) ? data[k] : []);
+      const frontText = [
+        data.title, seoTitle, description, data.h1, data.h1Accent, data.lead,
+        ...list("pains").flatMap((x) => [x.title, x.text]),
+        ...list("build").flatMap((x) => [x.title, x.text]),
+        ...list("features"),
+        ...faq.flatMap((f) => [f.q, f.a]),
+      ].map((x) => String(x ?? "")).join(" \n ");
+      const prose = proseOf(body);
+      const words = wordCount(prose) + wordCount(frontText);
+      if (words < 600) errors.push(`only ${words} words (min 600)`);
+      if (seoTitle.length + TITLE_SUFFIX.length > 60) errors.push(`<title> is ${seoTitle.length + TITLE_SUFFIX.length} chars with the suffix (max 60)`);
+      if (description.length < 150 || description.length > 160) errors.push(`meta description is ${description.length} chars (150–160)`);
+      const h2s = [...body.matchAll(/^##\s+(.+)$/gm)].map((m) => m[1]);
+      if (!keyword) errors.push("missing keyword");
+      else {
+        if (!containsKeyword(seoTitle, keyword)) errors.push(`keyword "${keyword}" missing from the title`);
+        if (!containsKeyword(String(data.lead ?? ""), keyword)) errors.push(`keyword "${keyword}" missing from the lead (first paragraph)`);
+        if (!h2s.some((h) => containsKeyword(h, keyword))) errors.push(`keyword "${keyword}" missing from every H2`);
+        const k = normalize(keyword);
+        if (SOLUTIONS.some((o) => o.slug !== slug && normalize(String(o.data.keyword ?? "")) === k)) errors.push("keyword used by another industry page");
+        if (parsed.some((p) => normalize(String(p.data.keyword ?? "")) === k)) errors.push("keyword used by a blog post");
+        if ((backlog.items ?? []).some((i) => normalize(String(i.keyword ?? "")) === k)) errors.push("keyword is queued in the blog backlog");
+        if (SERVICE_KEYWORDS.some((x) => normalize(x) === k)) errors.push("keyword belongs to a service page");
+        if (TOOL_KEYWORDS.some((x) => normalize(x) === k)) errors.push("keyword belongs to a tool page");
+      }
+      if (faq.length < 4 || faq.length > 6) errors.push(`${faq.length} FAQ questions (need 4–6)`);
+      const links = [...body.matchAll(/(?<!!)\[[^\]]+\]\(([^)\s]+)\)/g)].map((m) => m[1]);
+      const internal = [...new Set(links.filter((l) => l.startsWith("/")))];
+      if (internal.length < 2) errors.push(`${internal.length} internal links in the body (min 2)`);
+      for (const l of internal) {
+        const path = l.split("#")[0].replace(/\/$/, "") || "/";
+        if (!KNOWN_ROUTES.has(path)) errors.push(`broken internal link: ${l}`);
+      }
+      for (const pr of list("projects")) if (!PROJECT_SLUGS.includes(pr)) errors.push(`unknown project "${pr}"`);
+      const unknown = [...new Set(numberValues(`${prose} \n ${frontText}`).filter((n) => !ALLOWED_NUMBERS.has(n)))];
+      if (unknown.length) errors.push(`numbers not found in content/owner/ or the case studies: ${unknown.join(", ")}`);
+      const lower = `${prose} ${frontText}`.toLowerCase();
+      const banned = BANNED.filter((x) => lower.includes(x));
+      if (banned.length) errors.push(`banned phrases: ${banned.map((b) => `"${b}"`).join(", ")}`);
+      if (/\b(bahawalpur|lahore|islamabad|karachi)\b/i.test(lower)) errors.push("names a city (industry pages target clients worldwide)");
+      return { slug, words, faq: faq.length, internal: internal.length, errors };
+    });
+
 const failed = results.filter((r) => r.errors.length);
+const failedSolutions = solutionResults.filter((r) => r.errors.length);
 if (asJson) {
-  console.log(JSON.stringify({ ok: failed.length === 0 && backlogErrors.length === 0, results, backlogErrors }, null, 2));
+  console.log(JSON.stringify({ ok: failed.length === 0 && backlogErrors.length === 0 && failedSolutions.length === 0, results, backlogErrors, solutionResults }, null, 2));
 } else {
   for (const r of results) {
     console.log(`${r.errors.length ? "FAIL" : "PASS"}  ${r.slug}  (${r.words} words, ${r.h2} H2, ${r.internal} internal / ${r.external} outside links, ${r.faq} FAQ)`);
@@ -310,7 +376,11 @@ if (asJson) {
   if (!only.length) {
     console.log(backlogErrors.length ? "FAIL  backlog" : `PASS  backlog (${(backlog.items ?? []).length} topics, keywords unique)`);
     for (const e of backlogErrors) console.log(`      ✗ ${e}`);
+    for (const r of solutionResults) {
+      console.log(`${r.errors.length ? "FAIL" : "PASS"}  solutions/${r.slug}  (${r.words} words, ${r.internal} internal links, ${r.faq} FAQ)`);
+      for (const e of r.errors) console.log(`      ✗ ${e}`);
+    }
   }
   console.log(`\n${results.length - failed.length}/${results.length} posts passed${offline ? " (outside links not requested: --offline)" : ""}.`);
 }
-process.exitCode = failed.length || (!only.length && backlogErrors.length) ? 1 : 0;
+process.exitCode = failed.length || failedSolutions.length || (!only.length && backlogErrors.length) ? 1 : 0;

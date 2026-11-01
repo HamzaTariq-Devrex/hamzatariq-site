@@ -11,7 +11,9 @@ export const PROJECT_TYPES = [
 
 export const BUDGETS = ["Under $500", "$500 to $1,000", "$1,000 to $2,500", "$2,500+", "Not sure yet"] as const;
 
-export const LEAD_SOURCES = ["chatbot", "form", "tool", "page", "seo-audit"] as const;
+export const LEAD_SOURCES = ["chatbot", "form", "tool", "page", "seo-audit", "website-cost-calculator", "chatbot-roi-calculator"] as const;
+/** Free tools whose result is emailed to the visitor (short lead form: name, email, WhatsApp). */
+export const TOOL_SOURCES = ["seo-audit", "website-cost-calculator", "chatbot-roi-calculator"] as const;
 export type LeadSource = (typeof LEAD_SOURCES)[number];
 
 export type LeadInput = {
@@ -27,6 +29,8 @@ export type LeadInput = {
   session: string | null;
   /** SEO audit the visitor asked to receive (source "seo-audit"). */
   auditId: string | null;
+  /** Calculator inputs (website-cost-calculator, chatbot-roi-calculator); the server recomputes the result. */
+  toolInput: unknown;
 };
 
 export const EMAIL_PATTERN = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;

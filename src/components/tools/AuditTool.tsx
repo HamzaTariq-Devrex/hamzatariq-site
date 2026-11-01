@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import LeadForm from "@/components/assistant/LeadForm";
+import { trackEvent, trackToolUsed } from "@/lib/analytics";
 import BookCall from "@/components/site/BookCall";
 import { GROUP_LABELS, scoreBand, type AuditResponse, type Check, type CheckGroup, type CheckStatus } from "@/lib/audit/types";
 
@@ -38,7 +39,7 @@ const CheckItem = ({ check }: { check: Check }) => (
   <li className={`audit-check is-${check.status}`}>
     <span className="audit-pill">{STATUS_LABEL[check.status]}</span>
     <div>
-      <h4>{check.label}</h4>
+      <h3>{check.label}</h3>
       <p>{check.detail}</p>
       {check.fix && (
         <p className="audit-fix">
@@ -73,6 +74,8 @@ const AuditTool = () => {
       const data = (await res.json().catch(() => ({}))) as AuditResponse & { error?: string };
       if (!res.ok) throw new Error(data.error || "Something went wrong. Please try again.");
       setState({ kind: "done", data });
+      trackToolUsed("free-seo-audit");
+      if (!data.cached) trackEvent("audit_run", { score: data.result.score });
     } catch (err) {
       setState({ kind: "error", message: (err as Error).message });
     }
@@ -126,9 +129,9 @@ const AuditTool = () => {
               <ScoreRing score={result.score} />
               <div>
                 <p className="audit-host">{new URL(result.finalUrl).hostname}</p>
-                <h3>
+                <h2>
                   {result.score >= 90 ? "Strong technical SEO." : result.score >= 50 ? "A good base, with things to fix." : "Search engines are struggling with this page."}
-                </h3>
+                </h2>
                 <p>
                   {toFix ? `${toFix} thing${toFix > 1 ? "s" : ""} to fix or improve, most important first.` : "No problems found on this page."}
                   {state.data.cached && " (Checked in the last 24 hours, so this is the saved result.)"}
@@ -141,7 +144,7 @@ const AuditTool = () => {
               if (!checks.length) return null;
               return (
                 <section key={g} className="audit-group">
-                  <h3>{GROUP_LABELS[g]}</h3>
+                  <h2>{GROUP_LABELS[g]}</h2>
                   <ul>
                     {checks.map((c) => (
                       <CheckItem key={c.id} check={c} />
@@ -163,7 +166,7 @@ const AuditTool = () => {
 
             <div className="audit-next">
               <div className="audit-report x-card">
-                <h3>Email me the full report</h3>
+                <h2>Email me the full report</h2>
                 <p>Get every check and fix in your inbox, to keep or send to your developer.</p>
                 {state.data.id ? (
                   <LeadForm source="seo-audit" auditId={state.data.id} compact />
@@ -172,7 +175,7 @@ const AuditTool = () => {
                 )}
               </div>
               <div className="audit-cta x-card">
-                <h3>Want me to fix this?</h3>
+                <h2>Want me to fix this?</h2>
                 <p>
                   SEO audit from <strong>$150</strong>: a full report and a fix plan in priority order, delivered in 2–3 days. I can also do the fixes for you.
                 </p>

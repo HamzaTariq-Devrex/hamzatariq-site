@@ -4,6 +4,17 @@ import { getOwner } from "@/lib/supabase/server";
 import { DAY_MS, SERVICE_GROUPS, SOURCES, SOURCE_LABELS, formatDate, pktDay, pktStartOfToday, serviceLabel, serviceOf } from "@/lib/admin/labels";
 import DailyBars from "@/components/admin/DailyBars";
 import { BarList, Change, EmptyState, PageHead, StatCard, StatusBadge } from "@/components/admin/ui";
+import { TOOLS } from "@/data/tools";
+
+// Site events (src/lib/analytics.ts): written by the server (chat, leads, audits) and by /api/events.
+const EVENTS = [
+  { name: "chat_started", label: "Chats started" },
+  { name: "lead_submitted", label: "Leads submitted" },
+  { name: "tool_used", label: "Tools used" },
+  { name: "audit_run", label: "SEO audits run" },
+  { name: "booking_clicked", label: "Booking clicks" },
+  { name: "cv_downloaded", label: "CV downloads" },
+] as const;
 
 export const metadata: Metadata = { title: "Overview" };
 
@@ -18,12 +29,19 @@ export default async function OverviewPage() {
   const today = pktStartOfToday(now);
   const tomorrow = today + DAY_MS;
 
-  const [{ data: leadRows }, { data: sessionRows }] = await Promise.all([
+  const [{ data: leadRows }, { data: sessionRows }, { data: eventRows }] = await Promise.all([
     supabase.from("leads").select("id, name, project_type, source, status, created_at").order("created_at", { ascending: false }).limit(5000),
     supabase.from("chat_sessions").select("created_at").gte("created_at", new Date(today - 13 * DAY_MS).toISOString()).limit(10000),
+    supabase
+      .from("events")
+      .select("name, data, created_at")
+      .in("name", EVENTS.map((e) => e.name))
+      .gte("created_at", new Date(tomorrow - 60 * DAY_MS).toISOString())
+      .limit(50000),
   ]);
   const leads = leadRows ?? [];
   const sessions = sessionRows ?? [];
+  const events = eventRows ?? [];
 
   // Periods: the last 7 / 30 days (including today) against the 7 / 30 days before them.
   const inDays = (rows: { created_at: string }[], from: number, to: number) => rows.filter((r) => between(r.created_at, from, to)).length;
@@ -43,6 +61,14 @@ export default async function OverviewPage() {
     const day = pktDay(new Date(today - (29 - i) * DAY_MS + DAY_MS / 2));
     return { day, count: perDay.get(day) ?? 0 };
   });
+
+  const eventsIn = (from: number, to: number) => events.filter((e) => between(e.created_at, from, to));
+  const events30 = eventsIn(tomorrow - 30 * DAY_MS, tomorrow);
+  const eventsPrev30 = eventsIn(tomorrow - 60 * DAY_MS, tomorrow - 30 * DAY_MS);
+  const count = (rows: typeof events, name: string) => rows.filter((e) => e.name === name).length;
+  const toolOf = (e: (typeof events)[number]) => (e.data as { tool?: string } | null)?.tool ?? "";
+  const byTool = TOOLS.map((t) => ({ label: t.name, value: events30.filter((e) => e.name === "tool_used" && toolOf(e) === t.slug).length }));
+  const toolTotal = byTool.reduce((s, t) => s + t.value, 0);
 
   const bySource = SOURCES.map((s) => ({ label: SOURCE_LABELS[s], value: leads.filter((l) => l.source === s).length }));
   const byService = SERVICE_GROUPS.map((g) => ({ label: g.label, value: leads.filter((l) => serviceOf(l.project_type) === g.key).length }));
@@ -82,6 +108,28 @@ export default async function OverviewPage() {
           <DailyBars days={days} />
         ) : (
           <EmptyState icon="chart" title="No leads in the last 30 days" text="New leads from the chat and the contact form will show up here day by day." compact />
+        )}
+      </section>
+
+      <section className="adm-card">
+        <div className="adm-card-head">
+          <h2>Site events</h2>
+          <span>Last 30 days vs the 30 before</span>
+        </div>
+        <div className="adm-events">
+          {EVENTS.map((e) => (
+            <div key={e.name} className="adm-event">
+              <span>{e.label}</span>
+              <strong>{count(events30, e.name)}</strong>
+              <Change current={count(events30, e.name)} previous={count(eventsPrev30, e.name)} label="" />
+            </div>
+          ))}
+        </div>
+        {toolTotal > 0 && (
+          <div className="adm-events-tools">
+            <h3>Tools used, by tool</h3>
+            <BarList rows={byTool} total={toolTotal} />
+          </div>
         )}
       </section>
 

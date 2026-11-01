@@ -1,0 +1,371 @@
+/* Calculators (/tools/website-cost-calculator, /tools/chatbot-roi-calculator). Tokens from Premium.css. */
+.calc {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: 18px;
+  width: 100%;
+  max-width: 1100px;
+  margin: 34px auto 0;
+  text-align: left;
+  align-items: start;
+}
+
+.calc .x-card {
+  padding: 24px;
+}
+
+.calc fieldset {
+  margin: 0 0 22px;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.calc fieldset:last-child {
+  margin-bottom: 0;
+}
+
+.calc legend {
+  margin-bottom: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--x-ink);
+}
+
+.calc-types {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.calc-option,
+.calc-chip {
+  position: relative;
+  cursor: pointer;
+  border: 1px solid var(--x-line);
+  background: rgba(255, 255, 255, 0.02);
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.calc-option {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px;
+  border-radius: 14px;
+}
+
+.calc-option strong {
+  font-size: 15px;
+  color: var(--x-ink);
+}
+
+.calc .calc-option span {
+  font-size: 13px;
+  color: var(--x-faint);
+  line-height: 1.45;
+}
+
+.calc-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.calc-chip {
+  padding: 9px 14px;
+  border-radius: 999px;
+  font-size: 14px;
+  color: var(--x-muted);
+}
+
+.calc-option input,
+.calc-chip input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.calc-option:hover,
+.calc-chip:hover {
+  border-color: rgba(45, 212, 191, 0.4);
+}
+
+.calc-option.is-on,
+.calc-chip.is-on {
+  border-color: var(--x-teal);
+  background: rgba(45, 212, 191, 0.08);
+  color: var(--x-ink);
+}
+
+.calc-option:has(input:focus-visible),
+.calc-chip:has(input:focus-visible) {
+  outline: 2px solid var(--x-teal);
+  outline-offset: 2px;
+}
+
+.calc-field {
+  margin-bottom: 18px;
+}
+
+.calc-field:last-child {
+  margin-bottom: 0;
+}
+
+.calc-field label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--x-ink);
+}
+
+.calc .calc-field p {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: var(--x-faint);
+  line-height: 1.45;
+}
+
+.calc-number {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--x-line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  overflow: hidden;
+}
+
+.calc-number:focus-within {
+  border-color: var(--x-teal);
+}
+
+.calc-number input {
+  flex: 1;
+  min-width: 0;
+  padding: 12px 14px;
+  border: 0;
+  background: transparent;
+  color: var(--x-ink);
+  font: inherit;
+  font-size: 17px;
+}
+
+.calc-number input:focus {
+  outline: none;
+}
+
+.calc-number span {
+  padding: 0 14px;
+  font-size: 13px;
+  color: var(--x-faint);
+}
+
+.calc-result {
+  position: sticky;
+  top: 100px;
+  border-color: rgba(45, 212, 191, 0.3) !important;
+}
+
+.calc .calc-big {
+  margin: 10px 0 4px;
+  font-size: clamp(38px, 6vw, 52px);
+  font-weight: 700;
+  line-height: 1.05;
+  color: var(--x-teal-soft);
+}
+
+.calc .calc-big small {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--x-faint);
+}
+
+.calc .calc-time {
+  margin: 0 0 16px;
+  color: var(--x-muted);
+}
+
+.calc .calc-time strong {
+  color: var(--x-ink);
+}
+
+.calc-lines {
+  list-style: none;
+  margin: 0 0 14px;
+  padding: 0;
+  border-top: 1px solid var(--x-line);
+}
+
+.calc-lines li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--x-line);
+  font-size: 15px;
+  color: var(--x-ink);
+}
+
+.calc-lines li span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.calc-lines small {
+  font-size: 12px;
+  color: var(--x-faint);
+}
+
+.calc-lines small a {
+  color: var(--x-teal-soft);
+}
+
+.calc-lines strong {
+  flex: none;
+  white-space: nowrap;
+}
+
+.calc-lines li.is-quoted {
+  color: var(--x-muted);
+}
+
+.calc-lines li.is-quoted strong {
+  font-weight: 500;
+  color: var(--x-faint);
+}
+
+.calc-formula {
+  display: grid;
+  gap: 8px;
+  margin: 0 0 14px;
+  padding: 14px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--x-line);
+}
+
+.calc .calc-formula p {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--x-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.calc-formula code {
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--x-muted);
+  overflow-wrap: anywhere;
+}
+
+.calc-formula b {
+  color: var(--x-teal-soft);
+}
+
+.calc .calc-note {
+  margin: 0 0 16px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--x-faint);
+}
+
+.calc-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.calc-email {
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid var(--x-line);
+}
+
+.calc-email h2 {
+  margin: 0 0 12px;
+  font-size: 17px;
+}
+
+.tool-prose {
+  max-width: 760px;
+  color: var(--x-muted);
+  font-size: 17px;
+  line-height: 1.7;
+}
+
+.tool-prose h3 {
+  margin: 30px 0 10px;
+  color: var(--x-ink);
+  font-size: 20px;
+}
+
+.tool-prose a {
+  color: var(--x-teal-soft);
+}
+
+.tool-prose strong {
+  color: var(--x-ink);
+}
+
+.tool-prose .post-table,
+.tool-prose table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+
+.tool-prose th,
+.tool-prose td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--x-line);
+  text-align: left;
+}
+
+.tool-prose th {
+  color: var(--x-ink);
+}
+
+.tool-table {
+  overflow-x: auto;
+  margin: 16px 0;
+}
+
+@media (max-width: 900px) {
+  .calc {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .calc-result {
+    position: static;
+  }
+}
+
+@media (max-width: 520px) {
+  .calc-types {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .calc .x-card {
+    padding: 18px;
+  }
+}
+
+/* Industry pages (/solutions) */
+.sol-card-title {
+  margin: 0 0 8px;
+  font-size: 20px;
+}
+
+.sol-body {
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.sol-features li > span:last-child {
+  color: var(--x-ink);
+}

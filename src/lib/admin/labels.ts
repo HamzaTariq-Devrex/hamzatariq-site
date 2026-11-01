@@ -4,8 +4,11 @@ export const STATUSES = ["new", "replied", "won", "lost"] as const;
 export type LeadStatus = (typeof STATUSES)[number];
 export const STATUS_LABELS: Record<LeadStatus, string> = { new: "New", replied: "Replied", won: "Won", lost: "Lost" };
 
-export const SOURCES = ["chatbot", "form", "seo-audit", "tool", "page"] as const;
-export const SOURCE_LABELS: Record<string, string> = { chatbot: "Chatbot", form: "Contact form", "seo-audit": "SEO audit", tool: "Tools", page: "Page" };
+export const SOURCES = ["chatbot", "form", "seo-audit", "website-cost-calculator", "chatbot-roi-calculator", "tool", "page"] as const;
+export const SOURCE_LABELS: Record<string, string> = { chatbot: "Chatbot", form: "Contact form", "seo-audit": "SEO audit",
+  "website-cost-calculator": "Cost calculator",
+  "chatbot-roi-calculator": "Chatbot ROI",
+  tool: "Tools", page: "Page" };
 
 export const SERVICE_GROUPS = [
   { key: "websites", label: "Websites" },

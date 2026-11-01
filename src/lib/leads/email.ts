@@ -179,3 +179,25 @@ ${speed.length ? `<p style="margin:22px 0 8px;font-weight:bold;font-size:16px">S
     text,
   });
 };
+
+export type ToolResult = { subject: string; title: string; summary: string; note: string; cta: { label: string; href: string } };
+
+/** Result of a free calculator (website cost, chatbot ROI), sent to the visitor who asked for it. */
+export const sendToolResult = (lead: LeadInput, result: ToolResult) => {
+  const first = lead.name.split(/\s+/)[0];
+  const rows = result.summary.split("\n").map((line) => {
+    const i = line.indexOf(": ");
+    return i > 0 ? [line.slice(0, i), line.slice(i + 2)] : ["", line];
+  });
+  const html = layout(`<p style="margin:0 0 14px">Hi ${escape(first)},</p>
+<p style="margin:0 0 18px">Here is the estimate you asked for.</p>
+<p style="margin:0 0 16px;padding:16px;border-radius:12px;background:#f0fdfa;border:1px solid #99f6e4;font-size:18px;font-weight:bold;color:#0f766e">${escape(result.title)}</p>
+<table style="border-collapse:collapse;width:100%">${rows
+    .map(([k, v]) => `<tr><td style="padding:6px 12px 6px 0;color:#64748b;vertical-align:top">${escape(k)}</td><td style="padding:6px 0">${escape(v)}</td></tr>`)
+    .join("")}</table>
+<p style="margin:18px 0 20px;color:#475569">${escape(result.note)}</p>
+<p style="margin:0 0 24px"><a href="${result.cta.href}" style="display:inline-block;padding:12px 22px;border-radius:999px;background:#2dd4bf;color:#04221f;font-weight:bold;text-decoration:none">${escape(result.cta.label)}</a></p>
+<p style="margin:0">Hamza Tariq<br><span style="color:#64748b">${escape(SITE.jobTitle)} · <a href="${SITE.url}" style="color:#0d9488">hamzatariq.site</a></span></p>`);
+  const text = [`Hi ${first},`, "", result.title, "", result.summary, "", result.note, `${result.cta.label}: ${result.cta.href}`, "", "Hamza Tariq", SITE.url].join("\n");
+  return send({ from: `Hamza Tariq <${FROM}>`, to: lead.email, reply_to: SITE.email, subject: result.subject, html, text });
+};

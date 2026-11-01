@@ -14,11 +14,18 @@ Facts and access only Hamza can provide. Nothing on the site may be invented to 
 - [ ] **(Later) Search Console access for the autopilot:** create a Google Cloud service account, enable the Search Console API, add its email as a Restricted user on the hamzatariq.site property, and put its JSON key in `GSC_SERVICE_ACCOUNT_JSON` (where the autopilot runs). Skipped for now: refills use the AI assistant's top questions; monthly reports run without Search Console data.
 - [ ] **Autopilot schedule:** set up the two scheduled sessions in `docs/AUTOPILOT.md` (post every other day, monthly report on the 1st).
 
+- [ ] **Pages included per package.** Extra pages cost $50 each beyond the package, but how many pages each package (landing page, ecommerce store, ...) includes isn't set, so the calculator says "$50 each beyond the package, confirmed on the call" instead of adding them up.
+
 ## Needed for Phase 8 (analytics)
+
 
 - [ ] Bing Webmaster Tools: verify the site (can import from Search Console).
 
 ## Done
+
+- [x] Vercel Web Analytics enabled (custom events show in Vercel on Pro only; /admin counts them from Supabase).
+- [x] Add-on prices: extra page $50 each, CMS +$150, second language +$250.
+- [x] Industry pages reviewed, including the agency page's white-label promises.
 
 - [x] Location: based in Pakistan, working with clients worldwide (US, UK, EU time zones); no city targeting. Local topics replaced with international/remote ones.
 - [x] Posting pace: one post every 2 days (max 4 per week).

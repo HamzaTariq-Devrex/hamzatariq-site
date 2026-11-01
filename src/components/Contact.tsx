@@ -3,7 +3,8 @@ import "./styles/Contact.css";
 import { SERVICES } from "@/data/services";
 import { SITE } from "@/lib/site";
 import BookCall from "./site/BookCall";
-import { SEO_AUDIT_TOOL } from "@/data/tools";
+import { TOOLS } from "@/data/tools";
+import { SOLUTIONS_LINK } from "@/data/solutions";
 import { EDUCATION, UNIVERSITY } from "@/data/experience";
 
 const Contact = () => {
@@ -45,10 +46,17 @@ const Contact = () => {
                 </li>
               ))}
               <li>
-                <a href={SEO_AUDIT_TOOL.href} data-cursor="disable">
-                  {SEO_AUDIT_TOOL.name}
+                <a href={SOLUTIONS_LINK.href} data-cursor="disable">
+                  {SOLUTIONS_LINK.name}
                 </a>
               </li>
+              {TOOLS.map((t) => (
+                <li key={t.href}>
+                  <a href={t.href} data-cursor="disable">
+                    {t.name}
+                  </a>
+                </li>
+              ))}
             </ul>
           </div>
 

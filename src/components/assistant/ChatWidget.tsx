@@ -7,6 +7,7 @@ import { SITE } from "@/lib/site";
 import LeadForm from "./LeadForm";
 import { OPEN_CHAT_EVENT } from "@/components/site/ds/OpenChat";
 import "../styles/ChatWidget.css";
+import { trackEvent } from "@/lib/analytics";
 
 const BOT_NAME = "Hamza's AI";
 const AVATAR = "/bot-avatar.webp"; // 256px, circle-cropped; source in D:\PROJECTS\ai-assets\hamzatariq-site
@@ -220,7 +221,11 @@ export default function ChatWidget({ startOpen = false }: { startOpen?: boolean 
     const content = text.trim();
     if (!content || sending) return;
     const id = session || crypto.randomUUID();
-    if (!session) setSession(id);
+    if (!session) {
+      setSession(id);
+      // Supabase logs chat_started on the server; this is the Vercel Analytics copy.
+      trackEvent("chat_started");
+    }
     setError("");
     setInput("");
     setFormOpen(false);

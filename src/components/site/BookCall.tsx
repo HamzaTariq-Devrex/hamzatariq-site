@@ -4,6 +4,7 @@
 // loading Calendly's script only on click; without one it goes to /contact.
 import Link from "next/link";
 import { SITE } from "@/lib/site";
+import { trackEvent } from "@/lib/analytics";
 
 type Props = {
   label?: string;
@@ -47,9 +48,13 @@ const loadCalendly = () => {
   return loading;
 };
 
-const BookCall = ({ label = "Book a free call", variant = "primary", className = "", bare = false, plain = false, onClick, icon }: Props) => {
+const BookCall = ({ label = "Book a free call", variant = "primary", className = "", bare = false, plain = false, onClick: onClickProp, icon }: Props) => {
   const cls = bare ? className : `page-btn page-btn-${variant} ${className}`.trim();
   const url = SITE.bookingUrl;
+  const onClick = () => {
+    trackEvent("booking_clicked", { calendly: !!url });
+    onClickProp?.();
+  };
 
   if (url) {
     const open = async (e: React.MouseEvent<HTMLAnchorElement>) => {

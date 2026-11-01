@@ -33,6 +33,13 @@ export type Service = {
 
 export const PRICE_NOTE = "Every project is quoted after a free call. Final price depends on features.";
 
+/** Add-ons on top of a website package (owner confirmed 2026-11-03). Pages included per package: TODO(owner). */
+export const ADD_ONS = {
+  extraPage: { label: "Extra page beyond the package", price: 50, unit: "each" },
+  cms: { label: "Content editing (CMS)", price: 150 },
+  language: { label: "Second language", price: 250 },
+} as const;
+
 /** Terms that apply to every project (owner confirmed 2026-10-26). */
 export const PROJECT_TERMS = [
   { label: "Payment", text: "50% upfront, 50% on delivery" },

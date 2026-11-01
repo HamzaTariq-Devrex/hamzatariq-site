@@ -1,7 +1,8 @@
 "use client";
 
 import { useId, useState } from "react";
-import { BUDGETS, EMAIL_PATTERN, PROJECT_TYPES, isPhone, type LeadSource } from "@/lib/leads/options";
+import { BUDGETS, EMAIL_PATTERN, PROJECT_TYPES, TOOL_SOURCES, isPhone, type LeadSource } from "@/lib/leads/options";
+import { trackEvent } from "@/lib/analytics";
 import "../styles/LeadForm.css";
 
 type Props = {
@@ -13,12 +14,16 @@ type Props = {
   onSent?: () => void;
   /** Short form (name, email, WhatsApp) for the SEO audit report; links the lead to the audit. */
   auditId?: string | null;
+  /** Calculator inputs sent with a tool lead; the server recomputes and emails the result. */
+  toolInput?: unknown;
+  /** Submit button text for tool forms. */
+  submitLabel?: string;
 };
 
 type Status = { state: "idle" | "sending" | "sent" } | { state: "error"; message: string };
 
-const LeadForm = ({ source, session = null, compact = false, onSent, auditId = null }: Props) => {
-  const report = source === "seo-audit";
+const LeadForm = ({ source, session = null, compact = false, onSent, auditId = null, toolInput, submitLabel }: Props) => {
+  const report = (TOOL_SOURCES as readonly string[]).includes(source);
   const id = useId();
   const [status, setStatus] = useState<Status>({ state: "idle" });
 
@@ -45,12 +50,14 @@ const LeadForm = ({ source, session = null, compact = false, onSent, auditId = n
           source,
           session,
           auditId,
+          toolInput,
           page: window.location.pathname,
         }),
       });
       const data = (await res.json().catch(() => ({}))) as { error?: string };
       if (!res.ok) throw new Error(data.error || "Something went wrong. Please try again.");
       setStatus({ state: "sent" });
+      trackEvent("lead_submitted", { source });
       onSent?.();
     } catch (err) {
       setStatus({ state: "error", message: (err as Error).message });
@@ -60,7 +67,7 @@ const LeadForm = ({ source, session = null, compact = false, onSent, auditId = n
   if (status.state === "sent") {
     return (
       <div className={`lead-form lead-form-done${compact ? " is-compact" : ""}`} role="status">
-        <strong>{report ? "Your report is on its way." : "Thanks, your details are on their way."}</strong>
+        <strong>{report ? (source === "seo-audit" ? "Your report is on its way." : "Your estimate is on its way.") : "Thanks, your details are on their way."}</strong>
         <p>
           {report
             ? "Check your inbox in a minute (and the spam folder, just in case). Reply to that email if you have questions."
@@ -124,7 +131,7 @@ const LeadForm = ({ source, session = null, compact = false, onSent, auditId = n
         </p>
       )}
       <button type="submit" className="lead-form-submit" disabled={status.state === "sending"}>
-        {status.state === "sending" ? "Sending…" : report ? "Email me the full report" : "Send to Hamza"}
+        {status.state === "sending" ? "Sending…" : report ? (submitLabel ?? "Email me the full report") : "Send to Hamza"}
       </button>
     </form>
   );

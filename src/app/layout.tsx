@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist } from "next/font/google";
 import { SITE } from "@/lib/site";
 import AssistantLoader from "@/components/assistant/AssistantLoader";
+import { Analytics } from "@vercel/analytics/next";
 import "@/index.css";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-geist", display: "swap" });
@@ -39,6 +40,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         {children}
         <AssistantLoader />
+        <Analytics />
       </body>
     </html>
   );

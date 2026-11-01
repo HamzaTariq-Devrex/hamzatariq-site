@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { SITE } from "@/lib/site";
 import { SERVICES } from "@/data/services";
-import { SEO_AUDIT_TOOL } from "@/data/tools";
+import { TOOLS } from "@/data/tools";
+import { SOLUTIONS_LINK } from "@/data/solutions";
 import BookCall from "./BookCall";
 import SiteHeader from "./SiteHeader";
 import "../styles/Pages.css";
@@ -63,7 +64,15 @@ const SiteShell = ({ children, hideCta = false, cta = DEFAULT_CTA, stickyCta = f
               {s.name}
             </Link>
           ))}
-          <Link href={SEO_AUDIT_TOOL.href}>{SEO_AUDIT_TOOL.name}</Link>
+          <Link href={SOLUTIONS_LINK.href}>{SOLUTIONS_LINK.name}</Link>
+        </div>
+        <div>
+          <p className="page-footer-title">Free tools</p>
+          {TOOLS.map((t) => (
+            <Link key={t.href} href={t.href}>
+              {t.name}
+            </Link>
+          ))}
         </div>
         <div>
           <p className="page-footer-title">Pages</p>

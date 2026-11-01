@@ -9,7 +9,8 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { SITE } from "@/lib/site";
 import { SERVICES } from "@/data/services";
-import { SEO_AUDIT_TOOL } from "@/data/tools";
+import { TOOLS } from "@/data/tools";
+import { SOLUTIONS_LINK } from "@/data/solutions";
 import BookCall from "./BookCall";
 import "../styles/SiteHeader.css";
 
@@ -75,16 +76,29 @@ const SiteHeader = ({ home = false }: Props) => {
             Services
           </NavLink>
           <div className="site-nav-menu">
-            {SERVICES.map((s) => (
-              <NavLink {...link} key={s.slug} href={`/services/${s.slug}`} className={cls(`/services/${s.slug}`)}>
-                <strong>{s.name}</strong>
-                <span>{s.summary}</span>
+            <div className="site-nav-col">
+              <p className="site-nav-heading">Services</p>
+              {SERVICES.map((s) => (
+                <NavLink {...link} key={s.slug} href={`/services/${s.slug}`} className={cls(`/services/${s.slug}`)}>
+                  <strong>{s.name}</strong>
+                  <span>{s.summary}</span>
+                </NavLink>
+              ))}
+            </div>
+            <div className="site-nav-col is-side">
+              <p className="site-nav-heading">By industry</p>
+              <NavLink {...link} href={SOLUTIONS_LINK.href} className={cls(SOLUTIONS_LINK.href)}>
+                <strong>{SOLUTIONS_LINK.name}</strong>
+                <span>{SOLUTIONS_LINK.summary}</span>
               </NavLink>
-            ))}
-            <NavLink {...link} href={SEO_AUDIT_TOOL.href} className={`site-nav-tool ${cls(SEO_AUDIT_TOOL.href)}`}>
-              <strong>{SEO_AUDIT_TOOL.name}</strong>
-              <span>{SEO_AUDIT_TOOL.summary}</span>
-            </NavLink>
+              <p className="site-nav-heading">Free tools</p>
+              {TOOLS.map((t) => (
+                <NavLink {...link} key={t.href} href={t.href} className={cls(t.href)}>
+                  <strong>{t.name}</strong>
+                  <span>{t.summary}</span>
+                </NavLink>
+              ))}
+            </div>
           </div>
         </div>
         {NAV.map((n) => (
@@ -121,9 +135,14 @@ const SiteHeader = ({ home = false }: Props) => {
                 {s.name}
               </NavLink>
             ))}
-            <NavLink {...link} href={SEO_AUDIT_TOOL.href} className={`is-sub ${cls(SEO_AUDIT_TOOL.href)}`}>
-              {SEO_AUDIT_TOOL.name}
+            <NavLink {...link} href={SOLUTIONS_LINK.href} className={`is-sub ${cls(SOLUTIONS_LINK.href)}`}>
+              {SOLUTIONS_LINK.name}
             </NavLink>
+            {TOOLS.map((t) => (
+              <NavLink {...link} key={t.href} href={t.href} className={`is-sub ${cls(t.href)}`}>
+                {t.name}
+              </NavLink>
+            ))}
             {NAV.map((n) => (
               <NavLink {...link} key={n.href} href={n.href} className={cls(n.href)}>
                 {n.label}
