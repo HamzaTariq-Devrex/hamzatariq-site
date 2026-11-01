@@ -5,22 +5,46 @@ import BookCall from "./BookCall";
 import SiteHeader from "./SiteHeader";
 import "../styles/Pages.css";
 import "../styles/Content.css";
+import "../styles/Premium.css";
+import Reveal from "./ds/Reveal";
 
-type Props = { children: React.ReactNode; hideCta?: boolean };
+type Props = {
+  children: React.ReactNode;
+  hideCta?: boolean;
+  /** Heading and line for the closing CTA band. */
+  cta?: { title: React.ReactNode; text?: string };
+  /** Sticky "Book a free call" bar on phones (service pages). */
+  stickyCta?: boolean;
+};
 
-const SiteShell = ({ children, hideCta = false }: Props) => (
+const DEFAULT_CTA = {
+  title: (
+    <>
+      Let&apos;s build something <span>great</span> together.
+    </>
+  ),
+  text: "Tell me what you want to build or fix. You'll get a clear plan and quote after a free call.",
+};
+
+const SiteShell = ({ children, hideCta = false, cta = DEFAULT_CTA, stickyCta = false }: Props) => (
   <div className="page">
     <SiteHeader />
+    <Reveal />
 
     <main className="page-main">{children}</main>
 
+    {stickyCta && (
+      <div className="x-sticky-cta">
+        <BookCall />
+      </div>
+    )}
+
     <footer className="page-footer">
       {!hideCta && (
-        <div className="page-cta">
+        <div className="page-cta" data-reveal>
           <span className="page-eyebrow">Have a project in mind?</span>
-          <h2>
-            Let&apos;s build something <span>great</span> together.
-          </h2>
+          <h2>{cta.title}</h2>
+          {cta.text && <p className="page-cta-text">{cta.text}</p>}
           <div className="page-cta-actions">
             <BookCall />
             <a href={`mailto:${SITE.email}`} className="page-btn page-btn-ghost">

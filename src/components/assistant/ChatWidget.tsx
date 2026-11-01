@@ -5,6 +5,7 @@
 import { useEffect, useRef, useState } from "react";
 import { SITE } from "@/lib/site";
 import LeadForm from "./LeadForm";
+import { OPEN_CHAT_EVENT } from "@/components/site/ds/OpenChat";
 import "../styles/ChatWidget.css";
 
 const BOT_NAME = "Hamza's AI";
@@ -89,8 +90,8 @@ const Linkified = ({ text }: { text: string }) =>
     );
   });
 
-export default function ChatWidget() {
-  const [open, setOpen] = useState(false);
+export default function ChatWidget({ startOpen = false }: { startOpen?: boolean }) {
+  const [open, setOpen] = useState(startOpen);
   // Real conversation only; the greeting is rendered separately.
   const [messages, setMessages] = useState<Message[]>([]);
   const [session, setSession] = useState("");
@@ -110,6 +111,13 @@ export default function ChatWidget() {
   useEffect(() => {
     if (open && window.matchMedia("(pointer: fine)").matches) inputRef.current?.focus();
   }, [open]);
+
+  // Buttons elsewhere on the site ("Ask the AI assistant") open the chat.
+  useEffect(() => {
+    const openChat = () => setOpen(true);
+    window.addEventListener(OPEN_CHAT_EVENT, openChat);
+    return () => window.removeEventListener(OPEN_CHAT_EVENT, openChat);
+  }, []);
 
   // Full-screen chat on phones: stop the page behind it from scrolling.
   useEffect(() => {
@@ -474,9 +482,7 @@ export default function ChatWidget() {
             <img src={AVATAR} alt="" width={56} height={56} />
             <span className="ai-chat-online" aria-hidden="true" />
             {!openedThisVisit && (
-              <span className="ai-chat-badge" aria-hidden="true">
-                1
-              </span>
+              <span className="ai-chat-badge" aria-hidden="true" />
             )}
           </>
         )}

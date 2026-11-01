@@ -55,6 +55,10 @@
   border: 2px solid #0a0e17;
 }
 
+.ai-chat-badge::after {
+  content: "1";
+}
+
 .ai-chat-badge {
   position: absolute;
   top: -4px;

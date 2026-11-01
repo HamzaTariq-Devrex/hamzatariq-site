@@ -51,6 +51,9 @@ Portfolio and inbound lead site for Hamza Tariq (freelance developer: React/Next
 
 ## Design conventions
 
+- **Design system** (About, /services and service pages; reuse it for new pages): `src/components/site/ds/` (`Section` label→heading→lead rhythm, `Icon`, `CountUp`, `Reveal` scroll fade-in via `data-reveal`, `Mockups` laptop/phone/browser frames around real screenshots, `HeroVisual` per service, `Faq` accordion, `OpenChat` opens the AI assistant) with styles in `src/components/styles/Premium.css` (`x-` classes). Real screenshots and real numbers only; hidden elements must not widen the page at 390px.
+- `BookCall` is the only "Book a free call" button: Calendly popup when `CALENDLY_URL` is set, otherwise `/contact`. `SiteShell` takes `cta` (closing band text) and `stickyCta` (mobile bar on service pages).
+
 - Dark theme: background `#0a0e17`, accent teal `#2dd4bf` / `#5eead4`, text `#f1f5f9`, muted text `rgba(226, 232, 240, 0.6)`, font Geist.
 - Components: glass cards (`rgba(255,255,255,0.025)` background, `1px rgba(255,255,255,0.08)` border, 18–20px radius), pill buttons (teal primary, ghost secondary), small uppercase eyebrow labels with a 36px teal line.
 - Easing: `cubic-bezier(0.22, 1, 0.36, 1)`. Respect `prefers-reduced-motion`.

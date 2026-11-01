@@ -12,15 +12,18 @@ export const SITE = {
   },
   positioning:
     "I build custom-coded Next.js websites, dashboards and AI chatbots, and fix React sites that don't rank on Google, so your site loads fast, ranks and turns visitors into customers.",
-  bio: "I'm Hamza Tariq, a full-stack developer specializing in React and Next.js. At Devrex Digital I've helped build websites and web apps for 45+ brands, from landing pages and ecommerce stores to admin dashboards and AI chatbots. I write everything in custom code, with no templates, so every site is fast, secure, SEO-ready and built around the business it serves.",
+  /** Short line under the name (About hero, author box). */
+  role: "Founder of Devrex Digital · React & Next.js developer",
+  bio: "I'm Hamza Tariq, founder of Devrex Digital and a full-stack developer specializing in React and Next.js. With my team I've delivered websites and web apps for 45+ brands, from landing pages and ecommerce stores to admin dashboards and AI chatbots. I write everything in custom code, with no templates, so every site is fast, secure, SEO-ready and built around the business it serves.",
   agency: { name: "Devrex Digital", url: "https://www.devrexdigital.site" },
   social: {
     github: "https://github.com/HamzaTariq-Devrex",
     whatsapp: "https://wa.me/923054122637",
     instagram: "https://www.instagram.com/hamzatariq.dev/",
   },
-  // TODO(owner): Cal.com booking link. Until set, booking CTAs fall back to /contact (email + WhatsApp).
-  bookingUrl: null as string | null,
+  // Calendly link from the CALENDLY_URL env var (see next.config.ts). TODO(owner) until it is set:
+  // every "Book a free call" button goes to /contact (form, email, WhatsApp) instead.
+  bookingUrl: (process.env.NEXT_PUBLIC_CALENDLY_URL || null) as string | null,
   // TODO(owner): new CV PDF. The /hire download stays hidden until this is set.
   cvUrl: null as string | null,
 } as const;

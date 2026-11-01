@@ -9,6 +9,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { SITE } from "@/lib/site";
 import { SERVICES } from "@/data/services";
+import BookCall from "./BookCall";
 import "../styles/SiteHeader.css";
 
 const NAV = [
@@ -58,15 +59,7 @@ const SiteHeader = ({ home = false }: Props) => {
 
   const link = { home, pathname, onNavigate: () => setOpen(false) };
   const cls = (href: string) => (isActive(pathname, href) ? "is-active" : "");
-  const book = SITE.bookingUrl ? (
-    <a href={SITE.bookingUrl} target="_blank" rel="noreferrer" className="site-cta" data-cursor="disable">
-      Book a free call
-    </a>
-  ) : (
-    <NavLink {...link} href="/contact" className="site-cta">
-      Book a free call
-    </NavLink>
-  );
+  const book = <BookCall bare plain={home} className="site-cta" onClick={() => setOpen(false)} />;
 
   return (
     <header className={`site-header${home ? " is-home" : ""}`}>

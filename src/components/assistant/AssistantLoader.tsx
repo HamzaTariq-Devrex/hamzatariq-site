@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { OPEN_CHAT_EVENT } from "@/components/site/ds/OpenChat";
 
 const ChatWidget = dynamic(() => import("./ChatWidget"), { ssr: false });
 
@@ -10,6 +11,17 @@ const ChatWidget = dynamic(() => import("./ChatWidget"), { ssr: false });
 const AssistantLoader = () => {
   const pathname = usePathname();
   const [ready, setReady] = useState(false);
+  const [openNow, setOpenNow] = useState(false);
+
+  // A "talk to the assistant" button before the widget has loaded: load it now, already open.
+  useEffect(() => {
+    const open = () => {
+      setOpenNow(true);
+      setReady(true);
+    };
+    window.addEventListener(OPEN_CHAT_EVENT, open);
+    return () => window.removeEventListener(OPEN_CHAT_EVENT, open);
+  }, []);
 
   useEffect(() => {
     const start = () => setReady(true);
@@ -22,7 +34,7 @@ const AssistantLoader = () => {
   }, []);
 
   if (!ready || pathname.startsWith("/admin")) return null;
-  return <ChatWidget />;
+  return <ChatWidget startOpen={openNow} />;
 };
 
 export default AssistantLoader;

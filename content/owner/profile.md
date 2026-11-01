@@ -8,7 +8,7 @@ I build custom-coded Next.js websites, dashboards and AI chatbots, and fix React
 
 ## Short bio
 
-I'm Hamza Tariq, a full-stack developer specializing in React and Next.js. At Devrex Digital I've helped build websites and web apps for 45+ brands, from landing pages and ecommerce stores to admin dashboards and AI chatbots. I write everything in custom code, with no templates, so every site is fast, secure, SEO-ready and built around the business it serves.
+I'm Hamza Tariq, founder of Devrex Digital and a full-stack developer specializing in React and Next.js. With my team I've delivered websites and web apps for 45+ brands, from landing pages and ecommerce stores to admin dashboards and AI chatbots. I write everything in custom code, with no templates, so every site is fast, secure, SEO-ready and built around the business it serves.
 
 ## Facts
 
@@ -20,7 +20,7 @@ I'm Hamza Tariq, a full-stack developer specializing in React and Next.js. At De
 - GitHub: https://github.com/HamzaTariq-Devrex (main profile link). No LinkedIn.
 - Photo: `public/images/hamza-tariq-2026.webp`.
 - Availability: available for new projects. TODO(owner): open to full-time or contract roles?
-- Booking link: TODO(owner) (Cal.com).
+- Booking link: TODO(owner) (Calendly; set CALENDLY_URL).
 - CV: TODO(owner) (new PDF).
 
 ## Services and pricing (USD, "starting from")

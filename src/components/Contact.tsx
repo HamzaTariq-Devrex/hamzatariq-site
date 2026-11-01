@@ -2,6 +2,7 @@ import { MdArrowOutward, MdCopyright } from "react-icons/md";
 import "./styles/Contact.css";
 import { SERVICES } from "@/data/services";
 import { SITE } from "@/lib/site";
+import BookCall from "./site/BookCall";
 
 const Contact = () => {
   return (
@@ -9,10 +10,7 @@ const Contact = () => {
       <div className="contact-container">
         <div className="contact-top">
           <h3>Contact</h3>
-          <a href={SITE.bookingUrl ?? "/contact"} className="contact-book-btn" data-cursor="disable">
-            Book a free call
-            <MdArrowOutward />
-          </a>
+          <BookCall bare plain className="contact-book-btn" icon={<MdArrowOutward />} />
         </div>
 
         <div className="contact-flex">

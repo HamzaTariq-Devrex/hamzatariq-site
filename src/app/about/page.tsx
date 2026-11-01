@@ -1,10 +1,18 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { SiReact, SiNextdotjs, SiTypescript, SiTailwindcss, SiSupabase, SiNodedotjs, SiGooglegemini, SiVercel } from "react-icons/si";
 import SiteShell from "@/components/site/SiteShell";
 import BookCall from "@/components/site/BookCall";
-import { SERVICES, formatPrice } from "@/data/services";
+import OwnerTodo from "@/components/site/OwnerTodo";
+import Section from "@/components/site/ds/Section";
+import CountUp from "@/components/site/ds/CountUp";
+import Icon, { type IconName } from "@/components/site/ds/Icon";
+import { Laptop, Phone } from "@/components/site/ds/Mockups";
+import { PROCESS, SERVICES, formatPrice } from "@/data/services";
 import { EDUCATION, JOBS } from "@/data/experience";
+import { IMAGE_BASE, PROJECTS } from "@/data/projects";
+import { getCaseStudy } from "@/data/caseStudies";
 import { SITE } from "@/lib/site";
 import { jsonLd } from "@/lib/seo";
 
@@ -33,69 +41,239 @@ const structuredData = {
   ],
 };
 
+const caseStudy = getCaseStudy("hamzatariq-site")!;
+const seoAfter = Number(caseStudy.results.find((r) => r.label === "Mobile SEO score (home)")!.after);
+
+const STATS = [
+  { value: 45, suffix: "+", label: "Brands served", note: `With my team at ${SITE.agency.name}` },
+  { value: PROJECTS.length, suffix: "", label: "Projects in my portfolio", note: "Browse them on the work page" },
+  { value: SERVICES.length, suffix: "", label: "Services", note: "Websites, dashboards, AI chatbots, SEO" },
+  { value: seoAfter, suffix: "", label: "Mobile SEO score", note: "This site, Lighthouse, after the Next.js move" },
+];
+
+const [devrex, ruya] = [JOBS.find((j) => j.company === "Devrex Digital")!, JOBS.find((j) => j.company === "Ruya Solutions")!];
+
+// My story, oldest first. Logos are placeholders (initials) until the owner sends real ones.
+const STORY = [
+  {
+    when: null,
+    badge: "AI",
+    title: EDUCATION,
+    place: "Education",
+    text: "Where I started: a degree in artificial intelligence, the background behind the AI chatbots I build today.",
+    todo: "Add the university and years for the BSc in Artificial Intelligence.",
+  },
+  { when: ruya.period, badge: "RS", title: ruya.role, place: ruya.company, text: ruya.body, todo: null },
+  { when: devrex.period, badge: "DD", title: devrex.role, place: devrex.company, text: devrex.body, todo: null },
+  {
+    when: "Now",
+    badge: "HT",
+    title: "Working directly with businesses",
+    place: "hamzatariq.site",
+    text: "Alongside Devrex Digital, I now work directly with business owners on Next.js websites, dashboards, AI chatbots and React SEO.",
+    todo: null,
+  },
+];
+
+const STACK = [
+  { name: "React", Icon: SiReact, use: "Interfaces for every site and app" },
+  { name: "Next.js", Icon: SiNextdotjs, use: "Fast, pre-rendered pages Google can read" },
+  { name: "TypeScript", Icon: SiTypescript, use: "Safer code that's easier to change" },
+  { name: "Tailwind CSS", Icon: SiTailwindcss, use: "Custom designs without template limits" },
+  { name: "Supabase", Icon: SiSupabase, use: "Databases, logins and storage for dashboards" },
+  { name: "Node.js", Icon: SiNodedotjs, use: "APIs and server logic" },
+  { name: "Gemini / AI", Icon: SiGooglegemini, use: "AI chatbots that answer from your content" },
+  { name: "Vercel", Icon: SiVercel, use: "Hosting with fast global delivery" },
+];
+
+const VALUES: { title: string; text: string; icon: IconName }[] = [
+  { title: "Custom code, no templates", text: "Every site is designed and built around your business, not around what a theme allows.", icon: "code" },
+  { title: "Built for speed", text: "Pre-rendered pages and optimised images, so your site loads fast on the phones your customers use.", icon: "speed" },
+  { title: "SEO built in", text: "Titles, descriptions, sitemap and structured data from day one, the same setup this site uses.", icon: "search" },
+  { title: "Direct communication", text: "You talk to me, the person building your project, from the first call to launch and after.", icon: "chat" },
+];
+
+const nagina = PROJECTS.find((p) => p.slug === "nagina-jewels")!;
+const dulhahouse = PROJECTS.find((p) => p.slug === "dulhahouse")!;
+const WORK = [
+  {
+    href: `/work/${caseStudy.slug}`,
+    title: caseStudy.title,
+    label: caseStudy.label,
+    text: caseStudy.headline,
+    desktop: { src: "/images/work/hamzatariq-site-home.webp", width: 1440, height: 900 },
+    mobile: { src: "/images/work/hamzatariq-site-mobile.webp", width: 390, height: 844 },
+    cta: "Read the case study",
+  },
+  {
+    href: `/work/${dulhahouse.slug}`,
+    title: dulhahouse.title,
+    label: `${dulhahouse.label} · Built at ${SITE.agency.name}`,
+    text: dulhahouse.description,
+    desktop: { src: `${IMAGE_BASE}v2/dulhahouse.webp`, width: 1440, height: 1299 },
+    mobile: { src: `${IMAGE_BASE}v2/dulhahouse-mobile.webp`, width: 780, height: 2118 },
+    cta: "See the project",
+  },
+  {
+    href: `/work/${nagina.slug}`,
+    title: nagina.title,
+    label: `${nagina.label} · Built at ${SITE.agency.name}`,
+    text: nagina.description,
+    desktop: { src: `${IMAGE_BASE}v2/nagina.webp`, width: 1440, height: 1177 },
+    mobile: { src: `${IMAGE_BASE}v2/nagina-mobile.webp`, width: 780, height: 2302 },
+    cta: "See the project",
+  },
+];
+
 export default function AboutPage() {
   return (
-    <SiteShell>
+    <SiteShell
+      cta={{
+        title: (
+          <>
+            Let&apos;s build something that brings you <span>customers</span>.
+          </>
+        ),
+        text: "Tell me about your business and what you need. You'll get a clear plan and quote after a free call.",
+      }}
+    >
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(structuredData)} />
-      <section className="about-hero">
-        <div className="about-hero-text">
-          <span className="page-eyebrow">About</span>
-          <h1>
+
+      <section className="x-hero x-about-hero">
+        <div className="x-hero-text">
+          <span className="x-badge">
+            <i aria-hidden="true" /> Available for new projects
+          </span>
+          <h1 className="x-h1">
             Hi, I&apos;m <span>Hamza Tariq</span>
           </h1>
-          <p className="about-positioning">{SITE.positioning}</p>
-          <p>{SITE.bio}</p>
-          <div className="project-actions">
+          <p className="x-role">{SITE.role}</p>
+          <p className="x-hero-lead">{SITE.positioning}</p>
+          <p className="x-hero-sub">{SITE.bio}</p>
+          <div className="x-actions">
             <BookCall />
             <Link href="/work" className="page-btn page-btn-ghost">
               See my work
             </Link>
           </div>
         </div>
-        <Image
-          src={SITE.photo.src}
-          alt={SITE.photo.alt}
-          width={SITE.photo.width}
-          height={SITE.photo.height}
-          sizes="(max-width: 1000px) 80vw, 420px"
-          className="about-photo"
-          priority
-        />
-      </section>
-
-      <section className="svc-section">
-        <h2>What I do</h2>
-        <div className="svc-others is-four">
-          {SERVICES.map((s) => (
-            <Link key={s.slug} href={`/services/${s.slug}`} className="svc-card svc-link">
-              <h3>{s.name}</h3>
-              <p>{s.summary}</p>
-              <span>From {formatPrice(s.pricing[0])} →</span>
-            </Link>
-          ))}
+        <div className="x-portrait">
+          <Image
+            src={SITE.photo.src}
+            alt={SITE.photo.alt}
+            width={SITE.photo.width}
+            height={SITE.photo.height}
+            sizes="(max-width: 960px) 72vw, 420px"
+            priority
+          />
         </div>
       </section>
 
-      <section className="svc-section">
-        <h2>Experience</h2>
-        <ol className="about-timeline">
-          {JOBS.map((job) => (
-            <li key={job.company}>
-              <span className="about-timeline-period">{job.period}</span>
-              <div>
-                <h3>{job.role}</h3>
-                <p className="about-timeline-company">{job.company}</p>
-                <p>{job.body}</p>
+      <section className="x-stats" aria-label="In numbers">
+        {STATS.map((s) => (
+          <div key={s.label} className="x-stat" data-reveal>
+            <strong>
+              <CountUp value={s.value} suffix={s.suffix} />
+            </strong>
+            <span>{s.label}</span>
+            <small>{s.note}</small>
+          </div>
+        ))}
+      </section>
+
+      <Section label="My story" title="From frontend developer to agency founder" text="How I got here, in four steps.">
+        <ol className="x-timeline">
+          {STORY.map((s) => (
+            <li key={s.title} data-reveal>
+              <span className="x-timeline-logo" aria-hidden="true">
+                {s.badge}
+              </span>
+              <div className="x-timeline-card">
+                <span className="x-timeline-when">{s.when ?? s.place}</span>
+                <h3>{s.title}</h3>
+                {s.when && <p className="x-timeline-place">{s.place}</p>}
+                <p>{s.text}</p>
+                {s.todo && <OwnerTodo what={s.todo} />}
               </div>
             </li>
           ))}
         </ol>
-      </section>
+        <OwnerTodo what="Send the Ruya Solutions and Devrex Digital logos to replace the initials in this timeline." />
+      </Section>
 
-      <section className="svc-section svc-split">
-        <h2>Education</h2>
-        <p className="about-plain">{EDUCATION}</p>
-      </section>
+      <Section label="How I work" title="A simple process, from first call to launch" center>
+        <ol className="x-steps">
+          {PROCESS.map((p, i) => (
+            <li key={p.title} data-reveal style={{ transitionDelay: `${i * 80}ms` }}>
+              <span className="x-step-icon">
+                <Icon name={p.icon} />
+              </span>
+              <span className="x-step-num">0{i + 1}</span>
+              <h3>{p.title}</h3>
+              <p>{p.text}</p>
+            </li>
+          ))}
+        </ol>
+      </Section>
+
+      <Section label="Tech stack" title="The tools I build with" text="Modern, proven tools, chosen for speed, SEO and easy changes later.">
+        <ul className="x-stack">
+          {STACK.map(({ name, Icon: Logo, use }) => (
+            <li key={name} tabIndex={0} data-reveal aria-label={`${name}: ${use}`}>
+              <Logo aria-hidden="true" />
+              <span>{name}</span>
+              <span className="x-tip" role="tooltip">
+                {use}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </Section>
+
+      <Section label="Why work with me" title="What you can count on">
+        <div className="x-grid-4">
+          {VALUES.map((v) => (
+            <div key={v.title} className="x-card" data-reveal>
+              <span className="x-card-icon">
+                <Icon name={v.icon} />
+              </span>
+              <h3>{v.title}</h3>
+              <p>{v.text}</p>
+            </div>
+          ))}
+        </div>
+        <div className="x-service-links" data-reveal>
+          {SERVICES.map((s) => (
+            <Link key={s.slug} href={`/services/${s.slug}`}>
+              <Icon name={s.icon} size={18} />
+              {s.name}
+              <small>from {formatPrice(s.pricing[0])}</small>
+            </Link>
+          ))}
+        </div>
+      </Section>
+
+      <Section label="Selected work" title="Recent projects" text="A case study of my own site and two stores built at Devrex Digital.">
+        <div className="x-work">
+          {WORK.map((w, i) => (
+            <Link key={w.href} href={w.href} className="x-work-item" data-reveal>
+              <div className="x-work-visual">
+                <Laptop src={w.desktop.src} alt={`${w.title}, desktop`} width={w.desktop.width} height={w.desktop.height} sizes="(max-width: 760px) 86vw, 380px" />
+                <div className="x-work-phone">
+                  <Phone src={w.mobile.src} alt={`${w.title}, mobile`} width={w.mobile.width} height={w.mobile.height} sizes="110px" />
+                </div>
+              </div>
+              <span className="x-work-label">{w.label}</span>
+              <h3>{w.title}</h3>
+              <p>{w.text}</p>
+              <span className="x-link">
+                {w.cta} <Icon name="arrow" size={16} />
+              </span>
+              {i === 0 && <span className="x-ribbon">Case study</span>}
+            </Link>
+          ))}
+        </div>
+      </Section>
     </SiteShell>
   );
 }

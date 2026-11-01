@@ -5,10 +5,13 @@ import SiteShell from "@/components/site/SiteShell";
 import BookCall from "@/components/site/BookCall";
 import AuthorBox from "@/components/site/AuthorBox";
 import OwnerTodo from "@/components/site/OwnerTodo";
-import ProjectCard from "@/components/ProjectCard";
-import CaseStudyCard from "@/components/site/CaseStudyCard";
+import Section from "@/components/site/ds/Section";
+import Faq from "@/components/site/ds/Faq";
+import Icon, { type IconName } from "@/components/site/ds/Icon";
+import HeroVisual from "@/components/site/ds/HeroVisual";
+import { Laptop, Phone } from "@/components/site/ds/Mockups";
 import { SERVICES, PRICE_NOTE, PROJECT_TERMS, formatPrice, getService } from "@/data/services";
-import { PROJECTS } from "@/data/projects";
+import { IMAGE_BASE, PROJECTS } from "@/data/projects";
 import { CASE_STUDIES } from "@/data/caseStudies";
 import { SITE, isProductionSite } from "@/lib/site";
 import { fitDescription, jsonLd } from "@/lib/seo";
@@ -42,11 +45,22 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   };
 }
 
-const Check = () => (
-  <svg viewBox="0 0 24 24" aria-hidden="true">
-    <path d="m5 12.5 4.5 4.5L19 7.5" />
-  </svg>
-);
+const STEP_ICONS: IconName[] = ["call", "plan", "code", "rocket"];
+const TERM_ICONS: IconName[] = ["tag", "repeat", "shield"];
+
+// Bento of features in 3 columns: widen the first (and last) card only when that fills the last row.
+const isWideFeature = (i: number, count: number) =>
+  (count % 3 === 2 && i === 0) || (count % 3 === 1 && (i === 0 || i === count - 1));
+
+type WorkItem = {
+  href: string;
+  title: string;
+  label: string;
+  text: string;
+  desktop: { src: string; width: number; height: number };
+  mobile: { src: string; width: number; height: number } | null;
+  cta: string;
+};
 
 export default async function ServicePage({ params }: Params) {
   const { slug } = await params;
@@ -62,6 +76,28 @@ export default async function ServicePage({ params }: Params) {
     .filter((c) => c !== undefined);
   const hasRelated = projects.length + caseStudies.length > 0;
   const proof = caseStudies[0];
+
+  // Real screenshots: case study images, and the desktop/mobile shots from the portfolio.
+  const work: WorkItem[] = [
+    ...caseStudies.map((c) => ({
+      href: `/work/${c.slug}`,
+      title: c.title,
+      label: c.label,
+      text: c.headline,
+      desktop: c.images[0],
+      mobile: c.images.find((i) => i.mobile) ?? null,
+      cta: "Read the case study",
+    })),
+    ...projects.map((p) => ({
+      href: `/work/${p.slug}`,
+      title: p.title,
+      label: `${p.label} · Built at ${SITE.agency.name}`,
+      text: p.description,
+      desktop: { src: `${IMAGE_BASE}${p.image}`, width: 1440, height: 1200 },
+      mobile: p.mobileImage ? { src: `${IMAGE_BASE}${p.mobileImage}`, width: 780, height: 2100 } : null,
+      cta: "See the project",
+    })),
+  ];
 
   const structuredData = {
     "@context": "https://schema.org",
@@ -110,7 +146,17 @@ export default async function ServicePage({ params }: Params) {
   };
 
   return (
-    <SiteShell>
+    <SiteShell
+      stickyCta
+      cta={{
+        title: (
+          <>
+            Ready to start your <span>{service.name}</span> project?
+          </>
+        ),
+        text: "Book a free call. You'll get a clear quote, a delivery date and the payment terms up front.",
+      }}
+    >
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(structuredData)} />
       <nav className="project-crumbs" aria-label="Breadcrumb">
         <Link href="/services">Services</Link>
@@ -118,151 +164,164 @@ export default async function ServicePage({ params }: Params) {
         <span aria-current="page">{service.name}</span>
       </nav>
 
-      <section className="svc-hero">
-        <span className="page-eyebrow">{service.eyebrow}</span>
-        <h1>
-          {service.h1} <span>{service.h1Accent}</span>
-        </h1>
-        <p>{service.lead}</p>
-        <div className="project-actions">
-          <BookCall />
-          <a href="#pricing" className="page-btn page-btn-ghost">
-            See pricing
-          </a>
+      <section className="x-hero x-svc-hero">
+        <div className="x-hero-text">
+          <span className="x-label">{service.eyebrow}</span>
+          <h1 className="x-h1">
+            {service.h1} <span>{service.h1Accent}</span>
+          </h1>
+          <p className="x-hero-lead">{service.lead}</p>
+          <div className="x-actions">
+            <BookCall />
+            <a href="#pricing" className="page-btn page-btn-ghost">
+              See pricing
+            </a>
+          </div>
+          <p className="x-trust">
+            <Icon name="shield" size={16} /> Built at {SITE.agency.name} for 45+ brands · Custom code, no templates
+          </p>
         </div>
-        <p className="svc-trust">Built at {SITE.agency.name} for 45+ brands · Custom code, no templates</p>
+        <HeroVisual slug={service.slug} />
       </section>
 
       {proof && (
-        <section className="svc-proof" aria-label={`Results from ${proof.title}`}>
+        <section className="x-proof" aria-label={`Results from ${proof.title}`} data-reveal>
           {proof.results.slice(0, 2).map((r) => (
             <div key={r.label}>
-              <span className="svc-proof-value">
+              <strong>
                 {r.before} <em>→</em> {r.after}
-              </span>
-              <span className="svc-proof-label">{r.label}</span>
+              </strong>
+              <span>{r.label}</span>
             </div>
           ))}
-          <Link href={`/work/${proof.slug}`} className="svc-proof-link">
-            Read the {proof.title} case study →
+          <Link href={`/work/${proof.slug}`} className="x-link">
+            Read the {proof.title} case study <Icon name="arrow" size={16} />
           </Link>
         </section>
       )}
 
-      <section className="svc-section">
-        <h2>Problems I solve</h2>
-        <div className="svc-problems">
+      <Section label="The problem" title="Problems I solve">
+        <div className="x-grid-4">
           {service.problems.map((p) => (
-            <div key={p.title} className="svc-card">
+            <div key={p.title} className="x-card" data-reveal>
+              <span className="x-card-icon">
+                <Icon name={p.icon} />
+              </span>
               <h3>{p.title}</h3>
               <p>{p.text}</p>
             </div>
           ))}
         </div>
-      </section>
+      </Section>
 
-      <section className="svc-section">
-        <h2>How it works</h2>
-        <ol className="svc-process">
+      <Section label="What you get" title="Everything included">
+        <ul className="x-features">
+          {service.features.map((f, i) => (
+            <li key={f} className={`x-card${isWideFeature(i, service.features.length) ? " is-wide" : ""}`} data-reveal>
+              <span className="x-card-icon is-sm">
+                <Icon name="check" size={18} />
+              </span>
+              {f}
+            </li>
+          ))}
+        </ul>
+      </Section>
+
+      <Section id="pricing" label="Pricing" title="Clear starting prices" text={PRICE_NOTE}>
+        <div className={`x-pricing is-${service.pricing.length}`}>
+          {service.pricing.map((tier) => (
+            <div key={tier.name} className={`x-price-card${tier.popular ? " is-popular" : ""}`} data-reveal>
+              {tier.popular && <span className="x-popular">Most popular</span>}
+              <h3>{tier.name}</h3>
+              {tier.detail && <p className="x-price-detail">{tier.detail}</p>}
+              <p className="x-price-value">
+                <small>From</small>
+                {formatPrice(tier)}
+              </p>
+              <p className="x-price-time">
+                <Icon name="rocket" size={15} />
+                {tier.timeline ? `Delivery: ${tier.timeline}` : "Timeline agreed on the call"}
+              </p>
+              <BookCall label="Get a quote" variant={tier.popular ? "primary" : "ghost"} className="x-price-cta" />
+            </div>
+          ))}
+        </div>
+        <ul className="x-terms" data-reveal>
+          {PROJECT_TERMS.map((t, i) => (
+            <li key={t.label}>
+              <span className="x-card-icon is-sm">
+                <Icon name={TERM_ICONS[i] ?? "check"} size={18} />
+              </span>
+              <div>
+                <strong>{t.label}</strong>
+                <p>{t.text}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </Section>
+
+      <Section label="Process" title="How it works">
+        <ol className="x-steps">
           {service.process.map((step, i) => (
-            <li key={step.title}>
-              <span className="svc-step">0{i + 1}</span>
+            <li key={step.title} data-reveal style={{ transitionDelay: `${i * 80}ms` }}>
+              <span className="x-step-icon">
+                <Icon name={STEP_ICONS[i] ?? "check"} />
+              </span>
+              <span className="x-step-num">0{i + 1}</span>
               <h3>{step.title}</h3>
               <p>{step.text}</p>
             </li>
           ))}
         </ol>
-      </section>
-
-      <section className="svc-section svc-split">
-        <h2>What you get</h2>
-        <ul className="svc-features">
-          {service.features.map((f) => (
-            <li key={f}>
-              <Check />
-              {f}
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      <section className="svc-section" id="pricing">
-        <h2>Pricing</h2>
-        <div className="svc-pricing">
-          {service.pricing.map((tier) => (
-            <div key={tier.name} className="svc-price">
-              <div>
-                <h3>{tier.name}</h3>
-                {tier.detail && <p>{tier.detail}</p>}
-                {tier.timeline && <p className="svc-price-time">Delivery: {tier.timeline}</p>}
-              </div>
-              <div className="svc-price-value">
-                <span>Starting from</span>
-                <strong>{formatPrice(tier)}</strong>
-              </div>
-            </div>
-          ))}
-        </div>
-        <p className="svc-note">{PRICE_NOTE}</p>
-        <dl className="svc-terms">
-          {PROJECT_TERMS.map((t) => (
-            <div key={t.label}>
-              <dt>{t.label}</dt>
-              <dd>{t.text}</dd>
-            </div>
-          ))}
-        </dl>
-        <div className="project-actions">
-          <BookCall label="Get a quote on a free call" />
-        </div>
-      </section>
+      </Section>
 
       {(hasRelated || !isProductionSite) && (
-        <section className="svc-section">
-          <h2>Related work</h2>
+        <Section label="Related work" title="Projects like this">
           {hasRelated ? (
-            <div className="project-grid is-static">
-              {caseStudies.map((c) => (
-                <CaseStudyCard key={c.slug} study={c} />
-              ))}
-              {projects.map((p, i) => (
-                <ProjectCard key={p.slug} project={p} index={i} />
+            <div className="x-work">
+              {work.map((w) => (
+                <Link key={w.href} href={w.href} className="x-work-item" data-reveal>
+                  <div className="x-work-visual">
+                    <Laptop src={w.desktop.src} alt={`${w.title}, desktop`} width={w.desktop.width} height={w.desktop.height} sizes="(max-width: 760px) 86vw, 380px" />
+                    {w.mobile && (
+                      <div className="x-work-phone">
+                        <Phone src={w.mobile.src} alt={`${w.title}, mobile`} width={w.mobile.width} height={w.mobile.height} sizes="110px" />
+                      </div>
+                    )}
+                  </div>
+                  <span className="x-work-label">{w.label}</span>
+                  <h3>{w.title}</h3>
+                  <p>{w.text}</p>
+                  <span className="x-link">
+                    {w.cta} <Icon name="arrow" size={16} />
+                  </span>
+                </Link>
               ))}
             </div>
           ) : (
             <OwnerTodo what={`Add a case study for ${service.name}. This section is hidden on the live site until one exists.`} />
           )}
-        </section>
+        </Section>
       )}
 
       <AuthorBox />
 
-      <section className="svc-section">
-        <h2>Frequently asked questions</h2>
-        <div className="svc-faq">
-          {service.faqs.map((f) => (
-            <details key={f.q}>
-              <summary>
-                <h3>{f.q}</h3>
-              </summary>
-              <p>{f.a}</p>
-            </details>
-          ))}
-        </div>
-      </section>
+      <Section label="FAQ" title="Frequently asked questions">
+        <Faq items={service.faqs} />
+      </Section>
 
-      <section className="svc-section">
-        <h2>Other services</h2>
-        <div className="svc-others">
-          {SERVICES.filter((s) => s.slug !== service.slug).map((s) => (
-            <Link key={s.slug} href={`/services/${s.slug}`} className="svc-card svc-link">
-              <h3>{s.name}</h3>
-              <p>{s.summary}</p>
-              <span>From {formatPrice(s.pricing[0])} →</span>
+      <Section label="More services" title="Other ways I can help">
+        <div className="x-service-links" data-reveal>
+          {SERVICES.filter((o) => o.slug !== service.slug).map((o) => (
+            <Link key={o.slug} href={`/services/${o.slug}`}>
+              <Icon name={o.icon} size={18} />
+              {o.name}
+              <small>from {formatPrice(o.pricing[0])}</small>
             </Link>
           ))}
         </div>
-      </section>
+      </Section>
     </SiteShell>
   );
 }

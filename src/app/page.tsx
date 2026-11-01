@@ -16,7 +16,7 @@ const structuredData = {
       "@id": `${SITE.url}/#person`,
       name: SITE.name,
       url: SITE.url,
-      jobTitle: SITE.jobTitle,
+      jobTitle: "Founder",
       description: SITE.bio,
       image: `${SITE.url}${SITE.photo.src}`,
       email: `mailto:${SITE.email}`,

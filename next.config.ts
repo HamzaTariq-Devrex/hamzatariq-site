@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // CALENDLY_URL (server env, set in Vercel) is inlined for the Calendly popup on "Book a free call".
+  env: { NEXT_PUBLIC_CALENDLY_URL: process.env.CALENDLY_URL ?? "" },
   // `next dev` gets its own folder so `npm run build` (required before every commit) can't break a running dev server.
   distDir: process.env.NODE_ENV === "development" ? ".next-dev" : ".next",
   images: {

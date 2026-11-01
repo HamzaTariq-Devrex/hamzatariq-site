@@ -1,4 +1,14 @@
-export type PriceTier = { name: string; price: number; unit?: string; detail?: string; timeline?: string };
+export type PriceTier = {
+  name: string;
+  price: number;
+  unit?: string;
+  detail?: string;
+  timeline?: string;
+  /** Highlighted as "Most popular" on the pricing cards. TODO(owner): confirm which tier. */
+  popular?: boolean;
+};
+import type { IconName } from "@/components/site/ds/Icon";
+
 export type Faq = { q: string; a: string };
 
 export type Service = {
@@ -11,7 +21,9 @@ export type Service = {
   h1Accent: string;
   lead: string;
   summary: string;
-  problems: { title: string; text: string }[];
+  /** Design-system icon for cards and menus (src/components/site/ds/Icon.tsx). */
+  icon: IconName;
+  problems: { title: string; text: string; icon: IconName }[];
   process: { title: string; text: string }[];
   features: string[];
   pricing: PriceTier[];
@@ -31,6 +43,7 @@ export const PROJECT_TERMS = [
 export const SERVICES: Service[] = [
   {
     slug: "nextjs-websites",
+    icon: "globe",
     name: "Next.js Websites",
     keyword: "Next.js website development",
     metaTitle: "Next.js Website Development for Businesses",
@@ -40,10 +53,10 @@ export const SERVICES: Service[] = [
     lead: "Custom-coded Next.js websites, from landing pages to full ecommerce apps. No templates: every page is built around your business, loads fast and is ready for Google from day one.",
     summary: "Landing pages, ecommerce stores and full ecommerce apps in custom-coded Next.js.",
     problems: [
-      { title: "Your site is slow on mobile", text: "Theme and page-builder sites ship a lot of code your visitors never use, so pages load slowly on phones and people leave before they see your offer." },
-      { title: "It looks like every other site", text: "Templates limit what your site can look like. A custom build is designed around your brand and your customers, not around what a theme allows." },
-      { title: "Google can't read it properly", text: "Missing titles, descriptions and structured data, or pages built only in the browser, make it hard for Google to understand and rank your site." },
-      { title: "Managing products and orders is a mess", text: "Selling through DMs and spreadsheets doesn't scale. An online store with an admin dashboard keeps products, stock and orders in one place." },
+      { title: "Your site is slow on mobile", icon: "speed", text: "Theme and page-builder sites ship a lot of code your visitors never use, so pages load slowly on phones and people leave before they see your offer." },
+      { title: "It looks like every other site", icon: "design", text: "Templates limit what your site can look like. A custom build is designed around your brand and your customers, not around what a theme allows." },
+      { title: "Google can't read it properly", icon: "search", text: "Missing titles, descriptions and structured data, or pages built only in the browser, make it hard for Google to understand and rank your site." },
+      { title: "Managing products and orders is a mess", icon: "orders", text: "Selling through DMs and spreadsheets doesn't scale. An online store with an admin dashboard keeps products, stock and orders in one place." },
     ],
     process: [
       { title: "Free call", text: "We talk through your goals, the pages you need and the features that matter. You get a clear quote afterwards." },
@@ -62,7 +75,7 @@ export const SERVICES: Service[] = [
     ],
     pricing: [
       { name: "Landing page / portfolio website", price: 400, timeline: "5–7 days" },
-      { name: "Ecommerce store with admin dashboard", price: 1000, timeline: "2–3 weeks" },
+      { name: "Ecommerce store with admin dashboard", price: 1000, timeline: "2–3 weeks", popular: true },
       { name: "Full ecommerce app", price: 2000, detail: "User logins, accounts and orders" },
     ],
     relatedProjects: ["dulhahouse", "nagina-jewels", "the-trekkerz-pakistan"],
@@ -77,6 +90,7 @@ export const SERVICES: Service[] = [
   },
   {
     slug: "dashboards",
+    icon: "chart",
     name: "Dashboards & Web Apps",
     keyword: "custom dashboard development",
     metaTitle: "Custom Dashboard and Web App Development",
@@ -86,10 +100,10 @@ export const SERVICES: Service[] = [
     lead: "Dashboards and web apps built around how your business actually works, so your team stops juggling spreadsheets and sees what matters in one place.",
     summary: "Custom admin dashboards and web apps built around how your business works.",
     problems: [
-      { title: "Your data lives in spreadsheets", text: "Orders, customers and numbers are spread across files and chats, and nobody is sure which version is current." },
-      { title: "Off-the-shelf tools don't fit", text: "Generic software makes you change how you work, or charges for features you never use while missing the ones you need." },
-      { title: "No single view of the business", text: "Without one place to see sales, stock or bookings, decisions are made on guesswork." },
-      { title: "The same manual work every day", text: "Copying data between tools and building the same reports by hand costs your team hours." },
+      { title: "Your data lives in spreadsheets", icon: "sheet", text: "Orders, customers and numbers are spread across files and chats, and nobody is sure which version is current." },
+      { title: "Off-the-shelf tools don't fit", icon: "puzzle", text: "Generic software makes you change how you work, or charges for features you never use while missing the ones you need." },
+      { title: "No single view of the business", icon: "eye", text: "Without one place to see sales, stock or bookings, decisions are made on guesswork." },
+      { title: "The same manual work every day", icon: "repeat", text: "Copying data between tools and building the same reports by hand costs your team hours." },
     ],
     process: [
       { title: "Free call", text: "You walk me through how your business runs today and what you want the dashboard or app to do." },
@@ -106,7 +120,7 @@ export const SERVICES: Service[] = [
       "Works on desktop and mobile",
     ],
     pricing: [
-      { name: "Custom dashboard", price: 1200, timeline: "2–4 weeks" },
+      { name: "Custom dashboard", price: 1200, timeline: "2–4 weeks", popular: true },
       { name: "Custom web app", price: 2500, timeline: "4–8 weeks" },
     ],
     relatedProjects: [],
@@ -121,6 +135,7 @@ export const SERVICES: Service[] = [
   },
   {
     slug: "ai-chatbots",
+    icon: "message",
     name: "AI Chatbots",
     keyword: "AI chatbot for website",
     metaTitle: "AI Chatbot for Website Built on Your Content",
@@ -130,10 +145,10 @@ export const SERVICES: Service[] = [
     lead: "An AI chatbot that answers your customers' questions from your own content, day and night, and passes real leads to you on WhatsApp or email.",
     summary: "AI chatbots that answer from your own content and pass leads to you.",
     problems: [
-      { title: "The same questions, every day", text: "Prices, delivery, opening hours: your team answers the same messages over and over." },
-      { title: "Visitors leave after hours", text: "If nobody replies at night or on weekends, people who were ready to buy go somewhere else." },
-      { title: "Leads get lost", text: "Interested visitors close the tab without leaving their details, and you never hear from them." },
-      { title: "Generic bots give wrong answers", text: "Off-the-shelf chatbots guess. A bot trained only on your content answers from what you actually offer." },
+      { title: "The same questions, every day", icon: "chat", text: "Prices, delivery, opening hours: your team answers the same messages over and over." },
+      { title: "Visitors leave after hours", icon: "moon", text: "If nobody replies at night or on weekends, people who were ready to buy go somewhere else." },
+      { title: "Leads get lost", icon: "leads", text: "Interested visitors close the tab without leaving their details, and you never hear from them." },
+      { title: "Generic bots give wrong answers", icon: "warning", text: "Off-the-shelf chatbots guess. A bot trained only on your content answers from what you actually offer." },
     ],
     process: [
       { title: "Free call", text: "We go through the questions your customers ask most and what the chatbot should do." },
@@ -162,6 +177,7 @@ export const SERVICES: Service[] = [
   },
   {
     slug: "react-nextjs-seo",
+    icon: "search",
     name: "React & Next.js SEO",
     keyword: "React SEO services",
     metaTitle: "React SEO Services for Sites That Don't Rank",
@@ -171,10 +187,10 @@ export const SERVICES: Service[] = [
     lead: "Most React sites don't rank because their pages are rendered in the browser, so Google first sees an almost empty HTML page. I fix that with server-rendered pages, clean metadata and structured data, without changing your design.",
     summary: "Fix React and Next.js sites that don't rank on Google, without changing the design.",
     problems: [
-      { title: "Google sees an empty page", text: "A Vite or Create React App site sends an almost empty HTML file and builds the page in the browser. Google has to render JavaScript before it sees your content, and often indexes less of it." },
-      { title: "Every page has the same title", text: "Single-page apps often share one title and description, so Google can't tell your pages apart and none of them stands out." },
-      { title: "It is slow on mobile", text: "Large JavaScript bundles and heavy images hurt Core Web Vitals, which affects both rankings and how many visitors stay." },
-      { title: "No sitemap or structured data", text: "Without a sitemap, canonical URLs and structured data, search engines find and understand your pages more slowly." },
+      { title: "Google sees an empty page", icon: "empty", text: "A Vite or Create React App site sends an almost empty HTML file and builds the page in the browser. Google has to render JavaScript before it sees your content, and often indexes less of it." },
+      { title: "Every page has the same title", icon: "tag", text: "Single-page apps often share one title and description, so Google can't tell your pages apart and none of them stands out." },
+      { title: "It is slow on mobile", icon: "mobile", text: "Large JavaScript bundles and heavy images hurt Core Web Vitals, which affects both rankings and how many visitors stay." },
+      { title: "No sitemap or structured data", icon: "map", text: "Without a sitemap, canonical URLs and structured data, search engines find and understand your pages more slowly." },
     ],
     process: [
       { title: "SEO audit", text: "I check how Google sees your site and give you a report with a prioritized fix list." },
@@ -193,7 +209,7 @@ export const SERVICES: Service[] = [
     ],
     pricing: [
       { name: "SEO audit", price: 150, detail: "Report + prioritized fix list", timeline: "2–3 days" },
-      { name: "Technical SEO setup for React / Next.js", price: 500 },
+      { name: "Technical SEO setup for React / Next.js", price: 500, popular: true },
       { name: "React (Vite/CRA) to Next.js migration for SEO", price: 800 },
       { name: "Monthly SEO + content", price: 400, unit: "/month" },
     ],
@@ -211,3 +227,33 @@ export const SERVICES: Service[] = [
 export const getService = (slug: string) => SERVICES.find((s) => s.slug === slug);
 
 export const formatPrice = (tier: PriceTier) => `$${tier.price.toLocaleString("en-US")}${tier.unit ?? ""}`;
+
+/** The process every project follows (About and /services). Facts from the service pages and PROJECT_TERMS. */
+export const PROCESS: { title: string; text: string; icon: IconName }[] = [
+  { title: "Free call", text: "We talk through your goals and the features that matter. You get a clear quote afterwards.", icon: "call" },
+  { title: "Plan & design", text: "I map the pages, screens and data, and design around your brand before any code is written.", icon: "plan" },
+  { title: "Build in custom code", text: "I build in React and Next.js with no templates, and you review each part as it's ready.", icon: "code" },
+  { title: "Launch & support", text: "It goes live with SEO set up, followed by 30 days of free bug fixes.", icon: "rocket" },
+];
+
+/** FAQ for /services (also used for its FAQPage schema). */
+export const GENERAL_FAQS: Faq[] = [
+  {
+    q: "Which service do I need?",
+    a: "For a new website or online store, start with Next.js websites. If your team runs orders, stock or bookings from spreadsheets, a custom dashboard fits. To answer customer questions automatically, an AI chatbot. If your React site doesn't rank on Google, React & Next.js SEO. Not sure? Ask the AI assistant or book a free call.",
+  },
+  {
+    q: "How much does a project cost?",
+    a: "Starting prices: websites from $400, ecommerce stores from $1,000, custom dashboards from $1,200, web apps from $2,500, AI chatbots from $350 and SEO audits from $150. Every project is quoted after a free call, and the final price depends on features.",
+  },
+  {
+    q: "How long does a project take?",
+    a: "Usually 5–7 days for a landing page, 3–5 days for an AI chatbot, 2–3 days for an SEO audit, 2–3 weeks for an ecommerce store, 2–4 weeks for a custom dashboard and 4–8 weeks for a custom web app. The exact timeline comes with your quote.",
+  },
+  { q: "What are the payment terms?", a: "50% upfront and 50% on delivery." },
+  { q: "How many revisions are included?", a: "Every project includes 2 free revision rounds, and you review the work as each part is ready." },
+  {
+    q: "Do you offer support after launch?",
+    a: "Yes. You get 30 days of free bug fixes after launch. Ongoing maintenance is quoted separately.",
+  },
+];

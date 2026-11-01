@@ -57,9 +57,14 @@ export default function ContactPage() {
         <div className="contact-book">
           <h2>Book a free call</h2>
           {SITE.bookingUrl ? (
-            <iframe src={SITE.bookingUrl} title="Book a call with Hamza Tariq" className="contact-embed" loading="lazy" />
+            <iframe
+              src={`${SITE.bookingUrl}?embed_type=Inline&hide_gdpr_banner=1&background_color=0f1420&text_color=f1f5f9&primary_color=2dd4bf`}
+              title="Book a call with Hamza Tariq"
+              className="contact-embed"
+              loading="lazy"
+            />
           ) : (
-            <OwnerTodo what="Add the Cal.com booking link (SITE.bookingUrl). Until then visitors book by email or WhatsApp.">
+            <OwnerTodo what="Add the Calendly link (CALENDLY_URL env variable). Until then visitors book by email or WhatsApp.">
               <p className="contact-fallback">
                 Online booking is coming soon. Send me a message by email or WhatsApp and I&apos;ll set up a time
                 that suits you.
