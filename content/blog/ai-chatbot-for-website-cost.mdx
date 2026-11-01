@@ -1,0 +1,112 @@
+---
+title: "How Much Does an AI Chatbot for a Website Cost?"
+seoTitle: "AI Chatbot for a Website: Cost Breakdown"
+description: "What does an AI chatbot for a website cost to build and run? Setup prices, monthly AI fees, the free-tier limits I measured and how to keep running costs low."
+keyword: "ai chatbot for website cost"
+category: ai-chatbots
+tags: [ai chatbot, pricing, gemini, lead generation]
+published: 2026-11-06
+faq:
+  - q: "How much does an AI chatbot for a website cost?"
+    a: "With me, a custom AI chatbot starts at $350 and is usually live in 3–5 days. On top of that, the AI provider charges per use; on a free tier that can be zero, but free tiers have daily limits."
+  - q: "Can an AI chatbot run for free?"
+    a: "It can start for free. On my own site, the Gemini free tier allowed 20 replies per day for the fast model. Above that you either pay for usage or answer from saved replies, which is what my chatbot does."
+  - q: "Will the chatbot make up answers about my business?"
+    a: "It shouldn't if it's built right. My chatbots answer only from your own pages and documents, and when they don't know, they hand the visitor to you with a lead form instead of guessing."
+  - q: "Do I need a monthly subscription for a custom chatbot?"
+    a: "No subscription to me. You pay once for the build, and the AI provider bills your own account directly for usage. Ongoing maintenance is optional and quoted separately."
+  - q: "Can the chatbot answer in Urdu or Roman Urdu?"
+    a: "Yes. The assistant on my site understands English and Roman Urdu questions, and its offline answer bank includes Roman Urdu phrasings too."
+---
+
+An AI chatbot for a website costs two things: a one-time build and a running AI cost. With me, a custom chatbot starts at $350 and usually goes live in 3–5 days. The running cost depends on how many questions visitors ask; on a free AI tier it can be zero, but free tiers have daily limits you need to plan for.
+
+Off-the-shelf chatbot tools charge a monthly subscription instead. Below I break down both options, show the real limits I measured on my own site, and explain how to keep the AI bill small.
+
+## What you actually pay for
+
+Every AI chatbot has the same parts, whether you build it or rent it:
+
+1. **The chat widget** on your site: the button, the chat window, the mobile view.
+2. **Your knowledge:** the pages, prices, FAQs and documents the bot is allowed to answer from.
+3. **The AI model** that writes each reply (Google Gemini, OpenAI, Claude and others).
+4. **Search over your content**, so the model gets the right page before it answers. Developers call this retrieval, and it's what stops the bot from making things up.
+5. **Lead capture:** a way to collect a name, email and project details, and send them to you.
+6. **Logs and a dashboard**, so you can read conversations and see what people ask.
+
+A subscription tool bundles all of these and charges monthly. A custom build means you pay once for the setup, and the AI provider bills your own account for usage.
+
+## AI chatbot for website cost: my prices
+
+My custom AI chatbot starts at **$350** and is usually live in **3–5 days**. That includes the widget styled to your brand, training on your own content, lead capture and WhatsApp handoff. The final price depends on how much content there is and what the bot should connect to, so I quote after a free call.
+
+The same terms apply as on every project: 50% upfront and 50% on delivery, 2 free revision rounds, and 30 days of free bug fixes after launch. You can see what's included on my [AI chatbot for website](/services/ai-chatbots) service page.
+
+What changes the price:
+
+- **Amount of content.** A five-page site is quicker than a large catalog.
+- **Integrations.** Saving leads to a database, sending emails, a dashboard to read chats.
+- **Languages.** Bots that handle more than one language need more testing.
+- **Custom rules.** For example, which topics the bot should refuse.
+
+## The running cost: what the AI provider charges
+
+AI providers charge per use, measured in tokens (small pieces of text). Every question and every reply costs a little. Most providers also have a free tier with limits per minute and per day. Prices and limits change often, so check the provider's current page; Google publishes its [Gemini API pricing](https://ai.google.dev/gemini-api/docs/pricing) and free-tier details.
+
+For a small business site, the cost is usually driven by three things:
+
+- **How many visitors open the chat.** Most visitors never do.
+- **How long the replies are.** Short, direct answers cost less and read better.
+- **Which model you use.** Faster, cheaper models are fine for answering questions about your own services.
+
+<FromMyWork>
+I built "Hamza's AI", the assistant on this site, on the free tier of Google Gemini with Supabase for search, chat history and leads. I measured the free tier on 2026-10-26: the fast model allowed **20 replies per day**, and with minimal thinking it started replying in **1–2 s**. The free Flash-Lite models were much slower, at **13–40 s** per reply.
+
+So I added an offline answer bank of **30 saved answers** (English and Roman Urdu). When Gemini fails or the free quota runs out, the bot answers from that bank instantly, without an API call. Questions it can't match get "Hamza will answer this personally" plus the lead form. At launch it answered from **44 pages** of site content. You can try it with the chat button on any page.
+</FromMyWork>
+
+## How to keep the running cost low
+
+These are the choices I make on every chatbot build:
+
+- **Answer only from your content.** The bot searches your pages first and sends only the matching parts to the model. Smaller prompts cost less and keep the answers accurate.
+- **Use a fast model with short replies.** Most questions ("How much is a landing page?", "How long does it take?") need two or three sentences, not an essay.
+- **Saved answers for common questions.** An offline answer bank handles the questions everyone asks, for free and instantly, and keeps the bot working when the AI quota runs out.
+- **Refuse off-topic questions.** My bots reply to coding help, trivia and jokes with one fixed line. Nobody uses your quota to do their homework.
+- **Re-embed only what changed.** When you update your site, only the changed pages are processed again, so updates cost almost nothing.
+
+## Questions to ask before you pay for a chatbot
+
+Whoever builds or sells you a chatbot, ask these questions first. The answers tell you what you'll really pay over time.
+
+- **Where do the answers come from?** You want "only from your pages and documents". A bot that answers from the open internet will sooner or later say something wrong about your prices or services.
+- **What happens when the bot doesn't know?** A good bot says so and offers a way to reach you: a lead form, WhatsApp or email. A bad one guesses.
+- **What happens when the AI provider is down or the quota runs out?** Ask to see it. If the chat window just shows an error, you lose the visitor.
+- **Whose account pays for the AI?** With a custom build it should be yours, so you can see the usage and nobody marks it up.
+- **Where are the leads and chats stored?** You should be able to read every conversation and export your leads at any time.
+- **How do I update what the bot knows?** When your prices change, the bot must change too. On my builds, updating the site updates the bot on the next deploy.
+- **Can I see it working on a real site first?** Ask for a live demo, not a video.
+
+These questions also help you compare quotes. A cheaper bot that guesses answers or loses leads costs more in missed customers than it saves.
+
+## Custom build vs subscription chatbot
+
+| | Custom build | Subscription tool |
+| --- | --- | --- |
+| Upfront cost | One-time (from $350 with me) | Usually none |
+| Monthly cost | AI usage on your account, can start free | Fixed monthly fee, often per seat or per conversation |
+| Design | Matches your site | Their widget, limited styling |
+| Data | Leads and chats in your own database | Stored on their platform |
+| Answers | Only from your content, with your rules | Depends on the tool |
+
+A subscription tool is fine if you want to test the idea for a month. If you want the bot to look like your brand, keep your leads in your own database and avoid a growing monthly bill, a custom build usually pays for itself.
+
+## Is an AI chatbot worth it for your business?
+
+A chatbot is worth it when visitors ask the same questions again and again: prices, delivery times, what's included, how to start. It answers at any hour, in the visitor's language, and turns a question into a lead with contact details.
+
+It also tells you what your customers want. Reading the questions people ask at night, in their own words, shows you which prices are unclear, which services people look for and which pages are missing. On my own dashboard I can see the most asked questions, and that list has already shaped what I put on my service pages.
+
+It's less useful if your site gets very few visitors or if every sale needs a long custom conversation anyway. In that case, a clear pricing page and a booking button may do more.
+
+If you're not sure, try the assistant on this site and ask it what you'd want your own customers to ask. Then look at the [hamzatariq.site case study](/work/hamzatariq-site) to see how the rest of the site is built, or [book a free call](/contact) and I'll tell you honestly whether a chatbot makes sense for you.

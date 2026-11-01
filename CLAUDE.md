@@ -28,12 +28,16 @@ Portfolio and inbound lead site for Hamza Tariq (freelance developer: React/Next
 - **Leads:** one flow for the chat, the `/contact` form and future tools: `LeadForm` → `/api/leads` → `app_create_lead` → Resend emails (notification to `SITE.email`, auto-reply from `hello@hamzatariq.site`) sent from the route with `after()`. Emails are sent from Next.js rather than a Supabase Edge Function so they work and can be tested locally with the same env vars. The lead form has an optional WhatsApp number (`leads.phone`).
 - **Admin dashboard** (`src/app/admin/(dashboard)/`, sidebar layout checks the owner): `/admin` overview (stat cards with change vs the previous period in Pakistan time, leads per day, by source, by service, latest leads), `/admin/leads` (search, filters, sort, CSV export, side panel with transcript, status, private `notes`, Gmail/WhatsApp/copy actions; `?lead=<id>` opens a lead), `/admin/chats` (sessions, top 20 questions without off-topic ones, off-topic and saved-answer counts). Real Supabase data only; UI in `src/components/admin/`, styles in `Admin.css`, labels and service grouping in `src/lib/admin/labels.ts`. Chart bars use `#0d9488` (validated for the dark surface with the dataviz validator). `/admin/login` is email + password only (Supabase `signInWithPassword` in a server action; no magic link), owner email only, session kept 30 days from the last visit (`src/lib/supabase/session.ts`). The owner user is created/updated with the Supabase admin API; sign-ups stay blocked by the `only_owner_signup` trigger.
 - **Content:** blog posts, case studies and industry pages are MDX files in Git. Only dynamic data lives in Supabase.
+- **Blog (Phase 3):** posts are `content/blog/<slug>.mdx` (frontmatter and rules in `content/STYLE.md`), parsed by `src/lib/blog.ts` and compiled server-side with `@mdx-js/mdx` (`src/components/blog/mdx.tsx`: `<FromMyWork>`, `<Figure>`). Five categories with their closing CTA in `content/blog-categories.json`. Routes: `/blog`, `/blog/[slug]`, `/blog/category/[category]`, `/blog/tag/[tag]` (noindex), `/blog/rss.xml`; all revalidate daily so posts dated in the future appear on their `published` date (PKT); local and preview builds show them early. Posts get BlogPosting, FAQPage and BreadcrumbList JSON-LD and their own OG image, and are added to the sitemap, the assistant's embeddings and IndexNow automatically on deploy.
+- **Quality gate:** `npm run content:check` (`scripts/content-check.mjs`) fails a post on length, title/description length, keyword placement or reuse, links (min 3 internal, 1 outside, no broken ones), FAQ, `<FromMyWork>`, alt text, banned filler, any number not found in `content/owner/`, `caseStudies.ts`, `services.ts` or `experience.ts`, or a post less than 2 days after the previous one (max 4 per ISO week). It runs offline as `prebuild`. `content/backlog.json` is the topic queue (60 topics; `blockedBy` marks topics waiting on an owner fact).
+- **Content autopilot (Phase 7):** `docs/AUTOPILOT.md` is the prompt for the scheduled sessions (one post every other day; monthly refresh of posts at positions 8–20 and `reports/YYYY-MM.md`). Scripts in `scripts/autopilot/` (`next-topic`, `finish`, `refill`, `monthly`); Search Console via a service account (`GSC_SERVICE_ACCOUNT_JSON`).
+- **Free SEO audit tool** (`/tools/free-seo-audit`, `src/lib/audit/`, `/api/audit`): fetches the raw HTML through `safeFetch` (SSRF guard: http(s) on ports 80/443, no credentials or internal host names, every resolved IP checked at connect time, redirects re-validated, 8 s timeout, 2 MB cap), runs 17 weighted checks plus PageSpeed Insights (`PAGESPEED_API_KEY`), caches results 24 h in `seo_audits` and allows 10 new audits per IP per hour (in-memory fallback for both). "Email me the full report" is a lead with source `seo-audit` linked by `leads.audit_id`; the visitor gets the full report email, the owner a notification with URL and score. Never weaken the SSRF checks; Node's `BlockList` must not get an `::ffff:0:0/96` rule (it matches every IPv4 address).
 - **Animation/3D:** GSAP 3.14 (ScrollTrigger, ScrollSmoother, SplitText) and Three.js on the home page only. New page templates must not depend on them.
 - **Hosting:** Vercel. Domain `https://hamzatariq.site`.
 
 ## Folders
 
-- `src/app/` routes (App Router): `/`, `/services`, `/services/[slug]`, `/work`, `/work/hamzatariq-site` (own case study), `/work/[slug]`, `/about`, `/hire`, `/contact`, `not-found`.
+- `src/app/` routes (App Router): `/`, `/services`, `/services/[slug]`, `/work`, `/work/hamzatariq-site` (own case study), `/work/[slug]`, `/about`, `/hire`, `/contact`, `/blog/**`, `/tools/free-seo-audit`, `not-found`.
 - `src/components/` home page sections; styles in `src/components/styles/<Component>.css`. Non-home page styles live in `Pages.css` (shell) and `Content.css` (sections).
 - `src/components/site/` shell and widgets: `SiteHeader` (all pages), `SiteShell`, `BookCall`, `AuthorBox`, `OwnerTodo`, `CaseStudyCard`, `WorkBrowser`.
 - `src/data/services.ts` the four services (copy, process, features, pricing, FAQs). `src/data/caseStudies.ts` case studies with measured results. `src/data/experience.ts` career timeline.
@@ -47,7 +51,8 @@ Portfolio and inbound lead site for Hamza Tariq (freelance developer: React/Next
 - `supabase/migrations/` schema migrations.
 - Do not create `src/pages/`: Next.js would treat it as the Pages Router.
 - `public/` CV, 3D model, Draco decoder.
-- Planned: `content/STYLE.md` (writing rules), `reports/`.
+- `content/STYLE.md` writing rules, `content/blog/` posts, `docs/AUTOPILOT.md`, `reports/` monthly content reports.
+- `src/data/tools.ts` free tools (name, link, keyword); `src/components/tools/` their UI, styles in `Audit.css`.
 
 ## Design conventions
 
@@ -63,7 +68,7 @@ Portfolio and inbound lead site for Hamza Tariq (freelance developer: React/Next
 
 1. The site is the demo: show working features (assistant, tools, fast pages), not just claims.
 2. Real experience in every page, pulled from `content/owner/`. No mass-produced or generic AI text.
-3. Max 2 blog posts per week. No thin or near-duplicate pages.
+3. At most one blog post every 2 days (max 4 per week). No thin or near-duplicate pages.
 4. One page = one main keyword. Never target a keyword twice.
 5. Every page links to a service page and ends with a CTA (AI assistant, booking or contact).
 6. Mobile Lighthouse 95+ on all new templates.
@@ -73,6 +78,9 @@ Portfolio and inbound lead site for Hamza Tariq (freelance developer: React/Next
 ## Confirmed owner facts
 
 - Client count: 45+ brands and clients (owner confirmed).
+- Location and market: based in Bahawalpur, Pakistan, selling to international clients (US, UK, Europe, Middle East). Never target a city on pages or in blog topics. Pages show "Based in Pakistan · Working with clients worldwide" and "Available in US, UK and EU time zones" (`SITE.location`, `SITE.timezones`, `WhereIWork`); "Bahawalpur, Pakistan" appears only in the Person schema `address` (`SITE.address`). Prices always in USD.
+- Education: BS Artificial Intelligence, The Islamia University of Bahawalpur, 2022–2026 (`UNIVERSITY` in `src/data/experience.ts`). No company logos; text only.
+- "Most popular" pricing tiers: Ecommerce store with admin dashboard, AI chatbot.
 - Projects are shown as "Built at Devrex Digital" unless the owner marks one as their own client.
 - No LinkedIn profile. GitHub (`https://github.com/HamzaTariq-Devrex`) is the main profile link.
 - AI assistant provider: Google Gemini (chat and embeddings). Phase 4 builds on the owner's `/bot` skill, adapted to Supabase (leads, chat history, pgvector) and site-content-only answers.
@@ -90,6 +98,7 @@ Portfolio and inbound lead site for Hamza Tariq (freelance developer: React/Next
 - `npm run lint`: ESLint (includes the Next.js plugin).
 - `npm run typecheck`: TypeScript only.
 - `npm run embed`: re-embed site content into Supabase (run after `npm run build`; only changed pages are re-embedded).
+- `npm run content:check`: blog quality gate, including outside link checks (`-- <slug>` for one post, `-- --offline` to skip outside links).
 - Env vars: see `.env.example`. Never print their values.
 
 ## SEO conventions

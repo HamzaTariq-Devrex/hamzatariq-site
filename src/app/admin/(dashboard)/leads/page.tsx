@@ -1,16 +1,16 @@
 import type { Metadata } from "next";
 import { getOwner } from "@/lib/supabase/server";
-import LeadsBrowser from "@/components/admin/LeadsBrowser";
+import LeadsBrowser, { type Lead } from "@/components/admin/LeadsBrowser";
 import { PageHead } from "@/components/admin/ui";
 
 export const metadata: Metadata = { title: "Leads" };
 
 export default async function LeadsPage({ searchParams }: { searchParams: Promise<{ lead?: string }> }) {
   const { supabase } = (await getOwner())!; // the layout redirects when signed out
-  const [{ lead }, { data, error }] = await Promise.all([
-    searchParams,
-    supabase.from("leads").select("*").order("created_at", { ascending: false }).limit(5000),
-  ]);
+  const query = (columns: string) => supabase.from("leads").select(columns).order("created_at", { ascending: false }).limit(5000);
+  const [{ lead }, first] = await Promise.all([searchParams, query("*, audit:seo_audits(final_url, score)").overrideTypes<Lead[]>()]);
+  // Before the SEO audit migration is applied the join fails; load the leads without audits.
+  const { data, error } = first.error ? await query("*").overrideTypes<Lead[]>() : first;
 
   return (
     <main className="adm-page">

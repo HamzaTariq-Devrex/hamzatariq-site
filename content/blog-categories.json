@@ -1,0 +1,57 @@
+[
+  {
+    "slug": "nextjs-websites",
+    "name": "Next.js Websites",
+    "description": "Guides for business owners planning a new website or online store: what to build it with, what it costs and how to make it fast.",
+    "cta": {
+      "title": "Need a fast, custom Next.js website?",
+      "text": "Landing pages from $400 and ecommerce stores from $1,000, built in custom code and quoted after a free call.",
+      "href": "/services/nextjs-websites",
+      "label": "See the Next.js website service"
+    }
+  },
+  {
+    "slug": "dashboards",
+    "name": "Dashboards",
+    "description": "When spreadsheets stop working: custom dashboards and web apps for orders, stock, customers and bookings.",
+    "cta": {
+      "title": "Ready to replace the spreadsheets?",
+      "text": "Custom dashboards from $1,200 and web apps from $2,500, built around how your business works.",
+      "href": "/services/dashboards",
+      "label": "See the dashboard service"
+    }
+  },
+  {
+    "slug": "ai-chatbots",
+    "name": "AI Chatbots",
+    "description": "AI chatbots that answer from your own content: what they cost, how they work and how to get real leads from them.",
+    "cta": {
+      "title": "Want an AI chatbot like the one on this site?",
+      "text": "AI chatbots from $350, usually live in 3–5 days, answering only from your own content.",
+      "href": "/services/ai-chatbots",
+      "label": "See the AI chatbot service"
+    }
+  },
+  {
+    "slug": "react-nextjs-seo",
+    "name": "React & Next.js SEO",
+    "description": "Why React sites struggle on Google and how to fix it: rendering, metadata, structured data, speed and migrations.",
+    "cta": {
+      "title": "Is your React site invisible on Google?",
+      "text": "SEO audits from $150 and React to Next.js migrations from $800, without changing your design.",
+      "href": "/services/react-nextjs-seo",
+      "label": "See the React SEO service"
+    }
+  },
+  {
+    "slug": "hiring",
+    "name": "Hiring",
+    "description": "For founders and recruiters hiring a React or Next.js developer: what to look for, what to ask and how I work.",
+    "cta": {
+      "title": "Hiring a React or Next.js developer?",
+      "text": "See my experience, stack and how I work with teams, or get in touch directly.",
+      "href": "/hire",
+      "label": "See the hire page"
+    }
+  }
+]

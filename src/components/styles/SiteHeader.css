@@ -147,6 +147,12 @@
   transition: background-color 0.2s ease;
 }
 
+.site-nav-menu a.site-nav-tool {
+  margin-top: 6px;
+  border-top: 1px solid var(--sh-line);
+  border-radius: 0 0 12px 12px;
+}
+
 .site-nav-menu a:hover,
 .site-nav-menu a.is-active {
   background: rgba(45, 212, 191, 0.08);

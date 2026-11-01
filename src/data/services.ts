@@ -4,7 +4,7 @@ export type PriceTier = {
   unit?: string;
   detail?: string;
   timeline?: string;
-  /** Highlighted as "Most popular" on the pricing cards. TODO(owner): confirm which tier. */
+  /** Highlighted as "Most popular" on the pricing cards (owner confirmed: ecommerce store and AI chatbot). */
   popular?: boolean;
 };
 import type { IconName } from "@/components/site/ds/Icon";
@@ -120,7 +120,7 @@ export const SERVICES: Service[] = [
       "Works on desktop and mobile",
     ],
     pricing: [
-      { name: "Custom dashboard", price: 1200, timeline: "2–4 weeks", popular: true },
+      { name: "Custom dashboard", price: 1200, timeline: "2–4 weeks" },
       { name: "Custom web app", price: 2500, timeline: "4–8 weeks" },
     ],
     relatedProjects: [],
@@ -164,7 +164,7 @@ export const SERVICES: Service[] = [
       "Custom look that matches your brand",
       "Works on mobile, full-screen chat",
     ],
-    pricing: [{ name: "AI chatbot", price: 350, timeline: "3–5 days" }],
+    pricing: [{ name: "AI chatbot", price: 350, timeline: "3–5 days", popular: true }],
     relatedProjects: [],
     faqs: [
       { q: "How much does an AI chatbot for a website cost?", a: "An AI chatbot starts from $350. Every project is quoted after a free call, and the final price depends on features." },
@@ -209,7 +209,7 @@ export const SERVICES: Service[] = [
     ],
     pricing: [
       { name: "SEO audit", price: 150, detail: "Report + prioritized fix list", timeline: "2–3 days" },
-      { name: "Technical SEO setup for React / Next.js", price: 500, popular: true },
+      { name: "Technical SEO setup for React / Next.js", price: 500 },
       { name: "React (Vite/CRA) to Next.js migration for SEO", price: 800 },
       { name: "Monthly SEO + content", price: 400, unit: "/month" },
     ],

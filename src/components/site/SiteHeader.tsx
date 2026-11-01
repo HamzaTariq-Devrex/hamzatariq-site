@@ -9,12 +9,14 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { SITE } from "@/lib/site";
 import { SERVICES } from "@/data/services";
+import { SEO_AUDIT_TOOL } from "@/data/tools";
 import BookCall from "./BookCall";
 import "../styles/SiteHeader.css";
 
 const NAV = [
   { href: "/work", label: "Work" },
   { href: "/about", label: "About" },
+  { href: "/blog", label: "Blog" },
   { href: "/contact", label: "Contact" },
 ];
 
@@ -79,6 +81,10 @@ const SiteHeader = ({ home = false }: Props) => {
                 <span>{s.summary}</span>
               </NavLink>
             ))}
+            <NavLink {...link} href={SEO_AUDIT_TOOL.href} className={`site-nav-tool ${cls(SEO_AUDIT_TOOL.href)}`}>
+              <strong>{SEO_AUDIT_TOOL.name}</strong>
+              <span>{SEO_AUDIT_TOOL.summary}</span>
+            </NavLink>
           </div>
         </div>
         {NAV.map((n) => (
@@ -115,6 +121,9 @@ const SiteHeader = ({ home = false }: Props) => {
                 {s.name}
               </NavLink>
             ))}
+            <NavLink {...link} href={SEO_AUDIT_TOOL.href} className={`is-sub ${cls(SEO_AUDIT_TOOL.href)}`}>
+              {SEO_AUDIT_TOOL.name}
+            </NavLink>
             {NAV.map((n) => (
               <NavLink {...link} key={n.href} href={n.href} className={cls(n.href)}>
                 {n.label}

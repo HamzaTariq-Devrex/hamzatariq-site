@@ -26,4 +26,5 @@ export const JOBS: Job[] = [
   },
 ];
 
-export const EDUCATION = "BSc in Artificial Intelligence";
+export const EDUCATION = "BS in Artificial Intelligence";
+export const UNIVERSITY = { name: "The Islamia University of Bahawalpur", period: "2022 - 2026", url: "https://www.iub.edu.pk" };

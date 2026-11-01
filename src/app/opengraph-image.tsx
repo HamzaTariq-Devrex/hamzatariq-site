@@ -8,6 +8,6 @@ export default function Image() {
   return renderOg({
     eyebrow: "Founder & Web Developer",
     title: "Custom-coded websites and online stores",
-    subtitle: "React and Next.js websites, online stores and dashboards for brands in Pakistan and abroad.",
+    subtitle: "React and Next.js websites, dashboards and AI chatbots for clients worldwide.",
   });
 }

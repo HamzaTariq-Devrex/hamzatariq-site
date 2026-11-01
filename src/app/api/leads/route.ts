@@ -1,7 +1,8 @@
 import { after } from "next/server";
 import { SITE } from "@/lib/site";
 import { hashIp, rpcClient, serverSecret } from "@/lib/supabase/server";
-import { sendOwnerNotification, sendVisitorReply } from "@/lib/leads/email";
+import { sendAuditReport, sendOwnerNotification, sendVisitorReply } from "@/lib/leads/email";
+import { getAuditById } from "@/lib/audit/store";
 import { BUDGETS, EMAIL_PATTERN, LEAD_SOURCES, PROJECT_TYPES, isPhone, type LeadInput, type LeadSource } from "@/lib/leads/options";
 
 export const runtime = "nodejs";
@@ -48,7 +49,14 @@ export async function POST(req: Request) {
     source: (LEAD_SOURCES as readonly string[]).includes(str(body.source, 20)) ? (str(body.source, 20) as LeadSource) : "page",
     page: PAGE.test(str(body.page, 200)) ? str(body.page, 200) : "",
     session: UUID.test(str(body.session, 36)) ? str(body.session, 36) : null,
+    auditId: UUID.test(str(body.auditId, 36)) ? str(body.auditId, 36) : null,
   };
+  const audit = lead.source === "seo-audit" && lead.auditId ? await getAuditById(lead.auditId) : null;
+  if (lead.source === "seo-audit" && !audit) return fail(400, "That audit has expired. Please run the audit again.");
+  if (audit) {
+    lead.projectType ||= "React / Next.js SEO";
+    lead.message = [`SEO audit: ${audit.finalUrl} (score ${audit.score}/100)`, lead.message].filter(Boolean).join("\n\n");
+  }
   if (!lead.name) return fail(400, "Please enter your name.");
   if (!EMAIL_PATTERN.test(lead.email)) return fail(400, "Please enter a valid email address.");
   if (lead.phone && !isPhone(lead.phone)) return fail(400, "Please enter a valid WhatsApp number, or leave it empty.");
@@ -58,19 +66,25 @@ export async function POST(req: Request) {
 
   const db = rpcClient();
   if (!db) return fail(503, `The form is not available right now. Please email ${SITE.email}.`);
-  const { data: id, error } = await db.rpc("app_create_lead", {
+  const args = {
     p_secret: serverSecret(),
     p_name: lead.name,
     p_email: lead.email,
     p_project_type: lead.projectType,
     p_budget: lead.budget,
     p_message: lead.message,
-    p_source: lead.source,
+    p_source: lead.source as string,
     p_page: lead.page,
     // Generated types mark every argument non-null; the function treats a null session as "no chat".
     p_session: lead.session as string,
     p_phone: lead.phone || undefined,
-  });
+    p_audit: lead.auditId ?? undefined,
+  };
+  let { data: id, error } = await db.rpc("app_create_lead", args);
+  // An audit kept only in memory (database unavailable when it ran) can't be linked; keep the lead anyway.
+  if (error && args.p_audit) ({ data: id, error } = await db.rpc("app_create_lead", { ...args, p_audit: undefined }));
+  // Until migration 20261102090000 is applied, "seo-audit" is not an allowed source yet.
+  if (error && args.p_source === "seo-audit") ({ data: id, error } = await db.rpc("app_create_lead", { ...args, p_audit: undefined, p_source: "tool" }));
   if (error || !id) {
     console.error("lead insert failed:", error?.message);
     return fail(500, `Something went wrong. Please email ${SITE.email}.`);
@@ -78,7 +92,10 @@ export async function POST(req: Request) {
 
   // Emails go out after the response, so the visitor isn't kept waiting.
   after(async () => {
-    const [owner, visitor] = await Promise.allSettled([sendOwnerNotification(lead, id), sendVisitorReply(lead)]);
+    const [owner, visitor] = await Promise.allSettled([
+      sendOwnerNotification(lead, id, audit),
+      audit ? sendAuditReport(lead, audit) : sendVisitorReply(lead),
+    ]);
     if (owner.status === "fulfilled") {
       await db.rpc("app_mark_lead_notified", { p_secret: serverSecret(), p_lead: id });
     } else {

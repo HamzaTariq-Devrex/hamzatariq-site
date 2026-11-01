@@ -1,5 +1,6 @@
 import { SITE } from "@/lib/site";
 import type { LeadInput } from "./options";
+import { GROUP_LABELS, type AuditResult, type CheckGroup } from "@/lib/audit/types";
 
 // Lead emails via the Resend REST API (server-only, RESEND_API_KEY).
 // Visitor emails come from LEAD_FROM_EMAIL (hello@hamzatariq.site, a domain verified in Resend).
@@ -29,7 +30,7 @@ const send = async (payload: { from: string; to: string; reply_to: string; subje
 };
 
 /** Notification to Hamza. Reply-to is the visitor, so answering the email reaches them directly. */
-export const sendOwnerNotification = (lead: LeadInput, id: string) => {
+export const sendOwnerNotification = (lead: LeadInput, id: string, audit: AuditResult | null = null) => {
   const rows: [string, string][] = [
     ["Name", lead.name],
     ["Email", lead.email],
@@ -38,6 +39,7 @@ export const sendOwnerNotification = (lead: LeadInput, id: string) => {
     ["Budget", lead.budget || "-"],
     ["Source", lead.source + (lead.session ? " (chat transcript in admin)" : "")],
     ["Page", lead.page ? `${SITE.url}${lead.page}` : "-"],
+    ...(audit ? ([["Audited URL", audit.finalUrl], ["SEO score", `${audit.score}/100`]] as [string, string][]) : []),
   ];
   const adminUrl = `${SITE.url}/admin/leads?lead=${id}`;
   const html = layout(`<p style="margin:0 0 16px;font-size:18px;font-weight:bold">New lead from ${escape(lead.name)}</p>
@@ -59,7 +61,9 @@ ${lead.message ? `<p style="margin:16px 0 0;padding:14px;background:#f8fafc;bord
     from: `Hamza's AI <${FROM}>`,
     to: NOTIFY_TO,
     reply_to: lead.email,
-    subject: `New lead: ${lead.name}${lead.projectType ? ` (${lead.projectType})` : ""}`,
+    subject: audit
+      ? `New SEO audit lead: ${lead.name} (${new URL(audit.finalUrl).hostname}, ${audit.score}/100)`
+      : `New lead: ${lead.name}${lead.projectType ? ` (${lead.projectType})` : ""}`,
     html,
     text,
   });
@@ -92,6 +96,85 @@ export const sendVisitorReply = (lead: LeadInput) => {
     to: lead.email,
     reply_to: SITE.email,
     subject: "Thanks, I got your message",
+    html,
+    text,
+  });
+};
+
+const STATUS_STYLE = {
+  pass: { label: "Good", color: "#15803d", bg: "#dcfce7" },
+  warn: { label: "Improve", color: "#a16207", bg: "#fef9c3" },
+  fail: { label: "Fix", color: "#b91c1c", bg: "#fee2e2" },
+  skip: { label: "Not measured", color: "#475569", bg: "#f1f5f9" },
+} as const;
+
+/** The full SEO audit report, sent to the visitor who asked for it on /tools/free-seo-audit. */
+export const sendAuditReport = (lead: LeadInput, audit: AuditResult) => {
+  const first = lead.name.split(/\s+/)[0];
+  const host = new URL(audit.finalUrl).hostname;
+  const order = { fail: 0, warn: 1, skip: 2, pass: 3 };
+  const groups = (Object.keys(GROUP_LABELS) as CheckGroup[])
+    .map((g) => ({ g, checks: audit.checks.filter((c) => c.group === g).sort((a, b) => order[a.status] - order[b.status]) }))
+    .filter((x) => x.checks.length);
+  const toFix = audit.checks.filter((c) => c.status === "fail" || c.status === "warn").length;
+  const scoreColor = audit.score >= 90 ? "#15803d" : audit.score >= 50 ? "#a16207" : "#b91c1c";
+  const speed = audit.pagespeed
+    ? [...audit.pagespeed.field.map((m) => ({ ...m, label: `${m.label} (real users)` })), ...audit.pagespeed.lab]
+    : [];
+  const html = layout(`<p style="margin:0 0 14px">Hi ${escape(first)},</p>
+<p style="margin:0 0 18px">Here is the full SEO report for <strong>${escape(host)}</strong>, checked on ${new Date(audit.checkedAt).toUTCString().slice(5, 16)}.</p>
+<div style="text-align:center;padding:18px;border-radius:12px;background:#f8fafc;margin:0 0 22px">
+<div style="font-size:44px;font-weight:bold;color:${scoreColor};line-height:1">${audit.score}<span style="font-size:18px;color:#64748b">/100</span></div>
+<div style="color:#475569;margin-top:6px">${toFix ? `${toFix} thing${toFix > 1 ? "s" : ""} to fix or improve` : "No problems found"}</div>
+</div>
+${groups
+  .map(
+    ({ g, checks }) => `<p style="margin:22px 0 8px;font-weight:bold;font-size:16px">${escape(GROUP_LABELS[g])}</p>
+${checks
+  .map((c) => {
+    const st = STATUS_STYLE[c.status];
+    return `<div style="border:1px solid #e2e8f0;border-radius:10px;padding:12px 14px;margin:0 0 8px">
+<span style="display:inline-block;font-size:12px;font-weight:bold;padding:2px 8px;border-radius:999px;color:${st.color};background:${st.bg}">${st.label}</span>
+<strong style="margin-left:6px">${escape(c.label)}</strong>
+<div style="color:#475569;margin-top:6px">${escape(c.detail)}</div>
+${c.fix ? `<div style="margin-top:6px"><strong>How to fix:</strong> ${escape(c.fix)}</div>` : ""}
+</div>`;
+  })
+  .join("\n")}`,
+  )
+  .join("\n")}
+${speed.length ? `<p style="margin:22px 0 8px;font-weight:bold;font-size:16px">Speed details (mobile)</p>
+<table style="border-collapse:collapse;width:100%">${speed
+    .map((m) => `<tr><td style="padding:6px 12px 6px 0;color:#475569">${escape(m.label)}</td><td style="padding:6px 0;font-weight:bold;color:${STATUS_STYLE[m.status].color}">${escape(m.value)}</td></tr>`)
+    .join("")}</table>` : ""}
+<div style="margin:26px 0 0;padding:18px;border-radius:12px;background:#f0fdfa;border:1px solid #99f6e4">
+<p style="margin:0 0 8px;font-weight:bold">Want me to fix this?</p>
+<p style="margin:0 0 14px">My SEO audit with a full fix plan starts at $150 (2–3 days), and I can also do the fixes for you. Reply to this email or book a free call.</p>
+<a href="${SITE.bookingUrl || `${SITE.url}/contact`}" style="display:inline-block;padding:12px 22px;border-radius:999px;background:#2dd4bf;color:#04221f;font-weight:bold;text-decoration:none">Book a free call</a>
+<a href="${SITE.url}/services/react-nextjs-seo" style="margin-left:12px;color:#0d9488">See the SEO service</a>
+</div>
+<p style="margin:24px 0 0">Hamza Tariq<br><span style="color:#64748b">${escape(SITE.jobTitle)} · <a href="${SITE.url}" style="color:#0d9488">hamzatariq.site</a></span></p>`);
+  const text = [
+    `Hi ${first},`,
+    "",
+    `SEO report for ${host}: ${audit.score}/100`,
+    ...groups.flatMap(({ g, checks }) => [
+      "",
+      GROUP_LABELS[g].toUpperCase(),
+      ...checks.map((c) => `[${STATUS_STYLE[c.status].label}] ${c.label}: ${c.detail}${c.fix ? `\n  Fix: ${c.fix}` : ""}`),
+    ]),
+    "",
+    "Want me to fix this? SEO audit from $150. Reply to this email or book a free call:",
+    SITE.bookingUrl || `${SITE.url}/contact`,
+    "",
+    "Hamza Tariq",
+    SITE.url,
+  ].join("\n");
+  return send({
+    from: `Hamza Tariq <${FROM}>`,
+    to: lead.email,
+    reply_to: SITE.email,
+    subject: `Your SEO report for ${host}: ${audit.score}/100`,
     html,
     text,
   });

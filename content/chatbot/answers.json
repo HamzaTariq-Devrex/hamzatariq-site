@@ -646,7 +646,7 @@
     },
     {
       "id": "experience",
-      "answer": "Hamza is a full-stack developer specializing in React and Next.js with a BSc in Artificial Intelligence. He was a Junior Frontend Developer at Ruya Solutions (2023 to 2024) and since 2024 runs Devrex Digital, building for 45+ brands. https://hamzatariq.site/about",
+      "answer": "Hamza is a full-stack developer specializing in React and Next.js with a BS in Artificial Intelligence from The Islamia University of Bahawalpur (2022 to 2026). He was a Junior Frontend Developer at Ruya Solutions (2023 to 2024) and since 2024 runs Devrex Digital, building for 45+ brands. https://hamzatariq.site/about",
       "keywords": [
         "experience",
         "experienced",
@@ -813,6 +813,33 @@
         "available ho",
         "free ho",
         "abhi kaam le sakte"
+      ]
+    },
+    {
+      "id": "location",
+      "answer": "Hamza is based in Pakistan and works with clients worldwide, including the US, UK, Europe and the Middle East. He's available in US, UK and EU time zones, and all prices are in USD. Would you like to share your project details?",
+      "lead": true,
+      "keywords": [
+        "location",
+        "located",
+        "based",
+        "country",
+        "timezone",
+        "timezones",
+        "where",
+        "remote",
+        "abroad",
+        "international"
+      ],
+      "phrases": [
+        "where are you",
+        "where is hamza",
+        "time zone",
+        "work remotely",
+        "us clients",
+        "uk clients",
+        "kahan se",
+        "kis country"
       ]
     },
     {

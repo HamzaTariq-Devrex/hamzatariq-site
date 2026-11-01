@@ -3,6 +3,8 @@ import "./styles/Contact.css";
 import { SERVICES } from "@/data/services";
 import { SITE } from "@/lib/site";
 import BookCall from "./site/BookCall";
+import { SEO_AUDIT_TOOL } from "@/data/tools";
+import { EDUCATION, UNIVERSITY } from "@/data/experience";
 
 const Contact = () => {
   return (
@@ -22,8 +24,14 @@ const Contact = () => {
               </a>
             </p>
 
+            <h4>Where I work</h4>
+            <p>{SITE.location}</p>
+            <p>{SITE.timezones}</p>
+
             <h4>Education</h4>
-            <p>BSc in Artificial Intelligence</p>
+            <p>
+              {EDUCATION}, {UNIVERSITY.name}
+            </p>
           </div>
 
           <div className="contact-box">
@@ -36,6 +44,11 @@ const Contact = () => {
                   </a>
                 </li>
               ))}
+              <li>
+                <a href={SEO_AUDIT_TOOL.href} data-cursor="disable">
+                  {SEO_AUDIT_TOOL.name}
+                </a>
+              </li>
             </ul>
           </div>
 
@@ -47,6 +60,9 @@ const Contact = () => {
               </li>
               <li>
                 <a href="/about" data-cursor="disable">About</a>
+              </li>
+              <li>
+                <a href="/blog" data-cursor="disable">Blog</a>
               </li>
               <li>
                 <a href="/hire" data-cursor="disable">Hire me</a>

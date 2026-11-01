@@ -16,6 +16,10 @@ export const SITE = {
   role: "Founder of Devrex Digital · React & Next.js developer",
   bio: "I'm Hamza Tariq, founder of Devrex Digital and a full-stack developer specializing in React and Next.js. With my team I've delivered websites and web apps for 45+ brands, from landing pages and ecommerce stores to admin dashboards and AI chatbots. I write everything in custom code, with no templates, so every site is fast, secure, SEO-ready and built around the business it serves.",
   agency: { name: "Devrex Digital", url: "https://www.devrexdigital.site" },
+  // International focus (owner): no city on pages. The city appears only in the Person schema address.
+  location: "Based in Pakistan · Working with clients worldwide",
+  timezones: "Available in US, UK and EU time zones",
+  address: { addressLocality: "Bahawalpur", addressCountry: "PK" },
   social: {
     github: "https://github.com/HamzaTariq-Devrex",
     whatsapp: "https://wa.me/923054122637",

@@ -10,7 +10,8 @@ import CountUp from "@/components/site/ds/CountUp";
 import Icon, { type IconName } from "@/components/site/ds/Icon";
 import { Laptop, Phone } from "@/components/site/ds/Mockups";
 import { PROCESS, SERVICES, formatPrice } from "@/data/services";
-import { EDUCATION, JOBS } from "@/data/experience";
+import { EDUCATION, JOBS, UNIVERSITY } from "@/data/experience";
+import WhereIWork from "@/components/site/WhereIWork";
 import { IMAGE_BASE, PROJECTS } from "@/data/projects";
 import { getCaseStudy } from "@/data/caseStudies";
 import { SITE } from "@/lib/site";
@@ -53,15 +54,15 @@ const STATS = [
 
 const [devrex, ruya] = [JOBS.find((j) => j.company === "Devrex Digital")!, JOBS.find((j) => j.company === "Ruya Solutions")!];
 
-// My story, oldest first. Logos are placeholders (initials) until the owner sends real ones.
+// My story, oldest first. Badges are text initials (owner: no company logos).
 const STORY = [
   {
-    when: null,
+    when: UNIVERSITY.period,
     badge: "AI",
     title: EDUCATION,
-    place: "Education",
+    place: UNIVERSITY.name,
     text: "Where I started: a degree in artificial intelligence, the background behind the AI chatbots I build today.",
-    todo: "Add the university and years for the BSc in Artificial Intelligence.",
+    todo: null,
   },
   { when: ruya.period, badge: "RS", title: ruya.role, place: ruya.company, text: ruya.body, todo: null },
   { when: devrex.period, badge: "DD", title: devrex.role, place: devrex.company, text: devrex.body, todo: null },
@@ -148,6 +149,7 @@ export default function AboutPage() {
             Hi, I&apos;m <span>Hamza Tariq</span>
           </h1>
           <p className="x-role">{SITE.role}</p>
+          <WhereIWork />
           <p className="x-hero-lead">{SITE.positioning}</p>
           <p className="x-hero-sub">{SITE.bio}</p>
           <div className="x-actions">
@@ -198,7 +200,6 @@ export default function AboutPage() {
             </li>
           ))}
         </ol>
-        <OwnerTodo what="Send the Ruya Solutions and Devrex Digital logos to replace the initials in this timeline." />
       </Section>
 
       <Section label="How I work" title="A simple process, from first call to launch" center>

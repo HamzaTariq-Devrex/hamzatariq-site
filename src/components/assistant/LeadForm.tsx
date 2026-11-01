@@ -11,11 +11,14 @@ type Props = {
   /** Smaller layout for the chat panel. */
   compact?: boolean;
   onSent?: () => void;
+  /** Short form (name, email, WhatsApp) for the SEO audit report; links the lead to the audit. */
+  auditId?: string | null;
 };
 
 type Status = { state: "idle" | "sending" | "sent" } | { state: "error"; message: string };
 
-const LeadForm = ({ source, session = null, compact = false, onSent }: Props) => {
+const LeadForm = ({ source, session = null, compact = false, onSent, auditId = null }: Props) => {
+  const report = source === "seo-audit";
   const id = useId();
   const [status, setStatus] = useState<Status>({ state: "idle" });
 
@@ -41,6 +44,7 @@ const LeadForm = ({ source, session = null, compact = false, onSent }: Props) =>
           ...Object.fromEntries(form),
           source,
           session,
+          auditId,
           page: window.location.pathname,
         }),
       });
@@ -56,8 +60,12 @@ const LeadForm = ({ source, session = null, compact = false, onSent }: Props) =>
   if (status.state === "sent") {
     return (
       <div className={`lead-form lead-form-done${compact ? " is-compact" : ""}`} role="status">
-        <strong>Thanks, your details are on their way.</strong>
-        <p>Hamza will reply by email within 24 hours. Check your inbox for a confirmation.</p>
+        <strong>{report ? "Your report is on its way." : "Thanks, your details are on their way."}</strong>
+        <p>
+          {report
+            ? "Check your inbox in a minute (and the spam folder, just in case). Reply to that email if you have questions."
+            : "Hamza will reply by email within 24 hours. Check your inbox for a confirmation."}
+        </p>
       </div>
     );
   }
@@ -76,6 +84,8 @@ const LeadForm = ({ source, session = null, compact = false, onSent }: Props) =>
         <label htmlFor={`${id}-phone`}>WhatsApp number (optional)</label>
         <input id={`${id}-phone`} name="phone" type="tel" maxLength={40} autoComplete="tel" placeholder="+92 300 1234567" />
       </div>
+      {!report && (
+      <>
       <div className="lead-form-pair">
         <div className="lead-form-row">
           <label htmlFor={`${id}-type`}>Project type</label>
@@ -104,6 +114,8 @@ const LeadForm = ({ source, session = null, compact = false, onSent }: Props) =>
         <label htmlFor={`${id}-message`}>{compact ? "Anything to add? (optional)" : "About your project"}</label>
         <textarea id={`${id}-message`} name="message" rows={compact ? 2 : 5} maxLength={4000} />
       </div>
+      </>
+      )}
       {/* Honeypot for bots; hidden from people and screen readers. */}
       <input name="website" tabIndex={-1} autoComplete="off" className="lead-form-trap" aria-hidden="true" />
       {status.state === "error" && (
@@ -112,7 +124,7 @@ const LeadForm = ({ source, session = null, compact = false, onSent }: Props) =>
         </p>
       )}
       <button type="submit" className="lead-form-submit" disabled={status.state === "sending"}>
-        {status.state === "sending" ? "Sending…" : "Send to Hamza"}
+        {status.state === "sending" ? "Sending…" : report ? "Email me the full report" : "Send to Hamza"}
       </button>
     </form>
   );

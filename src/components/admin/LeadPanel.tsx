@@ -97,6 +97,21 @@ const LeadPanel = ({ lead, onClose }: { lead: Lead; onClose: () => void }) => {
     ["Project type", lead.project_type || "-"],
     ["Budget", lead.budget || "-"],
     ["Source", SOURCE_LABELS[lead.source] ?? lead.source],
+    ...(lead.audit
+      ? ([
+          [
+            "Audited URL",
+            lead.audit.final_url ? (
+              <a href={lead.audit.final_url} target="_blank" rel="noreferrer">
+                {lead.audit.final_url}
+              </a>
+            ) : (
+              "-"
+            ),
+          ],
+          ["SEO score", `${lead.audit.score}/100`],
+        ] as [string, React.ReactNode][])
+      : []),
     [
       "Page",
       lead.page ? (

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { SITE } from "@/lib/site";
 import { SERVICES } from "@/data/services";
+import { SEO_AUDIT_TOOL } from "@/data/tools";
 import BookCall from "./BookCall";
 import SiteHeader from "./SiteHeader";
 import "../styles/Pages.css";
@@ -62,12 +63,14 @@ const SiteShell = ({ children, hideCta = false, cta = DEFAULT_CTA, stickyCta = f
               {s.name}
             </Link>
           ))}
+          <Link href={SEO_AUDIT_TOOL.href}>{SEO_AUDIT_TOOL.name}</Link>
         </div>
         <div>
           <p className="page-footer-title">Pages</p>
           <a href="/">Home</a>
           <Link href="/work">Work</Link>
           <Link href="/about">About</Link>
+          <Link href="/blog">Blog</Link>
           <Link href="/hire">Hire me</Link>
           <Link href="/contact">Contact</Link>
         </div>
@@ -88,6 +91,9 @@ const SiteShell = ({ children, hideCta = false, cta = DEFAULT_CTA, stickyCta = f
 
       <div className="page-footer-bottom">
         <span>© {new Date().getFullYear()} Hamza Tariq</span>
+        <span>
+          {SITE.location} · {SITE.timezones}
+        </span>
         <span>
           Founder of{" "}
           <a href={SITE.agency.url} target="_blank" rel="noreferrer">

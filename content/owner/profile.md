@@ -15,7 +15,8 @@ I'm Hamza Tariq, founder of Devrex Digital and a full-stack developer specializi
 - Role: full-stack developer (React, Next.js); founder of Devrex Digital.
 - Experience: Junior Frontend Web Developer at Ruya Solutions (2023–2024); Founder & Web Developer at Devrex Digital (2024–present).
 - Brands and clients served at Devrex Digital: 45+.
-- Education: BSc in Artificial Intelligence.
+- Location: based in Bahawalpur, Pakistan; works with clients worldwide (focus: US, UK, Europe, Middle East). Available in US, UK and EU time zones. Prices in USD. Pages say "Based in Pakistan" only; the city appears only in the Person schema address.
+- Education: BS in Artificial Intelligence, The Islamia University of Bahawalpur (2022–2026).
 - Email: hamzabuildsweb@gmail.com. WhatsApp: +92 305 4122637.
 - GitHub: https://github.com/HamzaTariq-Devrex (main profile link). No LinkedIn.
 - Photo: `public/images/hamza-tariq-2026.webp`.

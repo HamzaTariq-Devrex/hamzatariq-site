@@ -17,12 +17,15 @@ import {
 import { EmptyState, StatusBadge } from "./ui";
 import LeadPanel from "./LeadPanel";
 
-export type Lead = Database["public"]["Tables"]["leads"]["Row"];
+export type Lead = Database["public"]["Tables"]["leads"]["Row"] & {
+  /** The SEO audit an "seo-audit" lead asked for. */
+  audit?: { final_url: string | null; score: number } | null;
+};
 
 const csvCell = (value: string | null) => `"${(value ?? "").replace(/"/g, '""')}"`;
 
 const toCsv = (rows: Lead[]) => {
-  const head = ["Date", "Name", "Email", "WhatsApp", "Service", "Project type", "Budget", "Source", "Status", "Page", "Message", "Notes"];
+  const head = ["Date", "Name", "Email", "WhatsApp", "Service", "Project type", "Budget", "Source", "Audited URL", "SEO score", "Status", "Page", "Message", "Notes"];
   const lines = rows.map((l) =>
     [
       formatDate(l.created_at),
@@ -33,6 +36,8 @@ const toCsv = (rows: Lead[]) => {
       l.project_type,
       l.budget,
       SOURCE_LABELS[l.source] ?? l.source,
+      l.audit?.final_url ?? "",
+      l.audit ? String(l.audit.score) : "",
       STATUS_LABELS[l.status as keyof typeof STATUS_LABELS] ?? l.status,
       l.page ? `${SITE.url}${l.page}` : "",
       l.message,
@@ -207,7 +212,14 @@ const LeadsBrowser = ({ leads, initialLeadId }: { leads: Lead[]; initialLeadId: 
                   <td data-label="Budget" className={`adm-muted${l.budget ? "" : " is-empty"}`}>
                     {l.budget ?? "-"}
                   </td>
-                  <td data-label="Source">{SOURCE_LABELS[l.source] ?? l.source}</td>
+                  <td data-label="Source">
+                    {SOURCE_LABELS[l.source] ?? l.source}
+                    {l.audit && (
+                      <span className="adm-muted adm-audit-cell">
+                        {l.audit.final_url ? new URL(l.audit.final_url).hostname : ""} · {l.audit.score}/100
+                      </span>
+                    )}
+                  </td>
                   <td data-label="Status">
                     <StatusBadge status={l.status} />
                   </td>

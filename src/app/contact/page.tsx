@@ -6,6 +6,7 @@ import LeadForm from "@/components/assistant/LeadForm";
 import { SERVICES } from "@/data/services";
 import { SITE } from "@/lib/site";
 import { jsonLd } from "@/lib/seo";
+import WhereIWork from "@/components/site/WhereIWork";
 
 export const metadata: Metadata = {
   title: "Contact Hamza Tariq: Book a Free Call",
@@ -45,6 +46,7 @@ export default function ContactPage() {
           Tell me what you want to build or fix. We&apos;ll go through it on a free call, and you&apos;ll get a clear
           quote afterwards.
         </p>
+        <WhereIWork className="is-center" />
       </section>
 
       <section className="contact-form" id="project-form" aria-labelledby="project-form-title">

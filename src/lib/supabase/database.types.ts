@@ -108,6 +108,7 @@ export type Database = {
       }
       leads: {
         Row: {
+          audit_id: string | null
           budget: string | null
           created_at: string
           email: string
@@ -124,6 +125,7 @@ export type Database = {
           status: string
         }
         Insert: {
+          audit_id?: string | null
           budget?: string | null
           created_at?: string
           email: string
@@ -140,6 +142,7 @@ export type Database = {
           status?: string
         }
         Update: {
+          audit_id?: string | null
           budget?: string | null
           created_at?: string
           email?: string
@@ -157,6 +160,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "leads_audit_id_fkey"
+            columns: ["audit_id"]
+            isOneToOne: false
+            referencedRelation: "seo_audits"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "leads_session_id_fkey"
             columns: ["session_id"]
             isOneToOne: false
@@ -164,6 +174,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      seo_audits: {
+        Row: {
+          created_at: string
+          final_url: string | null
+          id: string
+          ip_hash: string | null
+          result: Json
+          score: number
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          final_url?: string | null
+          id?: string
+          ip_hash?: string | null
+          result: Json
+          score: number
+          url: string
+        }
+        Update: {
+          created_at?: string
+          final_url?: string | null
+          id?: string
+          ip_hash?: string | null
+          result?: Json
+          score?: number
+          url?: string
+        }
+        Relationships: []
       }
       site_chunks: {
         Row: {
@@ -203,6 +243,21 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      app_audit_recent_count: {
+        Args: { p_ip_hash: string; p_minutes?: number; p_secret: string }
+        Returns: number
+      }
+      app_cached_audit: {
+        Args: { p_hours?: number; p_secret: string; p_url: string }
+        Returns: {
+          created_at: string
+          final_url: string
+          id: string
+          result: Json
+          score: number
+          url: string
+        }[]
+      }
       app_chat_recent_count: {
         Args: { p_ip_hash: string; p_minutes?: number; p_secret: string }
         Returns: number
@@ -216,6 +271,7 @@ export type Database = {
       }
       app_create_lead: {
         Args: {
+          p_audit?: string
           p_budget: string
           p_email: string
           p_message: string
@@ -228,6 +284,24 @@ export type Database = {
           p_source: string
         }
         Returns: string
+      }
+      app_get_audit: {
+        Args: { p_id: string; p_secret: string }
+        Returns: {
+          created_at: string
+          final_url: string
+          id: string
+          result: Json
+          score: number
+          url: string
+        }[]
+      }
+      app_leads_by_source: {
+        Args: { p_from: string; p_secret: string; p_to: string }
+        Returns: {
+          leads: number
+          source: string
+        }[]
       }
       app_log_chat: {
         Args: {
@@ -276,6 +350,24 @@ export type Database = {
           p_url: string
         }
         Returns: number
+      }
+      app_save_audit: {
+        Args: {
+          p_final_url: string
+          p_ip_hash: string
+          p_result: Json
+          p_score: number
+          p_secret: string
+          p_url: string
+        }
+        Returns: string
+      }
+      app_top_questions: {
+        Args: { p_days?: number; p_limit?: number; p_secret: string }
+        Returns: {
+          asked: number
+          question: string
+        }[]
       }
       is_owner: { Args: never; Returns: boolean }
     }

@@ -3,6 +3,7 @@ import HomeClient from "@/components/HomeClient";
 import { SITE } from "@/lib/site";
 import { jsonLd } from "@/lib/seo";
 import { SERVICES } from "@/data/services";
+import { UNIVERSITY } from "@/data/experience";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/" },
@@ -22,6 +23,8 @@ const structuredData = {
       email: `mailto:${SITE.email}`,
       sameAs: [SITE.social.github, SITE.social.instagram],
       worksFor: { "@type": "Organization", name: SITE.agency.name, url: SITE.agency.url },
+      alumniOf: { "@type": "CollegeOrUniversity", name: UNIVERSITY.name, url: UNIVERSITY.url },
+      address: { "@type": "PostalAddress", ...SITE.address },
       knowsAbout: ["React", "Next.js", "TypeScript", "Tailwind CSS", "GSAP", "Ecommerce websites", "Dashboards", "AI chatbots", "Technical SEO"],
     },
     {
@@ -34,6 +37,7 @@ const structuredData = {
       founder: { "@id": `${SITE.url}/#person` },
       description: SITE.positioning,
       serviceType: SERVICES.map((s) => s.keyword),
+      areaServed: "Worldwide",
       hasOfferCatalog: {
         "@type": "OfferCatalog",
         name: "Services",

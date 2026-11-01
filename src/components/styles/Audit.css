@@ -1,0 +1,384 @@
+/* Free SEO audit tool (/tools/free-seo-audit). Tokens from Premium.css. */
+.audit-hero .audit {
+  width: 100%;
+  max-width: 760px;
+  margin: 34px auto 0;
+  text-align: left;
+}
+
+.audit-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.audit-form {
+  display: flex;
+  gap: 10px;
+  padding: 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(45, 212, 191, 0.35);
+  box-shadow: 0 0 0 6px rgba(45, 212, 191, 0.05);
+}
+
+.audit-form input {
+  flex: 1;
+  min-width: 0;
+  padding: 0 18px;
+  border: 0;
+  background: transparent;
+  color: var(--x-ink);
+  font: inherit;
+  font-size: 17px;
+}
+
+.audit-form input:focus {
+  outline: none;
+}
+
+.audit-form:focus-within {
+  border-color: var(--x-teal);
+}
+
+.audit-form button {
+  flex: none;
+}
+
+.audit-hint {
+  margin: 12px 0 0;
+  text-align: center;
+  font-size: 14px;
+  color: var(--x-faint);
+}
+
+.audit-progress {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 26px 0 0;
+  color: var(--x-muted);
+  font-size: 15px;
+}
+
+.audit-spinner {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  border-radius: 50%;
+  border: 2px solid rgba(45, 212, 191, 0.25);
+  border-top-color: var(--x-teal);
+  animation: audit-spin 0.8s linear infinite;
+}
+
+@keyframes audit-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.audit-result-anchor:focus {
+  outline: none;
+}
+
+.audit-error {
+  margin: 22px 0 0;
+  padding: 14px 18px;
+  border-radius: 14px;
+  background: rgba(248, 113, 113, 0.08);
+  border: 1px solid rgba(248, 113, 113, 0.3);
+  color: #fecaca;
+  text-align: center;
+}
+
+.audit-result {
+  margin-top: 34px;
+  display: grid;
+  gap: 26px;
+}
+
+.audit-summary {
+  display: flex;
+  align-items: center;
+  gap: 26px;
+  padding: 24px;
+}
+
+.audit-summary h3 {
+  margin: 4px 0 6px;
+  font-size: 22px;
+}
+
+.audit-summary p {
+  margin: 0;
+  color: var(--x-muted);
+}
+
+.audit-host {
+  color: var(--x-teal-soft) !important;
+  font-size: 14px;
+  word-break: break-all;
+}
+
+.audit-ring {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  flex: none;
+  --ring: #4ade80;
+}
+
+.audit-ring.is-warn {
+  --ring: #facc15;
+}
+
+.audit-ring.is-fail {
+  --ring: #f87171;
+}
+
+.audit-ring svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.audit-ring circle {
+  fill: none;
+  stroke-width: 10;
+}
+
+.audit-ring-track {
+  stroke: rgba(255, 255, 255, 0.08);
+}
+
+.audit-ring-value {
+  stroke: var(--ring);
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1s var(--x-ease);
+}
+
+.audit-ring > span {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  font-size: 34px;
+  font-weight: 700;
+  color: var(--ring);
+  text-align: center;
+  line-height: 1;
+}
+
+.audit-ring small {
+  display: block;
+  margin-top: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--x-faint);
+}
+
+.audit-group h3 {
+  margin: 0 0 12px;
+  font-size: 18px;
+}
+
+.audit-group ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.audit-check {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  gap: 14px;
+  padding: 16px 18px;
+  border-radius: 16px;
+  background: var(--x-glass);
+  border: 1px solid var(--x-line);
+  --tone: #4ade80;
+  --tone-bg: rgba(74, 222, 128, 0.1);
+}
+
+.audit-check.is-warn {
+  --tone: #facc15;
+  --tone-bg: rgba(250, 204, 21, 0.1);
+}
+
+.audit-check.is-fail {
+  --tone: #f87171;
+  --tone-bg: rgba(248, 113, 113, 0.1);
+  border-color: rgba(248, 113, 113, 0.25);
+}
+
+.audit-check.is-skip {
+  --tone: rgba(226, 232, 240, 0.7);
+  --tone-bg: rgba(255, 255, 255, 0.06);
+}
+
+.audit-pill {
+  align-self: start;
+  justify-self: start;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--tone);
+  background: var(--tone-bg);
+  white-space: nowrap;
+}
+
+.audit-check h4 {
+  margin: 0 0 4px;
+  font-size: 16px;
+}
+
+.audit-check p {
+  margin: 0;
+  color: var(--x-muted);
+  font-size: 15px;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+.audit-check .audit-fix {
+  margin-top: 8px;
+  color: var(--x-ink);
+}
+
+.audit-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+  margin: 12px 0 0;
+}
+
+.audit-metrics div {
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--x-glass);
+  border: 1px solid var(--x-line);
+}
+
+.audit-metrics dt {
+  font-size: 13px;
+  color: var(--x-faint);
+}
+
+.audit-metrics dd {
+  margin: 4px 0 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #4ade80;
+}
+
+.audit-metrics .is-warn dd {
+  color: #facc15;
+}
+
+.audit-metrics .is-fail dd {
+  color: #f87171;
+}
+
+.audit-metrics .is-skip dd {
+  color: var(--x-ink);
+}
+
+.audit-next {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px;
+}
+
+.audit-next .x-card {
+  padding: 24px;
+}
+
+.audit-next h3 {
+  margin: 0 0 6px;
+  font-size: 20px;
+}
+
+.audit-next p {
+  color: var(--x-muted);
+}
+
+.audit-cta {
+  border-color: rgba(45, 212, 191, 0.3) !important;
+}
+
+.audit-cta .x-actions {
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+
+.audit-prose {
+  max-width: 760px;
+  color: var(--x-muted);
+  font-size: 17px;
+  line-height: 1.7;
+}
+
+.audit-prose h3 {
+  margin: 30px 0 10px;
+  color: var(--x-ink);
+  font-size: 20px;
+}
+
+.audit-prose a {
+  color: var(--x-teal-soft);
+}
+
+.audit-prose strong {
+  color: var(--x-ink);
+}
+
+.audit-checks-grid .x-card h3 {
+  font-size: 17px;
+}
+
+@media (max-width: 760px) {
+  .audit-form {
+    flex-direction: column;
+    border-radius: 20px;
+  }
+
+  .audit-form input {
+    padding: 12px 12px;
+  }
+
+  .audit-form button {
+    width: 100%;
+  }
+
+  .audit-summary {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .audit-check {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  .audit-next {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .audit-spinner {
+    animation-duration: 2.4s;
+  }
+
+  .audit-ring-value {
+    transition: none;
+  }
+}

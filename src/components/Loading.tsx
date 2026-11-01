@@ -71,9 +71,10 @@ const Loading = ({ percent }: { percent: number }) => {
             <span className="preloader-eyebrow">
               <span>Web Developer &amp; Designer</span>
             </span>
-            <h1 className="preloader-name">
+            {/* Not a heading: the page's one H1 is in the hero (Landing). */}
+            <p className="preloader-name">
               <span>{NAME}</span>
-            </h1>
+            </p>
           </div>
 
           <footer className="preloader-footer">

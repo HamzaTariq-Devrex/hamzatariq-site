@@ -5,7 +5,8 @@ import SiteShell from "@/components/site/SiteShell";
 import OwnerTodo from "@/components/site/OwnerTodo";
 import CaseStudyCard from "@/components/site/CaseStudyCard";
 import ProjectCard from "@/components/ProjectCard";
-import { EDUCATION, JOBS } from "@/data/experience";
+import { EDUCATION, JOBS, UNIVERSITY } from "@/data/experience";
+import WhereIWork from "@/components/site/WhereIWork";
 import { CASE_STUDIES } from "@/data/caseStudies";
 import { PROJECTS } from "@/data/projects";
 import { SITE } from "@/lib/site";
@@ -58,6 +59,7 @@ export default function HirePage() {
             <span className="page-status" aria-hidden="true" />
             Available for new projects
           </div>
+          <WhereIWork />
           <OwnerTodo what="Confirm availability: open to full-time, contract or remote roles?" />
           <div className="project-actions">
             <a href={`mailto:${SITE.email}?subject=${encodeURIComponent("Role / project enquiry")}`} className="page-btn page-btn-primary">
@@ -101,7 +103,9 @@ export default function HirePage() {
         </div>
         <div>
           <span>Education</span>
-          <strong>{EDUCATION}</strong>
+          <strong>
+            {EDUCATION}, {UNIVERSITY.name} ({UNIVERSITY.period.replace(" - ", "–")})
+          </strong>
         </div>
       </section>
 

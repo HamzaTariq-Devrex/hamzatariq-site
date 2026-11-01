@@ -1921,3 +1921,31 @@ a.x-card:focus-visible {
     animation: none;
   }
 }
+
+/* "Based in Pakistan · Working with clients worldwide" + time zones (WhereIWork) */
+.x-where {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 22px;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 14px;
+  color: var(--x-muted);
+}
+
+.x-where li {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.x-where svg {
+  flex: none;
+  color: var(--x-teal);
+}
+
+.x-where.is-center {
+  justify-content: center;
+  margin-top: 18px;
+}

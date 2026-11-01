@@ -11,7 +11,7 @@ export const PROJECT_TYPES = [
 
 export const BUDGETS = ["Under $500", "$500 to $1,000", "$1,000 to $2,500", "$2,500+", "Not sure yet"] as const;
 
-export const LEAD_SOURCES = ["chatbot", "form", "tool", "page"] as const;
+export const LEAD_SOURCES = ["chatbot", "form", "tool", "page", "seo-audit"] as const;
 export type LeadSource = (typeof LEAD_SOURCES)[number];
 
 export type LeadInput = {
@@ -25,6 +25,8 @@ export type LeadInput = {
   source: LeadSource;
   page: string;
   session: string | null;
+  /** SEO audit the visitor asked to receive (source "seo-audit"). */
+  auditId: string | null;
 };
 
 export const EMAIL_PATTERN = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;

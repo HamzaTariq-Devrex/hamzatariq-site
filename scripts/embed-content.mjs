@@ -17,7 +17,8 @@ const OWNER_DIR = "content/owner";
 const EMBED_MODEL = "gemini-embedding-001";
 const EMBED_DIMENSIONS = 768;
 const CHUNK_CHARS = 1200;
-const SKIP = [/^_/, /^admin\//, /^(404|500)$/, /opengraph-image/];
+// Tag pages are noindex lists of posts that are embedded anyway.
+const SKIP = [/^_/, /^admin\//, /^(404|500)$/, /opengraph-image/, /^blog\/tag\//];
 
 const soft = process.argv.includes("--soft");
 

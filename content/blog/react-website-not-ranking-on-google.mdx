@@ -1,0 +1,138 @@
+---
+title: "Why Your React Website Is Not Ranking on Google (and How to Fix It)"
+seoTitle: "Why a React Website Is Not Ranking on Google"
+description: "Is your React website not ranking on Google? Here is why single-page React apps stay invisible, how to check yours in minutes, and the fixes that worked for me."
+keyword: "react website not ranking on google"
+category: react-nextjs-seo
+tags: [react, seo, next.js, indexing]
+published: 2026-11-02
+faq:
+  - q: "Can Google index a React website at all?"
+    a: "Yes, Google can run JavaScript and index React pages, but it does it later and less reliably than plain HTML. Other search engines, link previews and AI crawlers often read only the raw HTML, so a client-rendered React site looks almost empty to them."
+  - q: "Do I need to rebuild my React site to rank on Google?"
+    a: "Usually not. Your components, design and animations can stay. Moving the site to Next.js mostly changes how pages are delivered: each URL gets its own server-rendered HTML, title and description."
+  - q: "How long does it take to see results after fixing React SEO?"
+    a: "The technical fixes are visible right away in your page source and in Lighthouse. Rankings depend on Google crawling the new pages, your content and your competition, so I never promise a ranking date."
+  - q: "What does a React SEO audit cost?"
+    a: "My SEO audit starts at $150 and takes 2–3 days. You get a report and a fix list in priority order. A full React to Next.js migration starts at $800."
+  - q: "Is react-helmet enough to fix my titles?"
+    a: "It sets titles in the browser after JavaScript runs, so the raw HTML still has one generic title. It helps a little with Google but not with crawlers that skip JavaScript. Server-rendered metadata fixes it properly."
+---
+
+If your React website is not ranking on Google, the most common reason is simple: the page Google downloads is almost empty. A standard React app (built with Vite or Create React App) sends one blank HTML shell for every URL and builds the content in the browser with JavaScript. Google has to run that JavaScript before it can see anything, and many crawlers never do.
+
+The good news is that this is a technical problem, not a content or design problem. You can usually keep your React components and your design, and fix how the pages are delivered. I did exactly that on my own site, and the mobile SEO score went from 83 to 100.
+
+Below I explain why it happens, how to check your own site in a few minutes, and what to fix first.
+
+## Why a React website is not ranking on Google
+
+Most React sites are single-page apps (SPAs). When someone opens any URL, the server returns the same small HTML file. It has an empty `<div id="root">` and a script tag. Everything you see on screen is created later by JavaScript.
+
+For people with a fast phone this works fine. For search engines it creates three problems:
+
+1. **Empty HTML.** The first thing a crawler receives has no headings, no text and no links. Google puts JavaScript pages in a render queue and comes back later to run them. That second step can be slow, and if anything fails (a script error, a blocked API call, a timeout) Google indexes the empty version.
+2. **One title for every page.** The `<title>` and meta description live in `index.html`, so every URL shares them. Google sees ten pages with the same title and no description, and has no idea which page answers which search.
+3. **Missing basics.** SPAs often ship without a sitemap, a robots.txt file, canonical URLs or structured data, because the framework doesn't create them for you.
+
+Google explains its own process in its guide to [JavaScript SEO basics](https://developers.google.com/search/docs/crawling-indexing/javascript/javascript-seo-basics). The short version: crawl, then render, then index. Every step you make Google do in the browser is a step that can go wrong.
+
+Other crawlers are less patient. Link previews on WhatsApp, LinkedIn and Slack read only the raw HTML. So do many AI search tools. If the HTML is empty, your site shows up with no title, no image and no text.
+
+## How to check your site in five minutes
+
+You don't need any paid tool for this. Try these checks on your home page and one inner page.
+
+### View the page source
+
+Open your site, right-click and choose **View page source** (not Inspect). Search for a sentence that you can see on the page. If it's not in the source, the content is created by JavaScript and crawlers that skip JavaScript can't see it.
+
+### Compare titles
+
+Open three different pages and look at the browser tab. If they all show the same title, Google sees the same title too. Each page needs its own title and its own description.
+
+### Check robots.txt and sitemap.xml
+
+Add `/robots.txt` and `/sitemap.xml` to your domain. If either one returns your home page, a blank page or an error, search engines are missing the map of your site.
+
+### Run a free audit
+
+I built a [free SEO audit tool](/tools/free-seo-audit) that does these checks for you. It downloads the raw HTML the way a crawler does, checks the title, description, headings, structured data, robots.txt and sitemap, and runs Google's PageSpeed test. You get a score and a fix list in red, yellow and green.
+
+## The fixes that matter most
+
+Here is the order I work in. The first two make the biggest difference.
+
+### 1. Send real HTML for every URL
+
+This is the main fix. Each URL should return HTML that already contains its headings, text, links and images. There are two ways to get there:
+
+- **Server-side rendering (SSR):** the server builds the HTML when someone asks for the page.
+- **Static generation:** the HTML for each page is built once at deploy time and served from a CDN. This is the fastest option and works for most business sites.
+
+[Next.js](https://nextjs.org/docs) gives you both and still uses React components, so your existing code moves over with small changes. That's why I recommend it for React sites that need search traffic.
+
+### 2. Give every page its own title and description
+
+Every page needs a unique title (short enough to show fully in search results) and a meta description of about 150–160 characters that says what the reader gets. In Next.js you export `metadata` from each page, and it lands in the server HTML, not after JavaScript runs.
+
+### 3. Add the files search engines look for
+
+- **sitemap.xml** with every page you want indexed.
+- **robots.txt** that allows crawling and points to the sitemap.
+- **Canonical URLs**, so `www` and non-`www`, or URLs with tracking parameters, don't count as duplicates.
+
+### 4. Add structured data
+
+Structured data (JSON-LD) tells Google what a page is: a person, a business, a service, an article, an FAQ. It can make your result richer and helps Google connect your pages.
+
+### 5. Make the first screen load fast
+
+Speed matters for both people and rankings. Google measures it with Core Web Vitals; the main one is Largest Contentful Paint (LCP), the time until the largest thing on screen appears. On React sites the usual problems are heavy JavaScript, a preloader that hides content, unoptimized images and web fonts loaded late.
+
+<FromMyWork>
+My own portfolio started as a Vite + React single-page app. Every URL returned the same nearly empty HTML, there was one hard-coded title for all pages, and there was no meta description, sitemap, robots.txt or structured data.
+
+I moved it to Next.js 15 and kept the design, the GSAP animations and the 3D character. All pages are now pre-rendered, including 31 project pages, each with its own title, description, canonical URL and JSON-LD.
+
+Results on mobile Lighthouse: the SEO score went from **83 to 100**, and LCP on the home page dropped from **18.0 s to 2.6 s**. The full story is in the [hamzatariq.site case study](/work/hamzatariq-site).
+</FromMyWork>
+
+## Should you migrate to Next.js or patch your React app?
+
+You have three realistic options. Here is how I explain them to clients.
+
+| Option | What it fixes | Good for |
+| --- | --- | --- |
+| Patch the SPA (react-helmet, a prerender service) | Some titles, some previews | Small sites that can't change hosting |
+| Migrate to Next.js | Real HTML, metadata, sitemap, speed | Sites that need Google traffic or leads |
+| Rebuild from scratch | Everything, plus a new design | Sites that need a redesign anyway |
+
+Patching is cheaper at first, but it leaves the empty HTML in place. Prerender services add another moving part that can break quietly. For most business sites the migration is the better deal: your components and design stay, and every page starts working for search.
+
+If you're unsure, start with an audit. You'll know which problems you actually have before you spend money on fixing them.
+
+## What a React SEO fix costs and how long it takes
+
+These are my starting prices. Every project is quoted after a free call, because the final price depends on the size of the site.
+
+- **SEO audit:** from $150, delivered in 2–3 days. A report and a fix list in priority order.
+- **Technical SEO setup for React/Next.js:** from $500. Metadata, sitemap, robots.txt, canonical URLs, structured data and speed fixes.
+- **React (Vite/CRA) to Next.js migration:** from $800. Your design stays; every page gets real HTML.
+- **Monthly SEO + content:** from $400/month.
+
+Payment is 50% upfront and 50% on delivery, and you get 30 days of free bug fixes after launch. The details are on my [React SEO services](/services/react-nextjs-seo) page.
+
+## A quick checklist before you call anyone
+
+Use this to see how much work your site needs:
+
+- [ ] View source shows your real text, not just an empty root div.
+- [ ] Every page has its own title and meta description.
+- [ ] `/robots.txt` and `/sitemap.xml` return real files.
+- [ ] Every page has a canonical URL.
+- [ ] Structured data exists for your business or person.
+- [ ] The largest element on mobile appears quickly, with no preloader hiding it.
+- [ ] Images use modern formats and have alt text.
+
+If three or more boxes are empty, your React website is probably invisible to most of Google's crawl, no matter how good it looks. Run the [free audit](/tools/free-seo-audit) to see your exact list, or read how I compare the two main platforms in [Next.js vs WordPress for a business website](/blog/nextjs-vs-wordpress-for-business-website).
