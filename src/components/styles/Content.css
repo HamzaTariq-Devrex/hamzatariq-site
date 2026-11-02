@@ -1024,3 +1024,32 @@
   font-weight: 600;
   letter-spacing: -0.02em;
 }
+
+/* /hire: CV highlights, education and languages */
+.hire-highlights {
+  margin: 8px 0 14px;
+  padding-left: 18px;
+  display: grid;
+  gap: 6px;
+  color: rgba(226, 232, 240, 0.75);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.hire-edu {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.hire-edu > div {
+  padding: 18px;
+  border-radius: 18px;
+  border: 1px solid var(--page-line);
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.hire-edu h3 {
+  margin: 6px 0 4px;
+  font-size: 17px;
+}

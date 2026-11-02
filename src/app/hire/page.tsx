@@ -6,7 +6,7 @@ import OwnerTodo from "@/components/site/OwnerTodo";
 import CvLink from "@/components/site/CvLink";
 import CaseStudyCard from "@/components/site/CaseStudyCard";
 import ProjectCard from "@/components/ProjectCard";
-import { EDUCATION, JOBS, UNIVERSITY } from "@/data/experience";
+import { CV_PROJECTS, CV_SKILLS, CV_SUMMARY, EDUCATION_HISTORY, JOBS, LANGUAGES } from "@/data/experience";
 import WhereIWork from "@/components/site/WhereIWork";
 import { CASE_STUDIES } from "@/data/caseStudies";
 import { PROJECTS } from "@/data/projects";
@@ -16,16 +16,9 @@ import { jsonLd } from "@/lib/seo";
 export const metadata: Metadata = {
   title: "Hire a React and Next.js Developer",
   description:
-    "Hire Hamza Tariq, a full-stack React and Next.js developer: skills, tech stack, experience at Devrex Digital, GitHub and availability for new projects.",
+    "Hire Hamza Tariq, a frontend developer (Next.js, React, TypeScript) with 40+ live websites: CV, skills, experience at Devrex Digital, projects and GitHub.",
   alternates: { canonical: "/hire" },
 };
-
-const SKILLS = [
-  { group: "Frontend", items: ["React", "Next.js", "TypeScript", "JavaScript", "HTML5", "CSS3", "Tailwind CSS"] },
-  { group: "Motion & 3D", items: ["GSAP", "Framer Motion", "Three.js"] },
-  { group: "What I build", items: ["Ecommerce stores", "Admin dashboards", "Web apps", "AI chatbots", "Responsive design"] },
-  { group: "SEO", items: ["Technical SEO", "Next.js migrations", "Structured data", "Core Web Vitals"] },
-];
 
 const structuredData = {
   "@context": "https://schema.org",
@@ -55,7 +48,7 @@ export default function HirePage() {
           <h1>
             Hire a React &amp; <span>Next.js developer</span>
           </h1>
-          <p>{SITE.bio}</p>
+          <p>{CV_SUMMARY}</p>
           <div className="hire-status">
             <span className="page-status" aria-hidden="true" />
             Available for new projects
@@ -90,28 +83,26 @@ export default function HirePage() {
       <section className="hire-facts" aria-label="Quick facts">
         <div>
           <span>Role</span>
-          <strong>Full-stack developer</strong>
+          <strong>Frontend developer · Next.js / React / TypeScript</strong>
         </div>
         <div>
-          <span>Focus</span>
-          <strong>React & Next.js</strong>
+          <span>Experience</span>
+          <strong>2+ years · 40+ live production websites</strong>
         </div>
         <div>
-          <span>Brands served</span>
-          <strong>45+ at Devrex Digital</strong>
+          <span>Based in</span>
+          <strong>Pakistan · remote, US, UK and EU time zones</strong>
         </div>
         <div>
-          <span>Education</span>
-          <strong>
-            {EDUCATION}, {UNIVERSITY.name} ({UNIVERSITY.period.replace(" - ", "–")})
-          </strong>
+          <span>Languages</span>
+          <strong>{LANGUAGES.map((l) => `${l.name} (${l.level.split(" ")[0].toLowerCase()})`).join(", ")}</strong>
         </div>
       </section>
 
       <section className="svc-section">
         <h2>Skills &amp; tech stack</h2>
         <div className="hire-skills">
-          {SKILLS.map((g) => (
+          {CV_SKILLS.map((g) => (
             <div key={g.group}>
               <h3>{g.group}</h3>
               <ul className="about-chips">
@@ -133,7 +124,11 @@ export default function HirePage() {
               <div>
                 <h3>{job.role}</h3>
                 <p className="about-timeline-company">{job.company}</p>
-                <p>{job.body}</p>
+                <ul className="hire-highlights">
+                  {job.highlights.map((h) => (
+                    <li key={h}>{h}</li>
+                  ))}
+                </ul>
                 <ul className="about-chips">
                   {job.tags.map((t) => (
                     <li key={t}>{t}</li>
@@ -146,12 +141,32 @@ export default function HirePage() {
       </section>
 
       <section className="svc-section">
+        <h2>Education &amp; languages</h2>
+        <div className="hire-edu">
+          {EDUCATION_HISTORY.map((e) => (
+            <div key={e.title}>
+              <span className="about-timeline-period">{e.period.replace(" - ", "–")}</span>
+              <h3>{e.title}</h3>
+              <p className="about-timeline-company">{e.school}</p>
+            </div>
+          ))}
+          {LANGUAGES.map((l) => (
+            <div key={l.name}>
+              <span className="about-timeline-period">Language</span>
+              <h3>{l.name}</h3>
+              <p className="about-timeline-company">{l.level}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="svc-section">
         <h2>Selected work</h2>
         <div className="project-grid is-static">
           {CASE_STUDIES.map((c) => (
             <CaseStudyCard key={c.slug} study={c} />
           ))}
-          {PROJECTS.slice(0, 2).map((p, i) => (
+          {CV_PROJECTS.map((slug) => PROJECTS.find((p) => p.slug === slug)!).map((p, i) => (
             <ProjectCard key={p.slug} project={p} index={i} />
           ))}
         </div>

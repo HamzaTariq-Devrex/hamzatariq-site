@@ -8,6 +8,7 @@ import { TbNotes } from "react-icons/tb";
 import { useEffect } from "react";
 import HoverLinks from "./HoverLinks";
 import { trackEvent } from "@/lib/analytics";
+import { SITE } from "@/lib/site";
 
 const SocialIcons = () => {
   useEffect(() => {
@@ -80,8 +81,8 @@ const SocialIcons = () => {
       {/* Resume Button */}
       <a
      className="resume-button"
-  href="/Hamza Tariq Resume.pdf"
-  download="Hamza Tariq Resume.pdf"
+  href={SITE.cvUrl ?? "/hire"}
+  download="Hamza Tariq CV.pdf"
   onClick={() => trackEvent("cv_downloaded", { from: "home" })}
   target="_blank"
   rel="noreferrer"

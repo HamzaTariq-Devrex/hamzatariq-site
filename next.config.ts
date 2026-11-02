@@ -14,6 +14,8 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
+      // Old CV file name (replaced November 2026).
+      { source: "/Hamza%20Tariq%20Resume.pdf", destination: "/Hamza_Tariq_CV.pdf", permanent: true },
       {
         source: "/:path*",
         has: [{ type: "host", value: "www.hamzatariq.site" }],

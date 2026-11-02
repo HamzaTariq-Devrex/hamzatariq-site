@@ -28,8 +28,8 @@ export const SITE = {
   // Calendly link from the CALENDLY_URL env var (see next.config.ts). TODO(owner) until it is set:
   // every "Book a free call" button goes to /contact (form, email, WhatsApp) instead.
   bookingUrl: (process.env.NEXT_PUBLIC_CALENDLY_URL || null) as string | null,
-  // TODO(owner): new CV PDF. The /hire download stays hidden until this is set.
-  cvUrl: null as string | null,
+  /** CV (November 2026): home Resume button and /hire "Download CV". */
+  cvUrl: "/Hamza_Tariq_CV.pdf" as string | null,
 } as const;
 
 export const isProductionSite = process.env.VERCEL_ENV === "production";

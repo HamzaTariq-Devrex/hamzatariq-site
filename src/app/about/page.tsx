@@ -10,7 +10,7 @@ import CountUp from "@/components/site/ds/CountUp";
 import Icon, { type IconName } from "@/components/site/ds/Icon";
 import { Laptop, Phone } from "@/components/site/ds/Mockups";
 import { PROCESS, SERVICES, formatPrice } from "@/data/services";
-import { EDUCATION, JOBS, UNIVERSITY } from "@/data/experience";
+import { EDUCATION_HISTORY, JOBS } from "@/data/experience";
 import WhereIWork from "@/components/site/WhereIWork";
 import { IMAGE_BASE, PROJECTS } from "@/data/projects";
 import { getCaseStudy } from "@/data/caseStudies";
@@ -52,19 +52,27 @@ const STATS = [
   { value: seoAfter, suffix: "", label: "Mobile SEO score", note: "This site, Lighthouse, after the Next.js move" },
 ];
 
-const [devrex, ruya] = [JOBS.find((j) => j.company === "Devrex Digital")!, JOBS.find((j) => j.company === "Ruya Solutions")!];
+const devrex = JOBS.find((j) => j.company === "Devrex Digital")!;
+const [bs, ics] = EDUCATION_HISTORY;
 
 // My story, oldest first. Badges are text initials (owner: no company logos).
 const STORY = [
   {
-    when: UNIVERSITY.period,
-    badge: "AI",
-    title: EDUCATION,
-    place: UNIVERSITY.name,
-    text: "Where I started: a degree in artificial intelligence, the background behind the AI chatbots I build today.",
+    when: ics.period,
+    badge: "CS",
+    title: ics.title,
+    place: ics.school,
+    text: "Where I started with code: computer science at intermediate level, before university.",
     todo: null,
   },
-  { when: ruya.period, badge: "RS", title: ruya.role, place: ruya.company, text: ruya.body, todo: null },
+  {
+    when: bs.period,
+    badge: "AI",
+    title: bs.title,
+    place: bs.school,
+    text: "A degree in artificial intelligence, the background behind the AI chatbots I build today.",
+    todo: null,
+  },
   { when: devrex.period, badge: "DD", title: devrex.role, place: devrex.company, text: devrex.body, todo: null },
   {
     when: "Now",
@@ -183,7 +191,7 @@ export default function AboutPage() {
         ))}
       </section>
 
-      <Section label="My story" title="From frontend developer to agency founder" text="How I got here, in four steps.">
+      <Section label="My story" title="From computer science to agency founder" text="How I got here, in four steps.">
         <ol className="x-timeline">
           {STORY.map((s) => (
             <li key={s.title} data-reveal>

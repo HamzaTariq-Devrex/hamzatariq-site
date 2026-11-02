@@ -6,7 +6,6 @@ Facts and access only Hamza can provide. Nothing on the site may be invented to 
 ## Open
 
 - [ ] **Calendly link.** Add `CALENDLY_URL` in Vercel (Production) and `.env.local`, then redeploy. Every "Book a free call" button then opens the Calendly popup and `/contact` shows the inline embed. Until then the buttons go to `/contact` (form, email, WhatsApp).
-- [ ] **New CV PDF.** Put it in `public/` and set `cvUrl` in `src/lib/site.ts`; the "Download CV" button on `/hire` appears automatically. (The home page Resume button still links the old `public/Hamza Tariq Resume.pdf`.)
 - [ ] **More case studies.** For each: client type, problem, what you built, stack, results, screenshots, testimonial (if any), and whether it was your own client or Devrex Digital work. Dashboards and AI chatbots have no related case study yet, so their "Related work" sections are hidden on the live site.
 - [ ] **Availability for roles** (`/hire`): open to full-time, contract or remote work?
 - [ ] **Supabase CLI login (blocks the growth-engine push).** The CLI is logged in to a client account (tuluawear07). Run `npx supabase login` with the hamzabuildsweb account, then I apply migration `20261102090000_seo_audit_autopilot` (SEO audits table, `seo-audit` lead source, autopilot data functions) and regenerate types.
@@ -20,6 +19,8 @@ Facts and access only Hamza can provide. Nothing on the site may be invented to 
 - [ ] Bing Webmaster Tools: verify the site (can import from Search Console).
 
 ## Done
+
+- [x] New CV (`public/Hamza_Tariq_CV.pdf`) on the home Resume button and /hire; /hire and /about updated from it (Devrex Digital since Jan 2023, ICS, languages, CV skills and selected projects). Old resume removed; its URL redirects to the new CV.
 
 - [x] Vercel Web Analytics enabled (custom events show in Vercel on Pro only; /admin counts them from Supabase).
 - [x] Add-on prices: extra page $50 each, CMS +$150, second language +$250. Pages included: landing/portfolio 5, store 10 (unlimited products), full ecommerce app 15; dashboards and web apps by features.
