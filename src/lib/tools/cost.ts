@@ -1,7 +1,7 @@
 // Website cost calculator: turns a project description into a starting price and delivery time.
 // Uses ONLY the real packages, prices and timelines in src/data/services.ts (mirrors
 // content/owner/profile.md). Anything without an owner price is listed as "quoted after a free call",
-// never priced. Add-on prices (CMS, second language, extra pages) come from ADD_ONS. Shared by the browser UI and /api/leads (which recomputes it from the inputs).
+// never priced. Add-on prices (CMS, second language, extra pages beyond a tier's `pages`) come from ADD_ONS. Shared by the browser UI and /api/leads (which recomputes it from the inputs).
 import { ADD_ONS, SERVICES, type PriceTier } from "@/data/services";
 
 export const SITE_TYPES = [
@@ -20,20 +20,14 @@ export const FEATURES = [
   { id: "multilingual", label: "More than one language" },
 ] as const;
 
-// ASCII ids (sent to /api/leads); labels use an en dash.
-export const PAGE_OPTIONS = [
-  { id: "1-5", label: "1–5" },
-  { id: "6-10", label: "6–10" },
-  { id: "11-20", label: "11–20" },
-  { id: "20+", label: "20+" },
-] as const;
+/** Pages the visitor plans (1-200). */
+export const PAGES = { min: 1, max: 200, default: 5 } as const;
 
 export type SiteType = (typeof SITE_TYPES)[number]["id"];
 export type Feature = (typeof FEATURES)[number]["id"];
-export type PageOption = (typeof PAGE_OPTIONS)[number]["id"];
-export type CostInput = { type: SiteType; pages: PageOption; features: Feature[] };
+export type CostInput = { type: SiteType; pages: number; features: Feature[] };
 
-export type Package = { service: string; serviceSlug: string; name: string; price: number; timeline: string | null };
+export type Package = { service: string; serviceSlug: string; name: string; price: number; timeline: string | null; pages: number | null };
 export type AddOn = { name: string; price: number };
 export type Estimate = {
   packages: Package[];
@@ -51,7 +45,7 @@ const tier = (serviceSlug: string, name: string): Package => {
   const service = SERVICES.find((s) => s.slug === serviceSlug)!;
   const t: PriceTier | undefined = service.pricing.find((p) => p.name === name);
   if (!t) throw new Error(`Unknown package "${name}" in ${serviceSlug}`);
-  return { service: service.name, serviceSlug, name: t.name, price: t.price, timeline: t.timeline ?? null };
+  return { service: service.name, serviceSlug, name: t.name, price: t.price, timeline: t.timeline ?? null, pages: t.pages ?? null };
 };
 
 const PKG = {
@@ -76,8 +70,6 @@ const deliveryLabel = (minDays: number, maxDays: number) =>
 
 export const usd = (n: number) => `$${n.toLocaleString("en-US")}`;
 
-const pageLabel = (id: PageOption) => PAGE_OPTIONS.find((p) => p.id === id)!.label;
-
 export const estimate = ({ type, pages, features }: CostInput): Estimate => {
   const has = (f: Feature) => features.includes(f);
   const packages: Package[] = [];
@@ -101,8 +93,14 @@ export const estimate = ({ type, pages, features }: CostInput): Estimate => {
   const addOns: AddOn[] = [];
   if (has("cms")) addOns.push({ name: ADD_ONS.cms.label, price: ADD_ONS.cms.price });
   if (has("multilingual")) addOns.push({ name: ADD_ONS.language.label, price: ADD_ONS.language.price });
-  // How many pages each package includes isn't set yet, so extra pages are priced per page on the call.
-  if (pages !== "1-5") quoted.push(`Extra pages (${pageLabel(pages)} pages): ${usd(ADD_ONS.extraPage.price)} each beyond the package`);
+  // Extra pages: website packages include a set number of pages; dashboards and web apps are priced by features.
+  const included = packages.find((p) => p.pages !== null)?.pages ?? null;
+  if (included !== null && pages > included) {
+    const extra = pages - included;
+    addOns.push({ name: `${extra} extra page${extra === 1 ? "" : "s"} (${included} included)`, price: extra * ADD_ONS.extraPage.price });
+  } else if (included === null && pages > 1) {
+    quoted.push("Pages: dashboards and web apps are quoted by features, not pages");
+  }
 
   const timelines = packages.map((p) => p.timeline);
   const delivery = timelines.every((t): t is string => !!t)
@@ -126,7 +124,9 @@ export const isCostInput = (value: unknown): value is CostInput => {
   return (
     !!v &&
     SITE_TYPES.some((t) => t.id === v.type) &&
-    PAGE_OPTIONS.some((p) => p.id === v.pages) &&
+    Number.isInteger(v.pages) &&
+    v.pages >= PAGES.min &&
+    v.pages <= PAGES.max &&
     Array.isArray(v.features) &&
     v.features.length <= FEATURES.length &&
     v.features.every((f) => FEATURES.some((x) => x.id === f))
@@ -137,7 +137,7 @@ export const isCostInput = (value: unknown): value is CostInput => {
 export const summarizeEstimate = (input: CostInput, e: Estimate) =>
   [
     `Type: ${SITE_TYPES.find((t) => t.id === input.type)!.label}`,
-    `Pages: ${pageLabel(input.pages)}`,
+    `Pages: ${input.pages}`,
     `Features: ${input.features.length ? input.features.map((f) => FEATURES.find((x) => x.id === f)!.label).join(", ") : "none"}`,
     `Packages: ${e.packages.map((p) => `${p.name} (from ${usd(p.price)})`).join(" + ")}`,
     ...(e.addOns.length ? [`Add-ons: ${e.addOns.map((a) => `${a.name} (+${usd(a.price)})`).join(" + ")}`] : []),

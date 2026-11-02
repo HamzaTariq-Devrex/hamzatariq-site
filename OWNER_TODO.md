@@ -12,9 +12,7 @@ Facts and access only Hamza can provide. Nothing on the site may be invented to 
 - [ ] **Supabase CLI login (blocks the growth-engine push).** The CLI is logged in to a client account (tuluawear07). Run `npx supabase login` with the hamzabuildsweb account, then I apply migration `20261102090000_seo_audit_autopilot` (SEO audits table, `seo-audit` lead source, autopilot data functions) and regenerate types.
 - [ ] **PageSpeed API key** for the free SEO audit tool: Google Cloud console → enable "PageSpeed Insights API" → create an API key (restrict it to that API) → add `PAGESPEED_API_KEY` in Vercel and `.env.local`. Without it Google's shared quota is usually busy and the speed check is skipped.
 - [ ] **(Later) Search Console access for the autopilot:** create a Google Cloud service account, enable the Search Console API, add its email as a Restricted user on the hamzatariq.site property, and put its JSON key in `GSC_SERVICE_ACCOUNT_JSON` (where the autopilot runs). Skipped for now: refills use the AI assistant's top questions; monthly reports run without Search Console data.
-- [ ] **Autopilot schedule:** set up the two scheduled sessions in `docs/AUTOPILOT.md` (post every other day, monthly report on the 1st).
 
-- [ ] **Pages included per package.** Extra pages cost $50 each beyond the package, but how many pages each package (landing page, ecommerce store, ...) includes isn't set, so the calculator says "$50 each beyond the package, confirmed on the call" instead of adding them up.
 
 ## Needed for Phase 8 (analytics)
 
@@ -24,7 +22,8 @@ Facts and access only Hamza can provide. Nothing on the site may be invented to 
 ## Done
 
 - [x] Vercel Web Analytics enabled (custom events show in Vercel on Pro only; /admin counts them from Supabase).
-- [x] Add-on prices: extra page $50 each, CMS +$150, second language +$250.
+- [x] Add-on prices: extra page $50 each, CMS +$150, second language +$250. Pages included: landing/portfolio 5, store 10 (unlimited products), full ecommerce app 15; dashboards and web apps by features.
+- [x] Autopilot schedules set up as Claude scheduled tasks (blog every 2 days at 8:45 PKT, monthly report on the 1st).
 - [x] Industry pages reviewed, including the agency page's white-label promises.
 
 - [x] Location: based in Pakistan, working with clients worldwide (US, UK, EU time zones); no city targeting. Local topics replaced with international/remote ones.

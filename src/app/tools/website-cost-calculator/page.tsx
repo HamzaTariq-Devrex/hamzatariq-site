@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 
 // The four build services (SEO is a separate service, not part of a new build's price).
 const PACKAGES = SERVICES.filter((s) => s.slug !== "react-nextjs-seo").flatMap((s) =>
-  s.pricing.map((p) => ({ service: s.name, slug: s.slug, name: p.name, price: p.price, timeline: p.timeline ?? "Agreed on the call" })),
+  s.pricing.map((p) => ({ service: s.name, slug: s.slug, name: p.name, price: p.price, pages: p.pages ?? null, timeline: p.timeline ?? "Agreed on the call" })),
 );
 
 const FAQS = [
@@ -30,7 +30,7 @@ const FAQS = [
   },
   {
     q: "How are extra pages, a CMS and a second language priced?",
-    a: "A CMS adds $150 and a second language adds $250 to the starting price. Extra pages beyond what your package includes are $50 each; we confirm the page count on the free call.",
+    a: "A CMS adds $150 and a second language adds $250. Each package includes a set number of pages: up to 5 for a landing page or portfolio, up to 10 for an ecommerce store (with unlimited products) and up to 15 for a full ecommerce app. Extra pages are $50 each. Dashboards and web apps are quoted by features, not pages.",
   },
   {
     q: "Is the estimate in US dollars?",
@@ -121,8 +121,8 @@ export default function WebsiteCostCalculatorPage() {
               {usd(ADD_ONS.language.price)}.
             </li>
             <li>
-              <strong>Bigger sites</strong> pay {usd(ADD_ONS.extraPage.price)} for each page beyond what the package includes. The page count is
-              confirmed on the free call.
+              <strong>Bigger sites</strong> pay {usd(ADD_ONS.extraPage.price)} for each page beyond what the package includes (see the table).
+              Dashboards and web apps are quoted by features, not pages.
             </li>
           </ul>
           <h3>My starting prices</h3>
@@ -132,6 +132,7 @@ export default function WebsiteCostCalculatorPage() {
                 <tr>
                   <th>Package</th>
                   <th>From</th>
+                  <th>Pages included</th>
                   <th>Delivery</th>
                 </tr>
               </thead>
@@ -142,6 +143,7 @@ export default function WebsiteCostCalculatorPage() {
                       <Link href={`/services/${p.slug}`}>{p.name}</Link>
                     </td>
                     <td>{usd(p.price)}</td>
+                    <td>{p.pages ? `Up to ${p.pages}` : "By features"}</td>
                     <td>{p.timeline}</td>
                   </tr>
                 ))}
@@ -152,6 +154,7 @@ export default function WebsiteCostCalculatorPage() {
                       +{usd(a.price)}
                       {"unit" in a ? ` ${a.unit}` : ""}
                     </td>
+                    <td>-</td>
                     <td>-</td>
                   </tr>
                 ))}

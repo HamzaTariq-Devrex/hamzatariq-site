@@ -369,3 +369,14 @@
 .sol-features li > span:last-child {
   color: var(--x-ink);
 }
+
+.calc-pages {
+  max-width: 220px;
+}
+
+.calc .calc-hint {
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: var(--x-faint);
+  line-height: 1.45;
+}

@@ -43,7 +43,8 @@ Every project is quoted after a free call. Final price depends on features.
 
 ### Add-ons (website projects, owner confirmed 2026-11-03)
 
-- Extra page beyond the package: $50 each. TODO(owner): how many pages each package includes.
+- Pages included: landing page / portfolio up to 5; ecommerce store up to 10 (unlimited products); full ecommerce app up to 15. Dashboards and web apps are quoted by features.
+- Extra page beyond the package: $50 each.
 - Content editing (CMS): +$150.
 - Second language: +$250.
 

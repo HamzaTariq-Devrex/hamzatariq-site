@@ -5,12 +5,12 @@ import Link from "next/link";
 import LeadForm from "@/components/assistant/LeadForm";
 import BookCall from "@/components/site/BookCall";
 import { COST_CALCULATOR_TOOL } from "@/data/tools";
-import { FEATURES, PAGE_OPTIONS, SITE_TYPES, estimate, usd, type CostInput, type Feature, type PageOption, type SiteType } from "@/lib/tools/cost";
+import { FEATURES, PAGES, SITE_TYPES, estimate, usd, type CostInput, type Feature, type SiteType } from "@/lib/tools/cost";
 import { trackToolUsed } from "@/lib/analytics";
 
 const CostCalculator = () => {
   const [type, setType] = useState<SiteType>("website");
-  const [pages, setPages] = useState<PageOption>("1-5");
+  const [pages, setPages] = useState<number>(PAGES.default);
   const [features, setFeatures] = useState<Feature[]>([]);
   const input: CostInput = useMemo(() => ({ type, pages, features }), [type, pages, features]);
   const result = useMemo(() => estimate(input), [input]);
@@ -48,23 +48,25 @@ const CostCalculator = () => {
 
         <fieldset>
           <legend>2. How many pages?</legend>
-          <div className="calc-chips">
-            {PAGE_OPTIONS.map((p) => (
-              <label key={p.id} className={`calc-chip${pages === p.id ? " is-on" : ""}`}>
-                <input
-                  type="radio"
-                  name="pages"
-                  value={p.id}
-                  checked={pages === p.id}
-                  onChange={() => {
-                    touch();
-                    setPages(p.id);
-                  }}
-                />
-                {p.label}
-              </label>
-            ))}
+          <div className="calc-number calc-pages">
+            <input
+              type="number"
+              inputMode="numeric"
+              aria-label="Number of pages"
+              min={PAGES.min}
+              max={PAGES.max}
+              step={1}
+              defaultValue={PAGES.default}
+              onChange={(e) => {
+                const n = Math.round(Number(e.target.value));
+                if (!e.target.value || !Number.isFinite(n)) return;
+                touch();
+                setPages(Math.min(PAGES.max, Math.max(PAGES.min, n)));
+              }}
+            />
+            <span>pages</span>
           </div>
+          <p className="calc-hint">Landing pages include up to 5 pages, stores up to 10 (unlimited products), full ecommerce apps up to 15.</p>
         </fieldset>
 
         <fieldset>

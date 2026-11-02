@@ -4,6 +4,8 @@ export type PriceTier = {
   unit?: string;
   detail?: string;
   timeline?: string;
+  /** Pages included in the price (owner confirmed 2026-11-03); extra pages cost ADD_ONS.extraPage. Unset = quoted by features. */
+  pages?: number;
   /** Highlighted as "Most popular" on the pricing cards (owner confirmed: ecommerce store and AI chatbot). */
   popular?: boolean;
 };
@@ -33,7 +35,7 @@ export type Service = {
 
 export const PRICE_NOTE = "Every project is quoted after a free call. Final price depends on features.";
 
-/** Add-ons on top of a website package (owner confirmed 2026-11-03). Pages included per package: TODO(owner). */
+/** Add-ons on top of a website package (owner confirmed 2026-11-03). Pages included are on each tier (`pages`). */
 export const ADD_ONS = {
   extraPage: { label: "Extra page beyond the package", price: 50, unit: "each" },
   cms: { label: "Content editing (CMS)", price: 150 },
@@ -81,9 +83,9 @@ export const SERVICES: Service[] = [
       "WhatsApp ordering and contact links",
     ],
     pricing: [
-      { name: "Landing page / portfolio website", price: 400, timeline: "5–7 days" },
-      { name: "Ecommerce store with admin dashboard", price: 1000, timeline: "2–3 weeks", popular: true },
-      { name: "Full ecommerce app", price: 2000, detail: "User logins, accounts and orders" },
+      { name: "Landing page / portfolio website", price: 400, timeline: "5–7 days", pages: 5 },
+      { name: "Ecommerce store with admin dashboard", price: 1000, timeline: "2–3 weeks", popular: true, pages: 10 },
+      { name: "Full ecommerce app", price: 2000, detail: "User logins, accounts and orders", pages: 15 },
     ],
     relatedProjects: ["dulhahouse", "nagina-jewels", "the-trekkerz-pakistan"],
     faqs: [
