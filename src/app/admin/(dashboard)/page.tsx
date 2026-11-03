@@ -14,6 +14,7 @@ const EVENTS = [
   { name: "audit_run", label: "SEO audits run" },
   { name: "booking_clicked", label: "Booking clicks" },
   { name: "cv_downloaded", label: "CV downloads" },
+  { name: "audit_cta_click", label: "Audit CTA clicks" },
 ] as const;
 
 export const metadata: Metadata = { title: "Overview" };
@@ -69,6 +70,10 @@ export default async function OverviewPage() {
   const toolOf = (e: (typeof events)[number]) => (e.data as { tool?: string } | null)?.tool ?? "";
   const byTool = TOOLS.map((t) => ({ label: t.name, value: events30.filter((e) => e.name === "tool_used" && toolOf(e) === t.slug).length }));
   const toolTotal = byTool.reduce((s, t) => s + t.value, 0);
+  const CTA_LABELS: Record<string, string> = { nav: "Navbar", home: "Home page", blog: "Blog posts", service: "Service pages", solution: "Industry pages" };
+  const ctaOf = (e: (typeof events)[number]) => (e.data as { location?: string } | null)?.location ?? "";
+  const byCta = Object.entries(CTA_LABELS).map(([key, label]) => ({ label, value: events30.filter((e) => e.name === "audit_cta_click" && ctaOf(e) === key).length }));
+  const ctaTotal = byCta.reduce((s, t) => s + t.value, 0);
 
   const bySource = SOURCES.map((s) => ({ label: SOURCE_LABELS[s], value: leads.filter((l) => l.source === s).length }));
   const byService = SERVICE_GROUPS.map((g) => ({ label: g.label, value: leads.filter((l) => serviceOf(l.project_type) === g.key).length }));
@@ -129,6 +134,12 @@ export default async function OverviewPage() {
           <div className="adm-events-tools">
             <h3>Tools used, by tool</h3>
             <BarList rows={byTool} total={toolTotal} />
+          </div>
+        )}
+        {ctaTotal > 0 && (
+          <div className="adm-events-tools">
+            <h3>Audit CTA clicks, by location</h3>
+            <BarList rows={byCta} total={ctaTotal} />
           </div>
         )}
       </section>

@@ -7,6 +7,7 @@ import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
 import Icon from "@/components/site/ds/Icon";
 import { SITE } from "@/lib/site";
+import AuditCta from "@/components/site/AuditCta";
 
 /** The "From my work" box every post needs: a real example from Hamza's projects. */
 const FromMyWork = ({ title = "From my work", children }: { title?: string; children: React.ReactNode }) => (
@@ -57,10 +58,15 @@ const Table = (props: React.TableHTMLAttributes<HTMLTableElement>) => (
 /** GFM task lists ("- [ ] item"): a decorative box instead of an unlabeled disabled checkbox. */
 const TaskBox = () => <span className="post-check" aria-hidden="true" />;
 
-const components = { FromMyWork, Figure, a: A, table: Table, input: TaskBox };
+const BlogAuditCta = () => <AuditCta location="blog" />;
 
-export const renderMdx = async (source: string) => {
-  const { default: Content } = await evaluate(source, {
+const components = { FromMyWork, Figure, a: A, table: Table, input: TaskBox, AuditCta: BlogAuditCta };
+
+/** `auditCta`: insert the free SEO audit box after the first <FromMyWork> box (blog posts). */
+export const renderMdx = async (source: string, { auditCta = false }: { auditCta?: boolean } = {}) => {
+  const end = source.indexOf("</FromMyWork>");
+  const withCta = auditCta && end >= 0 ? `${source.slice(0, end + 13)}\n\n<AuditCta />\n${source.slice(end + 13)}` : source;
+  const { default: Content } = await evaluate(withCta, {
     ...runtime,
     remarkPlugins: [remarkGfm],
     rehypePlugins: [rehypeSlug],

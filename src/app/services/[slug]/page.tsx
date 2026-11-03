@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import SiteShell from "@/components/site/SiteShell";
 import BookCall from "@/components/site/BookCall";
 import AuthorBox from "@/components/site/AuthorBox";
+import AuditCta from "@/components/site/AuditCta";
 import OwnerTodo from "@/components/site/OwnerTodo";
 import Section from "@/components/site/ds/Section";
 import Faq from "@/components/site/ds/Faq";
@@ -304,6 +305,10 @@ export default async function ServicePage({ params }: Params) {
           )}
         </Section>
       )}
+
+      <section className="x-section">
+        <AuditCta location="service" heading />
+      </section>
 
       <AuthorBox />
 

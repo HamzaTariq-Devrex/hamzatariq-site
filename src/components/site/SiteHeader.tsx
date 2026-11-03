@@ -9,15 +9,17 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { SITE } from "@/lib/site";
 import { SERVICES } from "@/data/services";
-import { TOOLS } from "@/data/tools";
+import { SEO_AUDIT_TOOL, TOOLS } from "@/data/tools";
 import { SOLUTIONS_LINK } from "@/data/solutions";
 import BookCall from "./BookCall";
+import { trackEvent } from "@/lib/analytics";
 import "../styles/SiteHeader.css";
 
-const NAV = [
+const NAV: { href: string; label: string; badge?: string }[] = [
   { href: "/work", label: "Work" },
   { href: "/about", label: "About" },
   { href: "/blog", label: "Blog" },
+  { href: SEO_AUDIT_TOOL.href, label: "Free SEO Audit", badge: "Free" },
   { href: "/contact", label: "Contact" },
 ];
 
@@ -32,6 +34,7 @@ const NavLink = ({ href, className, children, home, pathname, onNavigate }: Link
     "aria-current": isActive(pathname, href) ? ("page" as const) : undefined,
     "data-cursor": "disable",
     onClick: (e: React.MouseEvent<HTMLAnchorElement>) => {
+      if (href === SEO_AUDIT_TOOL.href) trackEvent("audit_cta_click", { location: "nav" });
       onNavigate();
       e.currentTarget.blur(); // lets the hover/focus dropdown close after a click
     },
@@ -102,8 +105,9 @@ const SiteHeader = ({ home = false }: Props) => {
           </div>
         </div>
         {NAV.map((n) => (
-          <NavLink {...link} key={n.href} href={n.href} className={cls(n.href)}>
+          <NavLink {...link} key={n.href} href={n.href} className={`${cls(n.href)}${n.badge ? " site-nav-audit" : ""}`}>
             {n.label}
+            {n.badge && <span className="site-badge">{n.badge}</span>}
           </NavLink>
         ))}
       </nav>
@@ -146,6 +150,7 @@ const SiteHeader = ({ home = false }: Props) => {
             {NAV.map((n) => (
               <NavLink {...link} key={n.href} href={n.href} className={cls(n.href)}>
                 {n.label}
+                {n.badge && <span className="site-badge">{n.badge}</span>}
               </NavLink>
             ))}
             <NavLink {...link} href="/hire" className={cls("/hire")}>

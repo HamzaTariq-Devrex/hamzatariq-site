@@ -12,6 +12,7 @@ import SmoothScroll from "./SmoothScroll";
 import SiteHeader from "./site/SiteHeader";
 import SocialIcons from "./SocialIcons";
 import WhatIDo from "./WhatIDo";
+import AuditCta from "./site/AuditCta";
 import Work from "./Work";
 import setSplitText from "./utils/splitText";
 
@@ -72,6 +73,15 @@ const MainContainer = ({ children }: PropsWithChildren) => {
             <Landing>{isDesktopView === false && children}</Landing>
             <About />
             <WhatIDo />
+            <div className="home-audit">
+              <AuditCta
+                location="home"
+                variant="band"
+                heading
+                title="Is your website losing customers? Check it free in 30 seconds"
+                text="See your site the way Google sees it: a score out of 100, speed, titles, mobile setup and a clear fix list. Free, no sign-up."
+              />
+            </div>
             <Career />
             <Work />
             {isDesktopView && <div ref={techStackAnchorRef} />}

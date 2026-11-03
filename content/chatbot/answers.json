@@ -238,7 +238,7 @@
     },
     {
       "id": "react-seo",
-      "answer": "Many React sites don't rank because Google first sees an almost empty HTML page. Hamza fixes this with server-rendered pages, unique titles and descriptions, structured data and a sitemap, or a move to Next.js, without changing your design. https://hamzatariq.site/services/react-nextjs-seo",
+      "answer": "Many React sites don't rank because Google first sees an almost empty HTML page. Hamza fixes this with server-rendered pages, unique titles and descriptions, structured data and a sitemap, or a move to Next.js, without changing your design. Check your own site first with the free SEO audit: https://hamzatariq.site/tools/free-seo-audit",
       "keywords": [
         "seo",
         "google",
@@ -267,7 +267,7 @@
     },
     {
       "id": "seo-time",
-      "answer": "Fixes are live as soon as they're deployed, but Google needs time to recrawl your pages. Nobody can honestly promise a ranking or a date, so Hamza focuses on fixing what is measurably wrong. Would you like to start with an SEO audit?",
+      "answer": "Fixes are live as soon as they're deployed, but Google needs time to recrawl your pages. Nobody can honestly promise a ranking or a date, so Hamza focuses on fixing what is measurably wrong. See what's wrong on your site with the free SEO audit: https://hamzatariq.site/tools/free-seo-audit",
       "keywords": [
         "guarantee",
         "guaranteed",
@@ -284,6 +284,33 @@
         "guarantee first page",
         "rank first",
         "number one on google"
+      ]
+    },
+    {
+      "id": "site-speed",
+      "answer": "Slow pages and missing SEO basics cost visitors and rankings. The free SEO audit checks your site's speed, titles, mobile setup and what Google can read, and gives you a score out of 100 with a fix list: https://hamzatariq.site/tools/free-seo-audit",
+      "keywords": [
+        "slow",
+        "speed",
+        "fast",
+        "loading",
+        "ranking",
+        "rank",
+        "audit",
+        "indexed",
+        "visible",
+        "traffic"
+      ],
+      "phrases": [
+        "site is slow",
+        "website is slow",
+        "not ranking",
+        "not showing on google",
+        "check my site",
+        "seo audit",
+        "free audit",
+        "site slow hai",
+        "google pe nahi"
       ]
     },
     {

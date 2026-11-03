@@ -65,12 +65,11 @@ const AuditTool = () => {
     if (state.kind === "done" || state.kind === "error") resultRef.current?.focus();
   }, [state.kind]);
 
-  const onSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!url.trim()) return;
+  const run = async (target: string) => {
+    if (!target.trim()) return;
     setState({ kind: "loading", step: 0 });
     try {
-      const res = await fetch("/api/audit", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ url }) });
+      const res = await fetch("/api/audit", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ url: target }) });
       const data = (await res.json().catch(() => ({}))) as AuditResponse & { error?: string };
       if (!res.ok) throw new Error(data.error || "Something went wrong. Please try again.");
       setState({ kind: "done", data });
@@ -80,6 +79,22 @@ const AuditTool = () => {
       setState({ kind: "error", message: (err as Error).message });
     }
   };
+
+  const onSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    run(url);
+  };
+
+  // Entry points across the site link here with ?url=…: fill the field and start right away.
+  const started = useRef(false);
+  useEffect(() => {
+    if (started.current) return;
+    started.current = true;
+    const fromLink = new URLSearchParams(window.location.search).get("url")?.trim().slice(0, 500);
+    if (!fromLink) return;
+    setUrl(fromLink);
+    run(fromLink);
+  }, []);
 
   const loading = state.kind === "loading";
   const result = state.kind === "done" ? state.data.result : null;

@@ -1,0 +1,201 @@
+/* Free SEO audit entry point (AuditCta). Self-contained: used on the home page and on SiteShell pages. */
+.acta {
+  --acta-teal: #2dd4bf;
+  --acta-ink: #f1f5f9;
+  --acta-muted: rgba(226, 232, 240, 0.68);
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  border: 1px solid rgba(45, 212, 191, 0.28);
+  border-radius: 20px;
+  background:
+    radial-gradient(120% 140% at 0% 0%, rgba(45, 212, 191, 0.1), transparent 55%),
+    rgba(255, 255, 255, 0.025);
+  color: var(--acta-ink);
+  text-align: left;
+}
+
+.acta-box {
+  margin: 36px 0;
+  padding: 26px;
+}
+
+.acta-band {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 48px 44px;
+  text-align: center;
+}
+
+.acta-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--acta-teal);
+}
+
+.acta-badge {
+  padding: 2px 8px;
+  border-radius: 100px;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: #04221f;
+  background: var(--acta-teal);
+}
+
+.acta .acta-title {
+  margin: 12px 0 8px;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  color: var(--acta-ink);
+}
+
+.acta-band .acta-title {
+  max-width: 760px;
+  margin: 16px auto 12px;
+  font-size: clamp(28px, 4vw, 44px);
+}
+
+.acta .acta-text {
+  margin: 0 0 18px;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--acta-muted);
+}
+
+.acta-band .acta-text {
+  max-width: 620px;
+  margin: 0 auto 26px;
+  font-size: 17px;
+}
+
+.acta-form {
+  display: flex;
+  gap: 8px;
+  padding: 6px;
+  border-radius: 100px;
+  border: 1px solid rgba(45, 212, 191, 0.35);
+  background: rgba(10, 14, 23, 0.6);
+}
+
+.acta-band .acta-form {
+  max-width: 620px;
+  margin: 0 auto;
+}
+
+.acta-form:focus-within {
+  border-color: var(--acta-teal);
+}
+
+.acta-form input {
+  flex: 1;
+  min-width: 0;
+  padding: 0 16px;
+  border: 0;
+  background: transparent;
+  color: var(--acta-ink);
+  font: inherit;
+  font-size: 16px;
+}
+
+.acta-form input:focus {
+  outline: none;
+}
+
+.acta-form button {
+  flex: none;
+  padding: 12px 22px;
+  border: 0;
+  border-radius: 100px;
+  background: var(--acta-teal);
+  color: #04221f;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.25s ease;
+}
+
+.acta-form button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 30px rgba(45, 212, 191, 0.25);
+}
+
+.acta-form button:focus-visible {
+  outline: 2px solid var(--acta-ink);
+  outline-offset: 2px;
+}
+
+.acta-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Home page section wrapper */
+.home-audit {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 80px 24px;
+}
+
+@media (max-width: 600px) {
+  .acta-box {
+    padding: 20px;
+  }
+
+  .acta-band {
+    padding: 34px 20px;
+  }
+
+  .acta-form {
+    flex-direction: column;
+    border-radius: 18px;
+  }
+
+  .acta-form input {
+    padding: 12px;
+  }
+
+  .acta-form button {
+    width: 100%;
+  }
+
+  .home-audit {
+    padding: 56px 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .acta-form button {
+    transition: none;
+  }
+}
+
+/* Home: above the fixed 3D character (z-index 11 on desktop) with a solid card, so the character
+   passes behind the box while it scrolls away; extra top space absorbs What I Do's 15% scroll shift. */
+.home-audit {
+  position: relative;
+  z-index: 12;
+}
+
+.home-audit .acta-band {
+  background:
+    radial-gradient(120% 140% at 0% 0%, rgba(45, 212, 191, 0.12), transparent 55%),
+    #0d1320;
+}
+
+@media (min-width: 1025px) {
+  .home-audit {
+    padding-top: calc(80px + 12vh);
+  }
+}

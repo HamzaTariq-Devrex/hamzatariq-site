@@ -53,7 +53,7 @@ export default async function PostPage({ params }: Params) {
 
   const url = `${SITE.url}/blog/${post.slug}`;
   const related = getRelatedPosts(post);
-  const content = await renderMdx(post.body);
+  const content = await renderMdx(post.body, { auditCta: true });
 
   const structuredData = {
     "@context": "https://schema.org",

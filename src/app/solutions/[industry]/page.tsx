@@ -8,6 +8,7 @@ import Faq from "@/components/site/ds/Faq";
 import Icon, { type IconName } from "@/components/site/ds/Icon";
 import OpenChat from "@/components/site/ds/OpenChat";
 import WhereIWork from "@/components/site/WhereIWork";
+import AuditCta from "@/components/site/AuditCta";
 import { Laptop, Phone } from "@/components/site/ds/Mockups";
 import { renderMdx } from "@/components/blog/mdx";
 import { SERVICES, formatPrice } from "@/data/services";
@@ -136,6 +137,7 @@ export default async function SolutionPage({ params }: Props) {
       <section className="x-section">
         <article className="post-body sol-body" data-reveal>
           {content}
+          <AuditCta location="solution" />
         </article>
       </section>
 

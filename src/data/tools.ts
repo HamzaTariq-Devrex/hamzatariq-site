@@ -33,3 +33,7 @@ export const CHATBOT_ROI_TOOL: Tool = {
 };
 
 export const TOOLS: Tool[] = [SEO_AUDIT_TOOL, COST_CALCULATOR_TOOL, CHATBOT_ROI_TOOL];
+
+/** Where an audit_cta_click (a "Free SEO audit" entry point) came from; whitelisted in /api/events. */
+export const AUDIT_CTA_LOCATIONS = ["nav", "home", "blog", "service", "solution"] as const;
+export type AuditCtaLocation = (typeof AUDIT_CTA_LOCATIONS)[number];

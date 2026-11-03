@@ -339,3 +339,39 @@
     animation: none;
   }
 }
+
+/* "Free SEO Audit" link with its teal badge (desktop and mobile menu) */
+.site-badge {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 7px;
+  padding: 2px 7px;
+  border-radius: 100px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  line-height: 1.4;
+  color: #04221f;
+  background: var(--sh-accent);
+}
+
+.site-nav > a.site-nav-audit {
+  color: var(--sh-text);
+}
+
+/* Six links plus the logo and CTA: tighten spacing on narrower desktops. */
+@media (max-width: 1240px) {
+  .site-nav > a,
+  .site-nav-services {
+    padding: 8px 11px;
+    letter-spacing: 0.06em;
+  }
+}
+
+@media (max-width: 1080px) {
+  .site-nav > a,
+  .site-nav-services {
+    padding: 8px 8px;
+    font-size: 12px;
+  }
+}

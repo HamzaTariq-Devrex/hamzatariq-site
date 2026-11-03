@@ -1,12 +1,13 @@
 import { SITE } from "@/lib/site";
-import { TOOLS } from "@/data/tools";
+import { AUDIT_CTA_LOCATIONS, TOOLS } from "@/data/tools";
 import { hashIp, rpcClient, serverSecret } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
 
 // Browser events stored for the /admin overview (see src/lib/analytics.ts). Only these names and
 // values are accepted, so the table can't be filled with arbitrary data.
-const NAMES = ["tool_used", "booking_clicked", "cv_downloaded"];
+const NAMES = ["tool_used", "booking_clicked", "cv_downloaded", "audit_cta_click"];
+const CTA_LOCATIONS: readonly string[] = AUDIT_CTA_LOCATIONS;
 const TOOL_SLUGS = TOOLS.map((t) => t.slug);
 const PAGE = /^\/[a-z0-9\-/]{0,100}$/i;
 const ALLOWED_ORIGINS = [SITE.url, SITE.url.replace("://", "://www.")];
@@ -45,6 +46,11 @@ export async function POST(req: Request) {
     const tool = event.data?.tool;
     if (typeof tool !== "string" || !TOOL_SLUGS.includes(tool)) return done();
     data.tool = tool;
+  }
+  if (event.name === "audit_cta_click") {
+    const location = event.data?.location;
+    if (typeof location !== "string" || !CTA_LOCATIONS.includes(location)) return done();
+    data.location = location;
   }
 
   const ip = (req.headers.get("x-forwarded-for") || "").split(",")[0].trim() || "unknown";
