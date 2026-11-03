@@ -5,6 +5,8 @@ import gsap from "gsap";
 const Cursor = () => {
   const cursorRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
+    // Phones and tablets have no mouse: skip the per-frame cursor animation entirely.
+    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
     let hover = false;
     const cursor = cursorRef.current!;
     const mousePos = { x: 0, y: 0 };

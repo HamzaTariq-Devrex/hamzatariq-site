@@ -542,3 +542,13 @@ h2.landing-info-h2 {
     font-size: 17px;
   }
 }
+
+/* Phones and tablets: the corner glow is a round blur, so spinning it is barely visible but makes
+   the GPU repaint a 60px blur every frame while scrolling. Keep the glow, stop the spin. */
+@media (pointer: coarse) {
+  .landing-circle1,
+  .landing-circle2 {
+    animation: none;
+    will-change: auto;
+  }
+}

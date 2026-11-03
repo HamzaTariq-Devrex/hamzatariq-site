@@ -32,7 +32,12 @@ const MainContainer = ({ children }: PropsWithChildren) => {
   useEffect(() => setMounted(true), []);
 
   useEffect(() => {
+    // Width changes only: phones fire "resize" whenever the address bar shows or hides while
+    // scrolling, and re-splitting the text then makes the page jump.
+    let lastWidth = 0;
     const resizeHandler = () => {
+      if (window.innerWidth === lastWidth) return;
+      lastWidth = window.innerWidth;
       setSplitText();
       setIsDesktopView(window.innerWidth > 1024);
     };

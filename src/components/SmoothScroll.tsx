@@ -25,7 +25,13 @@ const SmoothScroll = () => {
     smoother.scrollTop(0);
     smoother.paused(true);
 
-    const onResize = () => ScrollSmoother.refresh(true);
+    // Width changes only (see MainContainer): the mobile address bar changes the height while scrolling.
+    let lastWidth = window.innerWidth;
+    const onResize = () => {
+      if (window.innerWidth === lastWidth) return;
+      lastWidth = window.innerWidth;
+      ScrollSmoother.refresh(true);
+    };
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, []);

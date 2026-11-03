@@ -30,12 +30,16 @@ const Scene = () => {
       const aspect = container.width / container.height;
       const scene = sceneRef.current;
 
+      // Phones have 3x screens; rendering every physical pixel costs ~4x the GPU work of 1.5x for
+      // no visible gain. Cap the pixel ratio: 1.5 on touch devices, 2 elsewhere.
+      const touch = window.matchMedia("(pointer: coarse)").matches;
       const renderer = new THREE.WebGLRenderer({
         alpha: true,
         antialias: true,
+        powerPreference: "high-performance",
       });
       renderer.setSize(container.width, container.height);
-      renderer.setPixelRatio(window.devicePixelRatio);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, touch ? 1.5 : 2));
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
       renderer.toneMappingExposure = 1;
       canvasHost.appendChild(renderer.domElement);
@@ -71,7 +75,14 @@ const Scene = () => {
               animations.startIntro();
             }, 1500);
           });
-          onResize = () => handleResize(renderer, camera, canvasDiv, character);
+          // Only real resizes: on phones the address bar showing/hiding fires "resize" with a new
+          // height while scrolling, and rebuilding every ScrollTrigger then makes the page jump.
+          let lastWidth = window.innerWidth;
+          onResize = () => {
+            if (window.innerWidth === lastWidth) return;
+            lastWidth = window.innerWidth;
+            handleResize(renderer, camera, canvasDiv, character);
+          };
           window.addEventListener("resize", onResize);
         }
       });
@@ -82,17 +93,20 @@ const Scene = () => {
       const onMouseMove = (event: MouseEvent) => {
         handleMouseMove(event, (x, y) => (mouse = { x, y }));
       };
+      // One touchmove listener for the whole scene (it used to add a new one on every touch).
+      let tracking = false;
       let debounce: ReturnType<typeof setTimeout> | undefined;
-      const onTouchStart = (event: TouchEvent) => {
-        const element = event.target as HTMLElement;
-        debounce = setTimeout(() => {
-          element?.addEventListener("touchmove", (e: TouchEvent) =>
-            handleTouchMove(e, (x, y) => (mouse = { x, y }))
-          );
-        }, 200);
+      const onTouchMove = (e: TouchEvent) => {
+        if (tracking) handleTouchMove(e, (x, y) => (mouse = { x, y }));
+      };
+      const onTouchStart = () => {
+        clearTimeout(debounce);
+        debounce = setTimeout(() => (tracking = true), 200);
       };
 
       const onTouchEnd = () => {
+        clearTimeout(debounce);
+        tracking = false;
         handleTouchEnd((x, y, interpolationX, interpolationY) => {
           mouse = { x, y };
           interpolation = { x: interpolationX, y: interpolationY };
@@ -102,11 +116,22 @@ const Scene = () => {
       document.addEventListener("mousemove", onMouseMove);
       const landingDiv = document.getElementById("landingDiv");
       if (landingDiv) {
-        landingDiv.addEventListener("touchstart", onTouchStart);
-        landingDiv.addEventListener("touchend", onTouchEnd);
+        landingDiv.addEventListener("touchstart", onTouchStart, { passive: true });
+        landingDiv.addEventListener("touchmove", onTouchMove, { passive: true });
+        landingDiv.addEventListener("touchend", onTouchEnd, { passive: true });
       }
+
+      // Render only while the character is on screen and the tab is visible, so the GPU is free
+      // for scrolling once the visitor has moved past it.
+      let onScreen = true;
+      const visibility = new IntersectionObserver(([entry]) => {
+        onScreen = entry.isIntersecting;
+        if (onScreen) clock.getDelta(); // don't jump the animation forward after a pause
+      });
+      visibility.observe(canvasHost);
       const animate = () => {
         frame = requestAnimationFrame(animate);
+        if (!onScreen || document.hidden) return;
         if (headBone) {
           handleHeadRotation(
             headBone,
@@ -129,6 +154,7 @@ const Scene = () => {
         disposed = true;
         progress.stop();
         cancelAnimationFrame(frame);
+        visibility.disconnect();
         clearTimeout(debounce);
         scene.clear();
         renderer.dispose();
@@ -139,6 +165,7 @@ const Scene = () => {
         document.removeEventListener("mousemove", onMouseMove);
         if (landingDiv) {
           landingDiv.removeEventListener("touchstart", onTouchStart);
+          landingDiv.removeEventListener("touchmove", onTouchMove);
           landingDiv.removeEventListener("touchend", onTouchEnd);
         }
       };

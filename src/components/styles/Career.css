@@ -312,3 +312,13 @@
     animation: none;
   }
 }
+
+/* Phones and tablets: backdrop blur over moving content is expensive while scrolling; a slightly
+   more opaque card looks the same on the dark background. */
+@media (pointer: coarse) {
+  .career-card {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: rgba(17, 22, 33, 0.92);
+  }
+}
