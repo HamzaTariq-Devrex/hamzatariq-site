@@ -6,6 +6,7 @@ import { TOOLS } from "@/data/tools";
 import { getSolutions } from "@/lib/solutions";
 import { BLOG_CATEGORIES, getPosts, getPostsInCategory } from "@/lib/blog";
 import { SITE } from "@/lib/site";
+import { hasReviews } from "@/lib/testimonials";
 
 // Rebuilt daily so scheduled blog posts are added on their published date.
 export const revalidate = 86400;
@@ -37,6 +38,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...CASE_STUDIES.map((c) => page(`/work/${c.slug}`, 0.8)),
     page("/about", 0.7),
     page("/hire", 0.7),
+    ...(hasReviews ? [page("/reviews", 0.6)] : []),
     page("/contact", 0.7),
     ...PROJECTS.map((p) => page(`/work/${p.slug}`, p.url ? 0.6 : 0.4, "yearly")),
   ];

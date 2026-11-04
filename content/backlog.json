@@ -1,552 +1,1665 @@
 {
-  "about": "Blog topic queue (rules in content/STYLE.md). One main keyword per topic, never reused. The autopilot (docs/AUTOPILOT.md) takes the first queued item without blockedBy; content:check rejects duplicate keywords.",
+  "about": "Blog topic queue in topic clusters (strategy: content/seo/strategy.md, clusters: content/seo/clusters.json, rules: content/STYLE.md). One main keyword per topic, never reused. The autopilot (docs/AUTOPILOT.md) first expands pillars marked expand, then takes the first queued item without blockedBy. content:check validates every field.",
   "fields": {
+    "cluster": "id from content/seo/clusters.json",
+    "pillar": "slug of the cluster's pillar post",
+    "role": "pillar (2,500–3,500 words, the complete guide) | supporting (answers one specific question, links up to the pillar)",
+    "intent": "hire | buy | compare | learn | fix",
+    "funnel": "awareness | consideration | decision",
+    "secondary": "3–6 secondary keywords, used naturally in the post",
+    "questions": "2–6 question variants (People Also Ask style); each gets an H2 or FAQ answer",
+    "reader": "target reader",
+    "angle": "what this post says that the top results don't (refined in the brief after SERP research)",
     "status": "queued | published | skipped",
+    "expand": "optional, pillars only: the post exists but must be expanded to pillar length",
     "blockedBy": "optional: a missing owner fact; the autopilot skips the topic until it is removed"
   },
   "items": [
     {
-      "keyword": "react website not ranking on google",
-      "title": "Why Your React Website Is Not Ranking on Google (and How to Fix It)",
-      "category": "react-nextjs-seo",
-      "reader": "business owner",
-      "targetPage": "/services/react-nextjs-seo",
-      "status": "published",
-      "publishedSlug": "react-website-not-ranking-on-google",
-      "published": "2026-11-02"
-    },
-    {
       "keyword": "hire next.js developer",
       "title": "Hire a Next.js Developer: What to Look For in 2026",
+      "cluster": "hire-developer",
+      "pillar": "hire-nextjs-developer",
+      "role": "pillar",
+      "intent": "hire",
+      "funnel": "decision",
       "category": "hiring",
+      "targetPage": "/services/nextjs-websites",
       "reader": "founder",
-      "targetPage": "/hire",
+      "secondary": [
+        "next.js developer for hire",
+        "hire react developer",
+        "freelance next.js developer",
+        "next.js developer cost"
+      ],
+      "questions": [
+        "what skills should a next.js developer have?",
+        "how much does it cost to hire a next.js developer?",
+        "freelancer or agency for a next.js site?"
+      ],
+      "angle": "The complete hiring guide from the developer's side of the table: the checks I'd run on any Next.js developer (including me), my real fixed prices and terms, and links to every supporting post in this cluster.",
       "status": "published",
       "publishedSlug": "hire-nextjs-developer",
-      "published": "2026-11-04"
-    },
-    {
-      "keyword": "ai chatbot for website cost",
-      "title": "How Much Does an AI Chatbot for a Website Cost?",
-      "category": "ai-chatbots",
-      "reader": "business owner",
-      "targetPage": "/services/ai-chatbots",
-      "status": "published",
-      "publishedSlug": "ai-chatbot-for-website-cost",
-      "published": "2026-11-06"
+      "published": "2026-11-04",
+      "expand": true
     },
     {
       "keyword": "next.js vs wordpress for business",
       "title": "Next.js vs WordPress for a Business Website",
+      "cluster": "hire-developer",
+      "pillar": "hire-nextjs-developer",
+      "role": "supporting",
+      "intent": "compare",
+      "funnel": "consideration",
       "category": "nextjs-websites",
-      "reader": "business owner",
       "targetPage": "/services/nextjs-websites",
+      "reader": "business owner",
+      "secondary": [
+        "wordpress or next.js",
+        "next.js vs wordpress seo",
+        "next.js vs wordpress cost",
+        "is next.js better than wordpress"
+      ],
+      "questions": [
+        "is next.js better than wordpress for seo?",
+        "can i edit a next.js website myself?",
+        "is next.js more expensive than wordpress?"
+      ],
+      "angle": "Top results are agency verdicts with no numbers; this one shows a measured before/after from my own Next.js site and a real price list, and says plainly when WordPress is the better pick.",
       "status": "published",
       "publishedSlug": "nextjs-vs-wordpress-for-business-website",
       "published": "2026-11-08"
     },
     {
+      "keyword": "react website not ranking on google",
+      "title": "Why Your React Website Is Not Ranking on Google (and How to Fix It)",
+      "cluster": "react-seo",
+      "pillar": "react-seo-guide",
+      "role": "supporting",
+      "intent": "fix",
+      "funnel": "consideration",
+      "category": "react-nextjs-seo",
+      "targetPage": "/services/react-nextjs-seo",
+      "reader": "business owner",
+      "secondary": [
+        "react seo",
+        "single page react app",
+        "server-side rendering",
+        "javascript seo"
+      ],
+      "questions": [
+        "why is my react website not on google?",
+        "can google crawl react?"
+      ],
+      "angle": "Starts with a 2-minute view-source test the owner can run, then the fixes in order, with my own site as the before/after.",
+      "status": "published",
+      "publishedSlug": "react-website-not-ranking-on-google",
+      "published": "2026-11-02"
+    },
+    {
       "keyword": "vite react to next.js migration",
       "title": "How I Migrated a Vite React Site to Next.js 15 (SEO 83 → 100)",
+      "cluster": "react-seo",
+      "pillar": "react-seo-guide",
+      "role": "supporting",
+      "intent": "learn",
+      "funnel": "decision",
       "category": "react-nextjs-seo",
-      "reader": "founder",
       "targetPage": "/services/react-nextjs-seo",
+      "reader": "founder",
+      "secondary": [
+        "migrate vite to next.js",
+        "react to next.js migration",
+        "vite vs next.js seo",
+        "convert react app to next.js"
+      ],
+      "questions": [
+        "how long does a vite to next.js migration take?",
+        "will i lose my animations when moving to next.js?"
+      ],
+      "angle": "The official guide keeps the app as a client-rendered SPA first, which doesn't fix SEO; this is a full migration on a live site with 3D and GSAP, measured before and after.",
       "status": "published",
       "publishedSlug": "vite-react-to-nextjs-migration",
       "published": "2026-11-10"
     },
     {
+      "keyword": "ai chatbot for website cost",
+      "title": "How Much Does an AI Chatbot for a Website Cost?",
+      "cluster": "ai-chatbots",
+      "pillar": "ai-chatbot-for-small-business",
+      "role": "supporting",
+      "intent": "buy",
+      "funnel": "decision",
+      "category": "ai-chatbots",
+      "targetPage": "/services/ai-chatbots",
+      "reader": "business owner",
+      "secondary": [
+        "chatbot pricing",
+        "custom chatbot development cost",
+        "chatbot monthly cost",
+        "ai chatbot running cost"
+      ],
+      "questions": [
+        "how much does an ai chatbot cost per month?",
+        "can an ai chatbot run for free?",
+        "is it cheaper to build or subscribe?"
+      ],
+      "angle": "Top results quote vendor ranges; this one gives a real build price, the free-tier limits I measured on a live bot, and what happens when the quota runs out.",
+      "status": "published",
+      "publishedSlug": "ai-chatbot-for-website-cost",
+      "published": "2026-11-06"
+    },
+    {
+      "keyword": "react seo guide",
+      "title": "React SEO: The Complete Guide for React and Next.js Sites",
+      "cluster": "react-seo",
+      "pillar": "react-seo-guide",
+      "role": "pillar",
+      "intent": "learn",
+      "funnel": "awareness",
+      "category": "react-nextjs-seo",
+      "targetPage": "/services/react-nextjs-seo",
+      "reader": "founder",
+      "secondary": [
+        "react seo",
+        "next.js seo",
+        "seo for single page applications",
+        "react seo best practices",
+        "technical seo for react"
+      ],
+      "questions": [
+        "is react bad for seo?",
+        "how do i make a react app seo friendly?",
+        "does google index javascript sites?",
+        "is next.js good for seo?"
+      ],
+      "angle": "The hub for the cluster: why client-rendered React fails, the exact fixes in order of impact, and my own measured migration (SEO 83 to 100, LCP 18.0 s to 2.6 s), linking every supporting post.",
+      "status": "queued",
+      "publishedSlug": null
+    },
+    {
+      "keyword": "react site not indexed by google fix",
+      "title": "React Site Not Indexed by Google? Fix It in 6 Steps",
+      "cluster": "react-seo",
+      "pillar": "react-seo-guide",
+      "role": "supporting",
+      "intent": "fix",
+      "funnel": "consideration",
+      "category": "react-nextjs-seo",
+      "targetPage": "/services/react-nextjs-seo",
+      "reader": "business owner",
+      "secondary": [
+        "crawled currently not indexed react",
+        "google not indexing react pages",
+        "discovered not indexed fix",
+        "request indexing google search console"
+      ],
+      "questions": [
+        "why does google say crawled but not indexed?",
+        "how long does google take to index a new page?"
+      ],
+      "angle": "Maps each Search Console status to the React cause behind it (empty HTML, duplicate titles, missing sitemap) and the exact fix, with the Search Console steps I used on this site.",
+      "status": "queued",
+      "publishedSlug": null
+    },
+    {
+      "keyword": "ai chatbot for small business",
+      "title": "AI Chatbots for Small Business: The Complete Guide",
+      "cluster": "ai-chatbots",
+      "pillar": "ai-chatbot-for-small-business",
+      "role": "pillar",
+      "intent": "learn",
+      "funnel": "awareness",
+      "category": "ai-chatbots",
+      "targetPage": "/services/ai-chatbots",
+      "reader": "business owner",
+      "secondary": [
+        "ai chatbot for business website",
+        "best chatbot for small business",
+        "ai customer service chatbot",
+        "chatbot for lead generation"
+      ],
+      "questions": [
+        "is an ai chatbot worth it for a small business?",
+        "how does an ai chatbot know about my business?",
+        "how much does a chatbot cost?"
+      ],
+      "angle": "The hub for the cluster, built around a chatbot running on this site: how it is built, what it costs to run on a free tier, what happens when the AI fails, and links to every supporting post.",
+      "status": "queued",
+      "publishedSlug": null
+    },
+    {
+      "keyword": "hire next.js developer for ecommerce",
+      "title": "Hire a Next.js Developer for Ecommerce: What to Check",
+      "cluster": "ecommerce",
+      "pillar": "custom-ecommerce-website-guide",
+      "role": "supporting",
+      "intent": "hire",
+      "funnel": "decision",
+      "category": "nextjs-websites",
+      "targetPage": "/services/nextjs-websites",
+      "reader": "founder",
+      "secondary": [
+        "next.js ecommerce developer",
+        "next.js online store developer",
+        "headless ecommerce developer"
+      ],
+      "questions": [
+        "what should an ecommerce developer know?",
+        "how much does a next.js store cost?"
+      ],
+      "angle": "Store-specific checks (checkout, stock, admin, product SEO) plus my real store packages: up to 10 pages with unlimited products, admin dashboard included.",
+      "status": "queued",
+      "publishedSlug": null
+    },
+    {
+      "keyword": "custom ecommerce website",
+      "title": "Custom Ecommerce Website: The Complete Guide for 2026",
+      "cluster": "ecommerce",
+      "pillar": "custom-ecommerce-website-guide",
+      "role": "pillar",
+      "intent": "learn",
+      "funnel": "awareness",
+      "category": "nextjs-websites",
+      "targetPage": "/services/nextjs-websites",
+      "reader": "business owner",
+      "secondary": [
+        "custom online store",
+        "ecommerce website development",
+        "build an ecommerce website",
+        "ecommerce admin dashboard"
+      ],
+      "questions": [
+        "should i build a custom store or use shopify?",
+        "how much does a custom ecommerce website cost?",
+        "how long does it take to build an online store?"
+      ],
+      "angle": "The hub for the cluster: what a custom store includes, my real package prices and page limits, and links to every supporting post.",
+      "status": "queued",
+      "publishedSlug": null
+    },
+    {
       "keyword": "react vs next.js for seo",
       "title": "React vs Next.js for SEO: Which One Ranks Better?",
+      "cluster": "react-seo",
+      "pillar": "react-seo-guide",
+      "role": "supporting",
+      "intent": "compare",
+      "funnel": "consideration",
       "category": "react-nextjs-seo",
-      "reader": "founder",
       "targetPage": "/services/react-nextjs-seo",
+      "reader": "founder",
+      "secondary": [
+        "is react good for seo",
+        "next.js seo benefits",
+        "server side rendering vs client side seo"
+      ],
+      "questions": [
+        "is next.js better than react for seo?",
+        "do i need next.js for seo?"
+      ],
+      "angle": "Shows the raw HTML a crawler gets from each setup side by side, using my site before and after, instead of a feature list.",
+      "status": "queued",
+      "publishedSlug": null
+    },
+    {
+      "keyword": "working with a remote web developer",
+      "title": "Working With a Remote Web Developer: The Complete Guide",
+      "cluster": "remote-developer",
+      "pillar": "working-with-a-remote-web-developer",
+      "role": "pillar",
+      "intent": "learn",
+      "funnel": "awareness",
+      "category": "hiring",
+      "targetPage": "/services/nextjs-websites",
+      "reader": "business owner",
+      "secondary": [
+        "hire remote developer",
+        "offshore web developer",
+        "remote freelance developer",
+        "outsource web development"
+      ],
+      "questions": [
+        "is it safe to hire a remote developer?",
+        "how do i pay a developer in another country?",
+        "how do time zones work with a remote developer?"
+      ],
+      "angle": "The hub for the cluster, from the remote developer's side: time-zone overlap, payments, contracts, handover and the warning signs, linking every supporting post.",
+      "status": "queued",
+      "publishedSlug": null
+    },
+    {
+      "keyword": "how much does a custom dashboard cost",
+      "title": "How Much Does a Custom Dashboard Cost? Real Prices",
+      "cluster": "dashboards",
+      "pillar": "custom-web-app-for-small-business",
+      "role": "supporting",
+      "intent": "buy",
+      "funnel": "decision",
+      "category": "dashboards",
+      "targetPage": "/services/dashboards",
+      "reader": "founder",
+      "secondary": [
+        "dashboard development cost",
+        "admin dashboard price",
+        "web app cost"
+      ],
+      "questions": [
+        "how much does it cost to build a dashboard?",
+        "what makes a dashboard more expensive?"
+      ],
+      "angle": "My real prices (dashboard from $1,200 in 2–4 weeks, web app from $2,500 in 4–8 weeks) and the features that move the price.",
+      "status": "queued",
+      "publishedSlug": null
+    },
+    {
+      "keyword": "custom web app for small business",
+      "title": "Custom Web App for Small Business: The Complete Guide",
+      "cluster": "dashboards",
+      "pillar": "custom-web-app-for-small-business",
+      "role": "pillar",
+      "intent": "learn",
+      "funnel": "awareness",
+      "category": "dashboards",
+      "targetPage": "/services/dashboards",
+      "reader": "business owner",
+      "secondary": [
+        "business web application",
+        "custom business software",
+        "internal tools for small business",
+        "web app development"
+      ],
+      "questions": [
+        "when does a small business need a custom web app?",
+        "how much does a custom web app cost?",
+        "how long does it take to build a web app?"
+      ],
+      "angle": "The hub for the cluster: when spreadsheets stop working, what a first version includes, real prices and timelines, and links to every supporting post.",
+      "status": "queued",
+      "publishedSlug": null
+    },
+    {
+      "keyword": "questions to ask a next.js developer before hiring",
+      "title": "12 Questions to Ask a Next.js Developer Before Hiring",
+      "cluster": "hire-developer",
+      "pillar": "hire-nextjs-developer",
+      "role": "supporting",
+      "intent": "hire",
+      "funnel": "decision",
+      "category": "hiring",
+      "targetPage": "/services/nextjs-websites",
+      "reader": "business owner",
+      "secondary": [
+        "questions to ask a web developer",
+        "interview a freelance developer",
+        "hiring a react developer checklist"
+      ],
+      "questions": [
+        "what should i ask a web developer before hiring?",
+        "how do i know a developer is good if i'm not technical?"
+      ],
+      "angle": "Every question comes with the answer a good developer gives and the answer that should worry you, using my own terms (50/50 payment, 2 revision rounds, 30 days of fixes) as the worked example.",
       "status": "queued",
       "publishedSlug": null
     },
     {
       "keyword": "next.js seo checklist",
-      "title": "Next.js SEO Checklist: What Every Page Needs",
+      "title": "Next.js SEO Checklist: 20 Things Every Page Needs",
+      "cluster": "react-seo",
+      "pillar": "react-seo-guide",
+      "role": "supporting",
+      "intent": "learn",
+      "funnel": "consideration",
       "category": "react-nextjs-seo",
+      "targetPage": "/services/react-nextjs-seo",
       "reader": "founder",
-      "targetPage": "/services/react-nextjs-seo",
+      "secondary": [
+        "next.js metadata api",
+        "next.js seo best practices",
+        "next.js sitemap",
+        "next.js canonical url"
+      ],
+      "questions": [
+        "how do i add seo to next.js?",
+        "does next.js generate a sitemap?"
+      ],
+      "angle": "A copyable checklist with the exact App Router code for each item, taken from this site's codebase, plus how to test each one.",
       "status": "queued",
       "publishedSlug": null
     },
     {
-      "keyword": "core web vitals react",
-      "title": "Core Web Vitals for React Sites: What to Fix First",
-      "category": "react-nextjs-seo",
-      "reader": "founder",
-      "targetPage": "/services/react-nextjs-seo",
-      "status": "queued",
-      "publishedSlug": null
-    },
-    {
-      "keyword": "google not indexing react pages",
-      "title": "Google Is Not Indexing My React Pages: How to Fix It",
-      "category": "react-nextjs-seo",
+      "keyword": "how much to build an ai chatbot for a shopify store",
+      "title": "How Much to Build an AI Chatbot for a Shopify Store?",
+      "cluster": "ai-chatbots",
+      "pillar": "ai-chatbot-for-small-business",
+      "role": "supporting",
+      "intent": "buy",
+      "funnel": "decision",
+      "category": "ai-chatbots",
+      "targetPage": "/services/ai-chatbots",
       "reader": "business owner",
-      "targetPage": "/services/react-nextjs-seo",
+      "secondary": [
+        "shopify ai chatbot",
+        "shopify chatbot cost",
+        "chatbot for online store"
+      ],
+      "questions": [
+        "can i add a custom chatbot to shopify?",
+        "what does a store chatbot need to know?"
+      ],
+      "angle": "Real build price plus what a store bot needs (products, delivery, returns) and where Shopify apps fall short.",
       "status": "queued",
-      "publishedSlug": null
+      "publishedSlug": null,
+      "blockedBy": "TODO(owner): do you install custom chatbots on Shopify stores (not only React/Next.js sites)? Any Shopify project to mention?"
     },
     {
-      "keyword": "meta tags in react",
-      "title": "Meta Tags in React: Why Every Page Needs Its Own Title",
-      "category": "react-nextjs-seo",
-      "reader": "founder",
-      "targetPage": "/services/react-nextjs-seo",
-      "status": "queued",
-      "publishedSlug": null
-    },
-    {
-      "keyword": "structured data for small business website",
-      "title": "Structured Data for Small Business Websites, Explained Simply",
-      "category": "react-nextjs-seo",
-      "reader": "business owner",
-      "targetPage": "/services/react-nextjs-seo",
-      "status": "queued",
-      "publishedSlug": null
-    },
-    {
-      "keyword": "client side rendering vs server side rendering seo",
-      "title": "Client-Side vs Server-Side Rendering: What It Means for SEO",
-      "category": "react-nextjs-seo",
-      "reader": "business owner",
-      "targetPage": "/services/react-nextjs-seo",
-      "status": "queued",
-      "publishedSlug": null
-    },
-    {
-      "keyword": "seo audit for react website",
-      "title": "What a React SEO Audit Checks (and What It Costs)",
-      "category": "react-nextjs-seo",
-      "reader": "business owner",
-      "targetPage": "/services/react-nextjs-seo",
-      "status": "queued",
-      "publishedSlug": null
-    },
-    {
-      "keyword": "create react app seo",
-      "title": "Create React App and SEO: Why It Struggles and What to Do",
-      "category": "react-nextjs-seo",
-      "reader": "founder",
-      "targetPage": "/services/react-nextjs-seo",
-      "status": "queued",
-      "publishedSlug": null
-    },
-    {
-      "keyword": "slow website losing customers",
-      "title": "Is Your Slow Website Losing Customers? How to Tell",
-      "category": "react-nextjs-seo",
-      "reader": "business owner",
-      "targetPage": "/services/react-nextjs-seo",
-      "status": "queued",
-      "publishedSlug": null
-    },
-    {
-      "keyword": "improve lcp next.js",
-      "title": "How to Improve LCP on a Next.js Site",
-      "category": "react-nextjs-seo",
-      "reader": "founder",
-      "targetPage": "/services/react-nextjs-seo",
-      "status": "queued",
-      "publishedSlug": null
-    },
-    {
-      "keyword": "website not showing on google",
-      "title": "My Website Is Not Showing on Google: A Step-by-Step Check",
-      "category": "react-nextjs-seo",
-      "reader": "business owner",
-      "targetPage": "/services/react-nextjs-seo",
-      "status": "queued",
-      "publishedSlug": null
-    },
-    {
-      "keyword": "technical seo for startups",
-      "title": "Technical SEO for Startups: The Basics Before Content",
-      "category": "react-nextjs-seo",
-      "reader": "founder",
-      "targetPage": "/services/react-nextjs-seo",
-      "status": "queued",
-      "publishedSlug": null
-    },
-    {
-      "keyword": "sitemap and robots.txt for next.js",
-      "title": "Sitemap and robots.txt in Next.js: A Plain Guide",
-      "category": "react-nextjs-seo",
-      "reader": "founder",
-      "targetPage": "/services/react-nextjs-seo",
-      "status": "queued",
-      "publishedSlug": null
-    },
-    {
-      "keyword": "custom website vs template",
-      "title": "Custom Website vs Template: Which Is Right for Your Business?",
+      "keyword": "ecommerce website cost breakdown",
+      "title": "Ecommerce Website Cost Breakdown: Where the Money Goes",
+      "cluster": "ecommerce",
+      "pillar": "custom-ecommerce-website-guide",
+      "role": "supporting",
+      "intent": "buy",
+      "funnel": "decision",
       "category": "nextjs-websites",
+      "targetPage": "/services/nextjs-websites",
       "reader": "business owner",
-      "targetPage": "/services/nextjs-websites",
-      "status": "queued",
-      "publishedSlug": null
-    },
-    {
-      "keyword": "landing page cost",
-      "title": "How Much Does a Landing Page Cost in 2026?",
-      "category": "nextjs-websites",
-      "reader": "business owner",
-      "targetPage": "/services/nextjs-websites",
-      "status": "queued",
-      "publishedSlug": null
-    },
-    {
-      "keyword": "ecommerce website cost",
-      "title": "How Much Does an Ecommerce Website Cost?",
-      "category": "nextjs-websites",
-      "reader": "business owner",
-      "targetPage": "/services/nextjs-websites",
-      "status": "queued",
-      "publishedSlug": null
-    },
-    {
-      "keyword": "next.js vs shopify",
-      "title": "Next.js vs Shopify for an Online Store",
-      "category": "nextjs-websites",
-      "reader": "business owner",
-      "targetPage": "/services/nextjs-websites",
-      "status": "queued",
-      "publishedSlug": null
-    },
-    {
-      "keyword": "website redesign checklist",
-      "title": "Website Redesign Checklist: What to Keep, Fix and Drop",
-      "category": "nextjs-websites",
-      "reader": "business owner",
-      "targetPage": "/services/nextjs-websites",
-      "status": "queued",
-      "publishedSlug": null
-    },
-    {
-      "keyword": "portfolio website for professionals",
-      "title": "What a Good Portfolio Website Needs (From Someone Who Builds Them)",
-      "category": "nextjs-websites",
-      "reader": "founder",
-      "targetPage": "/services/nextjs-websites",
-      "status": "queued",
-      "publishedSlug": null
-    },
-    {
-      "keyword": "website for small business that gets leads",
-      "title": "How to Build a Small Business Website That Gets Leads",
-      "category": "nextjs-websites",
-      "reader": "business owner",
-      "targetPage": "/services/nextjs-websites",
-      "status": "queued",
-      "publishedSlug": null
-    },
-    {
-      "keyword": "headless cms for next.js",
-      "title": "Do You Need a Headless CMS for Your Next.js Site?",
-      "category": "nextjs-websites",
-      "reader": "founder",
-      "targetPage": "/services/nextjs-websites",
-      "status": "queued",
-      "publishedSlug": null
-    },
-    {
-      "keyword": "what to prepare before hiring a web developer",
-      "title": "What to Prepare Before Your Website Project Starts",
-      "category": "nextjs-websites",
-      "reader": "business owner",
-      "targetPage": "/services/nextjs-websites",
-      "status": "queued",
-      "publishedSlug": null
-    },
-    {
-      "keyword": "website maintenance cost",
-      "title": "Website Maintenance: What It Costs and What You Actually Need",
-      "category": "nextjs-websites",
-      "reader": "business owner",
-      "targetPage": "/services/nextjs-websites",
-      "status": "queued",
-      "publishedSlug": null
-    },
-    {
-      "keyword": "vercel vs shared hosting",
-      "title": "Vercel vs Shared Hosting for a Business Website",
-      "category": "nextjs-websites",
-      "reader": "business owner",
-      "targetPage": "/services/nextjs-websites",
-      "status": "queued",
-      "publishedSlug": null
-    },
-    {
-      "keyword": "admin dashboard for ecommerce store",
-      "title": "What an Admin Dashboard for an Ecommerce Store Should Do",
-      "category": "dashboards",
-      "reader": "business owner",
-      "targetPage": "/services/dashboards",
-      "status": "queued",
-      "publishedSlug": null
-    },
-    {
-      "keyword": "custom dashboard vs off the shelf",
-      "title": "Custom Dashboard vs Off-the-Shelf Software",
-      "category": "dashboards",
-      "reader": "founder",
-      "targetPage": "/services/dashboards",
-      "status": "queued",
-      "publishedSlug": null
-    },
-    {
-      "keyword": "dashboard development cost",
-      "title": "How Much Does a Custom Dashboard Cost?",
-      "category": "dashboards",
-      "reader": "founder",
-      "targetPage": "/services/dashboards",
+      "secondary": [
+        "how much does an ecommerce website cost",
+        "online store price",
+        "ecommerce development cost"
+      ],
+      "questions": [
+        "how much should a small online store cost?",
+        "what are the hidden costs of an online store?"
+      ],
+      "angle": "A line-by-line table from my real prices (store from $1,000, full app from $2,000, extra pages $50, CMS +$150) and what a cheaper quote usually leaves out.",
       "status": "queued",
       "publishedSlug": null
     },
     {
       "keyword": "replace spreadsheets with a web app",
-      "title": "When to Replace Spreadsheets With a Web App",
+      "title": "Replace Spreadsheets With a Web App: When and How",
+      "cluster": "dashboards",
+      "pillar": "custom-web-app-for-small-business",
+      "role": "supporting",
+      "intent": "learn",
+      "funnel": "consideration",
       "category": "dashboards",
-      "reader": "business owner",
       "targetPage": "/services/dashboards",
+      "reader": "business owner",
+      "secondary": [
+        "spreadsheet to web app",
+        "excel to web application",
+        "google sheets alternative for business"
+      ],
+      "questions": [
+        "when should i stop using spreadsheets?",
+        "can my spreadsheet data move to an app?"
+      ],
+      "angle": "A self-check of the signs that a spreadsheet is costing money, and the migration steps I follow.",
+      "status": "queued",
+      "publishedSlug": null
+    },
+    {
+      "keyword": "hire web developer from pakistan",
+      "title": "Hiring a Web Developer From Pakistan: What to Know",
+      "cluster": "remote-developer",
+      "pillar": "working-with-a-remote-web-developer",
+      "role": "supporting",
+      "intent": "hire",
+      "funnel": "decision",
+      "category": "hiring",
+      "targetPage": "/services/nextjs-websites",
+      "reader": "founder",
+      "secondary": [
+        "pakistani web developer",
+        "outsource to pakistan",
+        "offshore developer pakistan"
+      ],
+      "questions": [
+        "is it a good idea to hire a developer from pakistan?",
+        "how do payments to pakistan work?"
+      ],
+      "angle": "Written by a developer based in Pakistan working with US, UK and EU clients: what to check, how payment and overlap work, with real terms and prices.",
+      "status": "queued",
+      "publishedSlug": null
+    },
+    {
+      "keyword": "red flags when hiring a react developer",
+      "title": "Red Flags When Hiring a React Developer (and What to Ask)",
+      "cluster": "hire-developer",
+      "pillar": "hire-nextjs-developer",
+      "role": "supporting",
+      "intent": "hire",
+      "funnel": "decision",
+      "category": "hiring",
+      "targetPage": "/services/nextjs-websites",
+      "reader": "founder",
+      "secondary": [
+        "react developer warning signs",
+        "bad web developer signs",
+        "hire react developer mistakes"
+      ],
+      "questions": [
+        "how do you spot a bad developer?",
+        "what are red flags in a developer portfolio?"
+      ],
+      "angle": "A red-flag list a non-technical founder can check in 10 minutes: view-source on their past sites, Lighthouse on their own site, who owns the code and accounts. I run each check on my own site in the post.",
+      "status": "queued",
+      "publishedSlug": null
+    },
+    {
+      "keyword": "create react app seo problems",
+      "title": "Create React App SEO Problems and How to Fix Them",
+      "cluster": "react-seo",
+      "pillar": "react-seo-guide",
+      "role": "supporting",
+      "intent": "fix",
+      "funnel": "consideration",
+      "category": "react-nextjs-seo",
+      "targetPage": "/services/react-nextjs-seo",
+      "reader": "founder",
+      "secondary": [
+        "cra seo",
+        "create react app meta tags",
+        "create react app prerender",
+        "create react app deprecated"
+      ],
+      "questions": [
+        "is create react app bad for seo?",
+        "should i move create react app to next.js?"
+      ],
+      "angle": "Fix options ranked by cost and effect (prerender, react-helmet, migration) with the trade-offs I hit, and when a migration is not worth it.",
+      "status": "queued",
+      "publishedSlug": null
+    },
+    {
+      "keyword": "ai chatbot trained on website content",
+      "title": "AI Chatbot Trained on Your Website Content: How It Works",
+      "cluster": "ai-chatbots",
+      "pillar": "ai-chatbot-for-small-business",
+      "role": "supporting",
+      "intent": "learn",
+      "funnel": "consideration",
+      "category": "ai-chatbots",
+      "targetPage": "/services/ai-chatbots",
+      "reader": "business owner",
+      "secondary": [
+        "chatbot that answers from your website",
+        "rag chatbot",
+        "custom gpt for website",
+        "chatbot knowledge base"
+      ],
+      "questions": [
+        "how do you train a chatbot on your website?",
+        "will the chatbot make up answers?"
+      ],
+      "angle": "Walks through the real pipeline on this site (44 pages embedded, re-embedded on every deploy, offline answer bank) in plain words, with what the owner has to maintain.",
+      "status": "queued",
+      "publishedSlug": null
+    },
+    {
+      "keyword": "next.js vs shopify for a small store",
+      "title": "Next.js vs Shopify for a Small Store: An Honest Comparison",
+      "cluster": "ecommerce",
+      "pillar": "custom-ecommerce-website-guide",
+      "role": "supporting",
+      "intent": "compare",
+      "funnel": "consideration",
+      "category": "nextjs-websites",
+      "targetPage": "/services/nextjs-websites",
+      "reader": "business owner",
+      "secondary": [
+        "shopify vs custom website",
+        "shopify alternative",
+        "headless shopify"
+      ],
+      "questions": [
+        "is shopify better than a custom store?",
+        "when should i leave shopify?"
+      ],
+      "angle": "Says when Shopify is the right choice, with a decision table and the real cost of the custom route.",
+      "status": "queued",
+      "publishedSlug": null
+    },
+    {
+      "keyword": "custom dashboard vs off the shelf software",
+      "title": "Custom Dashboard vs Off-the-Shelf Software",
+      "cluster": "dashboards",
+      "pillar": "custom-web-app-for-small-business",
+      "role": "supporting",
+      "intent": "compare",
+      "funnel": "consideration",
+      "category": "dashboards",
+      "targetPage": "/services/dashboards",
+      "reader": "founder",
+      "secondary": [
+        "build vs buy software",
+        "saas vs custom software",
+        "custom admin dashboard"
+      ],
+      "questions": [
+        "is custom software worth it for a small business?",
+        "when is off-the-shelf software enough?"
+      ],
+      "angle": "A decision table by team size and workflow, with real build prices instead of vague 'it depends'.",
+      "status": "queued",
+      "publishedSlug": null
+    },
+    {
+      "keyword": "remote developer time zone overlap",
+      "title": "Remote Developer in Another Time Zone: Making Overlap Work",
+      "cluster": "remote-developer",
+      "pillar": "working-with-a-remote-web-developer",
+      "role": "supporting",
+      "intent": "learn",
+      "funnel": "consideration",
+      "category": "hiring",
+      "targetPage": "/services/nextjs-websites",
+      "reader": "business owner",
+      "secondary": [
+        "working across time zones",
+        "async communication developer",
+        "us uk time zone developer"
+      ],
+      "questions": [
+        "how many overlap hours do you need with a remote developer?",
+        "how do you run updates across time zones?"
+      ],
+      "angle": "The overlap schedule and update routine I use with US, UK and EU clients.",
+      "status": "queued",
+      "publishedSlug": null
+    },
+    {
+      "keyword": "freelance next.js developer vs agency",
+      "title": "Freelance Next.js Developer vs Agency: Which to Hire?",
+      "cluster": "hire-developer",
+      "pillar": "hire-nextjs-developer",
+      "role": "supporting",
+      "intent": "compare",
+      "funnel": "consideration",
+      "category": "hiring",
+      "targetPage": "/services/nextjs-websites",
+      "reader": "business owner",
+      "secondary": [
+        "freelancer vs agency for website",
+        "hire freelancer or agency",
+        "small agency vs freelancer cost"
+      ],
+      "questions": [
+        "is it cheaper to hire a freelancer or an agency?",
+        "who owns the code with an agency?"
+      ],
+      "angle": "Written by someone who is both: a founder of a small agency who also works directly with clients. A decision table by project type instead of a generic pros/cons list.",
+      "status": "queued",
+      "publishedSlug": null
+    },
+    {
+      "keyword": "improve lcp in next.js",
+      "title": "How to Improve LCP in Next.js: What Worked on My Site",
+      "cluster": "react-seo",
+      "pillar": "react-seo-guide",
+      "role": "supporting",
+      "intent": "fix",
+      "funnel": "consideration",
+      "category": "react-nextjs-seo",
+      "targetPage": "/services/react-nextjs-seo",
+      "reader": "founder",
+      "secondary": [
+        "largest contentful paint next.js",
+        "next.js core web vitals",
+        "next/image lcp",
+        "slow lcp fix"
+      ],
+      "questions": [
+        "what is a good lcp score?",
+        "why is my lcp so high in next.js?"
+      ],
+      "angle": "The specific changes that took my home page LCP from 18.0 s to 2.6 s while keeping a 3D scene, in the order of how much each helped.",
+      "status": "queued",
+      "publishedSlug": null
+    },
+    {
+      "keyword": "website chatbot with whatsapp handoff",
+      "title": "Website Chatbot With WhatsApp Handoff: How It Works",
+      "cluster": "ai-chatbots",
+      "pillar": "ai-chatbot-for-small-business",
+      "role": "supporting",
+      "intent": "learn",
+      "funnel": "consideration",
+      "category": "ai-chatbots",
+      "targetPage": "/services/ai-chatbots",
+      "reader": "business owner",
+      "secondary": [
+        "chatbot to whatsapp",
+        "live chat to whatsapp",
+        "whatsapp lead capture"
+      ],
+      "questions": [
+        "can a chatbot send customers to whatsapp?",
+        "when should a bot hand over to a human?"
+      ],
+      "angle": "The handoff rules I use (when the bot doesn't know, when a lead is ready) and what the visitor sees, from the live assistant on this site.",
+      "status": "queued",
+      "publishedSlug": null
+    },
+    {
+      "keyword": "ecommerce admin dashboard features",
+      "title": "Ecommerce Admin Dashboard: Features Your Store Needs",
+      "cluster": "ecommerce",
+      "pillar": "custom-ecommerce-website-guide",
+      "role": "supporting",
+      "intent": "learn",
+      "funnel": "consideration",
+      "category": "nextjs-websites",
+      "targetPage": "/services/nextjs-websites",
+      "reader": "business owner",
+      "secondary": [
+        "admin dashboard for ecommerce store",
+        "order management dashboard",
+        "store admin panel"
+      ],
+      "questions": [
+        "what should an ecommerce admin panel include?",
+        "can i manage orders without shopify?"
+      ],
+      "angle": "A feature checklist ranked by how often store owners use each screen, from the dashboards built at Devrex Digital.",
       "status": "queued",
       "publishedSlug": null
     },
     {
       "keyword": "supabase vs firebase for business app",
       "title": "Supabase vs Firebase for a Business App",
+      "cluster": "dashboards",
+      "pillar": "custom-web-app-for-small-business",
+      "role": "supporting",
+      "intent": "compare",
+      "funnel": "consideration",
       "category": "dashboards",
+      "targetPage": "/services/dashboards",
       "reader": "founder",
-      "targetPage": "/services/dashboards",
+      "secondary": [
+        "supabase vs firebase",
+        "postgres vs firestore",
+        "supabase row level security"
+      ],
+      "questions": [
+        "is supabase better than firebase?",
+        "which is cheaper, supabase or firebase?"
+      ],
+      "angle": "Why this site's leads, chats and admin run on Supabase with row-level security, with the actual policy pattern.",
       "status": "queued",
       "publishedSlug": null
     },
     {
-      "keyword": "order management system for small business",
-      "title": "Order Management System for a Small Business: Build or Buy?",
-      "category": "dashboards",
+      "keyword": "how to pay a freelance developer overseas",
+      "title": "How to Pay a Freelance Developer Overseas Safely",
+      "cluster": "remote-developer",
+      "pillar": "working-with-a-remote-web-developer",
+      "role": "supporting",
+      "intent": "learn",
+      "funnel": "decision",
+      "category": "hiring",
+      "targetPage": "/services/nextjs-websites",
       "reader": "business owner",
-      "targetPage": "/services/dashboards",
+      "secondary": [
+        "pay international freelancer",
+        "milestone payments",
+        "freelancer payment methods"
+      ],
+      "questions": [
+        "what is the safest way to pay a foreign freelancer?",
+        "should i pay a developer upfront?"
+      ],
+      "angle": "How the 50/50 milestone split protects both sides, with the payment questions to settle before work starts.",
       "status": "queued",
-      "publishedSlug": null
+      "publishedSlug": null,
+      "blockedBy": "TODO(owner): which payment methods do you accept from international clients (bank transfer, Wise, Payoneer, PayPal)?"
     },
     {
-      "keyword": "mvp web app development",
-      "title": "Building an MVP Web App: What to Build First",
-      "category": "dashboards",
+      "keyword": "cost to hire a next.js developer",
+      "title": "Cost to Hire a Next.js Developer: Fixed Prices Explained",
+      "cluster": "hire-developer",
+      "pillar": "hire-nextjs-developer",
+      "role": "supporting",
+      "intent": "buy",
+      "funnel": "decision",
+      "category": "hiring",
+      "targetPage": "/services/nextjs-websites",
       "reader": "founder",
-      "targetPage": "/services/dashboards",
+      "secondary": [
+        "next.js developer rates",
+        "next.js website price",
+        "fixed price vs hourly developer",
+        "react developer cost"
+      ],
+      "questions": [
+        "how much does a next.js developer charge?",
+        "is fixed price or hourly better for a website?"
+      ],
+      "angle": "Real fixed package prices and delivery times from my own price list, what each package includes, and how add-ons change the total; no invented hourly-rate surveys.",
       "status": "queued",
       "publishedSlug": null
     },
     {
-      "keyword": "role based access dashboard",
-      "title": "Roles and Permissions in a Dashboard, Explained Simply",
-      "category": "dashboards",
+      "keyword": "react open graph tags not working",
+      "title": "React Open Graph Tags Not Working? Why Links Show No Preview",
+      "cluster": "react-seo",
+      "pillar": "react-seo-guide",
+      "role": "supporting",
+      "intent": "fix",
+      "funnel": "awareness",
+      "category": "react-nextjs-seo",
+      "targetPage": "/services/react-nextjs-seo",
       "reader": "founder",
-      "targetPage": "/services/dashboards",
-      "status": "queued",
-      "publishedSlug": null
-    },
-    {
-      "keyword": "ai chatbot for small business",
-      "title": "Does a Small Business Need an AI Chatbot?",
-      "category": "ai-chatbots",
-      "reader": "business owner",
-      "targetPage": "/services/ai-chatbots",
-      "status": "queued",
-      "publishedSlug": null
-    },
-    {
-      "keyword": "chatbot that answers from your website",
-      "title": "How a Chatbot Answers Only From Your Own Website",
-      "category": "ai-chatbots",
-      "reader": "business owner",
-      "targetPage": "/services/ai-chatbots",
-      "status": "queued",
-      "publishedSlug": null
-    },
-    {
-      "keyword": "whatsapp chatbot for business",
-      "title": "AI Chatbot or WhatsApp Button: What Brings More Leads?",
-      "category": "ai-chatbots",
-      "reader": "business owner",
-      "targetPage": "/services/ai-chatbots",
+      "secondary": [
+        "og tags react",
+        "whatsapp link preview not showing",
+        "react helmet og tags",
+        "next.js opengraph image"
+      ],
+      "questions": [
+        "why doesn't my link show a preview on whatsapp?",
+        "do social crawlers run javascript?"
+      ],
+      "angle": "Explains why social crawlers never see client-rendered tags, and shows the Next.js opengraph-image setup this site uses for every page.",
       "status": "queued",
       "publishedSlug": null
     },
     {
       "keyword": "gemini vs chatgpt for website chatbot",
       "title": "Gemini vs ChatGPT for a Website Chatbot",
+      "cluster": "ai-chatbots",
+      "pillar": "ai-chatbot-for-small-business",
+      "role": "supporting",
+      "intent": "compare",
+      "funnel": "consideration",
       "category": "ai-chatbots",
-      "reader": "founder",
       "targetPage": "/services/ai-chatbots",
+      "reader": "founder",
+      "secondary": [
+        "gemini api chatbot",
+        "openai api chatbot",
+        "best llm for customer support bot"
+      ],
+      "questions": [
+        "which ai model is best for a website chatbot?",
+        "is gemini free to use?"
+      ],
+      "angle": "Why I chose Gemini for this site's bot, with my own free-tier measurements (20 replies a day, first token in 1–2 s, Flash-Lite at 13–40 s) instead of benchmark tables.",
       "status": "queued",
       "publishedSlug": null
     },
     {
-      "keyword": "ai chatbot lead generation",
-      "title": "Using an AI Chatbot for Lead Generation",
+      "keyword": "ecommerce site with customer accounts",
+      "title": "Ecommerce Site With Customer Accounts: What It Takes",
+      "cluster": "ecommerce",
+      "pillar": "custom-ecommerce-website-guide",
+      "role": "supporting",
+      "intent": "buy",
+      "funnel": "decision",
+      "category": "nextjs-websites",
+      "targetPage": "/services/nextjs-websites",
+      "reader": "founder",
+      "secondary": [
+        "user login ecommerce",
+        "customer accounts online store",
+        "order history page"
+      ],
+      "questions": [
+        "do customers need accounts to buy?",
+        "what does a full ecommerce app include?"
+      ],
+      "angle": "When accounts are worth it and when guest checkout is better, with the real price difference between my store and full-app packages.",
+      "status": "queued",
+      "publishedSlug": null
+    },
+    {
+      "keyword": "order management system for small business",
+      "title": "Order Management System for a Small Business",
+      "cluster": "dashboards",
+      "pillar": "custom-web-app-for-small-business",
+      "role": "supporting",
+      "intent": "buy",
+      "funnel": "consideration",
+      "category": "dashboards",
+      "targetPage": "/services/dashboards",
+      "reader": "business owner",
+      "secondary": [
+        "order tracking dashboard",
+        "custom order management software",
+        "order management web app"
+      ],
+      "questions": [
+        "what does an order management system do?",
+        "can i build my own order system?"
+      ],
+      "angle": "The screens and statuses a small team actually uses, from order dashboards built at Devrex Digital.",
+      "status": "queued",
+      "publishedSlug": null
+    },
+    {
+      "keyword": "offshore react developer for us startup",
+      "title": "Offshore React Developer for a US Startup: A Checklist",
+      "cluster": "remote-developer",
+      "pillar": "working-with-a-remote-web-developer",
+      "role": "supporting",
+      "intent": "hire",
+      "funnel": "decision",
+      "category": "hiring",
+      "targetPage": "/services/nextjs-websites",
+      "reader": "founder",
+      "secondary": [
+        "offshore react developer",
+        "remote react developer",
+        "nearshore vs offshore developer"
+      ],
+      "questions": [
+        "is an offshore developer cheaper?",
+        "how do i check an offshore developer's work?"
+      ],
+      "angle": "A checklist for US founders: overlap hours, code ownership, accounts, handover, using my own terms as the example.",
+      "status": "queued",
+      "publishedSlug": null
+    },
+    {
+      "keyword": "react developer interview questions for non technical founders",
+      "title": "React Developer Interview Questions for Non-Technical Founders",
+      "cluster": "hire-developer",
+      "pillar": "hire-nextjs-developer",
+      "role": "supporting",
+      "intent": "hire",
+      "funnel": "consideration",
+      "category": "hiring",
+      "targetPage": "/services/nextjs-websites",
+      "reader": "founder",
+      "secondary": [
+        "react interview questions",
+        "how to interview a developer",
+        "technical interview without coding knowledge"
+      ],
+      "questions": [
+        "how do i interview a developer if i can't code?",
+        "what should a react developer be able to explain?"
+      ],
+      "angle": "Questions a founder can ask and judge without reading code: ask them to explain rendering, metadata and handover in plain words. Model answers come from how I build this site.",
+      "status": "queued",
+      "publishedSlug": null
+    },
+    {
+      "keyword": "sitemap and robots.txt for next.js app router",
+      "title": "Sitemap and robots.txt for the Next.js App Router",
+      "cluster": "react-seo",
+      "pillar": "react-seo-guide",
+      "role": "supporting",
+      "intent": "learn",
+      "funnel": "consideration",
+      "category": "react-nextjs-seo",
+      "targetPage": "/services/react-nextjs-seo",
+      "reader": "founder",
+      "secondary": [
+        "next.js sitemap.ts",
+        "next.js robots.ts",
+        "dynamic sitemap next.js",
+        "submit sitemap search console"
+      ],
+      "questions": [
+        "how do i create a sitemap in next.js?",
+        "where does robots.txt go in next.js?"
+      ],
+      "angle": "Working sitemap.ts and robots.ts from this site, including scheduled blog posts and how IndexNow runs after each deploy.",
+      "status": "queued",
+      "publishedSlug": null
+    },
+    {
+      "keyword": "ai chatbot that captures leads",
+      "title": "An AI Chatbot That Captures Leads: What It Needs",
+      "cluster": "ai-chatbots",
+      "pillar": "ai-chatbot-for-small-business",
+      "role": "supporting",
+      "intent": "buy",
+      "funnel": "decision",
       "category": "ai-chatbots",
-      "reader": "business owner",
       "targetPage": "/services/ai-chatbots",
-      "status": "queued",
-      "publishedSlug": null
-    },
-    {
-      "keyword": "urdu chatbot for website",
-      "title": "An AI Chatbot That Understands Urdu and Roman Urdu",
-      "category": "ai-chatbots",
       "reader": "business owner",
-      "targetPage": "/services/ai-chatbots",
+      "secondary": [
+        "chatbot lead generation",
+        "lead capture chatbot",
+        "chatbot crm integration"
+      ],
+      "questions": [
+        "can a chatbot collect leads?",
+        "where do chatbot leads go?"
+      ],
+      "angle": "The exact lead fields, emails and dashboard my bot uses, and what I'd leave out so visitors don't drop off.",
       "status": "queued",
       "publishedSlug": null
     },
     {
-      "keyword": "chatbot mistakes to avoid",
-      "title": "AI Chatbot Mistakes That Lose Customers",
-      "category": "ai-chatbots",
-      "reader": "business owner",
-      "targetPage": "/services/ai-chatbots",
-      "status": "queued",
-      "publishedSlug": null
-    },
-    {
-      "keyword": "freelance react developer",
-      "title": "Hiring a Freelance React Developer: A Practical Guide",
-      "category": "hiring",
+      "keyword": "next.js ecommerce seo",
+      "title": "Next.js Ecommerce SEO: Product Pages That Rank",
+      "cluster": "ecommerce",
+      "pillar": "custom-ecommerce-website-guide",
+      "role": "supporting",
+      "intent": "fix",
+      "funnel": "consideration",
+      "category": "nextjs-websites",
+      "targetPage": "/services/nextjs-websites",
       "reader": "founder",
-      "targetPage": "/hire",
+      "secondary": [
+        "product page seo",
+        "product schema next.js",
+        "category page seo"
+      ],
+      "questions": [
+        "how do i rank product pages?",
+        "does product schema help seo?"
+      ],
+      "angle": "Copyable product and breadcrumb JSON-LD plus metadata code for App Router stores.",
       "status": "queued",
       "publishedSlug": null
     },
     {
-      "keyword": "hire full stack developer for startup",
-      "title": "Hiring a Full-Stack Developer for Your Startup",
-      "category": "hiring",
+      "keyword": "mvp web app development cost",
+      "title": "MVP Web App Development Cost: What a First Version Needs",
+      "cluster": "dashboards",
+      "pillar": "custom-web-app-for-small-business",
+      "role": "supporting",
+      "intent": "buy",
+      "funnel": "decision",
+      "category": "dashboards",
+      "targetPage": "/services/dashboards",
       "reader": "founder",
-      "targetPage": "/hire",
-      "status": "queued",
-      "publishedSlug": null
-    },
-    {
-      "keyword": "questions to ask a web developer",
-      "title": "Questions to Ask a Web Developer Before You Hire",
-      "category": "hiring",
-      "reader": "business owner",
-      "targetPage": "/hire",
-      "status": "queued",
-      "publishedSlug": null
-    },
-    {
-      "keyword": "freelancer vs agency for website",
-      "title": "Freelancer vs Agency for Your Website",
-      "category": "hiring",
-      "reader": "business owner",
-      "targetPage": "/hire",
-      "status": "queued",
-      "publishedSlug": null
-    },
-    {
-      "keyword": "next.js developer portfolio",
-      "title": "What Recruiters Should Look for in a Next.js Developer Portfolio",
-      "category": "hiring",
-      "reader": "recruiter",
-      "targetPage": "/hire",
-      "status": "queued",
-      "publishedSlug": null
-    },
-    {
-      "keyword": "react developer interview questions",
-      "title": "React Developer Interview Questions That Show Real Skill",
-      "category": "hiring",
-      "reader": "recruiter",
-      "targetPage": "/hire",
-      "status": "queued",
-      "publishedSlug": null
-    },
-    {
-      "keyword": "hire developer from pakistan",
-      "title": "Hiring a Developer From Pakistan: Time Zones, Payments and Quality",
-      "category": "hiring",
-      "reader": "founder",
-      "targetPage": "/hire",
-      "status": "queued",
-      "publishedSlug": null
-    },
-    {
-      "keyword": "web development contract terms",
-      "title": "Web Development Contract Terms Every Client Should Know",
-      "category": "hiring",
-      "reader": "business owner",
-      "targetPage": "/hire",
-      "status": "queued",
-      "publishedSlug": null
-    },
-    {
-      "keyword": "offshore react developer",
-      "title": "Working With an Offshore React Developer: How to Avoid the Usual Problems",
-      "category": "hiring",
-      "reader": "founder",
-      "targetPage": "/hire",
-      "status": "queued",
-      "publishedSlug": null
-    },
-    {
-      "keyword": "hire remote next.js developer",
-      "title": "How to Hire a Remote Next.js Developer (and Make It Work)",
-      "category": "hiring",
-      "reader": "founder",
-      "targetPage": "/hire",
+      "secondary": [
+        "mvp development",
+        "startup mvp cost",
+        "minimum viable product web app"
+      ],
+      "questions": [
+        "how much does an mvp cost?",
+        "what should an mvp include?"
+      ],
+      "angle": "A cut-list of what to leave out of version one, priced against my real web app package.",
       "status": "queued",
       "publishedSlug": null
     },
     {
       "keyword": "affordable next.js developer for us startups",
-      "title": "Affordable Next.js Development for US Startups Without Cutting Corners",
+      "title": "Affordable Next.js Developer for US Startups: What You Get",
+      "cluster": "remote-developer",
+      "pillar": "working-with-a-remote-web-developer",
+      "role": "supporting",
+      "intent": "hire",
+      "funnel": "decision",
       "category": "hiring",
+      "targetPage": "/services/nextjs-websites",
       "reader": "founder",
-      "targetPage": "/hire",
+      "secondary": [
+        "cheap next.js developer",
+        "budget web developer",
+        "low cost react developer"
+      ],
+      "questions": [
+        "what does a low-cost developer usually skip?",
+        "how can a startup save on development?"
+      ],
+      "angle": "What changes and what must not change when the budget is small, with my real package prices as the reference.",
+      "status": "queued",
+      "publishedSlug": null
+    },
+    {
+      "keyword": "what to prepare before hiring a web developer",
+      "title": "What to Prepare Before Hiring a Web Developer (Checklist)",
+      "cluster": "hire-developer",
+      "pillar": "hire-nextjs-developer",
+      "role": "supporting",
+      "intent": "learn",
+      "funnel": "awareness",
+      "category": "hiring",
+      "targetPage": "/services/nextjs-websites",
+      "reader": "business owner",
+      "secondary": [
+        "website project brief",
+        "web design brief template",
+        "prepare for website project"
+      ],
+      "questions": [
+        "what does a web developer need from me?",
+        "how do i write a website brief?"
+      ],
+      "angle": "A copyable brief template with the exact fields I ask clients for on the first call, and which missing item delays a project the most.",
+      "status": "queued",
+      "publishedSlug": null
+    },
+    {
+      "keyword": "add json-ld structured data to next.js",
+      "title": "How to Add JSON-LD Structured Data to Next.js",
+      "cluster": "react-seo",
+      "pillar": "react-seo-guide",
+      "role": "supporting",
+      "intent": "learn",
+      "funnel": "consideration",
+      "category": "react-nextjs-seo",
+      "targetPage": "/services/react-nextjs-seo",
+      "reader": "founder",
+      "secondary": [
+        "next.js schema markup",
+        "json-ld next.js app router",
+        "person schema",
+        "faqpage schema next.js"
+      ],
+      "questions": [
+        "how do i add schema to next.js?",
+        "which schema types should a business site use?"
+      ],
+      "angle": "Copyable JSON-LD for Person, BlogPosting, FAQPage and BreadcrumbList as used on this site, with one @id linking them, and how to validate it.",
+      "status": "queued",
+      "publishedSlug": null
+    },
+    {
+      "keyword": "urdu chatbot for website",
+      "title": "Urdu and Roman Urdu Chatbot for Your Website",
+      "cluster": "ai-chatbots",
+      "pillar": "ai-chatbot-for-small-business",
+      "role": "supporting",
+      "intent": "buy",
+      "funnel": "consideration",
+      "category": "ai-chatbots",
+      "targetPage": "/services/ai-chatbots",
+      "reader": "business owner",
+      "secondary": [
+        "roman urdu chatbot",
+        "multilingual website chatbot",
+        "chatbot in urdu"
+      ],
+      "questions": [
+        "can an ai chatbot understand roman urdu?",
+        "how do you test a bilingual bot?"
+      ],
+      "angle": "How the bot on this site handles Roman Urdu, including the saved answers with Roman Urdu phrasings, and what to test before launch.",
+      "status": "queued",
+      "publishedSlug": null
+    },
+    {
+      "keyword": "ecommerce website launch checklist",
+      "title": "Ecommerce Website Launch Checklist (Copy and Use)",
+      "cluster": "ecommerce",
+      "pillar": "custom-ecommerce-website-guide",
+      "role": "supporting",
+      "intent": "learn",
+      "funnel": "decision",
+      "category": "nextjs-websites",
+      "targetPage": "/services/nextjs-websites",
+      "reader": "business owner",
+      "secondary": [
+        "online store launch",
+        "ecommerce pre launch checklist",
+        "store go live checklist"
+      ],
+      "questions": [
+        "what should i test before launching an online store?",
+        "how do i test checkout?"
+      ],
+      "angle": "The pre-launch checklist I run on every store, as a copyable task list, including what the 30 days of free fixes cover.",
+      "status": "queued",
+      "publishedSlug": null
+    },
+    {
+      "keyword": "role based access control dashboard",
+      "title": "Role-Based Access in a Dashboard: A Plain Guide",
+      "cluster": "dashboards",
+      "pillar": "custom-web-app-for-small-business",
+      "role": "supporting",
+      "intent": "learn",
+      "funnel": "consideration",
+      "category": "dashboards",
+      "targetPage": "/services/dashboards",
+      "reader": "founder",
+      "secondary": [
+        "user roles admin panel",
+        "permissions dashboard",
+        "row level security"
+      ],
+      "questions": [
+        "how do user roles work in a web app?",
+        "how do i stop staff seeing the wrong data?"
+      ],
+      "angle": "How the owner-only admin on this site is locked down (Auth, RLS, blocked sign-ups), as a pattern a business can ask for.",
+      "status": "queued",
+      "publishedSlug": null
+    },
+    {
+      "keyword": "milestone payments for a freelance developer",
+      "title": "Milestone Payments for a Freelance Developer, Explained",
+      "cluster": "remote-developer",
+      "pillar": "working-with-a-remote-web-developer",
+      "role": "supporting",
+      "intent": "learn",
+      "funnel": "consideration",
+      "category": "hiring",
+      "targetPage": "/services/nextjs-websites",
+      "reader": "business owner",
+      "secondary": [
+        "freelance payment schedule",
+        "50 percent upfront",
+        "website payment terms"
+      ],
+      "questions": [
+        "how much should i pay a developer upfront?",
+        "what happens if the project stalls?"
+      ],
+      "angle": "Why I use 50% upfront and 50% on delivery, and when more milestones make sense.",
+      "status": "queued",
+      "publishedSlug": null
+    },
+    {
+      "keyword": "web development contract terms checklist",
+      "title": "Web Development Contract Terms: A Checklist",
+      "cluster": "hire-developer",
+      "pillar": "hire-nextjs-developer",
+      "role": "supporting",
+      "intent": "learn",
+      "funnel": "consideration",
+      "category": "hiring",
+      "targetPage": "/services/nextjs-websites",
+      "reader": "business owner",
+      "secondary": [
+        "website development contract",
+        "freelance developer contract",
+        "website payment terms"
+      ],
+      "questions": [
+        "what should be in a website development contract?",
+        "who owns the code after a website is built?"
+      ],
+      "angle": "Clause-by-clause checklist using my real terms (50% upfront, 50% on delivery, 2 revision rounds, 30 days of free fixes) as a worked example, plus what to ask about code and account ownership.",
+      "status": "queued",
+      "publishedSlug": null
+    },
+    {
+      "keyword": "client side rendering vs server side rendering seo",
+      "title": "Client-Side vs Server-Side Rendering for SEO, Explained Simply",
+      "cluster": "react-seo",
+      "pillar": "react-seo-guide",
+      "role": "supporting",
+      "intent": "compare",
+      "funnel": "awareness",
+      "category": "react-nextjs-seo",
+      "targetPage": "/services/react-nextjs-seo",
+      "reader": "business owner",
+      "secondary": [
+        "csr vs ssr",
+        "static site generation seo",
+        "what is server side rendering",
+        "javascript seo"
+      ],
+      "questions": [
+        "what is the difference between csr and ssr?",
+        "which rendering is best for seo?"
+      ],
+      "angle": "A plain-English decision table per page type (marketing, blog, dashboard) instead of an engineering explainer, with the choices I made on this site.",
+      "status": "queued",
+      "publishedSlug": null
+    },
+    {
+      "keyword": "website chatbot mistakes",
+      "title": "7 Website Chatbot Mistakes That Lose Leads",
+      "cluster": "ai-chatbots",
+      "pillar": "ai-chatbot-for-small-business",
+      "role": "supporting",
+      "intent": "fix",
+      "funnel": "consideration",
+      "category": "ai-chatbots",
+      "targetPage": "/services/ai-chatbots",
+      "reader": "business owner",
+      "secondary": [
+        "chatbot best practices",
+        "why chatbots fail",
+        "chatbot user experience"
+      ],
+      "questions": [
+        "why do customers hate chatbots?",
+        "what should a chatbot never do?"
+      ],
+      "angle": "Each mistake paired with the rule I built into my own bot to avoid it (off-topic refusal, offline fallback, no guessing on prices).",
+      "status": "queued",
+      "publishedSlug": null
+    },
+    {
+      "keyword": "slow ecommerce website fix",
+      "title": "Slow Ecommerce Website? Fix These First",
+      "cluster": "ecommerce",
+      "pillar": "custom-ecommerce-website-guide",
+      "role": "supporting",
+      "intent": "fix",
+      "funnel": "consideration",
+      "category": "nextjs-websites",
+      "targetPage": "/services/nextjs-websites",
+      "reader": "business owner",
+      "secondary": [
+        "speed up online store",
+        "ecommerce core web vitals",
+        "product image optimization"
+      ],
+      "questions": [
+        "why is my online store slow?",
+        "does site speed affect sales?"
+      ],
+      "angle": "Starts with the free audit tool on the owner's own store, then the fixes in order of impact.",
+      "status": "queued",
+      "publishedSlug": null
+    },
+    {
+      "keyword": "build admin panel for next.js app",
+      "title": "Building an Admin Panel for a Next.js App",
+      "cluster": "dashboards",
+      "pillar": "custom-web-app-for-small-business",
+      "role": "supporting",
+      "intent": "learn",
+      "funnel": "consideration",
+      "category": "dashboards",
+      "targetPage": "/services/dashboards",
+      "reader": "founder",
+      "secondary": [
+        "next.js admin dashboard",
+        "admin panel next.js supabase",
+        "next.js crud dashboard"
+      ],
+      "questions": [
+        "should i build or buy an admin panel?",
+        "how do i protect an admin route in next.js?"
+      ],
+      "angle": "The structure of this site's /admin (leads, chats, CSV export) with the route protection code.",
+      "status": "queued",
+      "publishedSlug": null
+    },
+    {
+      "keyword": "website handover checklist",
+      "title": "Website Handover Checklist: What You Should Receive",
+      "cluster": "remote-developer",
+      "pillar": "working-with-a-remote-web-developer",
+      "role": "supporting",
+      "intent": "learn",
+      "funnel": "decision",
+      "category": "hiring",
+      "targetPage": "/services/nextjs-websites",
+      "reader": "business owner",
+      "secondary": [
+        "website ownership transfer",
+        "domain and hosting handover",
+        "code handover"
+      ],
+      "questions": [
+        "what should a developer hand over at the end?",
+        "who should own the domain and hosting?"
+      ],
+      "angle": "A copyable handover task list: accounts, code, domain, env keys and docs, from how I hand over projects.",
+      "status": "queued",
+      "publishedSlug": null
+    },
+    {
+      "keyword": "how to review a next.js developer portfolio",
+      "title": "How to Review a Next.js Developer Portfolio in 10 Minutes",
+      "cluster": "hire-developer",
+      "pillar": "hire-nextjs-developer",
+      "role": "supporting",
+      "intent": "hire",
+      "funnel": "consideration",
+      "category": "hiring",
+      "targetPage": "/services/nextjs-websites",
+      "reader": "recruiter",
+      "secondary": [
+        "next.js developer portfolio",
+        "check developer portfolio",
+        "evaluate web developer portfolio"
+      ],
+      "questions": [
+        "what should a developer portfolio show?",
+        "how can i check if a portfolio site is really fast?"
+      ],
+      "angle": "Step-by-step checks with free tools (view-source, Lighthouse, my free SEO audit) applied live to a real portfolio: mine.",
+      "status": "queued",
+      "publishedSlug": null
+    },
+    {
+      "keyword": "seo audit for react website",
+      "title": "SEO Audit for a React Website: What It Checks and Costs",
+      "cluster": "react-seo",
+      "pillar": "react-seo-guide",
+      "role": "supporting",
+      "intent": "buy",
+      "funnel": "decision",
+      "category": "react-nextjs-seo",
+      "targetPage": "/services/react-nextjs-seo",
+      "reader": "business owner",
+      "secondary": [
+        "react seo audit",
+        "technical seo audit cost",
+        "seo audit checklist",
+        "javascript seo audit"
+      ],
+      "questions": [
+        "what does a technical seo audit include?",
+        "how much does an seo audit cost?"
+      ],
+      "angle": "Shows what my free audit tool checks automatically versus what the paid audit adds, with the real price and delivery time.",
+      "status": "queued",
+      "publishedSlug": null
+    },
+    {
+      "keyword": "gemini api free tier limits for a chatbot",
+      "title": "Gemini API Free Tier Limits for a Website Chatbot",
+      "cluster": "ai-chatbots",
+      "pillar": "ai-chatbot-for-small-business",
+      "role": "supporting",
+      "intent": "learn",
+      "funnel": "consideration",
+      "category": "ai-chatbots",
+      "targetPage": "/services/ai-chatbots",
+      "reader": "founder",
+      "secondary": [
+        "gemini free tier",
+        "gemini rate limits",
+        "free ai api for chatbot"
+      ],
+      "questions": [
+        "is the gemini api free?",
+        "what happens when the free quota runs out?"
+      ],
+      "angle": "Measured on a live bot: replies per day, response times per model, and the fallback that keeps the bot answering when the quota is gone. Links to Google's current limits page.",
+      "status": "queued",
+      "publishedSlug": null
+    },
+    {
+      "keyword": "headless ecommerce for small business",
+      "title": "Headless Ecommerce for Small Business: Worth It?",
+      "cluster": "ecommerce",
+      "pillar": "custom-ecommerce-website-guide",
+      "role": "supporting",
+      "intent": "compare",
+      "funnel": "awareness",
+      "category": "nextjs-websites",
+      "targetPage": "/services/nextjs-websites",
+      "reader": "founder",
+      "secondary": [
+        "headless commerce",
+        "headless shopify next.js",
+        "composable commerce small business"
+      ],
+      "questions": [
+        "what is headless ecommerce?",
+        "is headless ecommerce worth it for a small store?"
+      ],
+      "angle": "Plain-English definition and an honest 'not for you if' list, with the real cost difference.",
+      "status": "queued",
+      "publishedSlug": null
+    },
+    {
+      "keyword": "booking system web app for small business",
+      "title": "Booking System Web App for a Small Business",
+      "cluster": "dashboards",
+      "pillar": "custom-web-app-for-small-business",
+      "role": "supporting",
+      "intent": "buy",
+      "funnel": "consideration",
+      "category": "dashboards",
+      "targetPage": "/services/dashboards",
+      "reader": "business owner",
+      "secondary": [
+        "online booking system",
+        "appointment booking web app",
+        "custom booking software"
+      ],
+      "questions": [
+        "do i need a custom booking system?",
+        "can a booking app send reminders?"
+      ],
+      "angle": "When a booking tool is enough and when a custom app pays off, priced against my real web app package.",
+      "status": "queued",
+      "publishedSlug": null,
+      "blockedBy": "TODO(owner): any booking-system project (Devrex Digital or your own) to use as the real example?"
+    },
+    {
+      "keyword": "paid trial project with a freelance developer",
+      "title": "Paid Trial Project With a Freelance Developer: How to Run One",
+      "cluster": "remote-developer",
+      "pillar": "working-with-a-remote-web-developer",
+      "role": "supporting",
+      "intent": "hire",
+      "funnel": "consideration",
+      "category": "hiring",
+      "targetPage": "/services/nextjs-websites",
+      "reader": "founder",
+      "secondary": [
+        "test project developer",
+        "trial task freelancer",
+        "evaluate a developer"
+      ],
+      "questions": [
+        "should i give a developer a test project?",
+        "what makes a good trial task?"
+      ],
+      "angle": "How to scope a small paid trial that shows real skill, and what to judge besides the code.",
+      "status": "queued",
+      "publishedSlug": null
+    },
+    {
+      "keyword": "hire full stack next.js developer for startup mvp",
+      "title": "Hiring a Full-Stack Next.js Developer for a Startup MVP",
+      "cluster": "hire-developer",
+      "pillar": "hire-nextjs-developer",
+      "role": "supporting",
+      "intent": "hire",
+      "funnel": "decision",
+      "category": "hiring",
+      "targetPage": "/services/nextjs-websites",
+      "reader": "founder",
+      "secondary": [
+        "full stack developer for startup",
+        "mvp developer",
+        "next.js supabase developer"
+      ],
+      "questions": [
+        "should a startup hire one full-stack developer?",
+        "what stack should an mvp use?"
+      ],
+      "angle": "What one full-stack developer can ship alone (this site: Next.js, Supabase, Gemini, Resend, admin dashboard) and where you need more people.",
+      "status": "queued",
+      "publishedSlug": null
+    },
+    {
+      "keyword": "custom ai chatbot vs chatbot plugin",
+      "title": "Custom AI Chatbot vs a Chatbot Plugin: Which to Choose",
+      "cluster": "ai-chatbots",
+      "pillar": "ai-chatbot-for-small-business",
+      "role": "supporting",
+      "intent": "compare",
+      "funnel": "consideration",
+      "category": "ai-chatbots",
+      "targetPage": "/services/ai-chatbots",
+      "reader": "business owner",
+      "secondary": [
+        "chatbot plugin",
+        "chatbot saas vs custom",
+        "build or buy chatbot"
+      ],
+      "questions": [
+        "is a custom chatbot worth it?",
+        "who owns the data in a chatbot plugin?"
+      ],
+      "angle": "A cost-over-time table from my real build price versus a subscription, and the data-ownership questions vendors avoid.",
+      "status": "queued",
+      "publishedSlug": null
+    },
+    {
+      "keyword": "ecommerce website maintenance after launch",
+      "title": "Ecommerce Website Maintenance After Launch: What to Expect",
+      "cluster": "ecommerce",
+      "pillar": "custom-ecommerce-website-guide",
+      "role": "supporting",
+      "intent": "learn",
+      "funnel": "consideration",
+      "category": "nextjs-websites",
+      "targetPage": "/services/nextjs-websites",
+      "reader": "business owner",
+      "secondary": [
+        "website maintenance cost",
+        "store maintenance plan",
+        "website support after launch"
+      ],
+      "questions": [
+        "what maintenance does an online store need?",
+        "what is covered after launch?"
+      ],
+      "angle": "What my 30 days of free fixes cover and what ongoing maintenance looks like, with no invented monthly figures.",
+      "status": "queued",
+      "publishedSlug": null
+    },
+    {
+      "keyword": "stop chatbot making up answers",
+      "title": "How to Stop a Chatbot Making Up Answers About Your Business",
+      "cluster": "ai-chatbots",
+      "pillar": "ai-chatbot-for-small-business",
+      "role": "supporting",
+      "intent": "fix",
+      "funnel": "consideration",
+      "category": "ai-chatbots",
+      "targetPage": "/services/ai-chatbots",
+      "reader": "business owner",
+      "secondary": [
+        "chatbot hallucination",
+        "grounded chatbot",
+        "ai chatbot accuracy"
+      ],
+      "questions": [
+        "why does my chatbot make things up?",
+        "can a chatbot only answer from my website?"
+      ],
+      "angle": "The grounding rules from my own bot's prompt and retrieval setup, explained for owners, with what the bot says when it doesn't know.",
       "status": "queued",
       "publishedSlug": null
     },
     {
       "keyword": "freelance ai chatbot developer for uk businesses",
       "title": "Hiring a Freelance AI Chatbot Developer for a UK Business",
+      "cluster": "ai-chatbots",
+      "pillar": "ai-chatbot-for-small-business",
+      "role": "supporting",
+      "intent": "hire",
+      "funnel": "decision",
       "category": "ai-chatbots",
-      "reader": "business owner",
       "targetPage": "/services/ai-chatbots",
-      "status": "queued",
-      "publishedSlug": null
-    },
-    {
-      "keyword": "website handover checklist",
-      "title": "Website Handover Checklist: What You Should Own When Your Site Launches",
-      "category": "nextjs-websites",
       "reader": "business owner",
-      "targetPage": "/services/nextjs-websites",
-      "status": "queued",
-      "publishedSlug": null
-    },
-    {
-      "keyword": "working with a remote developer in another time zone",
-      "title": "Working With a Remote Developer in Another Time Zone",
-      "category": "hiring",
-      "reader": "business owner",
-      "targetPage": "/hire",
-      "status": "queued",
-      "publishedSlug": null
-    },
-    {
-      "keyword": "how to pay a freelance developer overseas",
-      "title": "How to Pay a Freelance Developer Overseas: Safe Options and Terms",
-      "category": "hiring",
-      "reader": "business owner",
-      "targetPage": "/hire",
+      "secondary": [
+        "ai chatbot developer uk",
+        "hire chatbot developer",
+        "chatbot agency uk"
+      ],
+      "questions": [
+        "what should a chatbot developer show you?",
+        "can a remote developer build a chatbot for a uk business?"
+      ],
+      "angle": "What to ask a chatbot developer and how to test their live bot, with my UK time-zone overlap and real terms.",
       "status": "queued",
       "publishedSlug": null
     }

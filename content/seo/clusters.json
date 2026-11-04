@@ -1,0 +1,44 @@
+[
+  {
+    "id": "hire-developer",
+    "name": "Hire a Next.js/React developer",
+    "category": "hiring",
+    "servicePage": "/services/nextjs-websites",
+    "pillar": { "keyword": "hire next.js developer", "slug": "hire-nextjs-developer" }
+  },
+  {
+    "id": "react-seo",
+    "name": "React & Next.js SEO",
+    "category": "react-nextjs-seo",
+    "servicePage": "/services/react-nextjs-seo",
+    "pillar": { "keyword": "react seo guide", "slug": "react-seo-guide" }
+  },
+  {
+    "id": "ai-chatbots",
+    "name": "AI chatbots for business",
+    "category": "ai-chatbots",
+    "servicePage": "/services/ai-chatbots",
+    "pillar": { "keyword": "ai chatbot for small business", "slug": "ai-chatbot-for-small-business" }
+  },
+  {
+    "id": "ecommerce",
+    "name": "Ecommerce websites",
+    "category": "nextjs-websites",
+    "servicePage": "/services/nextjs-websites",
+    "pillar": { "keyword": "custom ecommerce website", "slug": "custom-ecommerce-website-guide" }
+  },
+  {
+    "id": "dashboards",
+    "name": "Dashboards & web apps",
+    "category": "dashboards",
+    "servicePage": "/services/dashboards",
+    "pillar": { "keyword": "custom web app for small business", "slug": "custom-web-app-for-small-business" }
+  },
+  {
+    "id": "remote-developer",
+    "name": "Working with a remote developer",
+    "category": "hiring",
+    "servicePage": "/services/nextjs-websites",
+    "pillar": { "keyword": "working with a remote web developer", "slug": "working-with-a-remote-web-developer" }
+  }
+]

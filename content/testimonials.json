@@ -1,0 +1,15 @@
+{
+  "about": "Real client reviews only, added by the owner (never written or edited by the autopilot). Each review needs the client's consent. Posts quote one with <Review id=\"...\" />; /reviews lists them and goes live once there is at least one.",
+  "fields": {
+    "id": "kebab-case id used by <Review id>",
+    "name": "client's name as they agreed to show it",
+    "role": "their role, e.g. Founder",
+    "company": "company or brand",
+    "url": "link to the client (their site or the public review)",
+    "quote": "their words, unedited",
+    "date": "YYYY-MM-DD when it was given",
+    "source": "where it was given: email, Upwork, Google, WhatsApp...",
+    "project": "optional: /work/<slug> it refers to"
+  },
+  "items": []
+}

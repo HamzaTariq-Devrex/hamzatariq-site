@@ -650,3 +650,94 @@
   border: 1.5px solid rgba(45, 212, 191, 0.6);
   border-radius: 4px;
 }
+
+/* "What I recommend" box: Hamza's labelled opinion */
+.post-take {
+  margin: 34px 0;
+  padding: 24px 26px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-left: 3px solid #2dd4bf;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+/* E-E-A-T line under the byline and the link up to the cluster's pillar */
+.post-trust,
+.post-part-of {
+  margin: 16px 0 0;
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: rgba(226, 232, 240, 0.72);
+}
+
+.post-trust strong {
+  color: #f1f5f9;
+}
+
+.post-part-of a {
+  color: #5eead4;
+}
+
+/* Pillar pages: every supporting post in the cluster */
+.post-cluster {
+  margin-top: 48px;
+  padding: 24px 26px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.post-cluster h2 {
+  margin-top: 0;
+}
+
+.post-cluster ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.post-cluster li {
+  margin: 8px 0;
+}
+
+/* Real client reviews (/reviews and <Review id> in posts) */
+.review-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+  gap: 20px;
+}
+
+.review-card {
+  margin: 28px 0;
+  padding: 24px 26px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.review-grid .review-card {
+  margin: 0;
+}
+
+.review-card blockquote {
+  margin: 0;
+}
+
+.review-card blockquote p {
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.65;
+}
+
+.review-card figcaption {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 14px;
+  font-size: 14px;
+  color: rgba(226, 232, 240, 0.6);
+}
+
+.review-card figcaption a {
+  color: #5eead4;
+}

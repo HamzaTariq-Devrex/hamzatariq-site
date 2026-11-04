@@ -5,6 +5,7 @@ import { join } from "node:path";
 import matter from "gray-matter";
 import GithubSlugger from "github-slugger";
 import categories from "../../content/blog-categories.json";
+import clusters from "../../content/seo/clusters.json";
 import { TITLE_SUFFIX } from "./seo";
 import { isProductionSite } from "./site";
 
@@ -24,7 +25,16 @@ export type BlogCategory = {
 export const BLOG_CATEGORIES: BlogCategory[] = categories;
 export const getCategory = (slug: string) => BLOG_CATEGORIES.find((c) => c.slug === slug);
 
+/**
+ * Topic clusters (content/seo/clusters.json, strategy in content/seo/strategy.md): one pillar post
+ * per cluster lists every supporting post; supporting posts link up to it.
+ */
+export type Cluster = { id: string; name: string; category: string; servicePage: string; pillar: { keyword: string; slug: string } };
+export const CLUSTERS: Cluster[] = clusters;
+export const getCluster = (id: string | null) => CLUSTERS.find((c) => c.id === id) ?? null;
+
 export type Faq = { q: string; a: string };
+export type HowTo = { name: string; steps: { name: string; text: string }[] };
 export type TocItem = { id: string; text: string; level: 2 | 3 };
 export type Cover = { src: string; alt: string; width: number; height: number };
 
@@ -41,6 +51,12 @@ export type Post = {
   updated: string | null;
   cover: Cover | null;
   faq: Faq[];
+  cluster: Cluster | null;
+  role: "pillar" | "supporting";
+  /** "Why trust this guide" line with real credentials (shown under the byline). */
+  trust: string | null;
+  /** HowTo schema, only for posts that are a real step-by-step. */
+  howto: HowTo | null;
   body: string;
   words: number;
   readingMinutes: number;
@@ -99,6 +115,12 @@ const parse = (file: string): Post => {
   const cover = data.cover && typeof data.cover === "object" ? (data.cover as Cover) : null;
   if (cover && (!cover.src || !cover.alt || !cover.width || !cover.height)) fail(file, "cover needs src, alt, width and height");
 
+  const cluster = data.cluster ? (getCluster(String(data.cluster)) ?? fail(file, `unknown cluster "${data.cluster}"`)) : null;
+  const role = data.role === "pillar" ? "pillar" : "supporting";
+  const trust = typeof data.trust === "string" && data.trust.trim() ? data.trust.trim() : null;
+  const howto = data.howto && typeof data.howto === "object" ? (data.howto as HowTo) : null;
+  if (howto && (!howto.name || !Array.isArray(howto.steps) || howto.steps.some((st) => !st?.name || !st?.text))) fail(file, "howto needs a name and steps with name and text");
+
   const words = countWords(content);
   return {
     slug,
@@ -112,6 +134,10 @@ const parse = (file: string): Post => {
     updated: updated as string | null,
     cover,
     faq,
+    cluster,
+    role,
+    trust,
+    howto,
     body: content,
     words,
     readingMinutes: Math.max(1, Math.round(words / WORDS_PER_MINUTE)),
@@ -141,6 +167,13 @@ export const getPosts = () => allFiles().filter((p) => !isProductionSite || !isS
 export const getPost = (slug: string) => getPosts().find((p) => p.slug === slug) ?? null;
 export const getPostsInCategory = (slug: string) => getPosts().filter((p) => p.category.slug === slug);
 export const getAllTags = () => [...new Set(getPosts().flatMap((p) => p.tags))].sort();
+/** Supporting posts of a cluster, oldest first (listed on the pillar page). */
+export const getClusterPosts = (cluster: Cluster) =>
+  getPosts()
+    .filter((p) => p.cluster?.id === cluster.id && p.slug !== cluster.pillar.slug)
+    .sort((a, b) => a.published.localeCompare(b.published));
+/** True when a post is visible on this build; links to posts not live yet render as plain text. */
+export const isLivePost = (slug: string) => getPosts().some((p) => p.slug === slug);
 export const getPostsWithTag = (tag: string) => getPosts().filter((p) => p.tags.includes(tag));
 
 /** Same category first, then most shared tags, then newest. */
@@ -149,7 +182,7 @@ export const getRelatedPosts = (post: Post, limit = 3) =>
     .filter((p) => p.slug !== post.slug)
     .map((p) => ({
       p,
-      score: (p.category.slug === post.category.slug ? 10 : 0) + p.tags.filter((t) => post.tags.includes(t)).length,
+      score: (post.cluster && p.cluster?.id === post.cluster.id ? 20 : 0) + (p.category.slug === post.category.slug ? 10 : 0) + p.tags.filter((t) => post.tags.includes(t)).length,
     }))
     .sort((a, b) => b.score - a.score || b.p.published.localeCompare(a.p.published))
     .slice(0, limit)

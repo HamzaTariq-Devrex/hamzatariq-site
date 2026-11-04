@@ -10,6 +10,8 @@ export const SITE_URL = "https://hamzatariq.site";
 export const MIN_DAYS_BETWEEN_POSTS = 2;
 export const MAX_POSTS_PER_WEEK = 4;
 export const MIN_QUEUED = 10;
+// Original data from the SEO audit tool needs at least this many audited sites (content/STYLE.md).
+export const MIN_AUDIT_SITES = 30;
 
 if (existsSync(join(ROOT, ".env.local"))) process.loadEnvFile(join(ROOT, ".env.local"));
 
@@ -31,6 +33,17 @@ const BACKLOG = join(ROOT, "content", "backlog.json");
 export const readBacklog = () => JSON.parse(readFileSync(BACKLOG, "utf8"));
 export const writeBacklog = (data) => writeFileSync(BACKLOG, `${JSON.stringify(data, null, 2)}\n`);
 
+// Topic clusters (content/seo/clusters.json, strategy in content/seo/strategy.md).
+export const readClusters = () => JSON.parse(readFileSync(join(ROOT, "content", "seo", "clusters.json"), "utf8"));
+export const briefPath = (slug) => `content/seo/briefs/${slug}.md`;
+/** Post slug for a keyword: kebab case, next.js → nextjs (STYLE.md). */
+export const slugFor = (keyword) =>
+  String(keyword)
+    .toLowerCase()
+    .replace(/next\.?js/g, "nextjs")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+
 export const readPosts = () => {
   const dir = join(ROOT, "content", "blog");
   if (!existsSync(dir)) return [];
@@ -39,7 +52,16 @@ export const readPosts = () => {
     .map((f) => {
       const { data } = matter(readFileSync(join(dir, f), "utf8"));
       const date = (v) => (v instanceof Date ? v.toISOString().slice(0, 10) : v ? String(v) : null);
-      return { slug: f.replace(/\.mdx$/, ""), title: data.title, keyword: data.keyword, category: data.category, published: date(data.published), updated: date(data.updated) };
+      return {
+        slug: f.replace(/\.mdx$/, ""),
+        title: data.title,
+        keyword: data.keyword,
+        category: data.category,
+        cluster: data.cluster ?? null,
+        role: data.role ?? "supporting",
+        published: date(data.published),
+        updated: date(data.updated),
+      };
     });
 };
 

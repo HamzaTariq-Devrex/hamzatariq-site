@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { SITE } from "@/lib/site";
+import { hasReviews } from "@/lib/testimonials";
 
 type Props = { heading?: string; className?: string };
 
@@ -21,6 +22,7 @@ const AuthorBox = ({ heading = "Who you'll work with", className = "" }: Props) 
       <p className="author-box-bio">{SITE.bio}</p>
       <div className="author-box-links">
         <Link href="/about">About me</Link>
+        {hasReviews && <Link href="/reviews">Client reviews</Link>}
         <Link href="/hire">Hire me</Link>
         <a href={SITE.social.github} target="_blank" rel="noreferrer">
           GitHub

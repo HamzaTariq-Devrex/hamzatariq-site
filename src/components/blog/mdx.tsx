@@ -8,6 +8,9 @@ import rehypeSlug from "rehype-slug";
 import Icon from "@/components/site/ds/Icon";
 import { SITE } from "@/lib/site";
 import AuditCta from "@/components/site/AuditCta";
+import ReviewCard from "@/components/site/ReviewCard";
+import { getTestimonial } from "@/lib/testimonials";
+import { isLivePost } from "@/lib/blog";
 
 /** The "From my work" box every post needs: a real example from Hamza's projects. */
 const FromMyWork = ({ title = "From my work", children }: { title?: string; children: React.ReactNode }) => (
@@ -18,6 +21,22 @@ const FromMyWork = ({ title = "From my work", children }: { title?: string; chil
     <div className="post-work-body">{children}</div>
   </aside>
 );
+
+/** Hamza's own recommendation, labelled as opinion (an information-gain block, see content/STYLE.md). */
+const MyTake = ({ title = "What I recommend to clients", children }: { title?: string; children: React.ReactNode }) => (
+  <aside className="post-take" aria-label={title}>
+    <span className="post-work-label">
+      <Icon name="chat" size={16} /> {title}
+    </span>
+    <div className="post-work-body">{children}</div>
+  </aside>
+);
+
+/** A real client review from content/testimonials.json; content:check fails unknown ids. */
+const Review = ({ id }: { id: string }) => {
+  const review = getTestimonial(id);
+  return review ? <ReviewCard review={review} /> : null;
+};
 
 /** Image with required alt text (checked by content:check) and an optional caption. */
 const Figure = ({ src, alt, width, height, caption }: { src: string; alt: string; width: number; height: number; caption?: string }) => (
@@ -37,6 +56,9 @@ const A = ({ href = "", children, ...rest }: React.AnchorHTMLAttributes<HTMLAnch
     );
   }
   const path = href.startsWith(SITE.url) ? href.slice(SITE.url.length) || "/" : href;
+  // Older posts may link to a scheduled post; on the live site that link stays plain text until the post is out.
+  const post = path.match(/^\/blog\/([a-z0-9-]+)\/?(?:[#?].*)?$/);
+  if (post && !["category", "tag", "rss.xml"].includes(post[1]) && !isLivePost(post[1])) return <span>{children}</span>;
   // The home page is only ever opened with a full page load (see CLAUDE.md).
   return path === "/" || path.startsWith("#") ? (
     <a href={path} {...rest}>
@@ -60,7 +82,7 @@ const TaskBox = () => <span className="post-check" aria-hidden="true" />;
 
 const BlogAuditCta = () => <AuditCta location="blog" />;
 
-const components = { FromMyWork, Figure, a: A, table: Table, input: TaskBox, AuditCta: BlogAuditCta };
+const components = { FromMyWork, MyTake, Review, Figure, a: A, table: Table, input: TaskBox, AuditCta: BlogAuditCta };
 
 /** `auditCta`: insert the free SEO audit box after the first <FromMyWork> box (blog posts). */
 export const renderMdx = async (source: string, { auditCta = false }: { auditCta?: boolean } = {}) => {

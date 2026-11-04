@@ -9,7 +9,7 @@ import Section from "@/components/site/ds/Section";
 import PostCard from "@/components/blog/PostCard";
 import PostCta from "@/components/blog/PostCta";
 import { renderMdx } from "@/components/blog/mdx";
-import { formatPostDate, getPost, getPosts, getRelatedPosts, isScheduled, tagSlug } from "@/lib/blog";
+import { formatPostDate, getClusterPosts, getPost, getPosts, getRelatedPosts, isLivePost, isScheduled, tagSlug } from "@/lib/blog";
 import { SITE } from "@/lib/site";
 import { jsonLd } from "@/lib/seo";
 import "@/components/styles/Blog.css";
@@ -53,6 +53,11 @@ export default async function PostPage({ params }: Params) {
 
   const url = `${SITE.url}/blog/${post.slug}`;
   const related = getRelatedPosts(post);
+  const cluster = post.cluster;
+  const isPillar = !!cluster && cluster.pillar.slug === post.slug;
+  const clusterPosts = isPillar && cluster ? getClusterPosts(cluster) : [];
+  const pillar = cluster && !isPillar && isLivePost(cluster.pillar.slug) ? getPost(cluster.pillar.slug) : null;
+  const lastUpdated = post.updated ?? post.published;
   const content = await renderMdx(post.body, { auditCta: true });
 
   const structuredData = {
@@ -92,6 +97,16 @@ export default async function PostPage({ params }: Params) {
             },
           ]
         : []),
+      ...(post.howto
+        ? [
+            {
+              "@type": "HowTo",
+              name: post.howto.name,
+              mainEntityOfPage: url,
+              step: post.howto.steps.map((st, i) => ({ "@type": "HowToStep", position: i + 1, name: st.name, text: st.text })),
+            },
+          ]
+        : []),
     ],
   };
 
@@ -126,20 +141,28 @@ export default async function PostPage({ params }: Params) {
                 <time dateTime={post.published}>{formatPostDate(post.published)}</time>
               </dd>
             </div>
-            {post.updated && (
-              <div>
-                <dt>Updated</dt>
-                <dd>
-                  <time dateTime={post.updated}>{formatPostDate(post.updated)}</time>
-                </dd>
-              </div>
-            )}
+            <div>
+              <dt>Last updated</dt>
+              <dd>
+                <time dateTime={lastUpdated}>{formatPostDate(lastUpdated)}</time>
+              </dd>
+            </div>
             <div>
               <dt>Reading time</dt>
               <dd>{post.readingMinutes} min</dd>
             </div>
           </dl>
         </div>
+        {post.trust && (
+          <p className="post-trust">
+            <strong>Why trust this guide:</strong> {post.trust}
+          </p>
+        )}
+        {pillar && (
+          <p className="post-part-of">
+            Part of the guide: <Link href={`/blog/${pillar.slug}`}>{pillar.title}</Link>
+          </p>
+        )}
       </header>
 
       <div className="post-layout">
@@ -165,6 +188,19 @@ export default async function PostPage({ params }: Params) {
 
         <article className="post-body">
           {content}
+
+          {isPillar && cluster && clusterPosts.length > 0 && (
+            <section id="guides" className="post-cluster">
+              <h2>Every guide in {cluster.name}</h2>
+              <ul>
+                {clusterPosts.map((p) => (
+                  <li key={p.slug}>
+                    <Link href={`/blog/${p.slug}`}>{p.title}</Link>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
 
           {post.faq.length > 0 && (
             <section id="faq" className="post-faq">

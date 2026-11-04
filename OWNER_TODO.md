@@ -5,10 +5,15 @@ Facts and access only Hamza can provide. Nothing on the site may be invented to 
 
 ## Open
 
+- [ ] **Client reviews** (blog information gain, author box, `/reviews`). Send real reviews you have permission to show: client name, role and company, a link to them (their site or the public review), the exact words, the date and where it was given (email, Upwork, Google, WhatsApp). They go in `content/testimonials.json`; `/reviews` and the "Client reviews" link in the author box appear automatically once there is one. Nothing is written for you.
+- [ ] **Blocked blog topics** (the autopilot skips them until answered):
+  - Do you install custom chatbots on Shopify stores (not only React/Next.js sites)? Any Shopify project to mention? (topic: "how much to build an ai chatbot for a shopify store")
+  - Any booking-system project (Devrex Digital or your own) to use as the real example? (topic: "booking system web app for small business")
+  - Which payment methods do you accept from international clients (bank transfer, Wise, Payoneer, PayPal)? (topic: "how to pay a freelance developer overseas")
+- [ ] **Screenshots for posts** (optional, improves information gain): a screenshot of the AI assistant open on the site, and of the /admin leads screen with test data only. Save as WebP under 250 KB in `public/images/work/`.
 - [ ] **Calendly link.** Add `CALENDLY_URL` in Vercel (Production) and `.env.local`, then redeploy. Every "Book a free call" button then opens the Calendly popup and `/contact` shows the inline embed. Until then the buttons go to `/contact` (form, email, WhatsApp).
 - [ ] **More case studies.** For each: client type, problem, what you built, stack, results, screenshots, testimonial (if any), and whether it was your own client or Devrex Digital work. Dashboards and AI chatbots have no related case study yet, so their "Related work" sections are hidden on the live site.
 - [ ] **Availability for roles** (`/hire`): open to full-time, contract or remote work?
-- [ ] **Supabase CLI login (blocks the growth-engine push).** The CLI is logged in to a client account (tuluawear07). Run `npx supabase login` with the hamzabuildsweb account, then I apply migration `20261102090000_seo_audit_autopilot` (SEO audits table, `seo-audit` lead source, autopilot data functions) and regenerate types.
 - [ ] **PageSpeed API key** for the free SEO audit tool: Google Cloud console → enable "PageSpeed Insights API" → create an API key (restrict it to that API) → add `PAGESPEED_API_KEY` in Vercel and `.env.local`. Without it Google's shared quota is usually busy and the speed check is skipped.
 - [ ] **(Later) Search Console access for the autopilot:** create a Google Cloud service account, enable the Search Console API, add its email as a Restricted user on the hamzatariq.site property, and put its JSON key in `GSC_SERVICE_ACCOUNT_JSON` (where the autopilot runs). Skipped for now: refills use the AI assistant's top questions; monthly reports run without Search Console data.
 
@@ -20,6 +25,7 @@ Facts and access only Hamza can provide. Nothing on the site may be invented to 
 
 ## Done
 
+- [x] Supabase CLI logged in to the hamzabuildsweb account; all migrations applied (including `20261105090000_audit_stats`).
 - [x] New CV (`public/Hamza_Tariq_CV.pdf`) on the home Resume button and /hire; /hire and /about updated from it (Devrex Digital since Jan 2023, ICS, languages, CV skills and selected projects). Old resume removed; its URL redirects to the new CV.
 
 - [x] Vercel Web Analytics enabled (custom events show in Vercel on Pro only; /admin counts them from Supabase).

@@ -247,6 +247,7 @@ export type Database = {
         Args: { p_ip_hash: string; p_minutes?: number; p_secret: string }
         Returns: number
       }
+      app_audit_stats: { Args: { p_secret: string }; Returns: Json }
       app_cached_audit: {
         Args: { p_hours?: number; p_secret: string; p_url: string }
         Returns: {
