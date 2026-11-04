@@ -428,31 +428,6 @@
       "publishedSlug": null
     },
     {
-      "keyword": "how much to build an ai chatbot for a shopify store",
-      "title": "How Much to Build an AI Chatbot for a Shopify Store?",
-      "cluster": "ai-chatbots",
-      "pillar": "ai-chatbot-for-small-business",
-      "role": "supporting",
-      "intent": "buy",
-      "funnel": "decision",
-      "category": "ai-chatbots",
-      "targetPage": "/services/ai-chatbots",
-      "reader": "business owner",
-      "secondary": [
-        "shopify ai chatbot",
-        "shopify chatbot cost",
-        "chatbot for online store"
-      ],
-      "questions": [
-        "can i add a custom chatbot to shopify?",
-        "what does a store chatbot need to know?"
-      ],
-      "angle": "Real build price plus what a store bot needs (products, delivery, returns) and where Shopify apps fall short.",
-      "status": "queued",
-      "publishedSlug": null,
-      "blockedBy": "TODO(owner): do you install custom chatbots on Shopify stores (not only React/Next.js sites)? Any Shopify project to mention?"
-    },
-    {
       "keyword": "ecommerce website cost breakdown",
       "title": "Ecommerce Website Cost Breakdown: Where the Money Goes",
       "cluster": "ecommerce",
@@ -595,30 +570,6 @@
         "will the chatbot make up answers?"
       ],
       "angle": "Walks through the real pipeline on this site (44 pages embedded, re-embedded on every deploy, offline answer bank) in plain words, with what the owner has to maintain.",
-      "status": "queued",
-      "publishedSlug": null
-    },
-    {
-      "keyword": "next.js vs shopify for a small store",
-      "title": "Next.js vs Shopify for a Small Store: An Honest Comparison",
-      "cluster": "ecommerce",
-      "pillar": "custom-ecommerce-website-guide",
-      "role": "supporting",
-      "intent": "compare",
-      "funnel": "consideration",
-      "category": "nextjs-websites",
-      "targetPage": "/services/nextjs-websites",
-      "reader": "business owner",
-      "secondary": [
-        "shopify vs custom website",
-        "shopify alternative",
-        "headless shopify"
-      ],
-      "questions": [
-        "is shopify better than a custom store?",
-        "when should i leave shopify?"
-      ],
-      "angle": "Says when Shopify is the right choice, with a decision table and the real cost of the custom route.",
       "status": "queued",
       "publishedSlug": null
     },
@@ -811,10 +762,9 @@
         "what is the safest way to pay a foreign freelancer?",
         "should i pay a developer upfront?"
       ],
-      "angle": "How the 50/50 milestone split protects both sides, with the payment questions to settle before work starts.",
+      "angle": "How payment works in practice with the two methods I accept from international clients (Payoneer and bank transfer), how the 50/50 split protects both sides, and the payment questions to settle before work starts.",
       "status": "queued",
-      "publishedSlug": null,
-      "blockedBy": "TODO(owner): which payment methods do you accept from international clients (bank transfer, Wise, Payoneer, PayPal)?"
+      "publishedSlug": null
     },
     {
       "keyword": "cost to hire a next.js developer",
@@ -1483,7 +1433,7 @@
       "reader": "founder",
       "secondary": [
         "headless commerce",
-        "headless shopify next.js",
+        "headless commerce next.js",
         "composable commerce small business"
       ],
       "questions": [
@@ -1514,10 +1464,9 @@
         "do i need a custom booking system?",
         "can a booking app send reminders?"
       ],
-      "angle": "When a booking tool is enough and when a custom app pays off, priced against my real web app package.",
+      "angle": "When a ready-made booking tool is enough and when a custom booking system pays off, priced against my real web app package. I haven't built a booking system yet: say that plainly, never claim a past booking project or results, and use only real projects (this site's admin dashboard, Devrex Digital dashboards) as examples of the parts it reuses (logins, statuses, notifications).",
       "status": "queued",
-      "publishedSlug": null,
-      "blockedBy": "TODO(owner): any booking-system project (Devrex Digital or your own) to use as the real example?"
+      "publishedSlug": null
     },
     {
       "keyword": "paid trial project with a freelance developer",

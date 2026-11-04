@@ -4,7 +4,7 @@ How the blog wins search traffic as a new site, and the rules every topic in `co
 
 ## The idea in one paragraph
 
-A new domain can't rank for "web developer" or "React SEO". It can rank for long, specific questions asked by people who are close to buying: "hire next.js developer for ecommerce", "react site not indexed by google fix", "how much to build an ai chatbot for a shopify store". So every post answers one such question better than the current top results, using things only Hamza has (his prices, his projects, his own site's measured results, his tools). The posts are grouped into topic clusters, so Google sees depth on six subjects instead of 60 unrelated pages.
+A new domain can't rank for "web developer" or "React SEO". It can rank for long, specific questions asked by people who are close to buying: "hire next.js developer for ecommerce", "react site not indexed by google fix", "how much does a custom dashboard cost". So every post answers one such question better than the current top results, using things only Hamza has (his prices, his projects, his own site's measured results, his tools). The posts are grouped into topic clusters, so Google sees depth on six subjects instead of 60 unrelated pages.
 
 ## Topic clusters
 

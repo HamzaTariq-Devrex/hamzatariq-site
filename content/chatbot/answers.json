@@ -189,7 +189,7 @@
     },
     {
       "id": "dashboards",
-      "answer": "Hamza builds custom admin dashboards and web apps around how your business works: secure logins for your team, products, orders, customers or bookings in one place, and charts for the numbers you track. They work on desktop and mobile. https://hamzatariq.site/services/dashboards",
+      "answer": "Hamza builds custom admin dashboards and web apps around how your business works: secure logins for your team, products, orders, customers or bookings in one place, and charts for the numbers you track. He can also build booking and appointment systems this way, quoted by features. They work on desktop and mobile. https://hamzatariq.site/services/dashboards",
       "keywords": [
         "dashboard",
         "dashboards",
@@ -210,7 +210,12 @@
         "admin panel",
         "dashboard banwana",
         "dashboard chahiye",
-        "management system"
+        "management system",
+        "booking system",
+        "appointment system",
+        "booking app",
+        "reservation system",
+        "appointment booking"
       ]
     },
     {
@@ -598,7 +603,7 @@
     },
     {
       "id": "custom-code",
-      "answer": "No templates. Hamza writes everything in custom code, so each site is built around your business. Next.js pre-renders pages into HTML, so they load fast and Google can read them, without the weight of theme plugins. https://hamzatariq.site/services/nextjs-websites",
+      "answer": "No templates. Hamza writes everything in custom code, so each site is built around your business. He doesn't do Shopify work: online stores are custom Next.js stores with their own admin dashboard. Next.js pre-renders pages into HTML, so they load fast and Google can read them, without the weight of theme plugins. https://hamzatariq.site/services/nextjs-websites",
       "keywords": [
         "template",
         "templates",
@@ -618,7 +623,9 @@
         "instead of wordpress",
         "instead of shopify",
         "do you use templates",
-        "custom code"
+        "custom code",
+        "shopify store",
+        "do you do shopify"
       ]
     },
     {
@@ -760,7 +767,7 @@
     },
     {
       "id": "payment",
-      "answer": "Payment is 50% upfront and 50% on delivery. Every project is quoted after a free call. Want to share your project details?",
+      "answer": "Payment is 50% upfront and 50% on delivery, by Payoneer or bank transfer. Every project is quoted after a free call. Want to share your project details?",
       "lead": true,
       "keywords": [
         "payment",
