@@ -4,6 +4,8 @@
 //
 //   npm run content:check                  all posts, external links checked
 //   npm run content:check -- --offline     skip external link requests (used by prebuild)
+//   npm run content:check -- --external=skip-if-blocked   scheduled runs in a restricted sandbox:
+//                                          blocked links pass only on trusted domains ("not verified")
 //   npm run content:check -- my-post-slug  only the given post(s)
 //   npm run content:check -- --json        machine-readable output
 //
@@ -43,6 +45,16 @@ const HEAD_TERMS = ["web developer", "web design", "website", "seo", "chatbot", 
 
 const args = process.argv.slice(2);
 const offline = args.includes("--offline");
+// --external=full (default): every outside link must answer. --external=skip-if-blocked (scheduled runs
+// in a restricted sandbox): when the network blocks a link (no connection, or 403/407/429), it passes as
+// "not verified" if it's on TRUSTED_DOMAINS and fails otherwise; real errors (404, 410, 5xx) still fail.
+const externalMode = (args.find((a) => a.startsWith("--external="))?.split("=")[1] ?? "full").trim();
+if (!["full", "skip-if-blocked"].includes(externalMode)) {
+  console.error(`Unknown --external mode "${externalMode}" (full | skip-if-blocked)`);
+  process.exit(1);
+}
+const BLOCKED_STATUS = new Set([403, 407, 429]);
+const TRUSTED_DOMAINS = ["developers.google.com", "web.dev", "nextjs.org", "react.dev", "supabase.com", "vercel.com", "ai.google.dev", "developer.mozilla.org"];
 const asJson = args.includes("--json");
 const only = args.filter((a) => !a.startsWith("--")).map((a) => a.replace(/\.mdx$/, "").split(/[\\/]/).pop());
 
@@ -244,11 +256,27 @@ const checkExternal = async (url) => {
   try {
     let status = await attempt("HEAD");
     if (status >= 400) status = await attempt("GET");
-    if (status === 403 || status === 429) return { ok: true, warn: `${url} answered ${status} (blocks bots?)` };
+    if (BLOCKED_STATUS.has(status)) return { ok: true, blocked: true, warn: `${url} answered ${status} (blocks bots?)` };
     return status < 400 ? { ok: true } : { ok: false, error: `${url} returned ${status}` };
   } catch (error) {
-    return { ok: false, error: `${url} could not be reached (${error.name})` };
+    return { ok: false, blocked: true, error: `${url} could not be reached (${error.cause?.code ?? error.name})` };
   }
+};
+
+/** --external=skip-if-blocked: a link the network blocks passes only on a trusted domain, marked "not verified". */
+const onTrustedDomain = (url) => {
+  try {
+    const host = new URL(url).hostname.toLowerCase();
+    return TRUSTED_DOMAINS.some((d) => host === d || host.endsWith(`.${d}`));
+  } catch {
+    return false;
+  }
+};
+const judgeExternal = (url, r) => {
+  if (externalMode !== "skip-if-blocked" || !r.blocked) return r;
+  return onTrustedDomain(url)
+    ? { ok: true, warn: `${url} not verified (network blocked; trusted domain)` }
+    : { ok: false, error: `${url} could not be checked (network blocked) and is not on the trusted-domain list` };
 };
 
 // ---------- Posts ----------
@@ -474,7 +502,7 @@ for (const post of posts) {
   for (const l of post.links) if (GENERIC_ANCHORS.has(normalize(l.text))) errors.push(`non-descriptive anchor text "${l.text}" (${l.href})`);
   if (!offline) {
     for (const url of external) {
-      const r = await checkExternal(url);
+      const r = judgeExternal(url, await checkExternal(url));
       if (!r.ok) errors.push(`broken link: ${r.error}`);
       if (r.warn) warnings.push(r.warn);
     }

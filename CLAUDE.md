@@ -16,6 +16,7 @@ Portfolio and inbound lead site for Hamza Tariq (freelance developer: React/Next
 - **Home page** (`/`) is one client tree (`src/components/HomeClient.tsx`): preloader, GSAP ScrollSmoother, Three.js character and R3F tech stack (both loaded with `next/dynamic`, `ssr: false`). Links into and out of the home page are plain `<a>` (full page load) on purpose, so ScrollSmoother and WebGL state never leak into other routes. Every other route uses `next/link`.
 - **One navbar everywhere:** `SiteHeader` (`src/components/site/SiteHeader.tsx`, styles `SiteHeader.css`): logo, Services dropdown, Work, About, Blog, Free SEO Audit (badge), Contact, Book a free call. Links always open real pages (never `#anchors`); active state comes from the pathname (nested pages included). On the home page it is rendered with `home` (plain `<a>` links, fixed position) and portalled to `<body>`, because inside the home tree it ends up under other fixed layers. GSAP ScrollSmoother lives in `src/components/SmoothScroll.tsx`.
 - **Other routes** use the server component `SiteShell` (`src/components/site/SiteShell.tsx`) for header, footer and CTA.
+- **Font:** Geist self-hosted from the `geist` npm package via `next/font/local` in `src/app/layout.tsx` (CSS variable `--font-geist`); never `next/font/google`, so builds work without network access.
 - **Images:** `next/image` everywhere. Remote hosts are allow-listed in `next.config.ts`.
 - **Site facts** (URL, email, social links, agency) live in `src/lib/site.ts`. Do not hard-code them elsewhere.
 - **Backend:** Supabase only, for all dynamic data: Postgres (`leads`, `chat_sessions`, `chat_messages`, `events`), `pgvector` (`site_chunks`), Auth (owner-only `/admin`), Storage. Do not add any other database or auth provider.
@@ -107,7 +108,7 @@ Portfolio and inbound lead site for Hamza Tariq (freelance developer: React/Next
 - `npm run lint`: ESLint (includes the Next.js plugin).
 - `npm run typecheck`: TypeScript only.
 - `npm run embed`: re-embed site content into Supabase (run after `npm run build`; only changed pages are re-embedded).
-- `npm run content:check`: blog quality gate, including outside link checks (`-- <slug>` for one post, `-- --offline` to skip outside links).
+- `npm run content:check`: blog quality gate, including outside link checks (`-- <slug>` for one post, `-- --offline` to skip outside links, `-- --external=skip-if-blocked` for scheduled runs in a restricted sandbox: blocked links pass as "not verified" only on trusted domains).
 - Env vars: see `.env.example`. Never print their values.
 
 ## SEO conventions

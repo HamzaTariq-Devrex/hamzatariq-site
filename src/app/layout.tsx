@@ -1,11 +1,17 @@
 import type { Metadata, Viewport } from "next";
-import { Geist } from "next/font/google";
+import localFont from "next/font/local";
 import { SITE } from "@/lib/site";
 import AssistantLoader from "@/components/assistant/AssistantLoader";
 import { Analytics } from "@vercel/analytics/next";
 import "@/index.css";
 
-const geist = Geist({ subsets: ["latin"], variable: "--font-geist", display: "swap" });
+// Geist from the `geist` npm package (self-hosted variable font), so builds never fetch Google Fonts.
+const geist = localFont({
+  src: "../../node_modules/geist/dist/fonts/geist-sans/Geist-Variable.woff2",
+  variable: "--font-geist",
+  weight: "100 900",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),

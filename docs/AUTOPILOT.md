@@ -13,6 +13,13 @@ Read before every run: `content/STYLE.md` (writing and on-page rules), `content/
 
 Use `/schedule` in Claude Code (cloud routine on this repo) or any cron that runs `claude -p "<prompt>"` in a checkout with push access. The session needs web search, the env vars below and `gh` logged in (for pull requests).
 
+**Restricted network (cloud sandbox).** Scheduled runs may have no access to outside sites. Two things are built for that:
+
+- **Fonts:** Geist is self-hosted from the `geist` npm package (`next/font/local`), so `npm run build` never needs the network.
+- **Outside links:** scheduled runs use `npm run content:check -- --external=skip-if-blocked <slugs>`. A link the network blocks (no connection, or 403/407/429 from a proxy) passes as "not verified" when it's on a trusted domain (developers.google.com, web.dev, nextjs.org, react.dev, supabase.com, vercel.com, ai.google.dev, developer.mozilla.org) and fails otherwise. Links that do answer are checked normally, so a real 404 still fails. Local runs keep the full check (`npm run content:check`).
+
+So in new posts, link outside sources on the trusted domains. A link elsewhere can't be checked from the sandbox and fails the run.
+
 **Pace:** one post every 2 days, max 4 per ISO week (CLAUDE.md content rules, checked by `content:check`). `next-topic` dates each post 2 days after the latest one; when that date is more than 2 days away (posts are already scheduled), the run ends without writing. The blog shows a post on its date (the site revalidates daily).
 
 ## Env vars
@@ -43,14 +50,15 @@ Search Console setup: create a service account in Google Cloud, enable the "Goog
    - Links: the pillar (`/blog/<pillar.slug>` if `pillar.exists`), 2 of `siblings`, `cluster.servicePage`, 1–2 official outside sources; descriptive anchor text only.
    - A **pillar** (`role: pillar`) is the complete guide to the cluster: 2,500–3,500 words, 8–14 H2s, linking every existing supporting post in context (the page also lists them automatically).
 8. **Link from older posts.** Add one natural sentence with a descriptive link to the new post in 2–3 of `backlinkCandidates` (same cluster first). Edit only that sentence or paragraph. If the new post is a pillar, also add the link up to it in every supporting post of the cluster that doesn't have one.
-9. `npm run content:check -- <slug> <each edited older slug>` (checks outside links too). Fix every error. Then `npm run build`; it must pass.
+9. `npm run content:check -- --external=skip-if-blocked <slug> <each edited older slug>`. Fix every error. Then `npm run build`; it must pass. List any "not verified" links in the run log (they're fine; the owner's local check verifies them later).
 10. **Publish:**
     - All green → `node scripts/autopilot/finish.mjs <slug>` (updates the backlog, commits the post, its brief and the edited older posts, pushes to `main`; Vercel deploys, IndexNow and the assistant's embeddings run on deploy). It refuses to commit files outside the allowed paths.
-    - Something still fails → fix it and run step 9 **once** more. If it still fails, `node scripts/autopilot/finish.mjs <slug> --pr "<what failed>"` opens a pull request instead, and nothing goes live.
+    - Something still fails → fix it and run step 9 **once** more. If it still fails **because of the content** (a check error you couldn't fix without inventing a fact or breaking a rule), `node scripts/autopilot/finish.mjs <slug> --pr "<what failed>"` opens a pull request instead, and nothing goes live.
+    - **Never open a PR for a network block.** "Not verified" warnings are not failures. If an outside link fails only because it's blocked and off the trusted list, replace it with an equivalent source on a trusted domain (or remove it if the post still has one outside source). If the build or a script fails because a download or API is unreachable (not because of the content), stop without committing and say so in the run log; the next run tries again. A PR is only for problems the owner has to decide.
 11. **Refill** (when `refill` is true):
     - `node scripts/autopilot/refill.mjs` returns real demand (the questions visitors ask the AI assistant most, plus Search Console queries once `GSC_SERVICE_ACCOUNT_JSON` is set; until then that part reports an error, ignore it) and how much room each cluster has (`clusters[].room`, max 15 supporting topics each).
     - Turn the best of it into **15 new supporting topics** following `content/seo/strategy.md`: long-tail and high buying intent, each in a cluster with room, with intent, funnel, 3–6 secondary keywords, 2–6 question variants, reader and an angle. Prefer queries with impressions and questions asked more than once; if the data is thin, use questions a buyer of the cluster's service would search, checked with a quick web search. Topics that need a missing owner fact get `blockedBy`.
-    - Save them as a JSON array (`[{ "keyword", "title", "cluster", "intent", "funnel", "secondary", "questions", "reader", "angle", "source" }]`) in a temp file, run `node scripts/autopilot/refill.mjs --add <file>` (it skips and explains incomplete or duplicate topics), then `npm run content:check` (backlog check) and commit `content/backlog.json` with the message `Backlog: add N topics`, and push.
+    - Save them as a JSON array (`[{ "keyword", "title", "cluster", "intent", "funnel", "secondary", "questions", "reader", "angle", "source" }]`) in a temp file, run `node scripts/autopilot/refill.mjs --add <file>` (it skips and explains incomplete or duplicate topics), then `npm run content:check -- --offline` (backlog check, no network needed) and commit `content/backlog.json` with the message `Backlog: add N topics`, and push.
 
 ### Expand a pillar
 
@@ -71,9 +79,9 @@ For `"job": "expand-pillar"` (a pillar that exists as a shorter post):
    - **Low CTR** (`lowCtr`): rewrite the `seoTitle` and `description` so they promise what the post really delivers (keyword still near the start, a specific benefit or number, no clickbait). Note the old title and the date in the brief.
    - Posts published before 2026-11-06 that you refresh must reach the full standard: write the brief, add the trust line and a second kind of information gain, and get 2+ links from older posts.
    - Update facts that changed (prices, results) from `content/owner/`, and set `updated:` to today. Keep the slug and main keyword.
-   - Run `npm run content:check -- <slugs>` and `npm run build`.
+   - Run `npm run content:check -- --external=skip-if-blocked <slugs>` and `npm run build`.
 4. Write `reports/YYYY-MM.md` using the template below, with only numbers from the script output.
-5. Commit the improved posts, their briefs and the report together: `Monthly content report YYYY-MM`. Push to `main` (or open a PR if a check fails after one retry).
+5. Commit the improved posts, their briefs and the report together: `Monthly content report YYYY-MM`. Push to `main` (or open a PR if a content check fails after one retry; never for a network block, as in step 10).
 
 ### Report template
 
