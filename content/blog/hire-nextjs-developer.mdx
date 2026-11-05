@@ -9,8 +9,10 @@ role: pillar
 intent: hire
 funnel: decision
 secondary: ["next.js developer for hire", "hire react developer", "freelance next.js developer", "next.js developer cost"]
+trust: "I've shipped 40+ live production websites in Next.js, React and TypeScript since founding Devrex Digital in 2023, and I publish my own site's measured scores, including the weak ones."
 tags: [hiring, next.js, freelance, react]
 published: 2026-11-04
+updated: 2026-11-05
 faq:
   - q: "Should I hire a freelance Next.js developer or an agency?"
     a: "A freelancer is usually faster and cheaper for a website, dashboard or chatbot, and you talk to the person writing the code. An agency makes sense when you need design, development and marketing from one team over a long time."
@@ -20,26 +22,44 @@ faq:
     a: "My landing pages start at $400 (5–7 days), ecommerce stores with an admin dashboard at $1,000 (2–3 weeks), and custom web apps at $2,500. Every project is quoted after a free call."
   - q: "What payment terms are normal for freelance web projects?"
     a: "I work with 50% upfront and 50% on delivery, 2 free revision rounds, and 30 days of free bug fixes after launch. Be careful with anyone who wants the full amount before starting."
+  - q: "How do I test a Next.js developer if I'm not technical?"
+    a: "Run the checks in this guide on their live work: read the page source, compare tab titles, run Lighthouse on mobile and use the site on your phone. Then give them a small paid project before the big one."
 ---
 
 If you want to hire a Next.js developer, look for three things before anything else: live sites you can test yourself, a clear understanding of SEO and speed, and someone who explains their plan in plain words. A nice portfolio page is not enough. Next.js is chosen for search traffic and fast pages, so the person you hire should be able to prove both on their own work.
 
-I'm a Next.js developer and the founder of Devrex Digital, where my team has built websites and web apps for 45+ brands. This is the checklist I'd use if I were on your side of the table.
+I'm a Next.js developer and the founder of Devrex Digital, where my team has built websites and web apps for 45+ brands. Most hiring guides are written by staffing firms, for companies that already have engineers to judge a coding test. This one is for a business owner with nobody technical to ask: every check below is something you can do yourself, and you can run all of them on me.
 
-## When it makes sense to hire a Next.js developer
+## What to look for when you hire a Next.js developer
 
-[Next.js](https://nextjs.org/docs) is a React framework. It adds the things plain React leaves out: pages rendered on the server or at build time, routing, metadata for search engines, image optimization and API routes.
+Five things separate a good hire from an expensive mistake. You can verify each one without reading code.
 
-It's a good fit when:
+| What to look for | How you check it |
+| --- | --- |
+| Live work you can open | Ask for links, then use the sites on your phone |
+| Pages that search engines can read | Look for real text in the page source |
+| Measured speed and SEO | Run Lighthouse on mobile, and ask for before-and-after numbers |
+| A clear written scope | The quote lists pages, features, price and delivery time |
+| Clean ownership and terms | The domain, code and accounts end up with you, in writing |
+
+The rest of this guide takes these one at a time, then covers cost, who to hire and how to start without risking your full budget.
+
+## Do you need a Next.js developer or a React developer?
+
+[Next.js](https://nextjs.org/docs) is a framework built on React. React draws the interface; Next.js adds what plain React leaves out, such as pages rendered on the server or at build time, routing, search metadata, image optimization and API routes.
+
+So every Next.js developer is a React developer, but not the other way round. Before you hire a React developer for a public website, ask how Google will read the pages. A React app that builds everything in the browser sends a nearly empty HTML file first, and [Google has to run the JavaScript](https://developers.google.com/search/docs/crawling-indexing/javascript/javascript-seo-basics) before it can see your content.
+
+A Next.js developer for hire is a good fit when:
 
 - You need **Google traffic** and your current React site doesn't rank.
 - You want a **fast marketing site** or **ecommerce store** with custom design, not a theme.
 - You need a **dashboard or web app** with logins, roles and real data.
 - You want an **AI chatbot** or other features that need a backend.
 
-If you only need a simple blog that you update yourself every day, a CMS might be enough. I compare the two in [Next.js vs WordPress for a business website](/blog/nextjs-vs-wordpress-for-business-website).
+If your team publishes articles every day and wants to manage everything alone, a CMS might be enough. I compare the two in [Next.js vs WordPress for a business website](/blog/nextjs-vs-wordpress-for-business-website), including when WordPress is the better choice.
 
-## The skills that matter (and the ones that don't)
+## What skills should a Next.js developer have?
 
 A long list of logos on a CV says little. These are the skills that decide whether your project works.
 
@@ -48,8 +68,8 @@ A long list of logos on a CV says little. These are the skills that decide wheth
 - **React and TypeScript.** Next.js is React. TypeScript catches mistakes before your visitors do.
 - **The App Router and server components.** This is how modern Next.js apps are built. Ask them to explain, in one minute, what runs on the server and what runs in the browser.
 - **Technical SEO.** Titles and descriptions per page, canonical URLs, sitemap, robots.txt, structured data. If they can't explain these, your site may look great and still be invisible.
-- **Performance.** They should know what Largest Contentful Paint is and how to make the first screen load fast with optimized images, fonts and less JavaScript. [web.dev's LCP guide](https://web.dev/articles/lcp) is a good reference for what that means.
-- **Backend basics.** Forms, emails, a database, auth. Most business sites need at least a working contact form and lead emails.
+- **Performance.** They should know what Largest Contentful Paint is (how long the main content takes to appear) and how to make the first screen load fast with optimized images, fonts and less JavaScript. [web.dev's LCP guide](https://web.dev/articles/lcp) explains the measure.
+- **Backend basics.** Forms, emails, a database, logins. Most business sites need at least a working contact form and lead emails.
 
 ### Nice to have
 
@@ -59,46 +79,80 @@ A long list of logos on a CV says little. These are the skills that decide wheth
 
 ### What matters less than you think
 
-Years alone. Someone with fewer years who ships fast, measurable sites is a better hire than someone with a long CV and no live work you can test.
+Years alone. Someone with fewer years who ships fast, measurable sites is a better hire than someone with a long CV and no live work you can test. Certificates and framework trivia tell you even less.
 
-## How to check a portfolio in ten minutes
+## How do you check a portfolio in ten minutes?
 
-Ask for links to live projects. Then do this on two or three of them:
+Ask for links to live projects. Then run this on two or three of them, plus the developer's own site. You need Chrome and a phone, nothing else.
 
-1. **Open the page source** (right-click → View page source). Real text in the HTML means the developer understands server rendering.
-2. **Open a few pages and compare the browser tab titles.** Each page should have its own.
-3. **Run Lighthouse** in Chrome DevTools on mobile, or use my [free SEO audit tool](/tools/free-seo-audit). Low SEO scores on a developer's own site are a warning sign.
-4. **Test on your phone.** Tap the menu, fill a form, scroll the whole page. Anything broken now will be broken on your site too.
-5. **Ask what they built personally.** Agency portfolios are team work. That's fine, but you should know who did what.
+| Test | How to run it | Pass | Warning sign |
+| --- | --- | --- | --- |
+| Page source | Right-click → View page source | Your headings and text are in the file | A near-empty file with script tags |
+| Tab titles | Open four pages, read each browser tab | Every page has its own title | One title on every page |
+| Lighthouse | Chrome DevTools, mobile setting, or my [free SEO audit tool](/tools/free-seo-audit) | Good SEO score; the speed has an honest explanation | Low SEO score on their own site |
+| Phone test | Tap the menu, send a form, scroll to the end | Everything works and nothing overflows | Sideways scrolling, dead buttons |
+| Who built it | Ask what they did personally | A specific answer | "We did everything" |
+
+Don't expect a perfect score on every page. A design-heavy page can be slow for a good reason. What you want is a developer who knows the number and can say why.
 
 <FromMyWork>
-I hold my own site to this test. hamzatariq.site was a Vite + React app with one title for every page and no sitemap. After I moved it to Next.js 15, the mobile Lighthouse SEO score went from **83 to 100** and the home page LCP dropped from **18.0 s to 2.6 s**, while keeping the 3D character and animations.
+I hold my own site to this test. hamzatariq.site was a Vite + React app with one title for every page and no sitemap. After I moved it to Next.js 15, the mobile Lighthouse SEO score went from **83 to 100** and the home page LCP dropped from **18.0 s to 2.6 s**.
 
-I also show the 31 projects my team and I built at Devrex Digital as "Built at Devrex Digital", so it's clear they were team projects. You can read the measured before-and-after numbers in the [hamzatariq.site case study](/work/hamzatariq-site).
+The weak spot is still there and I'll show it: mobile performance on the home page reached **66**, because I kept the 3D character and animations. The pages that don't carry them score **97** (/work) and **99** (project pages). The numbers are in the [hamzatariq.site case study](/work/hamzatariq-site).
+
+<Figure
+  src="/images/work/hamzatariq-site-home.webp"
+  alt="The hamzatariq.site home page on desktop with its 3D character"
+  width={1440}
+  height={900}
+  caption="The home page keeps its 3D character, which is why its performance score sits below the rest of the site."
+/>
+
+The 31 projects on the site are labelled "Built at Devrex Digital", so it's clear they were team projects. That is the kind of clarity to ask for.
 </FromMyWork>
+
+## What should you test for your type of project?
+
+The same developer can be a great fit for one project and a poor fit for another. Ask for a live example of the kind of thing you're buying, then test what matters for it.
+
+| You're buying | Ask to see | Try this on their example |
+| --- | --- | --- |
+| Marketing site or landing page | A live site with several pages | The tests above, then send the contact form |
+| Ecommerce store | A store with an admin dashboard | Filter products, add to cart, reach checkout on your phone |
+| Dashboard or web app | A demo login, or a screen-share | Ask how roles work and who can see what |
+| AI chatbot | A bot running on a real site | Ask something it can't know; it should say so, not guess |
+| React SEO fix | Before-and-after scores | Check the "after" page source for real text |
+
+A store and a dashboard are mostly backend work, so a beautiful marketing portfolio proves little for them. My specialty at Devrex Digital is custom storefronts with a Supabase database and a React admin dashboard, so that's what I'd show you. If you need a dashboard or an AI chatbot, say so upfront and ask for the closest real example.
 
 ## Questions to ask before you hire
 
-These questions quickly show who has done the work before:
+Good developers enjoy these questions. Listen for specifics, not for buzzwords.
 
 - **"How will each page get its own title, description and social preview image?"** You want to hear about server-side metadata, not a plugin added later.
 - **"What will my Lighthouse scores look like on mobile, and how will you measure them?"** A good developer measures before and after, and doesn't promise scores they haven't tested.
-- **"Where will the site be hosted and who owns the accounts?"** You should own the domain, hosting and code repository.
-- **"What happens after launch?"** Ask about bug fixes, updates and what maintenance costs.
-- **"How do we communicate, and how often will I see progress?"** Weekly previews on a staging link are a good sign.
+- **"Where will the site be hosted and who owns the accounts?"** The answer should name the accounts and whose email they're under.
+- **"What happens after launch?"** Ask what's fixed for free, for how long, and what maintenance costs after that.
+- **"How do we communicate, and how often will I see progress?"** Regular previews on a private link are a good sign.
+- **"What would you cut if the budget were smaller?"** Someone with real experience has an answer. It shows they think about your money, not only about the build.
+- **"What's the last thing that went wrong on a project, and what did you do?"** Everybody has one. A developer who says "nothing" hasn't shipped much, or isn't being open with you.
 
 ## Red flags to watch for
 
 - **No live links**, only screenshots or Dribbble shots.
-- **Guaranteed rankings** ("page one in 30 days"). Nobody controls Google.
+- **Guaranteed rankings** ("page one in 30 days"). Nobody controls Google, and [Google's own guide to hiring help](https://developers.google.com/search/docs/fundamentals/do-i-need-seo) warns about ranking guarantees.
 - **Full payment upfront** with no milestones.
 - **Templates sold as custom work.** Ask directly whether the design is built from scratch.
 - **Vague quotes** without a list of pages and features.
 - **No questions about your business.** A developer who doesn't ask who your customers are will build a generic site.
+- **Everything under their name.** If the domain or hosting sits in the developer's account, leaving them later gets hard.
+- **A disappearing act during the sale.** Slow, vague replies before you've paid rarely get better after.
 
-## What it costs to hire a Next.js developer
+## How much does it cost to hire a Next.js developer?
 
-Prices vary a lot by country and experience. For reference, these are my starting prices. Every project is quoted after a free call, based on the features you need.
+Next.js developer cost depends on how you buy. Staffing firms quote hourly rates, and those tables vary widely by country and by who published them. Most of the ones I found come from companies selling developers by the hour.
+
+A small business usually buys a project at a fixed price instead, which is easier to compare. These are my starting prices. Every project is quoted after a free call, based on the features you need.
 
 | Project | From | Delivery |
 | --- | --- | --- |
@@ -109,30 +163,63 @@ Prices vary a lot by country and experience. For reference, these are my startin
 | Custom web app | $2,500 | 4–8 weeks |
 | AI chatbot | $350 | 3–5 days |
 
-My terms are the same for every project: 50% upfront and 50% on delivery, 2 free revision rounds, and 30 days of free bug fixes after launch. Ongoing maintenance is quoted separately, so you only pay for it if you want it.
+The add-ons are where quotes usually grow, so ask for them upfront. Mine are $50 for each extra page beyond the package, +$150 for content editing (a CMS) and +$250 for a second language. A landing page includes up to 5 pages, a store up to 10 and a full ecommerce app up to 15. The [website cost calculator](/tools/website-cost-calculator) adds this up for your own project.
+
+My terms are the same for every project: 50% upfront and 50% on delivery, 2 free revision rounds, and 30 days of free bug fixes after launch. Ongoing maintenance is quoted separately, so you only pay for it if you want it. For international clients, payment is by Payoneer or bank transfer.
 
 If you have a React site that isn't getting traffic, a migration may be cheaper than a rebuild. I explain that in [why a React website is not ranking on Google](/blog/react-website-not-ranking-on-google), and show a full [Vite React to Next.js migration](/blog/vite-react-to-nextjs-migration) with scores before and after.
 
-## What a good project process looks like
+## Should you choose a freelancer, an agency or a full-time hire?
+
+| Option | Best for | Watch out for |
+| --- | --- | --- |
+| Freelance Next.js developer | A defined project: a site, a dashboard, a chatbot | One person's availability; ask what happens if they're away |
+| Agency | Design, development, content and ads together over a long time | You may not speak to the person writing the code |
+| Full-time developer | A product that needs daily work for years | A salary continues when the build is finished |
+
+For most small businesses, the first project doesn't need an employee. You need someone to build one thing well, hand it over, and be reachable afterwards. If you later find you're paying for daily changes every month, that's the moment to think about a full-time hire.
+
+Time zones matter less than people expect, as long as you agree when you'll overlap. I'm based in Pakistan and available in US, UK and EU time zones.
+
+## Who should own the code, domain and accounts?
+
+You should. This is the part most hiring guides skip, and it's the one that hurts most when it goes wrong. Agree on this list before you pay anything:
+
+- [ ] The domain is registered in your name, on your email.
+- [ ] Hosting sits in your account, or you can move it there on request.
+- [ ] The code lives in a repository you own or can get a full copy of.
+- [ ] Database, email and analytics accounts are yours, or transfer at handover.
+- [ ] The contract says the code becomes yours once the final payment clears.
+- [ ] You get a list of every paid service the site uses and what each costs.
+
+None of this is unusual, and none of it should offend a good developer. If you plan to rely on these terms, have them written into the contract; I'm not a lawyer, so get advice for anything large.
+
+## What does a good project process look like?
 
 How a developer runs the project matters as much as their code. This is the process I follow, and it's a fair standard to expect from anyone you hire:
 
 1. **A free call.** We talk about your business, your customers and what the site must do. No code yet.
-2. **A written quote.** A list of pages and features, the price and the delivery time. If something isn't on the list, it isn't in the price, so there are no surprises later.
+2. **A clear quote.** A list of pages and features, the price and the delivery time. If something isn't on the list, it isn't in the price, so there are no surprises later.
 3. **50% upfront.** Work starts once the first half is paid.
-4. **Previews while I build.** You get a private link to see progress and give feedback before launch, not after.
+4. **Reviews while I build.** You see each part as it's ready and give feedback before launch, not after.
 5. **Two revision rounds.** Changes to what we agreed are included twice.
-6. **Launch and handover.** The site goes live on your domain, and you own the code and the accounts. The second 50% is paid on delivery.
+6. **Launch.** The site goes live with its metadata, sitemap and structured data in place. The second 50% is paid on delivery.
 7. **Thirty days of free bug fixes.** If something breaks after launch, I fix it.
 
 Ask any developer you're considering to walk you through their version of this. If they can't describe it clearly, the project will probably be unclear too.
 
-## Freelancer, agency or full-time hire?
+You can help by preparing a few things before the first call: the pages you need, two or three sites you like and why, your text and photos (or who will write them), and a budget range. A developer can only quote what you can describe.
 
-- **Freelancer:** best for a defined project (a site, a dashboard, a chatbot). You talk to the person writing the code and pay for the project, not a salary.
-- **Agency:** best when you need design, development, content and ads together for a long time.
-- **Full-time developer:** best when you have a product that needs daily work for years.
+## How do you start without risking your full budget?
 
-Many of the businesses I work with start with one project, then come back for the next feature when they need it. That's usually the cheapest way to find out whether a developer is a good fit.
+Don't start with the biggest thing on your list. Buy something small with a clear result, then decide. A short paid project tells you more than any interview: how they communicate, whether they hit the date, and whether the work matches what they said.
 
-If you're hiring for a role or a project, my skills, experience and GitHub are on the [hire page](/hire), and you can see the [Next.js website development](/services/nextjs-websites) service for what a typical project includes.
+<MyTake>
+If you're not sure about a developer, start with the smallest useful project. With me that could be an SEO audit ($150, 2–3 days) on your current site, an AI chatbot ($350, 3–5 days) or a landing page ($400, 5–7 days). You get something you can keep, even if you never work together again.
+
+If your site already performs well, you may not need a new one at all. Run the free audit first.
+</MyTake>
+
+That's how a good working relationship usually grows: one project, then the next feature when you need it. A developer who earns the second project is the one to keep.
+
+If you're ready to compare, my skills, experience and GitHub are on the [hire page](/hire), and the [Next.js website development](/services/nextjs-websites) service shows what a typical project includes. If your site needs SEO more than a rebuild, see [React SEO services](/services/react-nextjs-seo).
