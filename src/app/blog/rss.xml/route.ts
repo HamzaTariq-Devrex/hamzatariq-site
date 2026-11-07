@@ -1,7 +1,7 @@
 import { getPosts } from "@/lib/blog";
 import { SITE } from "@/lib/site";
 
-export const revalidate = 86400;
+export const revalidate = 3600;
 
 const escape = (text: string) =>
   text.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&apos;" })[c]!);

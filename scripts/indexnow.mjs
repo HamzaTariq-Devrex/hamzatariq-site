@@ -1,7 +1,7 @@
 // Submits every URL in the live sitemap to IndexNow (Bing, Yandex, Seznam, Naver).
 // Usage: node scripts/indexnow.mjs [siteUrl]
 const SITE_URL = (process.argv[2] || process.env.SITE_URL || "https://hamzatariq.site").replace(/\/$/, "");
-const KEY = "718bcb0be670c128fd877ee016f03bef";
+const KEY = "718bcb0be670c128fd877ee016f03bef"; // same key as INDEXNOW_KEY in src/lib/indexnow.ts
 
 const res = await fetch(`${SITE_URL}/sitemap.xml`);
 if (!res.ok) throw new Error(`Sitemap request failed: ${res.status}`);

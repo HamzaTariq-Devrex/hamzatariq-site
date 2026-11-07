@@ -4,7 +4,7 @@ import { formatPostDate, getPost, getPosts } from "@/lib/blog";
 export const alt = "Blog post by Hamza Tariq";
 export const size = OG_SIZE;
 export const contentType = "image/png";
-export const revalidate = 86400;
+export const revalidate = 3600;
 
 export function generateStaticParams() {
   return getPosts().map((p) => ({ slug: p.slug }));

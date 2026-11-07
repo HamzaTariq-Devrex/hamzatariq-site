@@ -146,9 +146,9 @@ const parse = (file: string): Post => {
 };
 
 /** Today's date in Pakistan time (YYYY-MM-DD); a post is live from its published date. */
-const today = () => new Date(Date.now() + 5 * 60 * 60 * 1000).toISOString().slice(0, 10);
+export const todayPkt = () => new Date(Date.now() + 5 * 60 * 60 * 1000).toISOString().slice(0, 10);
 
-export const isScheduled = (post: Post) => post.published > today();
+export const isScheduled = (post: Post) => post.published > todayPkt();
 
 let cache: Post[] | null = null;
 const allFiles = () => {
@@ -160,8 +160,9 @@ const allFiles = () => {
 };
 
 /**
- * Posts visible on this build. The live site hides posts until their published date (the blog
- * revalidates daily, so they appear on time); local and preview builds show them with a badge.
+ * Posts visible on this build. The live site hides posts until their published date; the
+ * /api/cron/publish job refreshes the blog at 00:05 PKT (pages also revalidate hourly as a backup).
+ * Local and preview builds show them with a badge.
  */
 export const getPosts = () => allFiles().filter((p) => !isProductionSite || !isScheduled(p));
 export const getPost = (slug: string) => getPosts().find((p) => p.slug === slug) ?? null;

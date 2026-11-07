@@ -8,7 +8,7 @@ import "@/components/styles/Blog.css";
 
 type Params = { params: Promise<{ tag: string }> };
 
-export const revalidate = 86400;
+export const revalidate = 3600;
 export const dynamicParams = true;
 
 export function generateStaticParams() {

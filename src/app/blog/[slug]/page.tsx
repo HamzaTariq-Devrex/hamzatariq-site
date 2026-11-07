@@ -16,8 +16,8 @@ import "@/components/styles/Blog.css";
 
 type Params = { params: Promise<{ slug: string }> };
 
-// Scheduled posts go live on their date without a deploy: pages are rebuilt at most once a day.
-export const revalidate = 86400;
+// Scheduled posts go live on their date without a deploy (/api/cron/publish); hourly revalidation is the backup.
+export const revalidate = 3600;
 export const dynamicParams = true;
 
 export function generateStaticParams() {
@@ -121,9 +121,14 @@ export default async function PostPage({ params }: Params) {
 
       <header className="post-head">
         {isScheduled(post) && <p className="post-scheduled">Scheduled: goes live on {formatPostDate(post.published)}</p>}
-        <Link href={`/blog/category/${post.category.slug}`} className="x-label">
-          {post.category.name}
-        </Link>
+        <p className="post-kicker">
+          <Link href={`/blog/category/${post.category.slug}`} className="x-label">
+            {post.category.name}
+          </Link>
+          <span className="post-published">
+            Published <time dateTime={post.published}>{formatPostDate(post.published)}</time>
+          </span>
+        </p>
         <h1 className="post-title">{post.title}</h1>
         <p className="post-lead">{post.description}</p>
         <div className="post-byline">
@@ -135,12 +140,6 @@ export default async function PostPage({ params }: Params) {
             </div>
           </div>
           <dl className="post-dates">
-            <div>
-              <dt>Published</dt>
-              <dd>
-                <time dateTime={post.published}>{formatPostDate(post.published)}</time>
-              </dd>
-            </div>
             <div>
               <dt>Last updated</dt>
               <dd>

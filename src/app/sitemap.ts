@@ -8,8 +8,8 @@ import { BLOG_CATEGORIES, getPosts, getPostsInCategory } from "@/lib/blog";
 import { SITE } from "@/lib/site";
 import { hasReviews } from "@/lib/testimonials";
 
-// Rebuilt daily so scheduled blog posts are added on their published date.
-export const revalidate = 86400;
+// Scheduled posts are added on their date by /api/cron/publish; hourly revalidation is the backup.
+export const revalidate = 3600;
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const page = (path: string, priority: number, changeFrequency: "weekly" | "monthly" | "yearly" = "monthly") => ({

@@ -8,7 +8,7 @@ import { SITE } from "@/lib/site";
 import { jsonLd } from "@/lib/seo";
 import "@/components/styles/Blog.css";
 
-export const revalidate = 86400;
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: "Blog: Next.js, React SEO and AI Chatbots",

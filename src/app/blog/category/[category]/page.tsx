@@ -11,7 +11,7 @@ import "@/components/styles/Blog.css";
 
 type Params = { params: Promise<{ category: string }> };
 
-export const revalidate = 86400;
+export const revalidate = 3600;
 export const dynamicParams = true;
 
 // Only categories with posts get a page (no thin pages).

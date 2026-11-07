@@ -20,8 +20,12 @@ const PostCard = ({ post, featured = false }: { post: Post; featured?: boolean }
     <div className="post-card-body">
       <span className="post-card-meta">
         <span className="post-cat">{post.category.name}</span>
+        {isScheduled(post) ? (
+          <span className="post-scheduled">Scheduled {formatPostDate(post.published)}</span>
+        ) : (
+          <time dateTime={post.published}>{formatPostDate(post.published)}</time>
+        )}
         <span>{post.readingMinutes} min read</span>
-        {isScheduled(post) && <span className="post-scheduled">Scheduled {formatPostDate(post.published)}</span>}
       </span>
       <h2>{post.title}</h2>
       <p>{post.description}</p>

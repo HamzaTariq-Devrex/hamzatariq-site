@@ -4,7 +4,7 @@ import { getAllTags, tagFromSlug, tagSlug } from "@/lib/blog";
 export const alt = "Blog tag by Hamza Tariq";
 export const size = OG_SIZE;
 export const contentType = "image/png";
-export const revalidate = 86400;
+export const revalidate = 3600;
 
 export function generateStaticParams() {
   return getAllTags().map((t) => ({ tag: tagSlug(t) }));
