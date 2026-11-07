@@ -15,6 +15,7 @@ import { Laptop, Phone } from "@/components/site/ds/Mockups";
 import { SERVICES, PRICE_NOTE, PROJECT_TERMS, formatPrice, getService } from "@/data/services";
 import { IMAGE_BASE, PROJECTS } from "@/data/projects";
 import { CASE_STUDIES } from "@/data/caseStudies";
+import { OWN_SITE_RESULTS } from "@/data/ownSite";
 import { SITE, isProductionSite } from "@/lib/site";
 import { reviewsForPage } from "@/lib/testimonials";
 import { fitDescription, jsonLd } from "@/lib/seo";
@@ -78,7 +79,8 @@ export default async function ServicePage({ params }: Params) {
     .map((s) => CASE_STUDIES.find((c) => c.slug === s))
     .filter((c) => c !== undefined);
   const hasRelated = projects.length + caseStudies.length > 0;
-  const proof = caseStudies[0];
+  // Own-site results, mentioned briefly on the SEO service (not a case study, no link).
+  const proof = service.slug === "react-nextjs-seo" ? [OWN_SITE_RESULTS.seo, OWN_SITE_RESULTS.lcp] : null;
 
   // Real screenshots: case study images, and the desktop/mobile shots from the portfolio.
   const work: WorkItem[] = [
@@ -188,8 +190,8 @@ export default async function ServicePage({ params }: Params) {
       </section>
 
       {proof && (
-        <section className="x-proof" aria-label={`Results from ${proof.title}`} data-reveal>
-          {proof.results.slice(0, 2).map((r) => (
+        <section className="x-proof" aria-label="Results on my own site" data-reveal>
+          {proof.map((r) => (
             <div key={r.label}>
               <strong>
                 {r.before} <em>→</em> {r.after}
@@ -197,9 +199,7 @@ export default async function ServicePage({ params }: Params) {
               <span>{r.label}</span>
             </div>
           ))}
-          <Link href={`/work/${proof.slug}`} className="x-link">
-            Read the {proof.title} case study <Icon name="arrow" size={16} />
-          </Link>
+          <span className="x-proof-note">On my own site, after moving it from Vite + React to Next.js 15 (mobile Lighthouse)</span>
         </section>
       )}
 

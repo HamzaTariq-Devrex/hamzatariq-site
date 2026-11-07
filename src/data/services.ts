@@ -87,7 +87,7 @@ export const SERVICES: Service[] = [
       { name: "Ecommerce store with admin dashboard", price: 1000, timeline: "2–3 weeks", popular: true, pages: 10 },
       { name: "Full ecommerce app", price: 2000, detail: "User logins, accounts and orders", pages: 15 },
     ],
-    relatedProjects: ["dulhahouse", "nagina-jewels", "the-trekkerz-pakistan"],
+    relatedProjects: ["dulhahouse", "nagina-jewels", "auraluxebags", "the-trekkerz-pakistan"],
     faqs: [
       { q: "How much does a Next.js website cost?", a: "Prices start from $400 for a landing page or portfolio website, $1,000 for an ecommerce store with an admin dashboard and $2,000 for a full ecommerce app with user logins, accounts and orders. Every project is quoted after a free call, and the final price depends on features." },
       { q: "How long does a Next.js website take?", a: "A landing page or portfolio website usually takes 5–7 days, and an ecommerce store with an admin dashboard 2–3 weeks. A full ecommerce app depends on its features, so its timeline is planned on the free call." },
@@ -222,7 +222,7 @@ export const SERVICES: Service[] = [
       { name: "React (Vite/CRA) to Next.js migration for SEO", price: 800 },
       { name: "Monthly SEO + content", price: 400, unit: "/month" },
     ],
-    relatedProjects: ["hamzatariq-site"],
+    relatedProjects: [],
     faqs: [
       { q: "Why is my React website not ranking on Google?", a: "Usually because the pages are rendered in the browser. Google first receives an almost empty HTML file, every page may share the same title, and there is often no sitemap or structured data. Server-rendered pages with proper metadata fix the root cause." },
       { q: "Do I have to move my site to Next.js?", a: "Not always. The SEO audit shows what is holding your site back. If it is fully rendered in the browser, a migration to Next.js is usually the cleanest fix. It starts from $800." },

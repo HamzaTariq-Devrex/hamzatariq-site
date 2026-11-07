@@ -1150,8 +1150,13 @@ a.x-card:focus-visible {
   color: var(--x-muted);
 }
 
-.x-proof .x-link {
+.x-proof .x-link,
+.x-proof .x-proof-note {
   margin-left: auto;
+}
+
+.x-proof .x-proof-note {
+  max-width: 280px;
 }
 
 /* ---------- Features bento ---------- */

@@ -2,7 +2,7 @@
 
 - Client type: own portfolio and lead site.
 - Live: https://hamzatariq.site
-- Case study page: `/work/hamzatariq-site`
+- Not shown as a case study or project (owner, November 2026): mention the results briefly as "on my own site" and link to `/services/react-nextjs-seo`, never to a case study page.
 - Stack: Next.js 15 (App Router), React 19, TypeScript, GSAP, Three.js, Vercel.
 
 ## Problem

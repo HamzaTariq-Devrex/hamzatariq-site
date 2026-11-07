@@ -633,18 +633,15 @@
       ]
     },
     {
-      "id": "own-case-study",
-      "answer": "Hamza moved this site from a Vite and React app to Next.js 15, keeping the 3D design. On mobile, the home page SEO score went from 83 to 100 and its main content now loads in 2.6 seconds instead of 18. https://hamzatariq.site/work/hamzatariq-site",
+      "id": "own-site-results",
+      "answer": "On his own site, Hamza moved from a Vite and React app to Next.js 15, keeping the 3D design. On mobile, the home page SEO score went from 83 to 100 and its main content now loads in 2.6 seconds instead of 18. He makes the same fixes on client sites: https://hamzatariq.site/services/react-nextjs-seo",
       "keywords": [
-        "case",
-        "study",
         "results",
         "lighthouse",
         "score",
         "speed"
       ],
       "phrases": [
-        "case study",
         "this website",
         "this site",
         "your own site",
@@ -704,7 +701,9 @@
         "kaam dikhao",
         "pehle ka kaam",
         "kis ke liye banaya",
-        "examples of your work"
+        "examples of your work",
+        "case study",
+        "case studies"
       ]
     },
     {

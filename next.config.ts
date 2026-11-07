@@ -16,6 +16,8 @@ const nextConfig: NextConfig = {
     return [
       // Old CV file name (replaced November 2026).
       { source: "/Hamza%20Tariq%20Resume.pdf", destination: "/Hamza_Tariq_CV.pdf", permanent: true },
+      // The own-site case study page was removed (owner: client projects only on work pages).
+      { source: "/work/hamzatariq-site", destination: "/services/react-nextjs-seo", statusCode: 301 },
       {
         source: "/:path*",
         has: [{ type: "host", value: "www.hamzatariq.site" }],

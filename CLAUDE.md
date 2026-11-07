@@ -45,10 +45,10 @@ Portfolio and inbound lead site for Hamza Tariq (freelance developer: React/Next
 
 ## Folders
 
-- `src/app/` routes (App Router): `/`, `/services`, `/services/[slug]`, `/work`, `/work/hamzatariq-site` (own case study), `/work/[slug]`, `/about`, `/hire`, `/contact`, `/reviews` (only with real reviews), `/blog/**`, `/tools/*` (SEO audit, website cost calculator, chatbot ROI calculator), `/solutions`, `/solutions/[industry]`, `not-found`.
+- `src/app/` routes (App Router): `/`, `/services`, `/services/[slug]`, `/work`, `/work/[slug]`, `/about`, `/hire`, `/contact`, `/reviews` (only with real reviews), `/blog/**`, `/tools/*` (SEO audit, website cost calculator, chatbot ROI calculator), `/solutions`, `/solutions/[industry]`, `not-found`.
 - `src/components/` home page sections; styles in `src/components/styles/<Component>.css`. Non-home page styles live in `Pages.css` (shell) and `Content.css` (sections).
 - `src/components/site/` shell and widgets: `SiteHeader` (all pages), `SiteShell`, `BookCall`, `AuthorBox`, `OwnerTodo`, `CaseStudyCard`, `WorkBrowser`.
-- `src/data/services.ts` the four services (copy, process, features, pricing, FAQs). `src/data/caseStudies.ts` case studies with measured results. `src/data/experience.ts` career timeline.
+- `src/data/services.ts` the four services (copy, process, features, pricing, FAQs). `src/data/caseStudies.ts` client case studies with measured results (empty for now). `src/data/ownSite.ts` own-site Lighthouse results. `src/data/experience.ts` career timeline.
 - `src/data/projects.ts` project list (generated from devrexdigital.site/portfolio). Show projects as "Built at Devrex Digital" unless the owner marks one as a personal client.
 - `content/owner/` owner facts (`profile.md`, `projects/*.md`); `content/backlog.json` blog keyword queue; `content/seo/` strategy, clusters and SERP briefs; `content/testimonials.json` real client reviews.
 - Missing owner facts: wrap the spot in `<OwnerTodo what="...">fallback</OwnerTodo>` (visible on non-production builds, fallback on production) and list it in `OWNER_TODO.md`.
@@ -91,6 +91,7 @@ Portfolio and inbound lead site for Hamza Tariq (freelance developer: React/Next
 - Education: BS Artificial Intelligence, The Islamia University of Bahawalpur, 2022–2026 (`UNIVERSITY` in `src/data/experience.ts`). No company logos; text only.
 - "Most popular" pricing tiers: Ecommerce store with admin dashboard, AI chatbot.
 - Projects are shown as "Built at Devrex Digital" unless the owner marks one as their own client.
+- Own site is not a portfolio project or case study (owner, November 2026): work pages, home, service "Related work", industry pages, /hire and /about show client projects only, led by Dulhahouse, Nagina House of Jewels, AuraLuxe Bags and The Trekkerz Pakistan. Posts and the SEO service may mention the own-site results briefly as "on my own site" (`content/owner/profile.md` "Own site results", `src/data/ownSite.ts`) and link to `/services/react-nextjs-seo`, never to a case study page. `/work/hamzatariq-site` 301-redirects to `/services/react-nextjs-seo` (`next.config.ts`).
 - No LinkedIn profile. GitHub (`https://github.com/HamzaTariq-Devrex`) is the main profile link.
 - AI assistant provider: Google Gemini (chat and embeddings). Phase 4 builds on the owner's `/bot` skill, adapted to Supabase (leads, chat history, pgvector) and site-content-only answers.
 - Lead notifications go to `hamzabuildsweb@gmail.com` (`SITE.email`); visitor emails come from `hello@hamzatariq.site`.

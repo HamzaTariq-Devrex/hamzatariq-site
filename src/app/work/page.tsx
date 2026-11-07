@@ -59,14 +59,17 @@ export default function WorkPage() {
         </p>
       </section>
 
-      <section className="work-featured">
-        <h2>Case study</h2>
-        <div className="project-grid is-static">
-          {CASE_STUDIES.map((c) => (
-            <CaseStudyCard key={c.slug} study={c} />
-          ))}
-        </div>
-      </section>
+      {/* Client case studies only (none yet); the own-site case study was removed. */}
+      {CASE_STUDIES.length > 0 && (
+        <section className="work-featured">
+          <h2>Case studies</h2>
+          <div className="project-grid is-static">
+            {CASE_STUDIES.map((c) => (
+              <CaseStudyCard key={c.slug} study={c} />
+            ))}
+          </div>
+        </section>
+      )}
 
       <h2 className="work-clients-title">Client projects built at Devrex Digital</h2>
       <WorkBrowser />

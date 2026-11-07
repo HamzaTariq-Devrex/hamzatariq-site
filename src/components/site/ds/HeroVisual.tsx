@@ -1,7 +1,6 @@
 import Image from "next/image";
-import Link from "next/link";
 import { IMAGE_BASE } from "@/data/projects";
-import { getCaseStudy } from "@/data/caseStudies";
+import { OWN_SITE_RESULTS } from "@/data/ownSite";
 import { Browser, Phone } from "./Mockups";
 import Icon from "./Icon";
 
@@ -123,12 +122,7 @@ const Ring = ({ value, label, note }: { value: number; label: string; note: stri
 );
 
 const SeoVisual = () => {
-  const study = getCaseStudy("hamzatariq-site")!;
-  const result = (label: string) => study.results.find((r) => r.label === label)!;
-  const seo = result("Mobile SEO score (home)");
-  const lcp = result("Home page load time (LCP, mobile)");
-  const pages = result("Mobile performance (project pages)");
-  const work = result("Mobile performance (/work)");
+  const { seo, lcp, projectPerformance: pages, workPerformance: work } = OWN_SITE_RESULTS;
   return (
     <div className="x-visual x-visual-seo">
       <div className="x-rings" role="img" aria-label={`Mobile Lighthouse after the Next.js migration of hamzatariq.site: SEO ${seo.after}, performance ${pages.after} on project pages and ${work.after} on /work`}>
@@ -136,9 +130,9 @@ const SeoVisual = () => {
         <Ring value={Number(pages.after)} label="Performance" note={`Project pages, was ${pages.before}`} />
         <Ring value={Number(work.after)} label="Performance" note={`/work, was ${work.before}`} />
       </div>
-      <Link href="/work/hamzatariq-site" className="x-chip x-chip-link">
-        <Icon name="speed" size={16} /> Home LCP {lcp.before} → {lcp.after} · case study →
-      </Link>
+      <span className="x-chip">
+        <Icon name="speed" size={16} /> On my own site: home LCP {lcp.before} → {lcp.after}
+      </span>
     </div>
   );
 };

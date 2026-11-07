@@ -57,4 +57,4 @@ export const CV_SKILLS = [
 ];
 
 /** "Selected projects" on the CV, in CV order (slugs in src/data/projects.ts). */
-export const CV_PROJECTS = ["dulhahouse", "ascendant-consulting", "auraluxebags", "the-trekkerz-pakistan", "nagina-jewels"];
+export const CV_PROJECTS = ["dulhahouse", "nagina-jewels", "auraluxebags", "the-trekkerz-pakistan", "ascendant-consulting"];

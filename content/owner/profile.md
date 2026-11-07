@@ -60,7 +60,15 @@ Every project is quoted after a free call. Final price depends on features.
 
 Main keywords: Next.js website development; custom dashboard development; AI chatbot for website; React SEO services (secondary: Next.js SEO, React website not ranking on Google).
 
+## Own site results
+
+hamzatariq.site, measured with mobile Lighthouse on a local production build (2026-10-22). Not a case study or portfolio project: mention these briefly as "on my own site" and link to `/services/react-nextjs-seo`, never to a case study page (`/work/hamzatariq-site` redirects there). Details in `projects/hamzatariq-site.md`.
+
+- Vite + React to Next.js 15 migration (App Router, React 19), keeping the 3D character and GSAP animations; 31 project pages pre-rendered.
+- Mobile SEO score, home: 83 → 100.
+- Home load time (LCP, mobile): 18s → 2.6s (18.0 s → 2.6 s).
+- Mobile performance: home 35 → 66, /work 85 → 97, project pages 88 → 99.
+
 ## Projects
 
-- Own project: `projects/hamzatariq-site.md`.
 - 31 client projects built at Devrex Digital: `src/data/projects.ts` (descriptions and features from devrexdigital.site/portfolio). Show as "Built at Devrex Digital" unless the owner marks one as a personal client. TODO(owner): detailed case studies (problem, results, testimonials).

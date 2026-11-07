@@ -126,8 +126,8 @@ export default function FreeSeoAuditPage() {
           <p>
             My own portfolio had exactly this problem. It was a Vite + React single-page app with one title for every page and no meta description,
             sitemap, robots.txt or structured data. After I moved it to Next.js 15, the mobile Lighthouse SEO score went from 83 to 100 and the home page
-            Largest Contentful Paint dropped from 18.0 s to 2.6 s. The details are in the{" "}
-            <Link href="/work/hamzatariq-site">hamzatariq.site case study</Link>.
+            Largest Contentful Paint dropped from 18.0 s to 2.6 s. My{" "}
+            <Link href="/services/react-nextjs-seo">React and Next.js SEO service</Link> makes the same fixes on client sites.
           </p>
           <p>
             This tool runs the checks I start every audit with. It reads one page at a time, usually the home page, so run it on your most important

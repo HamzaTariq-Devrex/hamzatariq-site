@@ -15,7 +15,7 @@ import WhereIWork from "@/components/site/WhereIWork";
 import ReviewStrip from "@/components/site/ReviewStrip";
 import { ABOUT_REVIEWS } from "@/lib/testimonials";
 import { IMAGE_BASE, PROJECTS } from "@/data/projects";
-import { getCaseStudy } from "@/data/caseStudies";
+import { OWN_SITE_RESULTS } from "@/data/ownSite";
 import { SITE } from "@/lib/site";
 import { jsonLd } from "@/lib/seo";
 
@@ -44,8 +44,7 @@ const structuredData = {
   ],
 };
 
-const caseStudy = getCaseStudy("hamzatariq-site")!;
-const seoAfter = Number(caseStudy.results.find((r) => r.label === "Mobile SEO score (home)")!.after);
+const seoAfter = Number(OWN_SITE_RESULTS.seo.after);
 
 const STATS = [
   { value: 45, suffix: "+", label: "Brands served", note: `With my team at ${SITE.agency.name}` },
@@ -106,16 +105,10 @@ const VALUES: { title: string; text: string; icon: IconName }[] = [
 
 const nagina = PROJECTS.find((p) => p.slug === "nagina-jewels")!;
 const dulhahouse = PROJECTS.find((p) => p.slug === "dulhahouse")!;
+const auraluxe = PROJECTS.find((p) => p.slug === "auraluxebags")!;
+const trekkerz = PROJECTS.find((p) => p.slug === "the-trekkerz-pakistan")!;
+// Real client projects only (owner: no own-site case study among client work).
 const WORK = [
-  {
-    href: `/work/${caseStudy.slug}`,
-    title: caseStudy.title,
-    label: caseStudy.label,
-    text: caseStudy.headline,
-    desktop: { src: "/images/work/hamzatariq-site-home.webp", width: 1440, height: 900 },
-    mobile: { src: "/images/work/hamzatariq-site-mobile.webp", width: 390, height: 844 },
-    cta: "Read the case study",
-  },
   {
     href: `/work/${dulhahouse.slug}`,
     title: dulhahouse.title,
@@ -132,6 +125,24 @@ const WORK = [
     text: nagina.description,
     desktop: { src: `${IMAGE_BASE}v2/nagina.webp`, width: 1440, height: 1177 },
     mobile: { src: `${IMAGE_BASE}v2/nagina-mobile.webp`, width: 780, height: 2302 },
+    cta: "See the project",
+  },
+  {
+    href: `/work/${auraluxe.slug}`,
+    title: auraluxe.title,
+    label: `${auraluxe.label} · Built at ${SITE.agency.name}`,
+    text: auraluxe.description,
+    desktop: { src: `${IMAGE_BASE}v2/auraluxebags.webp`, width: 1440, height: 1307 },
+    mobile: { src: `${IMAGE_BASE}v2/auraluxebags-mobile.webp`, width: 780, height: 2194 },
+    cta: "See the project",
+  },
+  {
+    href: `/work/${trekkerz.slug}`,
+    title: trekkerz.title,
+    label: `${trekkerz.label} · Built at ${SITE.agency.name}`,
+    text: trekkerz.description,
+    desktop: { src: `${IMAGE_BASE}v2/trekkerz.webp`, width: 1440, height: 1657 },
+    mobile: { src: `${IMAGE_BASE}v2/trekkerz-mobile.webp`, width: 780, height: 3622 },
     cta: "See the project",
   },
 ];
@@ -274,9 +285,9 @@ export default function AboutPage() {
         text="Reviews posted on Instagram by brands whose websites I led at Devrex Digital. Word for word."
       />
 
-      <Section label="Selected work" title="Recent projects" text="A case study of my own site and two stores built at Devrex Digital.">
+      <Section label="Selected work" title="Recent projects" text="Client websites built at Devrex Digital, in projects I led.">
         <div className="x-work">
-          {WORK.map((w, i) => (
+          {WORK.map((w) => (
             <Link key={w.href} href={w.href} className="x-work-item" data-reveal>
               <div className="x-work-visual">
                 <Laptop src={w.desktop.src} alt={`${w.title}, desktop`} width={w.desktop.width} height={w.desktop.height} sizes="(max-width: 760px) 86vw, 380px" />
@@ -290,7 +301,6 @@ export default function AboutPage() {
               <span className="x-link">
                 {w.cta} <Icon name="arrow" size={16} />
               </span>
-              {i === 0 && <span className="x-ribbon">Case study</span>}
             </Link>
           ))}
         </div>
