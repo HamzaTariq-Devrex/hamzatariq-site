@@ -14,6 +14,10 @@ const Cursor = () => {
     document.addEventListener("mousemove", (e) => {
       mousePos.x = e.clientX;
       mousePos.y = e.clientY;
+      cursor.style.opacity = "1";
+    });
+    document.documentElement.addEventListener("mouseleave", () => {
+      cursor.style.opacity = "0";
     });
     requestAnimationFrame(function loop() {
       if (!hover) {

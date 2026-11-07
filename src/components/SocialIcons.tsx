@@ -56,6 +56,26 @@ const SocialIcons = () => {
     });
   }, []);
 
+  // The icons belong to the hero: once it is scrolled past they fade out (they are in the footer
+  // too), so they never sit on top of section content. The Resume button stays.
+  useEffect(() => {
+    const social = document.getElementById("social");
+    if (!social) return;
+    let ticking = false;
+    const update = () => {
+      ticking = false;
+      social.classList.toggle("is-past-hero", window.scrollY > window.innerHeight * 0.6);
+    };
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(update);
+    };
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   return (
     <div className="icons-section">
       <div className="social-icons" data-cursor="icons" id="social">

@@ -12,7 +12,8 @@
     "project": "slug in src/data/projects.ts (shown on /work/<slug>), or null",
     "logo": "brand logo in public/images/reviews/",
     "image": "the review story image in public/images/reviews/, or null",
-    "featured": "true for the 6 reviews on the home page"
+    "featured": "true for the 6 reviews on the home page",
+    "logoIsPhoto": "true when the brand image is a photo of a person, not a logo (left out of the home logo row)"
   },
   "items": [
     {
@@ -386,6 +387,7 @@
         "width": 112,
         "height": 112
       },
+      "logoIsPhoto": true,
       "image": {
         "src": "/images/reviews/dr-humza.webp",
         "width": 900,

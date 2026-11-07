@@ -1,5 +1,8 @@
 .section-container {
   width: 1300px;
+  /* Centre every home section in the same container (sections used to need their own margin: auto). */
+  margin-left: auto;
+  margin-right: auto;
 }
 .title,
 .para {

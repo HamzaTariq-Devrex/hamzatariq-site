@@ -13,6 +13,8 @@ export type Testimonial = {
   quote: string;
   project: string | null;
   logo: ReviewImage;
+  /** The brand image is a photo of a person, not a logo (left out of the home logo row). */
+  logoIsPhoto?: boolean;
   image: ReviewImage | null;
   featured: boolean;
 };
@@ -47,3 +49,31 @@ export const reviewsForPage = (page: "service:nextjs-websites" | "solution:ecomm
   if (page === "solution:clinics-dental") return CLINIC_REVIEWS;
   return [];
 };
+
+/** Home "Trusted by" featured quote (owner's example: Nagina House of Jewels). */
+export const HOME_FEATURED_ID = "nagina-house-of-jewels";
+/** Home logo row: real logos only. */
+export const LOGO_REVIEWS = TESTIMONIALS.filter((t) => !t.logoIsPhoto);
+
+/**
+ * A shorter excerpt for compact cards. Never changes words: it only cuts at a word boundary (and
+ * drops punctuation left dangling at the cut) and marks the cut with "…"; cards that cut link to
+ * the full review on /reviews.
+ */
+export const shortQuote = (quote: string, max = 110): { text: string; trimmed: boolean } => {
+  if (quote.length <= max) return { text: quote, trimmed: false };
+  const cut = quote.slice(0, max);
+  const atWord = cut.slice(0, cut.lastIndexOf(" ")).replace(/[\s,;:.!?\-–—]+$/, "");
+  return { text: `${atWord}…`, trimmed: true };
+};
+
+/** Link label for the brand: its Instagram (where the review was posted) or its website. */
+export const brandLinkLabel = (t: Testimonial) =>
+  t.instagram ? "Verified on Instagram" : `Visit ${t.url.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "")}`;
+
+/** Categories with counts, most reviews first (filter chips and the stats bar on /reviews). */
+export const REVIEW_CATEGORIES = Object.entries(
+  TESTIMONIALS.reduce<Record<string, number>>((acc, t) => ({ ...acc, [t.category]: (acc[t.category] ?? 0) + 1 }), {}),
+)
+  .map(([name, count]) => ({ name, count }))
+  .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));

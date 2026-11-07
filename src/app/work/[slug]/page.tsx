@@ -3,10 +3,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import SiteShell from "@/components/site/SiteShell";
-import ReviewCard from "@/components/site/ReviewCard";
+import ReviewStory from "@/components/site/ReviewStory";
 import { IMAGE_BASE, PROJECTS } from "@/data/projects";
 import { SITE } from "@/lib/site";
-import { getProjectReview } from "@/lib/testimonials";
+import { REVIEW_LABEL, brandLinkLabel, getProjectReview } from "@/lib/testimonials";
 import { jsonLd, projectDescription, projectTitle } from "@/lib/seo";
 
 type Params = { params: Promise<{ slug: string }> };
@@ -160,6 +160,28 @@ export default async function ProjectPage({ params }: Params) {
         )}
       </section>
 
+      {review && (
+        <figure className="project-quote" data-reveal>
+          <div className="project-quote-body">
+            <span className="page-eyebrow">What the client said</span>
+            <blockquote>&ldquo;{review.quote}&rdquo;</blockquote>
+            <figcaption>
+              <Image src={review.logo.src} alt={`${review.brand} logo`} width={48} height={48} className="review-logo" />
+              <span className="review-who">
+                <strong>{review.brand}</strong>
+                <a href={review.url} target="_blank" rel="noopener noreferrer">
+                  {brandLinkLabel(review)}
+                </a>
+              </span>
+            </figcaption>
+            <p className="review-label">
+              {REVIEW_LABEL} · <Link href="/reviews">See all reviews</Link>
+            </p>
+          </div>
+          <ReviewStory review={review} size="md" />
+        </figure>
+      )}
+
       {project.features.length > 0 && (
         <section className="project-features">
           <h2>On the site</h2>
@@ -173,18 +195,6 @@ export default async function ProjectPage({ params }: Params) {
               </li>
             ))}
           </ul>
-        </section>
-      )}
-
-      {review && (
-        <section className="project-review">
-          <div>
-            <h2>What the client said</h2>
-            <p>
-              Posted on Instagram after launch. <Link href="/reviews">See all reviews</Link>
-            </p>
-          </div>
-          <ReviewCard review={review} showImage />
         </section>
       )}
 

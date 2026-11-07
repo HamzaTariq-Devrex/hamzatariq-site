@@ -120,3 +120,14 @@ div.resume-button span {
     font-size: 24px;
   }
 }
+
+/* Hidden once the hero is scrolled past (SocialIcons.tsx), so they never cover section content. */
+.social-icons {
+  transition: opacity 0.35s ease, visibility 0.35s;
+}
+
+.social-icons.is-past-hero {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}

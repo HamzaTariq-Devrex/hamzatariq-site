@@ -1,5 +1,16 @@
-/* Real client reviews: ReviewCard, ReviewStrip, /reviews, home "What clients say", <Review id> in posts.
-   No star ratings anywhere. */
+/* Real client reviews (part of the design system): ReviewCard, ReviewStrip, ReviewStory (phone frame +
+   lightbox), ReviewsBrowser (/reviews), HomeReviews ("Trusted by" on the home page) and the project
+   page pull quote. Quotes are always word for word. No star ratings anywhere.
+   Motion: cards rise in on scroll, a soft teal glow on hover, the marquee pauses on hover/focus and
+   becomes a static grid with prefers-reduced-motion. */
+.review-card,
+.trust-card {
+  --rv-line: rgba(255, 255, 255, 0.08);
+  --rv-glow: rgba(45, 212, 191, 0.45);
+  --rv-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ---------- Card ---------- */
 .review-card {
   display: flex;
   flex-direction: column;
@@ -7,13 +18,21 @@
   margin: 28px 0;
   padding: 24px 26px;
   border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--rv-line);
   background: rgba(255, 255, 255, 0.025);
   min-width: 0;
+  transition: border-color 0.35s var(--rv-ease), box-shadow 0.35s var(--rv-ease), opacity 0.7s var(--rv-ease), transform 0.7s var(--rv-ease);
+}
+
+.review-card:hover,
+.trust-card:hover {
+  border-color: var(--rv-glow);
+  box-shadow: 0 0 0 1px rgba(45, 212, 191, 0.12), 0 18px 50px -20px rgba(45, 212, 191, 0.35);
 }
 
 .review-grid .review-card,
-.review-row .review-card {
+.review-row .review-card,
+.review-masonry .review-card {
   margin: 0;
 }
 
@@ -62,7 +81,7 @@
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: rgba(226, 232, 240, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--rv-line, rgba(255, 255, 255, 0.08));
 }
 
 .review-card blockquote {
@@ -83,28 +102,17 @@
   color: rgba(226, 232, 240, 0.6);
 }
 
-.review-image {
-  display: inline-flex;
-  align-items: center;
-  gap: 14px;
-  font-size: 13px;
+.review-label a {
   color: #5eead4;
 }
 
-.review-image img {
-  width: 72px;
-  height: auto;
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
+/* ---------- Strips (service, industry, /hire, /about): 3 per row, scroll-snap slider on phones ---------- */
 .review-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
   gap: 20px;
 }
 
-/* 3 per row; a scroll-snap slider on phones (no JS). */
 .review-row {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -137,24 +145,362 @@
   }
 }
 
-/* Home page section (inside the GSAP home tree) */
+/* ---------- Instagram story in a phone frame (9:16) + lightbox ---------- */
+.review-phone {
+  flex: none;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #5eead4;
+  font: inherit;
+  font-size: 12.5px;
+  cursor: zoom-in;
+}
+
+.review-phone-screen {
+  display: block;
+  width: 64px;
+  padding: 3px;
+  border-radius: 12px;
+  background: #1a2130;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14), 0 14px 30px -14px rgba(0, 0, 0, 0.8);
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease;
+}
+
+.review-phone.is-md .review-phone-screen {
+  width: min(220px, 52vw);
+  padding: 6px;
+  border-radius: 26px;
+}
+
+.review-phone-screen img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 9 / 16;
+  object-fit: cover;
+  border-radius: 9px;
+}
+
+.review-phone.is-md .review-phone-screen img {
+  border-radius: 20px;
+}
+
+.review-phone:hover .review-phone-screen,
+.review-phone:focus-visible .review-phone-screen {
+  transform: translateY(-3px);
+  box-shadow: inset 0 0 0 1px rgba(94, 234, 212, 0.5), 0 20px 40px -14px rgba(45, 212, 191, 0.35);
+}
+
+.review-phone:focus-visible {
+  outline: 2px solid #5eead4;
+  outline-offset: 6px;
+  border-radius: 14px;
+}
+
+.review-lightbox {
+  width: min(440px, 92vw);
+  max-height: 94vh;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  overflow: visible;
+}
+
+.review-lightbox::backdrop {
+  background: rgba(5, 8, 14, 0.82);
+  backdrop-filter: blur(6px);
+}
+
+.review-lightbox-inner {
+  position: relative;
+}
+
+.review-lightbox-inner img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 90vh;
+  object-fit: contain;
+  border-radius: 22px;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12), 0 40px 80px -20px rgba(0, 0, 0, 0.9);
+}
+
+.review-lightbox-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(10, 14, 23, 0.85);
+  color: #f1f5f9;
+  cursor: pointer;
+}
+
+.review-lightbox-close svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.review-lightbox-close:focus-visible {
+  outline: 2px solid #5eead4;
+  outline-offset: 2px;
+}
+
+/* ---------- /reviews ---------- */
+.reviews-hero {
+  padding-bottom: 48px;
+}
+
+.reviews-hero .x-hero-lead a,
+.reviews-end a {
+  color: #5eead4;
+}
+
+.review-stats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0;
+  margin: 32px 0 0;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 100px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.review-stats div {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 12px 22px;
+}
+
+.review-stats div + div {
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.review-stats dt {
+  order: 2;
+  font-size: 13px;
+  color: rgba(226, 232, 240, 0.6);
+}
+
+.review-stats dd {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 650;
+  color: #f1f5f9;
+  font-variant-numeric: tabular-nums;
+}
+
+.review-stats div:last-child dt {
+  display: none;
+}
+
+.review-stats div:last-child dd {
+  font-size: 14px;
+  font-weight: 500;
+  color: #5eead4;
+}
+
+.review-chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin: 0 auto 14px;
+  max-width: 980px;
+}
+
+.review-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 100px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.025);
+  color: rgba(226, 232, 240, 0.8);
+  font: inherit;
+  font-size: 13.5px;
+  cursor: pointer;
+  transition: border-color 0.25s ease, background 0.25s ease, color 0.25s ease;
+}
+
+.review-chip span {
+  font-size: 12px;
+  color: rgba(226, 232, 240, 0.5);
+}
+
+.review-chip:hover {
+  border-color: rgba(94, 234, 212, 0.5);
+}
+
+.review-chip[aria-pressed="true"] {
+  border-color: transparent;
+  background: #2dd4bf;
+  color: #04221f;
+}
+
+.review-chip[aria-pressed="true"] span {
+  color: rgba(4, 34, 31, 0.7);
+}
+
+.review-chip:focus-visible {
+  outline: 2px solid #5eead4;
+  outline-offset: 2px;
+}
+
+.review-count {
+  margin: 0 0 28px;
+  text-align: center;
+  font-size: 13px;
+  color: rgba(226, 232, 240, 0.5);
+}
+
+/* Masonry: CSS columns (cards keep their natural height, read top to bottom per column). */
+.review-masonry {
+  columns: 3 320px;
+  column-gap: 20px;
+  margin-bottom: 96px;
+}
+
+.review-masonry .review-card {
+  break-inside: avoid;
+  margin: 0 0 20px;
+  scroll-margin-top: 110px;
+}
+
+.review-masonry .review-card[hidden] {
+  display: none;
+}
+
+.review-masonry .review-card:target {
+  border-color: rgba(94, 234, 212, 0.6);
+}
+
+.review-foot {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.reviews-end {
+  max-width: 720px;
+  margin: 0 auto 120px;
+  text-align: center;
+}
+
+.reviews-end .x-actions {
+  justify-content: center;
+}
+
+/* ---------- Project page pull quote (next to the screenshots) ---------- */
+.project-quote {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 48px;
+  margin: -24px 0 72px;
+  padding: 40px 44px;
+  border-radius: 24px;
+  border: 1px solid rgba(45, 212, 191, 0.22);
+  background: radial-gradient(120% 140% at 0% 0%, rgba(45, 212, 191, 0.1), transparent 60%), rgba(255, 255, 255, 0.02);
+}
+
+.project-quote-body {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+
+.project-quote blockquote {
+  margin: 0;
+  font-size: clamp(22px, 2.3vw, 32px);
+  font-weight: 550;
+  line-height: 1.35;
+  letter-spacing: -0.015em;
+  color: #f1f5f9;
+  text-wrap: pretty;
+}
+
+.project-quote figcaption {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+@media (max-width: 760px) {
+  .project-quote {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 28px;
+    margin-top: 0;
+    padding: 28px 22px;
+  }
+
+  .project-quote .review-phone {
+    justify-self: center;
+  }
+}
+
+/* ---------- Home: "Trusted by N+ brands" ----------
+   Everything sits in one centred .section-container (the same width as the other home sections):
+   centred header, featured quote, the marquee (faded at both edges), logos, button. */
 .home-reviews {
   position: relative;
   z-index: 1;
   background-color: var(--backgroundColor);
-  padding: 40px 0 80px;
+  padding: 72px 0 96px;
 }
 
-.home-reviews .work-header {
-  margin-bottom: 36px;
+.trust-container {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.trust-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  margin: 0 0 44px;
+  text-align: center;
+}
+
+.trust-header .work-eyebrow {
+  margin: 0;
+}
+
+.trust-header p {
+  max-width: 560px;
+  margin: 0;
+  font-size: 15.5px;
+  line-height: 1.6;
+  color: rgba(226, 232, 240, 0.6);
 }
 
 .home-reviews-title {
   margin: 0;
-  font-size: clamp(44px, 5vw, 76px);
+  font-size: clamp(40px, 4.6vw, 72px);
   font-weight: 600;
-  line-height: 1;
+  line-height: 1.05;
   letter-spacing: -0.02em;
+  text-wrap: balance;
 }
 
 .home-reviews-title > span {
@@ -163,54 +509,354 @@
   font-weight: 500;
 }
 
-@media (max-width: 768px) {
-  .home-reviews {
-    padding: 20px 0 60px;
-  }
+/* Fade and rise in on scroll (HomeReviews arms it with JS; without JS or with reduced motion it is
+   simply visible). */
+.home-trust.is-armed .trust-rise {
+  opacity: 0;
+  transform: translateY(26px);
+  transition: opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1), transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .review-row {
-    scroll-behavior: smooth;
-  }
+.home-trust.is-armed.is-in .trust-rise {
+  opacity: 1;
+  transform: none;
 }
 
-/* /work/<slug>: the client's own review */
-.project-review {
-  display: grid;
-  grid-template-columns: 280px minmax(0, 1fr);
-  gap: 48px;
-  padding: 48px 0;
-  margin-bottom: 72px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+.home-trust.is-in .trust-featured {
+  transition-delay: 0.08s;
 }
 
-.project-review h2 {
-  margin: 0;
-  font-size: 28px;
+.home-trust.is-in .trust-wall {
+  transition-delay: 0.16s;
+}
+
+.home-trust.is-in .trust-logos {
+  transition-delay: 0.24s;
+}
+
+.trust-featured {
+  margin: 0 0 48px;
+  padding: clamp(28px, 4vw, 52px) clamp(22px, 4vw, 56px);
+  border-radius: 28px;
+  border: 1px solid rgba(45, 212, 191, 0.25);
+  background: radial-gradient(70% 120% at 50% 0%, rgba(45, 212, 191, 0.12), transparent 65%), rgba(255, 255, 255, 0.02);
+  text-align: center;
+}
+
+.trust-featured blockquote {
+  max-width: 800px;
+  margin: 0 auto;
+  font-size: clamp(22px, 2.3vw, 34px);
+  font-weight: 550;
+  line-height: 1.35;
+  letter-spacing: -0.015em;
+  color: #f1f5f9;
+  text-wrap: balance;
+}
+
+.trust-featured figcaption {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px 16px;
+  margin-top: 28px;
+}
+
+.trust-featured figcaption img {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #fff;
+  object-fit: cover;
+}
+
+.trust-featured-who {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.trust-featured-who strong {
+  font-size: 17px;
   font-weight: 600;
-  letter-spacing: -0.01em;
 }
 
-.project-review > div > p {
-  margin: 12px 0 0;
-  font-size: 14px;
+.trust-featured-who small {
+  font-size: 13px;
   color: rgba(226, 232, 240, 0.6);
 }
 
-.project-review > div > p a {
+.trust-verified {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 100px;
+  border: 1px solid rgba(94, 234, 212, 0.4);
+  font-size: 13px;
+  font-weight: 600;
+  color: #5eead4;
+  transition: background 0.25s ease;
+}
+
+.trust-verified:hover {
+  background: rgba(45, 212, 191, 0.1);
+}
+
+.trust-verified svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.trust-label {
+  margin: 18px 0 0;
+  font-size: 12.5px;
+  color: rgba(226, 232, 240, 0.55);
+}
+
+/* Marquee wall: inside the container, cards fade in and out at both edges; two rows in opposite
+   directions. Every card has the same size; label and link sit at the bottom. */
+.trust-wall {
+  --trust-gap: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--trust-gap);
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+}
+
+.trust-marquee {
+  overflow: hidden;
+}
+
+.trust-track,
+.trust-copy {
+  display: flex;
+  gap: var(--trust-gap);
+  width: max-content;
+}
+
+.trust-track {
+  animation: trustScroll 90s linear infinite;
+}
+
+.trust-marquee.is-reverse .trust-track {
+  animation-direction: reverse;
+  animation-duration: 100s;
+}
+
+.trust-marquee:hover .trust-track,
+.trust-marquee:focus-within .trust-track {
+  animation-play-state: paused;
+}
+
+/* Each track holds the cards twice; moving it by half its width (plus half a gap) loops seamlessly. */
+@keyframes trustScroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(calc(-50% - 10px));
+  }
+}
+
+.trust-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 300px;
+  height: 252px;
+  margin: 0;
+  padding: 20px 22px;
+  border-radius: 18px;
+  border: 1px solid var(--rv-line);
+  background: rgba(255, 255, 255, 0.03);
+  transition: border-color 0.35s var(--rv-ease), box-shadow 0.35s var(--rv-ease);
+}
+
+.trust-card-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.trust-card-head img {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #fff;
+  object-fit: cover;
+}
+
+.trust-card-head span {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.trust-card-head a {
+  font-size: 14px;
+  font-weight: 600;
+  color: #f1f5f9;
+}
+
+.trust-card-head a:hover {
   color: #5eead4;
 }
 
-.project-review .review-card {
-  margin: 0;
+.trust-card-head small {
+  font-size: 12px;
+  color: rgba(226, 232, 240, 0.55);
 }
 
-@media (max-width: 760px) {
-  .project-review {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 20px;
-    padding: 36px 0;
-    margin-bottom: 48px;
+.trust-card blockquote {
+  margin: 0;
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: rgba(241, 245, 249, 0.92);
+}
+
+.trust-card-foot {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 46px;
+  margin-top: auto;
+}
+
+.trust-card-label {
+  margin: 0;
+  font-size: 11.5px;
+  color: rgba(226, 232, 240, 0.5);
+}
+
+.trust-card-more {
+  align-self: flex-start;
+  font-size: 13px;
+  font-weight: 600;
+  color: #5eead4;
+}
+
+/* Client logos (real logos only): one centred row that wraps into centred rows, greyscale at 60%,
+   full colour on hover or focus. */
+/* Even rows: half the logos per row on wide screens (--logo-cols from HomeReviews), 5 per row on
+   smaller screens. */
+.trust-logos {
+  display: grid;
+  grid-template-columns: repeat(var(--logo-cols, 10), 56px);
+  justify-content: center;
+  gap: 18px 22px;
+  margin: 56px auto 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (max-width: 1100px) {
+  .trust-logos {
+    grid-template-columns: repeat(5, 56px);
+  }
+}
+
+.trust-logos a {
+  display: block;
+  border-radius: 50%;
+  filter: grayscale(1);
+  opacity: 0.6;
+  transition: filter 0.35s ease, opacity 0.35s ease, transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.trust-logos a:hover,
+.trust-logos a:focus-visible {
+  filter: none;
+  opacity: 1;
+  transform: translateY(-2px);
+}
+
+.trust-logos a:focus-visible {
+  outline: 2px solid #5eead4;
+  outline-offset: 3px;
+}
+
+.trust-logos img {
+  display: block;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #fff;
+  object-fit: cover;
+}
+
+.trust-more {
+  display: flex;
+  justify-content: center;
+  margin-top: 48px;
+}
+
+@media (max-width: 768px) {
+  .home-reviews {
+    padding: 48px 0 72px;
+  }
+
+  .trust-header {
+    margin-bottom: 32px;
+  }
+
+  .trust-card {
+    width: 264px;
+    height: 264px;
+  }
+
+  .trust-logos {
+    grid-template-columns: repeat(5, 44px);
+    gap: 14px 18px;
+  }
+
+  .trust-logos img {
+    width: 44px;
+    height: 44px;
+  }
+
+  .review-stats {
+    border-radius: 18px;
+  }
+
+  .review-stats div + div {
+    border-left: 0;
+  }
+}
+
+/* Reduced motion: no marquee (a static, wrapping grid of the cards), no hover lifts. */
+@media (prefers-reduced-motion: reduce) {
+  .trust-wall {
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+
+  .trust-marquee,
+  .trust-track {
+    overflow: visible;
+  }
+
+  .trust-track {
+    animation: none;
+    width: auto;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .trust-copy {
+    display: none;
+  }
+
+  .trust-logos a,
+  .review-phone-screen {
+    transition: none;
   }
 }
