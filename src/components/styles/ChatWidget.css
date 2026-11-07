@@ -604,3 +604,18 @@ body:has(.main-body) .ai-chat-panel {
     transition: none;
   }
 }
+
+/* Laptops and desktops: the message bubble sits beside the launcher in the bottom corner instead of
+   above it, so it never covers headings, cards or buttons (it also hides itself after a few seconds). */
+@media (min-width: 768px) {
+  .ai-chat-nudge,
+  body:has(.main-body) .ai-chat-nudge {
+    right: 84px;
+    bottom: 16px;
+    max-width: 260px;
+  }
+
+  body:has(.main-body) .ai-chat-nudge {
+    bottom: 76px;
+  }
+}

@@ -32,6 +32,7 @@ const LEAD_SIGNAL = "\u001eLEAD"; // same as LEAD_SIGNAL in src/lib/assistant/ch
 const STORAGE_KEY = "hamza-ai-chat-v1"; // conversation, kept for this browser tab session
 const NUDGE_DELAY_MS = 2500; // first popup on every page load
 const NUDGE_REPEAT_MS = 10000; // after a popup or the chat is closed, show the next one
+const NUDGE_VISIBLE_MS = 8000; // each popup hides itself, so it never sits over content for long
 
 type Message = { role: "user" | "assistant"; content: string };
 type Saved = { session: string; messages: Message[]; leadSent: boolean };
@@ -188,11 +189,21 @@ export default function ChatWidget({ startOpen = false }: { startOpen?: boolean 
 
   // Message bubbles next to the launcher: the first appears on every page load, and whenever a
   // message or the chat is closed, the next message follows after NUDGE_REPEAT_MS.
+  // Each message is shown once per page load; after the last one the bubbles stop.
   useEffect(() => {
-    if (open || nudge) return;
+    if (open || nudge || nudgeIndex >= NUDGE_MESSAGES.length) return;
     const t = setTimeout(() => setNudge(true), nudgeIndex === 0 ? NUDGE_DELAY_MS : NUDGE_REPEAT_MS);
     return () => clearTimeout(t);
   }, [open, nudge, nudgeIndex]);
+
+  useEffect(() => {
+    if (!nudge) return;
+    const t = setTimeout(() => {
+      setNudge(false);
+      setNudgeIndex((i) => i + 1);
+    }, NUDGE_VISIBLE_MS);
+    return () => clearTimeout(t);
+  }, [nudge]);
 
   useEffect(() => {
     if (!open) return;

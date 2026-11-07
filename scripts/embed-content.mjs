@@ -92,7 +92,8 @@ const collectOwnerFiles = () => {
       .filter((f) => f.endsWith(".md"))
       .map((f) => ({
         file: join(OWNER_DIR, "projects", f),
-        url: `${SITE_URL}/work/${f.replace(/\.md$/, "")}#owner-notes`,
+        // The own site has no project page (it redirects to the SEO service).
+        url: f === "hamzatariq-site.md" ? `${SITE_URL}/services/react-nextjs-seo#own-site-notes` : `${SITE_URL}/work/${f.replace(/\.md$/, "")}#owner-notes`,
         title: `Project notes: ${f.replace(/\.md$/, "")}`,
       })),
   ];
@@ -112,13 +113,21 @@ const collectOwnerFiles = () => {
 
 const hash = (text) => createHash("sha256").update(text).digest("hex").slice(0, 16);
 
-const withRetry = async (fn, tries = 4) => {
+// Free tier: 100 embedding requests per minute (each chunk counts). On 429 wait for the delay Gemini
+// asks for (or up to a minute) and go on; pages already embedded are saved, so a rerun resumes.
+const retryDelayMs = (error, attempt) => {
+  const s = String(error?.message ?? "").match(/retry in ([\d.]+)s/i)?.[1] ?? String(error?.message ?? "").match(/"retryDelay":"(\d+)s"/)?.[1];
+  return s ? (Number(s) + 2) * 1000 : Math.min(60_000, 5000 * attempt);
+};
+const withRetry = async (fn, tries = 8) => {
   for (let i = 1; ; i++) {
     try {
       return await fn();
     } catch (error) {
       if (i >= tries || ![429, 500, 503].includes(error?.status)) throw error;
-      await new Promise((r) => setTimeout(r, 2000 * i));
+      const wait = error?.status === 429 ? retryDelayMs(error, i) : 2000 * i;
+      log(`Gemini ${error.status}, retrying in ${Math.round(wait / 1000)} s`);
+      await new Promise((r) => setTimeout(r, wait));
     }
   }
 };

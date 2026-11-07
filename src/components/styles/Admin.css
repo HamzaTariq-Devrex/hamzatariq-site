@@ -1374,3 +1374,26 @@
   font-weight: 600;
   color: rgba(226, 232, 240, 0.75);
 }
+
+/* Laptops (1280–1440): the leads/chats tables fit the content column without sideways scrolling;
+   long emails and names wrap instead of widening the table. */
+@media (min-width: 901px) and (max-width: 1440px) {
+  .adm-page {
+    padding: 32px 24px 72px;
+  }
+
+  .adm-stats {
+    gap: 12px;
+  }
+
+  .adm-table th,
+  .adm-table td {
+    padding: 11px 10px;
+  }
+
+  .adm-table td[data-label="Email"],
+  .adm-table td[data-label="Name"] {
+    max-width: 220px;
+    overflow-wrap: anywhere;
+  }
+}

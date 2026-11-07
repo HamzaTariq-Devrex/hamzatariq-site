@@ -101,3 +101,22 @@ div.resume-button span {
     margin-top: -1.5px;
   }
 }
+
+/* Short laptop screens (720–820px tall): the vertical icon column reached the hero buttons, so the
+   icons sit in a row along the bottom edge instead. */
+@media only screen and (min-width: 900px) and (max-height: 820px) {
+  .social-icons {
+    flex-direction: row;
+    bottom: 8px;
+    gap: 6px;
+  }
+
+  .social-icons span {
+    width: 44px;
+    height: 44px;
+  }
+
+  .social-icons a {
+    font-size: 24px;
+  }
+}

@@ -130,7 +130,7 @@ const SeoVisual = () => {
         <Ring value={Number(pages.after)} label="Performance" note={`Project pages, was ${pages.before}`} />
         <Ring value={Number(work.after)} label="Performance" note={`/work, was ${work.before}`} />
       </div>
-      <span className="x-chip">
+      <span className="x-chip x-chip-static">
         <Icon name="speed" size={16} /> On my own site: home LCP {lcp.before} → {lcp.after}
       </span>
     </div>

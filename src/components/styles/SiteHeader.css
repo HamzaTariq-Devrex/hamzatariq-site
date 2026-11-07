@@ -308,7 +308,8 @@
   height: 46px;
 }
 
-@media (max-width: 960px) {
+/* The full menu (6 links, the audit badge and the CTA) needs 1280px; below that the burger menu. */
+@media (max-width: 1279px) {
   .site-nav,
   .site-cta-wrap {
     display: none;
@@ -359,19 +360,9 @@
   color: var(--sh-text);
 }
 
-/* Six links plus the logo and CTA: tighten spacing on narrower desktops. */
-@media (max-width: 1240px) {
-  .site-nav > a,
-  .site-nav-services {
-    padding: 8px 11px;
-    letter-spacing: 0.06em;
-  }
-}
-
-@media (max-width: 1080px) {
-  .site-nav > a,
-  .site-nav-services {
-    padding: 8px 8px;
-    font-size: 12px;
+/* Same width as the page container (Pages.css). */
+@media (min-width: 1600px) {
+  .site-header {
+    width: min(1360px, calc(100% - 64px));
   }
 }

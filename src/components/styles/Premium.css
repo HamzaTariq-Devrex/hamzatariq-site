@@ -1954,3 +1954,85 @@ a.x-card:focus-visible {
   justify-content: center;
   margin-top: 18px;
 }
+
+/* ---------- Laptop screens (1280–1600 wide, 720–900 tall) ----------
+   The page container is capped (1240px, 1360px from 1600px), so a 4-column row is ~300px per card at
+   every laptop width: 4-up grids use 2 columns until 1600px. Headings scale with the viewport height
+   too, so hero buttons stay above the fold on 720–768px tall screens. */
+.x-h1 {
+  font-size: clamp(36px, min(6.4vw, 9vh), 76px);
+}
+
+.x-hero-center {
+  justify-items: center;
+  row-gap: 0;
+}
+
+.x-chip-static {
+  position: static;
+  white-space: normal;
+  text-align: center;
+}
+
+.x-price-value {
+  flex-wrap: wrap;
+  font-size: clamp(30px, 2.6vw, 42px);
+}
+
+.x-grid-4 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.x-pricing.is-4,
+.x-work:has(> :nth-child(4):last-child) {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.x-grid-4 > *,
+.x-pricing > *,
+.x-work > * {
+  height: 100%;
+}
+
+@media (min-width: 1600px) {
+  .x-grid-4,
+  .x-pricing.is-4,
+  .x-work:has(> :nth-child(4):last-child) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .x-grid-4,
+  .x-pricing.is-4,
+  .x-work:has(> :nth-child(4):last-child) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Short laptop screens: tighter hero rhythm and a hero visual that fits the height. */
+@media (min-width: 961px) and (max-height: 820px) {
+  .x-hero {
+    padding-bottom: 72px;
+  }
+
+  .x-hero .x-actions {
+    margin-top: 24px;
+  }
+
+  .x-hero-lead {
+    margin-top: 16px;
+    font-size: 17px;
+  }
+
+  .x-visual {
+    max-width: min(560px, 72vh);
+  }
+}
+
+/* Phones: floating chips stay inside the screen (some sit at a negative offset on wider layouts). */
+@media (max-width: 760px) {
+  .x-visual .x-chip.x-float[style*="left:-"] {
+    left: 0 !important;
+  }
+}

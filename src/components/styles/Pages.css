@@ -594,3 +594,11 @@
     flex-direction: column;
   }
 }
+
+/* Big desktops: a wider container (kept in sync with .site-header in SiteHeader.css). */
+@media (min-width: 1600px) {
+  .page-main,
+  .page-footer {
+    width: min(1360px, calc(100% - 64px));
+  }
+}

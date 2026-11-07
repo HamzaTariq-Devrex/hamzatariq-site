@@ -1053,3 +1053,25 @@
   margin: 6px 0 4px;
   font-size: 17px;
 }
+
+/* Laptops: big headings scale with the viewport height too, so hero buttons stay above the fold on
+   720–768px tall screens. */
+.about-hero h1 {
+  font-size: clamp(40px, min(6vw, 9.5vh), 80px);
+}
+
+.page-hero h1,
+.project-hero h1 {
+  font-size: clamp(42px, min(7vw, 10.5vh), 92px);
+}
+
+@media (min-width: 1001px) and (max-height: 820px) {
+  .about-hero {
+    grid-template-columns: 1fr minmax(300px, 380px);
+  }
+
+  .about-hero-text > p {
+    font-size: 15.5px;
+    line-height: 1.6;
+  }
+}
