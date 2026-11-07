@@ -9,12 +9,14 @@ import Icon, { type IconName } from "@/components/site/ds/Icon";
 import OpenChat from "@/components/site/ds/OpenChat";
 import WhereIWork from "@/components/site/WhereIWork";
 import AuditCta from "@/components/site/AuditCta";
+import ReviewStrip from "@/components/site/ReviewStrip";
 import { Laptop, Phone } from "@/components/site/ds/Mockups";
 import { renderMdx } from "@/components/blog/mdx";
 import { SERVICES, formatPrice } from "@/data/services";
 import { IMAGE_BASE, PROJECTS } from "@/data/projects";
 import { getSolution, getSolutions } from "@/lib/solutions";
 import { SITE } from "@/lib/site";
+import { reviewsForPage } from "@/lib/testimonials";
 import { jsonLd } from "@/lib/seo";
 import "@/components/styles/Blog.css";
 import "@/components/styles/Tools.css";
@@ -167,6 +169,8 @@ export default async function SolutionPage({ params }: Props) {
           </div>
         </Section>
       )}
+
+      <ReviewStrip reviews={reviewsForPage(`solution:${s.slug}`)} text="Real reviews posted on Instagram after launch. Word for word." />
 
       <Section label="FAQ" title="Frequently asked questions">
         <Faq items={s.faq} />

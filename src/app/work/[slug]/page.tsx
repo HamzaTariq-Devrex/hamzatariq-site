@@ -3,8 +3,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import SiteShell from "@/components/site/SiteShell";
+import ReviewCard from "@/components/site/ReviewCard";
 import { IMAGE_BASE, PROJECTS } from "@/data/projects";
 import { SITE } from "@/lib/site";
+import { getProjectReview } from "@/lib/testimonials";
 import { jsonLd, projectDescription, projectTitle } from "@/lib/seo";
 
 type Params = { params: Promise<{ slug: string }> };
@@ -46,6 +48,7 @@ export default async function ProjectPage({ params }: Params) {
   const prev = PROJECTS[(index - 1 + PROJECTS.length) % PROJECTS.length];
   const next = PROJECTS[(index + 1) % PROJECTS.length];
   const pageUrl = `${SITE.url}/work/${project.slug}`;
+  const review = getProjectReview(project.slug);
   const structuredData = {
     "@context": "https://schema.org",
     "@graph": [
@@ -170,6 +173,18 @@ export default async function ProjectPage({ params }: Params) {
               </li>
             ))}
           </ul>
+        </section>
+      )}
+
+      {review && (
+        <section className="project-review">
+          <div>
+            <h2>What the client said</h2>
+            <p>
+              Posted on Instagram after launch. <Link href="/reviews">See all reviews</Link>
+            </p>
+          </div>
+          <ReviewCard review={review} showImage />
         </section>
       )}
 

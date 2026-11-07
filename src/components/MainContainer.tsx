@@ -14,6 +14,7 @@ import SocialIcons from "./SocialIcons";
 import WhatIDo from "./WhatIDo";
 import AuditCta from "./site/AuditCta";
 import Work from "./Work";
+import HomeReviews from "./HomeReviews";
 import setSplitText from "./utils/splitText";
 
 const TechStack = dynamic(() => import("./TechStack"), {
@@ -89,6 +90,7 @@ const MainContainer = ({ children }: PropsWithChildren) => {
             </div>
             <Career />
             <Work />
+            <HomeReviews />
             {isDesktopView && <div ref={techStackAnchorRef} />}
             {isDesktopView && showTechStack && <TechStack />}
             <Contact />

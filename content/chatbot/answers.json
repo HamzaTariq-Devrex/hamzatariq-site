@@ -57,7 +57,11 @@
     "mobile",
     "android",
     "ios",
-    "application"
+    "application",
+    "review",
+    "reviews",
+    "testimonials",
+    "feedback"
   ],
   "offTopicPhrases": [
     "write code",
@@ -646,6 +650,31 @@
         "your own site",
         "results kya",
         "how fast is this site"
+      ]
+    },
+    {
+      "id": "reviews",
+      "answer": "Brands whose websites Hamza led at Devrex Digital posted these reviews on Instagram. Just Petssionate: \"Shoutout to Team Devrex for creating such a lovely website for us. Hamza & Mudassir, you guys are the best!\" The Mark by Strokes: \"Had my website designed by them, and it was such a seamless experience. Definitely check them out if you're planning to build a website for your business.\" The Curtains Collection: \"The team was incredibly cooperative and professional.\" Read every review, word for word: https://hamzatariq.site/reviews",
+      "keywords": [
+        "review",
+        "reviews",
+        "testimonial",
+        "testimonials",
+        "feedback"
+      ],
+      "phrases": [
+        "what do clients say",
+        "what clients say",
+        "what do your clients say",
+        "client reviews",
+        "customer reviews",
+        "past clients",
+        "happy clients",
+        "clients say",
+        "any reviews",
+        "log kya kehte",
+        "clients kya kehte",
+        "reviews dikhao"
       ]
     },
     {

@@ -12,6 +12,8 @@ import { Laptop, Phone } from "@/components/site/ds/Mockups";
 import { PROCESS, SERVICES, formatPrice } from "@/data/services";
 import { EDUCATION_HISTORY, JOBS } from "@/data/experience";
 import WhereIWork from "@/components/site/WhereIWork";
+import ReviewStrip from "@/components/site/ReviewStrip";
+import { ABOUT_REVIEWS } from "@/lib/testimonials";
 import { IMAGE_BASE, PROJECTS } from "@/data/projects";
 import { getCaseStudy } from "@/data/caseStudies";
 import { SITE } from "@/lib/site";
@@ -261,6 +263,16 @@ export default function AboutPage() {
           ))}
         </div>
       </Section>
+
+      <ReviewStrip
+        reviews={ABOUT_REVIEWS}
+        title={
+          <>
+            What clients <span>say</span>
+          </>
+        }
+        text="Reviews posted on Instagram by brands whose websites I led at Devrex Digital. Word for word."
+      />
 
       <Section label="Selected work" title="Recent projects" text="A case study of my own site and two stores built at Devrex Digital.">
         <div className="x-work">

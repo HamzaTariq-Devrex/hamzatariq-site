@@ -25,9 +25,16 @@ const POSTS_DIR = join(ROOT, "content", "blog");
 const BRIEFS_DIR = join(ROOT, "content", "seo", "briefs");
 const SITE_URL = "https://hamzatariq.site";
 const TITLE_SUFFIX = " | Hamza Tariq";
-// Pace (CLAUDE.md): one post every 2 days at most, so max 4 per ISO week.
-const MIN_DAYS_BETWEEN_POSTS = 2;
-const MAX_POSTS_PER_WEEK = 4;
+// Pace (CLAUDE.md): up to 3 posts per publish day, publish days 2+ days apart, max 12 per ISO week.
+// Same-day posts are in different clusters. Keep in sync with scripts/autopilot/lib.mjs.
+const MAX_POSTS_PER_DAY = 3;
+const MIN_DAYS_BETWEEN_POSTS = 2; // between publish days
+const MAX_POSTS_PER_WEEK = 12;
+// Distinct questions: a post's title or question H2s may not be this similar (content-word Jaccard)
+// to a post published in the 14 days before it (or earlier the same day).
+const SIMILAR_WINDOW_DAYS = 14;
+const MAX_TITLE_SIMILARITY = 0.5;
+const MAX_H2_SIMILARITY = 0.6;
 // Posts published from this date follow the full expert standard (brief, information gain, trust
 // line, links from older posts). Older posts get them at their next monthly refresh.
 const SEO_V2_FROM = "2026-11-06";
@@ -306,8 +313,16 @@ for (const p of byDate) {
   const week = isoWeek(p.published);
   weekCounts[week] = [...(weekCounts[week] ?? []), p.slug];
 }
-/** The post published just before this one (same-day ties by slug), for the 2-day gap rule. */
-const previousPost = (slug) => byDate[byDate.findIndex((p) => p.slug === slug) - 1] ?? null;
+/** The latest post on an earlier publish day, for the 2-day gap between publish days. */
+const previousDayPost = (post) => [...byDate].reverse().find((p) => p.published < post.published) ?? null;
+/** Posts before this one (by date, then slug) within the similarity window. */
+const recentPosts = (post) => {
+  const from = new Date(Date.parse(`${post.published}T00:00:00Z`) - SIMILAR_WINDOW_DAYS * 86400000).toISOString().slice(0, 10);
+  return byDate.slice(0, byDate.findIndex((p) => p.slug === post.slug)).filter((p) => p.published >= from);
+};
+const SIM_STOP = new Set([...STOP, "what", "why", "when", "which", "should", "can", "will", "who", "where", "be", "or", "vs", "much", "need", "get"]);
+const contentWords = (text) => new Set(tokens(text).filter((w) => !SIM_STOP.has(w)).map(stem));
+const questionH2sOf = (body) => [...body.matchAll(/^##\s+(.+)$/gm)].map((m) => m[1].trim()).filter((h) => QUESTION_H2.test(h));
 const olderPosts = (post) => byDate.slice(0, byDate.findIndex((p) => p.slug === post.slug));
 
 const backlog = JSON.parse(read("content/backlog.json") || '{"items":[]}');
@@ -610,15 +625,33 @@ for (const post of posts) {
     for (let j = i + 1; j < paragraphs.length; j++)
       if (jaccard(paragraphs[i].sh, paragraphs[j].sh) > 0.35) errors.push(`two paragraphs make the same point: "${paragraphs[j].text.trim().slice(0, 70)}…"`);
 
-  // Publishing pace
+  // Publishing pace: up to 3 per publish day, publish days 2+ days apart, max 12 per ISO week
   const week = weekCounts[isoWeek(published)] ?? [];
   if (week.length > MAX_POSTS_PER_WEEK && week.indexOf(slug) >= MAX_POSTS_PER_WEEK) {
     errors.push(`more than ${MAX_POSTS_PER_WEEK} posts in week ${isoWeek(published)}; move "published" to a later week`);
   }
-  const prev = previousPost(slug);
+  const sameDay = byDate.filter((p) => p.published === published);
+  if (sameDay.length > MAX_POSTS_PER_DAY && sameDay.findIndex((p) => p.slug === slug) >= MAX_POSTS_PER_DAY) {
+    errors.push(`more than ${MAX_POSTS_PER_DAY} posts on ${published}; move "published" to the next publish day`);
+  }
+  const sameCluster = sameDay.find((p) => p.slug !== slug && data.cluster && p.data.cluster === data.cluster);
+  if (sameCluster) errors.push(`"${sameCluster.slug}" is in the same cluster (${data.cluster}) on the same day; same-day posts must be in different clusters`);
+  const prev = previousDayPost(post);
   if (prev && /^\d{4}-\d{2}-\d{2}$/.test(published)) {
     const gap = (Date.parse(published) - Date.parse(prev.published)) / 86400000;
-    if (gap < MIN_DAYS_BETWEEN_POSTS) errors.push(`published ${gap} day(s) after "${prev.slug}"; keep at least ${MIN_DAYS_BETWEEN_POSTS} days between posts`);
+    if (gap < MIN_DAYS_BETWEEN_POSTS) errors.push(`published ${gap} day(s) after "${prev.slug}"; keep at least ${MIN_DAYS_BETWEEN_POSTS} days between publish days (up to ${MAX_POSTS_PER_DAY} posts on one day)`);
+  }
+  // Distinct questions: title and question H2s vs posts from the last 14 days
+  const titleWords = contentWords(data.title);
+  const myQuestions = questionH2sOf(body).map((h) => ({ h, w: contentWords(h) })).filter((q) => q.w.size >= 2);
+  for (const other of recentPosts(post)) {
+    const t = jaccard(titleWords, contentWords(other.data.title));
+    if (t >= MAX_TITLE_SIMILARITY) errors.push(`title is too similar to "${other.data.title}" (${other.slug}, ${other.published}); answer a clearly different question`);
+    for (const q of myQuestions)
+      for (const oh of questionH2sOf(other.body)) {
+        const ow = contentWords(oh);
+        if (ow.size >= 2 && jaccard(q.w, ow) >= MAX_H2_SIMILARITY) errors.push(`H2 "${q.h}" is too similar to "${oh}" in ${other.slug} (${other.published}); answer a clearly different question`);
+      }
   }
 
   results.push({

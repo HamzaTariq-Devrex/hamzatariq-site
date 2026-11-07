@@ -6,10 +6,14 @@ import matter from "gray-matter";
 
 export const ROOT = process.cwd();
 export const SITE_URL = "https://hamzatariq.site";
-// Pace (CLAUDE.md): one post every 2 days at most, max 4 per ISO week. Keep in sync with content-check.mjs.
-export const MIN_DAYS_BETWEEN_POSTS = 2;
-export const MAX_POSTS_PER_WEEK = 4;
-export const MIN_QUEUED = 10;
+// Pace (CLAUDE.md): up to 3 posts per publish day, publish days 2+ days apart, max 12 per ISO week.
+// Same-day posts are in different clusters. Keep in sync with content-check.mjs.
+export const MAX_POSTS_PER_DAY = 3;
+export const MIN_DAYS_BETWEEN_POSTS = 2; // between publish days
+export const MAX_POSTS_PER_WEEK = 12;
+// Refill: when fewer than MIN_QUEUED topics are queued, add REFILL_COUNT.
+export const MIN_QUEUED = 20;
+export const REFILL_COUNT = 30;
 // Original data from the SEO audit tool needs at least this many audited sites (content/STYLE.md).
 export const MIN_AUDIT_SITES = 30;
 
@@ -73,16 +77,32 @@ export const normalizeKeyword = (text) =>
     .replace(/[^a-z0-9]+/g, " ")
     .trim();
 
-/** First date from `from` that is 2+ days after the latest post and in an ISO week with room left. */
-export const nextPublishDate = (posts, from = todayPkt()) => {
+/**
+ * Next free publish slot from `from` (default today, PKT). The latest publish day is reused while it
+ * is today or later and has room (under 3 posts, week under 12, a cluster not used that day), so one
+ * run can fill 3 slots on the same day. Otherwise the next publish day is 2+ days after the latest
+ * one, in an ISO week with room left. `exclude` skips days (e.g. no eligible topic for that day).
+ */
+export const nextPublishSlot = (posts, { from = todayPkt(), clusters = null, exclude = [] } = {}) => {
+  const dated = posts.filter((p) => p.published);
   const perWeek = {};
-  for (const p of posts) if (p.published) perWeek[isoWeek(p.published)] = (perWeek[isoWeek(p.published)] ?? 0) + 1;
+  for (const p of dated) perWeek[isoWeek(p.published)] = (perWeek[isoWeek(p.published)] ?? 0) + 1;
+  const onDay = (date) => dated.filter((p) => p.published === date);
+  const weekHasRoom = (date) => (perWeek[isoWeek(date)] ?? 0) < MAX_POSTS_PER_WEEK;
+  const slot = (date) => ({ date, sameDay: onDay(date).map((p) => ({ slug: p.slug, title: p.title, cluster: p.cluster })) });
+
+  const last = dated.map((p) => p.published).sort().pop();
+  if (last && last >= from && !exclude.includes(last)) {
+    const used = new Set(onDay(last).map((p) => p.cluster));
+    const freeCluster = !clusters || clusters.some((c) => !used.has(c));
+    if (onDay(last).length < MAX_POSTS_PER_DAY && weekHasRoom(last) && freeCluster) return slot(last);
+  }
   let date = from;
-  const last = posts.map((p) => p.published).filter(Boolean).sort().pop();
   if (last && addDays(last, MIN_DAYS_BETWEEN_POSTS) > date) date = addDays(last, MIN_DAYS_BETWEEN_POSTS);
-  while ((perWeek[isoWeek(date)] ?? 0) >= MAX_POSTS_PER_WEEK) date = addDays(date, 1);
-  return date;
+  while (!weekHasRoom(date) || exclude.includes(date)) date = addDays(date, 1);
+  return slot(date);
 };
+export const nextPublishDate = (posts, from = todayPkt()) => nextPublishSlot(posts, { from }).date;
 
 // ---------- Supabase (read-only app_* functions) ----------
 export const rpc = async (fn, args = {}) => {

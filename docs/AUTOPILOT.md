@@ -1,6 +1,6 @@
 # Content autopilot
 
-A scheduled Claude Code session writes one blog post every other day to an expert SEO standard: SERP research and a brief first, then a post that beats the top results with real information gain, linked into its topic cluster. Once a month it measures every post against Search Console and improves it, and writes a report. This file is the session's instructions: point the schedule at it.
+A scheduled Claude Code session writes up to 3 blog posts every other day to an expert SEO standard: SERP research and a brief first, then a post that beats the top results with real information gain, linked into its topic cluster. Once a month it measures every post against Search Console and improves it, and writes a report. This file is the session's instructions: point the schedule at it.
 
 Read before every run: `content/STYLE.md` (writing and on-page rules), `content/seo/strategy.md` (clusters and keywords). `npm run content:check` enforces both; a post that fails never goes live.
 
@@ -20,7 +20,7 @@ Use `/schedule` in Claude Code (cloud routine on this repo) or any cron that run
 
 So in new posts, link outside sources on the trusted domains. A link elsewhere can't be checked from the sandbox and fails the run.
 
-**Pace:** one post every 2 days, max 4 per ISO week (CLAUDE.md content rules, checked by `content:check`). `next-topic` dates each post 2 days after the latest one; when that date is more than 2 days away (posts are already scheduled), the run ends without writing. The blog shows a post on its date (the site revalidates daily).
+**Pace:** up to 3 posts per publish day, publish days at least 2 days apart, max 12 per ISO week; same-day posts are in different clusters and answer clearly different questions (CLAUDE.md content rules, checked by `content:check`, which also fails a post whose title or question H2s are too similar to a post from the last 14 days). `next-topic` returns the next free slot: it fills the latest publish day first (up to 3 slots, a cluster not used that day), then the next day 2+ days later. When that date is more than 2 days away (posts are already scheduled), the run ends without writing. Each post goes live on its date: the daily cron (`/api/cron/publish`, 00:05 PKT) refreshes the blog, sitemap and RSS and pings IndexNow for every post of that day.
 
 ## Env vars
 
@@ -34,11 +34,13 @@ Search Console setup: create a service account in Google Cloud, enable the "Goog
 
 ## Every run
 
+A run writes **up to 3 posts**. Do steps 1–10 for one post; after it is finished (step 10 pushed it, or opened a PR), go back to step 2 and call `next-topic` again. Stop after 3 finished posts, when `next-topic` says `skip`, or after a PR. If any `next-topic` output said `"refill": true`, do step 11 once at the end of the run. Every quality rule applies to each post: never shorten the research, brief or checks to fit 3 in.
+
 1. `git checkout main && git pull --ff-only`, then `npm ci` if `package-lock.json` changed.
 2. `node scripts/autopilot/next-topic.mjs`
    - `skip` → if it also says `"refill": true`, do step 11, then stop. Otherwise stop: nothing to do today.
    - `"job": "expand-pillar"` → do the **Expand a pillar** steps below instead of steps 3–10.
-   - `"job": "new-post"` → you get `topic` (keyword, title, cluster, role, intent, funnel, secondary, questions, reader, angle), `publish` (the post's date), `slug`, `brief` (where the brief goes), the cluster context (`cluster.servicePage`, `pillar`, `siblings`) and `backlinkCandidates` (older posts that should link to the new one).
+   - `"job": "new-post"` → you get `topic` (keyword, title, cluster, role, intent, funnel, secondary, questions, reader, angle), `publish` (the post's date), `slotOfDay` (1–3) and `sameDay` (posts already on that date: yours must be in another cluster, which `next-topic` already ensures, and answer a clearly different question, so pick a title and H2s that don't overlap theirs), `slug`, `brief` (where the brief goes), the cluster context (`cluster.servicePage`, `pillar`, `siblings`) and `backlinkCandidates` (older posts that should link to the new one).
 3. **Facts.** Read `content/owner/profile.md`, `content/owner/projects/*.md`, `src/data/caseStudies.ts`, `src/data/services.ts`, `src/data/experience.ts` and `content/testimonials.json`. **These are the only sources of facts and numbers.** Never invent clients, results, quotes or statistics. If the topic needs a fact that isn't there, set `"blockedBy": "TODO(owner): …"` on the backlog item, add the question to `OWNER_TODO.md`, commit those two files (`Backlog: block "<keyword>"`), and go back to step 2.
 4. **SERP research.** Web-search the primary keyword (and 1–2 of its question variants). Open and read at least 3 of the top results. Note what each covers, what they all miss or get wrong, and the "People also ask" / related questions (if the tool doesn't show them, say so in the brief). Never copy their text.
 5. **Original data (optional).** `node scripts/autopilot/audit-stats.mjs`. Only if `"usable": true` (30+ audited sites) and a number fits the topic, use it: copy `query`, `queriedAt` and `sites` into the brief's "Original data" section and say in the post how many sites it covers. Otherwise skip it.
@@ -56,8 +58,8 @@ Search Console setup: create a service account in Google Cloud, enable the "Goog
     - Something still fails → fix it and run step 9 **once** more. If it still fails **because of the content** (a check error you couldn't fix without inventing a fact or breaking a rule), `node scripts/autopilot/finish.mjs <slug> --pr "<what failed>"` opens a pull request instead, and nothing goes live.
     - **Never open a PR for a network block.** "Not verified" warnings are not failures. If an outside link fails only because it's blocked and off the trusted list, replace it with an equivalent source on a trusted domain (or remove it if the post still has one outside source). If the build or a script fails because a download or API is unreachable (not because of the content), stop without committing and say so in the run log; the next run tries again. A PR is only for problems the owner has to decide.
 11. **Refill** (when `refill` is true):
-    - `node scripts/autopilot/refill.mjs` returns real demand (the questions visitors ask the AI assistant most, plus Search Console queries once `GSC_SERVICE_ACCOUNT_JSON` is set; until then that part reports an error, ignore it) and how much room each cluster has (`clusters[].room`, max 15 supporting topics each).
-    - Turn the best of it into **15 new supporting topics** following `content/seo/strategy.md`: long-tail and high buying intent, each in a cluster with room, with intent, funnel, 3–6 secondary keywords, 2–6 question variants, reader and an angle. Prefer queries with impressions and questions asked more than once; if the data is thin, use questions a buyer of the cluster's service would search, checked with a quick web search. Topics that need a missing owner fact get `blockedBy`.
+    - `node scripts/autopilot/refill.mjs` returns real demand (the questions visitors ask the AI assistant most, plus Search Console queries once `GSC_SERVICE_ACCOUNT_JSON` is set; until then that part reports an error, ignore it) and how much room each cluster has (`clusters[].room`, max 15 supporting topics each) and `needed` (30 when fewer than 20 topics are queued).
+    - Turn the best of it into **30 new supporting topics** (fewer only if the clusters' `room` doesn't allow 30; say so in the run log) following `content/seo/strategy.md`: long-tail and high buying intent, each in a cluster with room, with intent, funnel, 3–6 secondary keywords, 2–6 question variants, reader and an angle. Prefer queries with impressions and questions asked more than once; if the data is thin, use questions a buyer of the cluster's service would search, checked with a quick web search. Topics that need a missing owner fact get `blockedBy`.
     - Save them as a JSON array (`[{ "keyword", "title", "cluster", "intent", "funnel", "secondary", "questions", "reader", "angle", "source" }]`) in a temp file, run `node scripts/autopilot/refill.mjs --add <file>` (it skips and explains incomplete or duplicate topics), then `npm run content:check -- --offline` (backlog check, no network needed) and commit `content/backlog.json` with the message `Backlog: add N topics`, and push.
 
 ### Expand a pillar

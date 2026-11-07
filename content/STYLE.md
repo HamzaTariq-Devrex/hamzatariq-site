@@ -164,4 +164,8 @@ Posts published before 2026-11-06 must meet the brief, trust-line, information-g
 
 ## Pace
 
-At most one post every 2 days, so max 4 per ISO week (by `published` date). **(checked)** The autopilot dates each post 2 days after the latest one and skips a run when the next free date is more than 2 days away.
+Up to 3 posts per publish day, publish days at least 2 days apart, max 12 per ISO week (by `published` date). **(checked)**
+
+- Posts on the same day are in **different clusters** and answer **clearly different questions**. **(checked)**
+- A post fails when its title or one of its question H2s is too similar to a post published in the 14 days before it (or earlier the same day): content-word overlap of 0.5+ for titles, 0.6+ for a question H2. **(checked)**
+- The autopilot fills the latest publish day first (up to 3 slots), then moves to the next day 2+ days later, and skips a run when the next free date is more than 2 days away. Every quality rule in this file applies to each post, however many go out that day.

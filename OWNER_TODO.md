@@ -5,7 +5,7 @@ Facts and access only Hamza can provide. Nothing on the site may be invented to 
 
 ## Open
 
-- [ ] **Client reviews** (blog information gain, author box, `/reviews`). Send real reviews you have permission to show: client name, role and company, a link to them (their site or the public review), the exact words, the date and where it was given (email, Upwork, Google, WhatsApp). They go in `content/testimonials.json`; `/reviews` and the "Client reviews" link in the author box appear automatically once there is one. Nothing is written for you.
+- [x] **Client reviews.** 21 reviews from devrexdigital.site/reviews (posted on Instagram, permission confirmed) are in `content/testimonials.json`, word for word. To add more, send the brand, its Instagram, the exact words and the review image.
 - [ ] **Screenshots for posts** (optional, improves information gain): a screenshot of the AI assistant open on the site, and of the /admin leads screen with test data only. Save as WebP under 250 KB in `public/images/work/`.
 - [ ] **Calendly link.** Add `CALENDLY_URL` in Vercel (Production) and `.env.local`, then redeploy. Every "Book a free call" button then opens the Calendly popup and `/contact` shows the inline embed. Until then the buttons go to `/contact` (form, email, WhatsApp).
 - [ ] **More case studies.** For each: client type, problem, what you built, stack, results, screenshots, testimonial (if any), and whether it was your own client or Devrex Digital work. Dashboards and AI chatbots have no related case study yet, so their "Related work" sections are hidden on the live site.

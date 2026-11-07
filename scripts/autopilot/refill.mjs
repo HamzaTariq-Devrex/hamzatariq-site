@@ -1,4 +1,4 @@
-// Backlog refill. With fewer than 10 queued topics, the autopilot adds 15 new ones based on real demand:
+// Backlog refill. With fewer than 20 queued topics (MIN_QUEUED), the autopilot adds 30 (REFILL_COUNT) based on real demand:
 // Search Console queries (what people already find the site for) and the AI assistant's top questions.
 // Every topic joins a cluster (content/seo/clusters.json) as a supporting post, with the full field set
 // from content/seo/strategy.md: intent, funnel, 3-6 secondary keywords, 2-6 questions, reader, angle.
@@ -7,7 +7,7 @@
 //   node scripts/autopilot/refill.mjs --add f    appends topics from a JSON array file, skipping
 //                                               duplicate or reserved keywords; prints what was added
 import { readFileSync } from "node:fs";
-import { MIN_QUEUED, gscQuery, log, normalizeKeyword, readBacklog, readClusters, rpc, writeBacklog } from "./lib.mjs";
+import { MIN_QUEUED, REFILL_COUNT, gscQuery, log, normalizeKeyword, readBacklog, readClusters, rpc, writeBacklog } from "./lib.mjs";
 
 const INTENTS = ["hire", "buy", "compare", "learn", "fix"];
 const FUNNEL = ["awareness", "consideration", "decision"];
@@ -93,5 +93,5 @@ if (args[0] === "--add") {
     const supporting = backlog.items.filter((i) => i.cluster === c.id && i.role !== "pillar");
     return { id: c.id, name: c.name, supporting: supporting.length, queued: supporting.filter((i) => i.status === "queued").length, room: MAX_SUPPORTING - supporting.length };
   });
-  console.log(JSON.stringify({ queued, needed: queued < MIN_QUEUED ? 15 : 0, clusters: clusterRoom, candidates }, null, 2));
+  console.log(JSON.stringify({ queued, needed: queued < MIN_QUEUED ? REFILL_COUNT : 0, clusters: clusterRoom, candidates }, null, 2));
 }

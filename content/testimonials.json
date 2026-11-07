@@ -1,15 +1,460 @@
 {
-  "about": "Real client reviews only, added by the owner (never written or edited by the autopilot). Each review needs the client's consent. Posts quote one with <Review id=\"...\" />; /reviews lists them and goes live once there is at least one.",
+  "about": "Real client reviews only, copied word for word from the owner's agency page https://www.devrexdigital.site/reviews (clients posted them publicly on Instagram; the owner confirmed permission to show them). Never edit, shorten or invent a review. Each is shown as \"Review for Devrex Digital · Project led by Hamza Tariq\" with a link to the brand. No star ratings and no AggregateRating schema.",
+  "source": "https://www.devrexdigital.site/reviews",
   "fields": {
-    "id": "kebab-case id used by <Review id>",
-    "name": "client's name as they agreed to show it",
-    "role": "their role, e.g. Founder",
-    "company": "company or brand",
-    "url": "link to the client (their site or the public review)",
-    "quote": "their words, unedited",
-    "date": "YYYY-MM-DD when it was given",
-    "source": "where it was given: email, Upwork, Google, WhatsApp...",
-    "project": "optional: /work/<slug> it refers to"
+    "id": "kebab-case id used by <Review id> in posts",
+    "brand": "brand name as shown on the agency page",
+    "instagram": "Instagram handle without @, or null when the agency page links the brand's website instead",
+    "url": "link to the brand: Instagram profile, or website when there is no handle",
+    "category": "brand category as shown on the agency page",
+    "segment": "fashion | ecommerce | travel | clinic (decides which service and industry pages show it)",
+    "quote": "the review, word for word",
+    "project": "slug in src/data/projects.ts (shown on /work/<slug>), or null",
+    "logo": "brand logo in public/images/reviews/",
+    "image": "the review story image in public/images/reviews/, or null",
+    "featured": "true for the 6 reviews on the home page"
   },
-  "items": []
+  "items": [
+    {
+      "id": "sazzora",
+      "brand": "Sazzora",
+      "instagram": "sazzora",
+      "url": "https://www.instagram.com/sazzora/",
+      "category": "Womenswear",
+      "segment": "fashion",
+      "quote": "A huge thank you from the Sazzora team! It's been an absolute pleasure collaborating with @devrexdigital. They turned our vision for the website into reality with perfection.",
+      "project": "sazzora",
+      "logo": {
+        "src": "/images/reviews/sazzora-logo.webp",
+        "width": 112,
+        "height": 112
+      },
+      "image": {
+        "src": "/images/reviews/sazzora.webp",
+        "width": 900,
+        "height": 1600
+      },
+      "featured": true
+    },
+    {
+      "id": "attire",
+      "brand": "Attire",
+      "instagram": "attire.clique",
+      "url": "https://www.instagram.com/attire.clique/",
+      "category": "Womenswear",
+      "segment": "fashion",
+      "quote": "Totally remarkable experience! The website offers a perfect balance of style and efficiency. It's visually appealing, simple to navigate, and works without a glitch.",
+      "project": "attire",
+      "logo": {
+        "src": "/images/reviews/attire-logo.webp",
+        "width": 112,
+        "height": 112
+      },
+      "image": {
+        "src": "/images/reviews/attire.webp",
+        "width": 900,
+        "height": 1600
+      },
+      "featured": false
+    },
+    {
+      "id": "jersey-frames",
+      "brand": "Jersey Frames",
+      "instagram": "jerseyframes",
+      "url": "https://www.instagram.com/jerseyframes/",
+      "category": "Sports Memorabilia",
+      "segment": "ecommerce",
+      "quote": "Absolutely outstanding experience! From start to finish, the professionalism and attention to detail truly impressed me.",
+      "project": null,
+      "logo": {
+        "src": "/images/reviews/jersey-frames-logo.webp",
+        "width": 112,
+        "height": 112
+      },
+      "image": {
+        "src": "/images/reviews/jersey-frames.webp",
+        "width": 900,
+        "height": 1600
+      },
+      "featured": false
+    },
+    {
+      "id": "scrubs-bakery",
+      "brand": "Scrubs Bakery",
+      "instagram": "scrubsbakery._",
+      "url": "https://www.instagram.com/scrubsbakery._/",
+      "category": "Body Care",
+      "segment": "ecommerce",
+      "quote": "Huge shoutout to @devrexdigital for creating such a clean, beautiful website for my body care brand! I highly recommend working with them.",
+      "project": null,
+      "logo": {
+        "src": "/images/reviews/scrubs-bakery-logo.webp",
+        "width": 112,
+        "height": 112
+      },
+      "image": {
+        "src": "/images/reviews/scrubs-bakery.webp",
+        "width": 900,
+        "height": 1600
+      },
+      "featured": false
+    },
+    {
+      "id": "exfolella",
+      "brand": "Exfolella",
+      "instagram": "exfolella",
+      "url": "https://www.instagram.com/exfolella/",
+      "category": "Skincare",
+      "segment": "ecommerce",
+      "quote": "A huge shout-out to my amazing website development team. They brought my dream website to life and turned my vision into reality.",
+      "project": "exfolella",
+      "logo": {
+        "src": "/images/reviews/exfolella-logo.webp",
+        "width": 112,
+        "height": 112
+      },
+      "image": {
+        "src": "/images/reviews/exfolella.webp",
+        "width": 900,
+        "height": 1600
+      },
+      "featured": false
+    },
+    {
+      "id": "auraluxe-bags",
+      "brand": "AuraLuxe Bags",
+      "instagram": "auraluxebags.pk",
+      "url": "https://www.instagram.com/auraluxebags.pk/",
+      "category": "Bags & Accessories",
+      "segment": "ecommerce",
+      "quote": "Thank you for bringing our vision to life. Glad we could get to work with such an amazing talent.",
+      "project": "auraluxebags",
+      "logo": {
+        "src": "/images/reviews/auraluxe-bags-logo.webp",
+        "width": 112,
+        "height": 112
+      },
+      "image": {
+        "src": "/images/reviews/auraluxe-bags.webp",
+        "width": 900,
+        "height": 1600
+      },
+      "featured": false
+    },
+    {
+      "id": "just-petssionate",
+      "brand": "Just Petssionate",
+      "instagram": "justpetssionate",
+      "url": "https://www.instagram.com/justpetssionate/",
+      "category": "Pet Supplies",
+      "segment": "ecommerce",
+      "quote": "Shoutout to Team Devrex for creating such a lovely website for us. Hamza & Mudassir, you guys are the best!",
+      "project": "just-petssionate",
+      "logo": {
+        "src": "/images/reviews/just-petssionate-logo.webp",
+        "width": 112,
+        "height": 112
+      },
+      "image": {
+        "src": "/images/reviews/just-petssionate.webp",
+        "width": 900,
+        "height": 1600
+      },
+      "featured": true
+    },
+    {
+      "id": "the-trekkerz-pakistan",
+      "brand": "The Trekkerz Pakistan",
+      "instagram": "thetrekkerspakistan",
+      "url": "https://www.instagram.com/thetrekkerspakistan/",
+      "category": "Travel",
+      "segment": "travel",
+      "quote": "The design is clean, professional, and exactly what we needed. Highly recommended!",
+      "project": "the-trekkerz-pakistan",
+      "logo": {
+        "src": "/images/reviews/the-trekkerz-pakistan-logo.webp",
+        "width": 112,
+        "height": 112
+      },
+      "image": {
+        "src": "/images/reviews/the-trekkerz-pakistan.webp",
+        "width": 900,
+        "height": 1600
+      },
+      "featured": false
+    },
+    {
+      "id": "dulha-house",
+      "brand": "Dulha House",
+      "instagram": "dulhahouseofficial",
+      "url": "https://www.instagram.com/dulhahouseofficial/",
+      "category": "Menswear",
+      "segment": "fashion",
+      "quote": "100% recommended for web development.",
+      "project": "dulhahouse",
+      "logo": {
+        "src": "/images/reviews/dulha-house-logo.webp",
+        "width": 112,
+        "height": 112
+      },
+      "image": {
+        "src": "/images/reviews/dulha-house.webp",
+        "width": 900,
+        "height": 1600
+      },
+      "featured": false
+    },
+    {
+      "id": "by-amina-shah",
+      "brand": "By Amina Shah",
+      "instagram": "byaminashah",
+      "url": "https://www.instagram.com/byaminashah/",
+      "category": "Womenswear",
+      "segment": "fashion",
+      "quote": "Loved the premium website. Highly recommended for web services.",
+      "project": null,
+      "logo": {
+        "src": "/images/reviews/by-amina-shah-logo.webp",
+        "width": 112,
+        "height": 112
+      },
+      "image": {
+        "src": "/images/reviews/by-amina-shah.webp",
+        "width": 900,
+        "height": 1600
+      },
+      "featured": false
+    },
+    {
+      "id": "light-up-candle",
+      "brand": "Light Up Candle",
+      "instagram": "_lightupcandle",
+      "url": "https://www.instagram.com/_lightupcandle/",
+      "category": "Candles & Gifts",
+      "segment": "ecommerce",
+      "quote": "We love the website and the team is very helpful. Thank you so much!",
+      "project": null,
+      "logo": {
+        "src": "/images/reviews/light-up-candle-logo.webp",
+        "width": 112,
+        "height": 112
+      },
+      "image": {
+        "src": "/images/reviews/light-up-candle.webp",
+        "width": 900,
+        "height": 1600
+      },
+      "featured": false
+    },
+    {
+      "id": "the-curtains-collection",
+      "brand": "The Curtains Collection",
+      "instagram": "thecurtainscollection",
+      "url": "https://www.instagram.com/thecurtainscollection/",
+      "category": "Home Decor",
+      "segment": "ecommerce",
+      "quote": "The team was incredibly cooperative and professional.",
+      "project": null,
+      "logo": {
+        "src": "/images/reviews/the-curtains-collection-logo.webp",
+        "width": 112,
+        "height": 112
+      },
+      "image": {
+        "src": "/images/reviews/the-curtains-collection.webp",
+        "width": 900,
+        "height": 1600
+      },
+      "featured": false
+    },
+    {
+      "id": "nagina-house-of-jewels",
+      "brand": "Nagina House of Jewels",
+      "instagram": "nagina_houseofjewels",
+      "url": "https://www.instagram.com/nagina_houseofjewels/",
+      "category": "Jewellery",
+      "segment": "ecommerce",
+      "quote": "I'm so glad for making the right choice by choosing them to be a part of my jewelry venture. Their team is amazing. Very accommodating and very professional. If anyone is looking for web development, they are your best choice!",
+      "project": "nagina-jewels",
+      "logo": {
+        "src": "/images/reviews/nagina-house-of-jewels-logo.webp",
+        "width": 112,
+        "height": 112
+      },
+      "image": {
+        "src": "/images/reviews/nagina-house-of-jewels.webp",
+        "width": 900,
+        "height": 1600
+      },
+      "featured": true
+    },
+    {
+      "id": "cultural-craft-co",
+      "brand": "Cultural Craft Co",
+      "instagram": "cultural.craft.coo",
+      "url": "https://www.instagram.com/cultural.craft.coo/",
+      "category": "Home Decor",
+      "segment": "ecommerce",
+      "quote": "Thank you so much, team! You did an amazing job with my website, exactly the way I wanted. You followed all my requirements perfectly and were extremely hardworking, cooperative, and professional throughout the process. Highly recommended from my side!",
+      "project": "cultural-craft-co",
+      "logo": {
+        "src": "/images/reviews/cultural-craft-co-logo.webp",
+        "width": 112,
+        "height": 112
+      },
+      "image": {
+        "src": "/images/reviews/cultural-craft-co.webp",
+        "width": 900,
+        "height": 1600
+      },
+      "featured": true
+    },
+    {
+      "id": "kulanch-artisanal",
+      "brand": "Kulanch Artisanal",
+      "instagram": "kulanch_artisanal",
+      "url": "https://www.instagram.com/kulanch_artisanal/",
+      "category": "Handmade Accessories",
+      "segment": "ecommerce",
+      "quote": "We are thrilled to officially announce the launch of our new website, and it wouldn't have been possible without @devrexdigital. Their attention to detail, creativity, and technical skill shine through in every single page. If you are looking to elevate your digital presence, we highly recommend them.",
+      "project": "kulanch-artisanal",
+      "logo": {
+        "src": "/images/reviews/kulanch-artisanal-logo.webp",
+        "width": 112,
+        "height": 112
+      },
+      "image": {
+        "src": "/images/reviews/kulanch-artisanal.webp",
+        "width": 900,
+        "height": 1600
+      },
+      "featured": true
+    },
+    {
+      "id": "palfrey-and-gulaabo",
+      "brand": "Palfrey & Gulaabo",
+      "instagram": "palfreyandgulaabo",
+      "url": "https://www.instagram.com/palfreyandgulaabo/",
+      "category": "Womenswear",
+      "segment": "fashion",
+      "quote": "Grateful to @devrexdigital team who turned our vision into a live website. Your patience and hard work made it all happen! Thank you for being part of this journey.",
+      "project": "palfrey-and-gulabo",
+      "logo": {
+        "src": "/images/reviews/palfrey-and-gulaabo-logo.webp",
+        "width": 112,
+        "height": 112
+      },
+      "image": {
+        "src": "/images/reviews/palfrey-and-gulaabo.webp",
+        "width": 900,
+        "height": 1600
+      },
+      "featured": false
+    },
+    {
+      "id": "adora-juniors",
+      "brand": "Adora Juniors",
+      "instagram": "adorajuniors",
+      "url": "https://www.instagram.com/adorajuniors/",
+      "category": "Kidswear",
+      "segment": "fashion",
+      "quote": "Thank you so much! It's been a great experience working with your team. Highly recommended!",
+      "project": null,
+      "logo": {
+        "src": "/images/reviews/adora-juniors-logo.webp",
+        "width": 112,
+        "height": 112
+      },
+      "image": {
+        "src": "/images/reviews/adora-juniors.webp",
+        "width": 900,
+        "height": 1600
+      },
+      "featured": false
+    },
+    {
+      "id": "dr-humza",
+      "brand": "Dr. Humza",
+      "instagram": "its_ameerhumza",
+      "url": "https://www.instagram.com/its_ameerhumza/",
+      "category": "Physiotherapy Clinic",
+      "segment": "clinic",
+      "quote": "I just wanted to take a moment to give a huge shoutout to @devrexdigital. The effort and passion you put into your work truly shows, and I'm so grateful to have come across your page. Keep shining and doing what you do best!",
+      "project": null,
+      "logo": {
+        "src": "/images/reviews/dr-humza-logo.webp",
+        "width": 112,
+        "height": 112
+      },
+      "image": {
+        "src": "/images/reviews/dr-humza.webp",
+        "width": 900,
+        "height": 1600
+      },
+      "featured": false
+    },
+    {
+      "id": "the-mark-by-strokes",
+      "brand": "The Mark by Strokes",
+      "instagram": null,
+      "url": "https://www.themarkbystrokes.com/",
+      "category": "Ceramics & Homeware",
+      "segment": "ecommerce",
+      "quote": "Had my website designed by them, and it was such a seamless experience. Definitely check them out if you're planning to build a website for your business.",
+      "project": "the-mark-by-strokes",
+      "logo": {
+        "src": "/images/reviews/the-mark-by-strokes-logo.webp",
+        "width": 112,
+        "height": 112
+      },
+      "image": {
+        "src": "/images/reviews/the-mark-by-strokes.webp",
+        "width": 900,
+        "height": 1600
+      },
+      "featured": true
+    },
+    {
+      "id": "sayrah-libas",
+      "brand": "Sayrah Libas",
+      "instagram": null,
+      "url": "https://www.sayrahlibas.com/",
+      "category": "Womenswear",
+      "segment": "fashion",
+      "quote": "Turning ideas into reality, one line of code at a time. Huge appreciation for our incredible website development team!",
+      "project": "sayrah-libas",
+      "logo": {
+        "src": "/images/reviews/sayrah-libas-logo.webp",
+        "width": 112,
+        "height": 112
+      },
+      "image": {
+        "src": "/images/reviews/sayrah-libas.webp",
+        "width": 900,
+        "height": 1600
+      },
+      "featured": false
+    },
+    {
+      "id": "enlightened-fashion",
+      "brand": "Enlightened Fashion",
+      "instagram": "enlightenedfashion",
+      "url": "https://www.instagram.com/enlightenedfashion/",
+      "category": "Womenswear",
+      "segment": "fashion",
+      "quote": "Well done! We admire your hard work.",
+      "project": "enlighten",
+      "logo": {
+        "src": "/images/reviews/enlightened-fashion-logo.webp",
+        "width": 112,
+        "height": 112
+      },
+      "image": {
+        "src": "/images/reviews/enlightened-fashion.webp",
+        "width": 900,
+        "height": 1600
+      },
+      "featured": false
+    }
+  ]
 }

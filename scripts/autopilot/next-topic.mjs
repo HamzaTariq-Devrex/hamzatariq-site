@@ -2,21 +2,30 @@
 //
 //   1. A pillar marked "expand" in the backlog (the post exists but is shorter than a pillar):
 //      {"job": "expand-pillar", ...}. No new post, so no publish date is needed.
-//   2. Otherwise the first "queued" backlog item without blockedBy: {"job": "new-post", ...} with a
-//      publish date that respects the pace from CLAUDE.md (2+ days after the latest post, max 4/week).
+//   2. Otherwise the first "queued" backlog item without blockedBy whose cluster isn't used yet on the
+//      next free publish slot: {"job": "new-post", ...}. Pace from CLAUDE.md: up to 3 posts per publish
+//      day, publish days 2+ days apart, max 12 per ISO week, same-day posts in different clusters.
+//      The slot fills the latest publish day first, so calling this again after each finished post
+//      gives up to 3 posts for the same day. `sameDay` lists the posts already on that day: the new
+//      post must answer a clearly different question (content:check compares titles and H2s).
 //
 // Both include the cluster context the writer needs for internal linking: the pillar, sibling posts,
 // the service page, older posts that should link to the new one, and where the SERP brief goes.
 //
 //   node scripts/autopilot/next-topic.mjs
-import { MAX_POSTS_PER_WEEK, MIN_QUEUED, addDays, briefPath, isoWeek, nextPublishDate, readBacklog, readClusters, readPosts, slugFor, todayPkt } from "./lib.mjs";
+import { MAX_POSTS_PER_DAY, MAX_POSTS_PER_WEEK, MIN_DAYS_BETWEEN_POSTS, MIN_QUEUED, addDays, briefPath, isoWeek, nextPublishSlot, readBacklog, readClusters, readPosts, slugFor, todayPkt } from "./lib.mjs";
 
 const backlog = readBacklog();
 const posts = readPosts();
 const clusters = readClusters();
 const queued = backlog.items.filter((i) => i.status === "queued" && !i.blockedBy);
 const today = todayPkt();
-const publish = nextPublishDate(posts, today);
+// The slot (and the topic for it): skip days where every queued topic's cluster is already used.
+const queuedClusters = [...new Set(queued.map((i) => i.cluster))];
+let slot = nextPublishSlot(posts, { from: today, clusters: queuedClusters });
+const pickFor = (s) => queued.find((i) => !s.sameDay.some((p) => p.cluster === i.cluster)) ?? null;
+for (let tries = 0; queued.length && !pickFor(slot) && tries < 10; tries++) slot = nextPublishSlot(posts, { from: today, exclude: [slot.date] });
+const publish = slot.date;
 const out = (data) => console.log(JSON.stringify(data, null, 2));
 
 /** Internal-linking context for a topic in a cluster, as of a publish date. */
@@ -46,15 +55,21 @@ if (expand) {
   out({ job: "expand-pillar", topic: expand, ...contextFor(expand, today), existingPosts: posts.map((p) => ({ slug: p.slug, title: p.title, keyword: p.keyword, cluster: p.cluster })) });
 } else if (publish > addDays(today, 2)) {
   // Write only when the post goes live within 2 days; otherwise posts are already scheduled far enough ahead.
-  out({ skip: `The next free publish date is ${publish} (one post every 2 days, max ${MAX_POSTS_PER_WEEK} per week, ${isoWeek(publish)}). Nothing to write today.`, queued: queued.length, refill: queued.length < MIN_QUEUED });
+  out({
+    skip: `The next free publish date is ${publish} (up to ${MAX_POSTS_PER_DAY} posts per publish day, ${MIN_DAYS_BETWEEN_POSTS}+ days between publish days, max ${MAX_POSTS_PER_WEEK} per week, ${isoWeek(publish)}). Nothing to write today.`,
+    queued: queued.length,
+    refill: queued.length < MIN_QUEUED,
+  });
 } else if (!queued.length) {
   out({ skip: "No queued topics without a blockedBy note. Run the refill step.", queued: 0, refill: true });
 } else {
-  const topic = queued[0];
+  const topic = pickFor(slot) ?? queued[0];
   out({
     job: "new-post",
     topic,
     publish,
+    slotOfDay: slot.sameDay.length + 1,
+    sameDay: slot.sameDay,
     ...contextFor(topic, publish),
     queued: queued.length,
     refill: queued.length - 1 < MIN_QUEUED,

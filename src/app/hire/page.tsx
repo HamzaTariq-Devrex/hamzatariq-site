@@ -8,6 +8,8 @@ import CaseStudyCard from "@/components/site/CaseStudyCard";
 import ProjectCard from "@/components/ProjectCard";
 import { CV_PROJECTS, CV_SKILLS, CV_SUMMARY, EDUCATION_HISTORY, JOBS, LANGUAGES } from "@/data/experience";
 import WhereIWork from "@/components/site/WhereIWork";
+import ReviewStrip from "@/components/site/ReviewStrip";
+import { HIRE_REVIEWS } from "@/lib/testimonials";
 import { CASE_STUDIES } from "@/data/caseStudies";
 import { PROJECTS } from "@/data/projects";
 import { SITE } from "@/lib/site";
@@ -159,6 +161,8 @@ export default function HirePage() {
           ))}
         </div>
       </section>
+
+      <ReviewStrip reviews={HIRE_REVIEWS} title="What clients say about the work" text="Reviews posted on Instagram by brands whose websites I led. Word for word." />
 
       <section className="svc-section">
         <h2>Selected work</h2>

@@ -5,6 +5,7 @@ import SiteShell from "@/components/site/SiteShell";
 import BookCall from "@/components/site/BookCall";
 import AuthorBox from "@/components/site/AuthorBox";
 import AuditCta from "@/components/site/AuditCta";
+import ReviewStrip from "@/components/site/ReviewStrip";
 import OwnerTodo from "@/components/site/OwnerTodo";
 import Section from "@/components/site/ds/Section";
 import Faq from "@/components/site/ds/Faq";
@@ -15,6 +16,7 @@ import { SERVICES, PRICE_NOTE, PROJECT_TERMS, formatPrice, getService } from "@/
 import { IMAGE_BASE, PROJECTS } from "@/data/projects";
 import { CASE_STUDIES } from "@/data/caseStudies";
 import { SITE, isProductionSite } from "@/lib/site";
+import { reviewsForPage } from "@/lib/testimonials";
 import { fitDescription, jsonLd } from "@/lib/seo";
 
 type Params = { params: Promise<{ slug: string }> };
@@ -305,6 +307,16 @@ export default async function ServicePage({ params }: Params) {
           )}
         </Section>
       )}
+
+      <ReviewStrip
+        reviews={reviewsForPage(`service:${service.slug}`)}
+        title={
+          <>
+            What store owners <span>say</span>
+          </>
+        }
+        text="Fashion and ecommerce brands that reviewed their new website on Instagram. Word for word."
+      />
 
       <section className="x-section">
         <AuditCta location="service" heading />
