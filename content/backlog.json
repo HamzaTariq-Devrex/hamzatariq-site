@@ -1610,6 +1610,700 @@
       "angle": "What to ask a chatbot developer and how to test their live bot, with my UK time-zone overlap and real terms.",
       "status": "queued",
       "publishedSlug": null
+    },
+    {
+      "keyword": "website redesign for small business",
+      "title": "Website Redesign for Small Business: The Complete Guide",
+      "cluster": "website-redesign",
+      "pillar": "website-redesign-for-small-business",
+      "role": "pillar",
+      "intent": "learn",
+      "funnel": "awareness",
+      "category": "nextjs-websites",
+      "targetPage": "/services/nextjs-websites",
+      "reader": "business owner",
+      "secondary": [
+        "small business website redesign",
+        "redesign my business website",
+        "website refresh vs redesign",
+        "website redesign process"
+      ],
+      "questions": [
+        "when should a small business redesign its website?",
+        "how much does a website redesign cost?",
+        "how long does a website redesign take?",
+        "will a redesign hurt my google rankings?"
+      ],
+      "angle": "The hub for the cluster: decide from measurable goals (leads, speed, mobile) instead of looks, with real starting prices and delivery times and my own measured rebuild (mobile SEO 83 to 100, home LCP 18.0 s to 2.6 s), linking every supporting post.",
+      "status": "queued",
+      "publishedSlug": null,
+      "source": "Buyer questions, checked with web search 2026-11-07 (owner request: new cluster)"
+    },
+    {
+      "keyword": "signs your website needs a redesign",
+      "title": "9 Signs Your Website Needs a Redesign (and 3 That Don't)",
+      "cluster": "website-redesign",
+      "pillar": "website-redesign-for-small-business",
+      "role": "supporting",
+      "intent": "learn",
+      "funnel": "awareness",
+      "category": "nextjs-websites",
+      "targetPage": "/services/nextjs-websites",
+      "reader": "business owner",
+      "secondary": [
+        "is my website outdated",
+        "when to redesign a website",
+        "website not getting leads",
+        "old website problems"
+      ],
+      "questions": [
+        "how do i know if my website is outdated?",
+        "how often should a website be redesigned?",
+        "is it time to redesign my website?"
+      ],
+      "angle": "Each sign comes with a test the owner can run in minutes (the free SEO audit, PageSpeed on a phone, a lead count), and three common reasons that don't justify a redesign at all.",
+      "status": "queued",
+      "publishedSlug": null,
+      "source": "Buyer questions, checked with web search 2026-11-07 (owner request: new cluster)"
+    },
+    {
+      "keyword": "website redesign without losing seo",
+      "title": "Website Redesign Without Losing SEO: A Step-by-Step Plan",
+      "cluster": "website-redesign",
+      "pillar": "website-redesign-for-small-business",
+      "role": "supporting",
+      "intent": "fix",
+      "funnel": "consideration",
+      "category": "nextjs-websites",
+      "targetPage": "/services/nextjs-websites",
+      "reader": "business owner",
+      "secondary": [
+        "redirect map for a redesign",
+        "301 redirects after redesign",
+        "keep rankings after relaunch",
+        "seo migration checklist"
+      ],
+      "questions": [
+        "will a website redesign affect seo?",
+        "how do i keep my rankings after a redesign?",
+        "do i need 301 redirects when redesigning?"
+      ],
+      "angle": "A launch-day order of work (crawl, redirect map, titles, schema, sitemap, Search Console) taken from how I moved this site to Next.js without changing a URL, plus what to watch in the first 4 weeks.",
+      "status": "queued",
+      "publishedSlug": null,
+      "source": "Buyer questions, checked with web search 2026-11-07 (owner request: new cluster)"
+    },
+    {
+      "keyword": "website redesign cost",
+      "title": "Website Redesign Cost: What You Pay For and Why",
+      "cluster": "website-redesign",
+      "pillar": "website-redesign-for-small-business",
+      "role": "supporting",
+      "intent": "buy",
+      "funnel": "decision",
+      "category": "nextjs-websites",
+      "targetPage": "/services/nextjs-websites",
+      "reader": "business owner",
+      "secondary": [
+        "how much to redesign a website",
+        "website redesign price",
+        "cost to rebuild a website",
+        "redesign quote"
+      ],
+      "questions": [
+        "how much does it cost to redesign a website?",
+        "why do website redesign quotes vary so much?",
+        "is a redesign cheaper than a new website?"
+      ],
+      "angle": "Real starting prices instead of wide ranges: landing page from $400, store with admin from $1,000, $50 per extra page, CMS +$150, second language +$250, with the free cost calculator to price the visitor's own site.",
+      "status": "queued",
+      "publishedSlug": null,
+      "source": "Buyer questions, checked with web search 2026-11-07 (owner request: new cluster)"
+    },
+    {
+      "keyword": "wordpress to next.js migration",
+      "title": "WordPress to Next.js Migration: When It Pays Off",
+      "cluster": "website-redesign",
+      "pillar": "website-redesign-for-small-business",
+      "role": "supporting",
+      "intent": "buy",
+      "funnel": "consideration",
+      "category": "nextjs-websites",
+      "targetPage": "/services/nextjs-websites",
+      "reader": "business owner",
+      "secondary": [
+        "move wordpress site to next.js",
+        "replace wordpress with next.js",
+        "wordpress site too slow",
+        "headless wordpress vs next.js"
+      ],
+      "questions": [
+        "should i move my wordpress site to next.js?",
+        "will i lose content moving from wordpress?",
+        "can i still edit content after leaving wordpress?"
+      ],
+      "angle": "Who should stay on WordPress and who should move, what happens to posts, URLs and editing (the +$150 CMS add-on), and the redirect steps, without repeating the general WordPress vs Next.js comparison.",
+      "status": "queued",
+      "publishedSlug": null,
+      "source": "Buyer questions, checked with web search 2026-11-07 (owner request: new cluster)"
+    },
+    {
+      "keyword": "why is my website so slow",
+      "title": "Why Is My Website So Slow? 7 Causes and How to Fix Them",
+      "cluster": "website-redesign",
+      "pillar": "website-redesign-for-small-business",
+      "role": "supporting",
+      "intent": "fix",
+      "funnel": "awareness",
+      "category": "nextjs-websites",
+      "targetPage": "/services/nextjs-websites",
+      "reader": "business owner",
+      "secondary": [
+        "slow website fix",
+        "website loading slowly on mobile",
+        "speed up business website",
+        "slow website losing customers"
+      ],
+      "questions": [
+        "why does my website take so long to load?",
+        "how do i check my website speed?",
+        "does a slow website hurt sales?"
+      ],
+      "angle": "Each cause is matched to what the owner sees in a free PageSpeed or SEO audit report, ordered by impact, with my own home page as the example (LCP 18.0 s down to 2.6 s on mobile).",
+      "status": "queued",
+      "publishedSlug": null,
+      "source": "Buyer questions, checked with web search 2026-11-07 (owner request: new cluster)"
+    },
+    {
+      "keyword": "website redesign checklist",
+      "title": "Website Redesign Checklist: 30 Steps From Brief to Launch",
+      "cluster": "website-redesign",
+      "pillar": "website-redesign-for-small-business",
+      "role": "supporting",
+      "intent": "learn",
+      "funnel": "consideration",
+      "category": "nextjs-websites",
+      "targetPage": "/services/nextjs-websites",
+      "reader": "business owner",
+      "secondary": [
+        "website relaunch checklist",
+        "redesign project plan",
+        "pre launch website checklist",
+        "website redesign steps"
+      ],
+      "questions": [
+        "what should be on a website redesign checklist?",
+        "what are the steps of a website redesign?"
+      ],
+      "angle": "A checklist split by who does each step (owner or developer) and when, built from my project process and terms: 50% upfront, 2 revision rounds, 30 days of free bug fixes after launch.",
+      "status": "queued",
+      "publishedSlug": null,
+      "source": "Buyer questions, checked with web search 2026-11-07 (owner request: new cluster)"
+    },
+    {
+      "keyword": "redesign vs rebuild website",
+      "title": "Redesign vs Rebuild: Which Does Your Website Need?",
+      "cluster": "website-redesign",
+      "pillar": "website-redesign-for-small-business",
+      "role": "supporting",
+      "intent": "compare",
+      "funnel": "consideration",
+      "category": "nextjs-websites",
+      "targetPage": "/services/nextjs-websites",
+      "reader": "business owner",
+      "secondary": [
+        "refresh or rebuild website",
+        "new design same platform",
+        "rebuild website from scratch",
+        "website facelift"
+      ],
+      "questions": [
+        "what is the difference between a website redesign and a rebuild?",
+        "can i keep my design and change the code?"
+      ],
+      "angle": "My own site is the example of a rebuild with the design kept: same look and animations, new Next.js code underneath, and the measured result of changing only the code.",
+      "status": "queued",
+      "publishedSlug": null,
+      "source": "Buyer questions, checked with web search 2026-11-07 (owner request: new cluster)"
+    },
+    {
+      "keyword": "mobile friendly website redesign",
+      "title": "Mobile-Friendly Website Redesign: What to Fix First",
+      "cluster": "website-redesign",
+      "pillar": "website-redesign-for-small-business",
+      "role": "supporting",
+      "intent": "fix",
+      "funnel": "consideration",
+      "category": "nextjs-websites",
+      "targetPage": "/services/nextjs-websites",
+      "reader": "business owner",
+      "secondary": [
+        "website not mobile friendly",
+        "fix website on phone",
+        "mobile first redesign",
+        "responsive website redesign"
+      ],
+      "questions": [
+        "how do i make my website mobile friendly?",
+        "why does my website look bad on phones?",
+        "does google rank mobile friendly sites higher?"
+      ],
+      "angle": "A phone-first fix order (tap targets, text size, layout at 390px, images, menus) with the exact widths I test every page at, including laptop sizes most guides skip.",
+      "status": "queued",
+      "publishedSlug": null,
+      "source": "Buyer questions, checked with web search 2026-11-07 (owner request: new cluster)"
+    },
+    {
+      "keyword": "core web vitals for business websites",
+      "title": "Core Web Vitals for Business Websites, Explained Simply",
+      "cluster": "website-redesign",
+      "pillar": "website-redesign-for-small-business",
+      "role": "supporting",
+      "intent": "learn",
+      "funnel": "awareness",
+      "category": "nextjs-websites",
+      "targetPage": "/services/nextjs-websites",
+      "reader": "business owner",
+      "secondary": [
+        "what are core web vitals",
+        "lcp inp cls explained",
+        "core web vitals and rankings",
+        "pass core web vitals"
+      ],
+      "questions": [
+        "what are core web vitals?",
+        "do core web vitals affect seo?",
+        "how do i check my core web vitals?"
+      ],
+      "angle": "Written for owners, not developers: what each metric means for a visitor, how to read the free audit's PageSpeed section, and which fixes are a redesign job versus a small fix.",
+      "status": "queued",
+      "publishedSlug": null,
+      "source": "Buyer questions, checked with web search 2026-11-07 (owner request: new cluster)"
+    },
+    {
+      "keyword": "website redesign timeline",
+      "title": "Website Redesign Timeline: How Long Each Stage Takes",
+      "cluster": "website-redesign",
+      "pillar": "website-redesign-for-small-business",
+      "role": "supporting",
+      "intent": "learn",
+      "funnel": "consideration",
+      "category": "nextjs-websites",
+      "targetPage": "/services/nextjs-websites",
+      "reader": "business owner",
+      "secondary": [
+        "how long does a website redesign take",
+        "website project timeline",
+        "redesign schedule",
+        "website launch date planning"
+      ],
+      "questions": [
+        "how long does a website redesign take?",
+        "what slows down a website project?"
+      ],
+      "angle": "Real delivery times per package (landing page 5–7 days, store with admin 2–3 weeks, custom web app 4–8 weeks) and the owner-side delays that stretch them: content, approvals and feedback rounds.",
+      "status": "queued",
+      "publishedSlug": null,
+      "source": "Buyer questions, checked with web search 2026-11-07 (owner request: new cluster)"
+    },
+    {
+      "keyword": "website redesign brief template",
+      "title": "Website Redesign Brief Template (Free, Fill-In)",
+      "cluster": "website-redesign",
+      "pillar": "website-redesign-for-small-business",
+      "role": "supporting",
+      "intent": "learn",
+      "funnel": "consideration",
+      "category": "nextjs-websites",
+      "targetPage": "/services/nextjs-websites",
+      "reader": "business owner",
+      "secondary": [
+        "website brief template",
+        "redesign requirements document",
+        "website project brief example",
+        "what to tell a web designer"
+      ],
+      "questions": [
+        "what should a website redesign brief include?",
+        "how do i write a website brief?"
+      ],
+      "angle": "A fill-in brief with the details I need to give a quote after one free call (goals, pages, features, content, deadline, budget), so owners skip weeks of back-and-forth.",
+      "status": "queued",
+      "publishedSlug": null,
+      "source": "Buyer questions, checked with web search 2026-11-07 (owner request: new cluster)"
+    },
+    {
+      "keyword": "image optimization for faster website",
+      "title": "Image Optimization for a Faster Website: A Practical Guide",
+      "cluster": "website-redesign",
+      "pillar": "website-redesign-for-small-business",
+      "role": "supporting",
+      "intent": "fix",
+      "funnel": "awareness",
+      "category": "nextjs-websites",
+      "targetPage": "/services/nextjs-websites",
+      "reader": "business owner",
+      "secondary": [
+        "compress images for website",
+        "webp images",
+        "large images slow website",
+        "image size for website"
+      ],
+      "questions": [
+        "how do i make images load faster on my website?",
+        "what image format is best for websites?",
+        "what size should website images be?"
+      ],
+      "angle": "The image setup this site uses (WebP, responsive sizes, lazy loading below the fold) with how to spot oversized images in a PageSpeed report and fix them without a redesign.",
+      "status": "queued",
+      "publishedSlug": null,
+      "source": "Buyer questions, checked with web search 2026-11-07 (owner request: new cluster)"
+    },
+    {
+      "keyword": "freelance web developer for startups",
+      "title": "Freelance Web Developer for Startups: The Complete Guide",
+      "cluster": "startups",
+      "pillar": "freelance-web-developer-for-startups",
+      "role": "pillar",
+      "intent": "hire",
+      "funnel": "consideration",
+      "category": "hiring",
+      "targetPage": "/services/dashboards",
+      "reader": "founder",
+      "secondary": [
+        "hire a developer for a startup",
+        "freelance developer for mvp",
+        "startup web development",
+        "outsource startup development"
+      ],
+      "questions": [
+        "should a startup hire a freelance developer?",
+        "what does a freelance developer build for a startup?",
+        "how much does a startup website or mvp cost?",
+        "how do i manage a freelance developer?"
+      ],
+      "angle": "The hub for the cluster: what to build in which order (landing page, then MVP web app), real starting prices and timelines, payment and code-ownership terms, and how to work across time zones, linking every supporting post.",
+      "status": "queued",
+      "publishedSlug": null,
+      "source": "Buyer questions, checked with web search 2026-11-07 (owner request: new cluster)"
+    },
+    {
+      "keyword": "landing page to validate startup idea",
+      "title": "Validate a Startup Idea With a Landing Page First",
+      "cluster": "startups",
+      "pillar": "freelance-web-developer-for-startups",
+      "role": "supporting",
+      "intent": "learn",
+      "funnel": "awareness",
+      "category": "hiring",
+      "targetPage": "/services/dashboards",
+      "reader": "founder",
+      "secondary": [
+        "startup validation landing page",
+        "test demand before building",
+        "pre launch landing page",
+        "smoke test landing page"
+      ],
+      "questions": [
+        "how do i validate a startup idea with a landing page?",
+        "what should a validation landing page include?",
+        "how many signups validate an idea?"
+      ],
+      "angle": "What a validation page needs and what it doesn't, built as a $400 landing page in 5–7 days, with lead capture wired to email so every signup reaches the founder.",
+      "status": "queued",
+      "publishedSlug": null,
+      "source": "Buyer questions, checked with web search 2026-11-07 (owner request: new cluster)"
+    },
+    {
+      "keyword": "how to scope an mvp web app",
+      "title": "How to Scope an MVP Web App (Without Overbuilding)",
+      "cluster": "startups",
+      "pillar": "freelance-web-developer-for-startups",
+      "role": "supporting",
+      "intent": "learn",
+      "funnel": "consideration",
+      "category": "dashboards",
+      "targetPage": "/services/dashboards",
+      "reader": "founder",
+      "secondary": [
+        "mvp feature list",
+        "mvp scope document",
+        "what to include in an mvp",
+        "cut mvp features"
+      ],
+      "questions": [
+        "what features should an mvp have?",
+        "how do i decide what goes in my mvp?"
+      ],
+      "angle": "A scoping worksheet that maps each feature to the quote (logins, roles, payments, admin) so founders see which cuts move a custom web app closer to its $2,500 starting price.",
+      "status": "queued",
+      "publishedSlug": null,
+      "source": "Buyer questions, checked with web search 2026-11-07 (owner request: new cluster)"
+    },
+    {
+      "keyword": "next.js and supabase for startup mvp",
+      "title": "Next.js and Supabase for a Startup MVP: Pros and Limits",
+      "cluster": "startups",
+      "pillar": "freelance-web-developer-for-startups",
+      "role": "supporting",
+      "intent": "compare",
+      "funnel": "consideration",
+      "category": "dashboards",
+      "targetPage": "/services/dashboards",
+      "reader": "founder",
+      "secondary": [
+        "startup tech stack",
+        "best stack for mvp",
+        "supabase for startups",
+        "next.js for saas"
+      ],
+      "questions": [
+        "is next.js good for a startup mvp?",
+        "is supabase production ready?",
+        "what tech stack should a startup use?"
+      ],
+      "angle": "The same stack runs this site's AI assistant, leads and admin dashboard, so the post shows real tables, row-level security and auth from production, plus when the stack is the wrong choice.",
+      "status": "queued",
+      "publishedSlug": null,
+      "source": "Buyer questions, checked with web search 2026-11-07 (owner request: new cluster)"
+    },
+    {
+      "keyword": "what pages a startup website needs",
+      "title": "What Pages Does a Startup Website Need at Launch?",
+      "cluster": "startups",
+      "pillar": "freelance-web-developer-for-startups",
+      "role": "supporting",
+      "intent": "learn",
+      "funnel": "awareness",
+      "category": "hiring",
+      "targetPage": "/services/dashboards",
+      "reader": "founder",
+      "secondary": [
+        "startup website structure",
+        "startup website must haves",
+        "minimum pages for a website",
+        "startup homepage sections"
+      ],
+      "questions": [
+        "what pages should a startup website have?",
+        "do i need a blog on my startup website?"
+      ],
+      "angle": "A launch set that fits the 5 pages included in the landing page package, what to add later at $50 per page, and which pages help with search from day one.",
+      "status": "queued",
+      "publishedSlug": null,
+      "source": "Buyer questions, checked with web search 2026-11-07 (owner request: new cluster)"
+    },
+    {
+      "keyword": "code ownership with a freelance developer",
+      "title": "Who Owns the Code When You Hire a Freelance Developer?",
+      "cluster": "startups",
+      "pillar": "freelance-web-developer-for-startups",
+      "role": "supporting",
+      "intent": "learn",
+      "funnel": "decision",
+      "category": "hiring",
+      "targetPage": "/services/dashboards",
+      "reader": "founder",
+      "secondary": [
+        "who owns website code",
+        "ip transfer freelance developer",
+        "github repo ownership",
+        "source code handover"
+      ],
+      "questions": [
+        "who owns the code a freelancer writes?",
+        "how do i make sure i own my app's code?",
+        "what accounts should be in my name?"
+      ],
+      "angle": "Ownership as a practical setup, not legal theory: which accounts (domain, hosting, database, GitHub) should be in the founder's name from day one and what a clean handover includes.",
+      "status": "queued",
+      "publishedSlug": null,
+      "source": "Buyer questions, checked with web search 2026-11-07 (owner request: new cluster)"
+    },
+    {
+      "keyword": "technical cofounder vs freelance developer",
+      "title": "Technical Co-founder vs Freelance Developer: How to Choose",
+      "cluster": "startups",
+      "pillar": "freelance-web-developer-for-startups",
+      "role": "supporting",
+      "intent": "compare",
+      "funnel": "consideration",
+      "category": "hiring",
+      "targetPage": "/services/dashboards",
+      "reader": "founder",
+      "secondary": [
+        "find a technical cofounder",
+        "non technical founder build app",
+        "pay developer or give equity",
+        "cto vs freelancer"
+      ],
+      "questions": [
+        "do i need a technical co-founder?",
+        "should i give equity to a developer?",
+        "can a non-technical founder build an mvp?"
+      ],
+      "angle": "A decision based on stage: a freelancer with fixed quotes and 50/50 payments to reach a working MVP, and the point where a long-term technical hire makes more sense.",
+      "status": "queued",
+      "publishedSlug": null,
+      "source": "Buyer questions, checked with web search 2026-11-07 (owner request: new cluster)"
+    },
+    {
+      "keyword": "how long does it take to build an mvp",
+      "title": "How Long Does It Take to Build an MVP Web App?",
+      "cluster": "startups",
+      "pillar": "freelance-web-developer-for-startups",
+      "role": "supporting",
+      "intent": "learn",
+      "funnel": "consideration",
+      "category": "dashboards",
+      "targetPage": "/services/dashboards",
+      "reader": "founder",
+      "secondary": [
+        "mvp development timeline",
+        "mvp in 8 weeks",
+        "time to build a web app",
+        "mvp launch schedule"
+      ],
+      "questions": [
+        "how long does it take to build an mvp?",
+        "can an mvp be built in a month?",
+        "what delays an mvp launch?"
+      ],
+      "angle": "A week-by-week plan inside the 4–8 week custom web app timeline, and the founder-side decisions that keep it on schedule.",
+      "status": "queued",
+      "publishedSlug": null,
+      "source": "Buyer questions, checked with web search 2026-11-07 (owner request: new cluster)"
+    },
+    {
+      "keyword": "waitlist page with email capture",
+      "title": "Build a Waitlist Page With Email Capture That Converts",
+      "cluster": "startups",
+      "pillar": "freelance-web-developer-for-startups",
+      "role": "supporting",
+      "intent": "buy",
+      "funnel": "decision",
+      "category": "hiring",
+      "targetPage": "/services/dashboards",
+      "reader": "founder",
+      "secondary": [
+        "startup waitlist page",
+        "coming soon page with signup",
+        "email signup landing page",
+        "pre launch signup form"
+      ],
+      "questions": [
+        "how do i make a waitlist page?",
+        "what should a waitlist page say?"
+      ],
+      "angle": "The same lead flow this site uses (form, database, instant email to the founder, auto-reply to the visitor) applied to a waitlist, built on the $400 landing page package.",
+      "status": "queued",
+      "publishedSlug": null,
+      "source": "Buyer questions, checked with web search 2026-11-07 (owner request: new cluster)"
+    },
+    {
+      "keyword": "build a demo app for investors",
+      "title": "Build a Demo App for Investors: What It Needs to Show",
+      "cluster": "startups",
+      "pillar": "freelance-web-developer-for-startups",
+      "role": "supporting",
+      "intent": "buy",
+      "funnel": "consideration",
+      "category": "dashboards",
+      "targetPage": "/services/dashboards",
+      "reader": "founder",
+      "secondary": [
+        "investor demo prototype",
+        "clickable prototype vs working demo",
+        "pitch demo app",
+        "demo before fundraising"
+      ],
+      "questions": [
+        "do i need a working product to raise money?",
+        "what should an investor demo include?"
+      ],
+      "angle": "The difference between a clickable design and a working demo with real data, what to build for each, and how to scope it as a custom dashboard (from $1,200, 2–4 weeks).",
+      "status": "queued",
+      "publishedSlug": null,
+      "source": "Buyer questions, checked with web search 2026-11-07 (owner request: new cluster)"
+    },
+    {
+      "keyword": "what to do after launching an mvp",
+      "title": "What to Do After Launching Your MVP: The First 30 Days",
+      "cluster": "startups",
+      "pillar": "freelance-web-developer-for-startups",
+      "role": "supporting",
+      "intent": "learn",
+      "funnel": "consideration",
+      "category": "dashboards",
+      "targetPage": "/services/dashboards",
+      "reader": "founder",
+      "secondary": [
+        "after mvp launch",
+        "post launch checklist",
+        "mvp feedback loop",
+        "next steps after mvp"
+      ],
+      "questions": [
+        "what should i do after launching my mvp?",
+        "how do i collect feedback after launch?"
+      ],
+      "angle": "A 30-day plan that lines up with the 30 days of free bug fixes after launch: analytics, events to track, feedback, and when to plan version two.",
+      "status": "queued",
+      "publishedSlug": null,
+      "source": "Buyer questions, checked with web search 2026-11-07 (owner request: new cluster)"
+    },
+    {
+      "keyword": "fixed price vs hourly for mvp development",
+      "title": "Fixed Price vs Hourly for MVP Development: Which Is Safer?",
+      "cluster": "startups",
+      "pillar": "freelance-web-developer-for-startups",
+      "role": "supporting",
+      "intent": "compare",
+      "funnel": "decision",
+      "category": "hiring",
+      "targetPage": "/services/dashboards",
+      "reader": "founder",
+      "secondary": [
+        "fixed price development contract",
+        "hourly vs project based pricing",
+        "mvp payment terms",
+        "milestone pricing for apps"
+      ],
+      "questions": [
+        "is fixed price or hourly better for an mvp?",
+        "how should i pay a developer for an mvp?"
+      ],
+      "angle": "How a fixed quote after a free call, 50% upfront and 50% on delivery, and 2 revision rounds protect a founder's budget, and when hourly work makes more sense.",
+      "status": "queued",
+      "publishedSlug": null,
+      "source": "Buyer questions, checked with web search 2026-11-07 (owner request: new cluster)"
+    },
+    {
+      "keyword": "saas mvp development with next.js",
+      "title": "SaaS MVP Development With Next.js: What It Takes",
+      "cluster": "startups",
+      "pillar": "freelance-web-developer-for-startups",
+      "role": "supporting",
+      "intent": "buy",
+      "funnel": "decision",
+      "category": "dashboards",
+      "targetPage": "/services/dashboards",
+      "reader": "founder",
+      "secondary": [
+        "build saas with next.js",
+        "saas mvp features",
+        "saas starter app",
+        "multi user web app mvp"
+      ],
+      "questions": [
+        "can next.js be used for saas?",
+        "what does a saas mvp need?",
+        "how much does a saas mvp cost?"
+      ],
+      "angle": "The core SaaS pieces (auth, user roles, admin, emails; payments quoted by features) mapped to the custom web app package from $2,500, using this site's own Supabase auth and admin dashboard as working examples.",
+      "status": "queued",
+      "publishedSlug": null,
+      "source": "Buyer questions, checked with web search 2026-11-07 (owner request: new cluster)"
     }
   ]
 }

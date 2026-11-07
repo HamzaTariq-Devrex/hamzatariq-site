@@ -711,7 +711,7 @@ for (const c of CLUSTERS) {
   const pillars = items.filter((i) => i.role === "pillar");
   const supporting = items.length - pillars.length;
   if (pillars.length !== 1) backlogErrors.push(`cluster "${c.id}" has ${pillars.length} pillar topics (need exactly 1)`);
-  if (supporting < 8 || supporting > 15) backlogErrors.push(`cluster "${c.id}" has ${supporting} supporting topics (need 8–15)`);
+  if (supporting < 8 || supporting > 30) backlogErrors.push(`cluster "${c.id}" has ${supporting} supporting topics (need 8–30)`);
 }
 for (const p of parsed) {
   if (!(backlog.items ?? []).some((i) => i.publishedSlug === p.slug)) backlogErrors.push(`post "${p.slug}" has no published backlog item`);

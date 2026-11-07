@@ -1075,3 +1075,31 @@
     line-height: 1.6;
   }
 }
+
+/* /hire: availability (SITE.availability) */
+.hire-availability {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 15px;
+  color: rgba(226, 232, 240, 0.82);
+}
+
+.hire-availability li {
+  position: relative;
+  padding-left: 22px;
+}
+
+.hire-availability li::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 0.55em;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #5eead4;
+}

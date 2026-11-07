@@ -19,6 +19,11 @@ export const SITE = {
   // International focus (owner): no city on pages. The city appears only in the Person schema address.
   location: "Based in Pakistan · Working with clients worldwide",
   timezones: "Available in US, UK and EU time zones",
+  /** Work availability (owner confirmed 2026-11-07): /hire and the assistant. */
+  availability: {
+    roles: "Open to full-time remote roles, contract work and freelance projects",
+    start: "Available to start within 2 weeks",
+  },
   address: { addressLocality: "Bahawalpur", addressCountry: "PK" },
   social: {
     github: "https://github.com/HamzaTariq-Devrex",

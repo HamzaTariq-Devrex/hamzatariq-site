@@ -22,7 +22,7 @@ I'm Hamza Tariq, founder of Devrex Digital and a full-stack developer specializi
 - Email: hamzabuildsweb@gmail.com. WhatsApp: +92 305 4122637.
 - GitHub: https://github.com/HamzaTariq-Devrex (main profile link). No LinkedIn.
 - Photo: `public/images/hamza-tariq-2026.webp`.
-- Availability: available for new projects. TODO(owner): open to full-time or contract roles?
+- Availability (owner confirmed 2026-11-07): open to full-time remote roles, contract work and freelance projects; available to start within 2 weeks.
 - Booking link: TODO(owner) (Calendly; set CALENDLY_URL).
 - Shopify (owner confirmed 2026-11-05): Hamza does not do Shopify work (no Shopify themes, apps or chatbots on Shopify stores). Online stores are built as custom Next.js stores.
 - Booking and appointment systems (owner confirmed 2026-11-05): Hamza can build them as a custom dashboard or web app, quoted by features. He has not built one yet: never claim a past booking project or booking results; use only real projects as examples.

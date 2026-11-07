@@ -4,11 +4,11 @@ How the blog wins search traffic as a new site, and the rules every topic in `co
 
 ## The idea in one paragraph
 
-A new domain can't rank for "web developer" or "React SEO". It can rank for long, specific questions asked by people who are close to buying: "hire next.js developer for ecommerce", "react site not indexed by google fix", "how much does a custom dashboard cost". So every post answers one such question better than the current top results, using things only Hamza has (his prices, his projects, his own site's measured results, his tools). The posts are grouped into topic clusters, so Google sees depth on six subjects instead of 60 unrelated pages.
+A new domain can't rank for "web developer" or "React SEO". It can rank for long, specific questions asked by people who are close to buying: "hire next.js developer for ecommerce", "react site not indexed by google fix", "how much does a custom dashboard cost". So every post answers one such question better than the current top results, using things only Hamza has (his prices, his projects, his own site's measured results, his tools). The posts are grouped into topic clusters, so Google sees depth on eight subjects instead of dozens of unrelated pages.
 
 ## Topic clusters
 
-Each cluster has one **pillar** (the complete guide, 2,500–3,500 words) and **8–15 supporting posts** (one question each, 1,300–2,000 words). **(checked)** Clusters are defined in `content/seo/clusters.json`.
+Each cluster has one **pillar** (the complete guide, 2,500–3,500 words) and **8–30 supporting posts** (one question each, 1,300–2,000 words). **(checked)** Clusters are defined in `content/seo/clusters.json`.
 
 | Cluster | Pillar (slug) | Service page | Category (CTA) |
 | --- | --- | --- | --- |
@@ -18,6 +18,8 @@ Each cluster has one **pillar** (the complete guide, 2,500–3,500 words) and **
 | Ecommerce websites | `custom-ecommerce-website-guide` | `/services/nextjs-websites` | nextjs-websites |
 | Dashboards & web apps | `custom-web-app-for-small-business` | `/services/dashboards` | dashboards |
 | Working with a remote developer | `working-with-a-remote-web-developer` | `/services/nextjs-websites` | hiring |
+| Website redesign & performance | `website-redesign-for-small-business` | `/services/nextjs-websites` | nextjs-websites |
+| Freelance web development for startups | `freelance-web-developer-for-startups` | `/services/dashboards` | hiring (or dashboards) |
 
 A post's category is the cluster's category, or the category whose CTA is the cluster's service page (for example, a hiring-cluster comparison may close with the Next.js websites CTA). **(checked)**
 

@@ -11,7 +11,7 @@ import { MIN_QUEUED, REFILL_COUNT, gscQuery, log, normalizeKeyword, readBacklog,
 
 const INTENTS = ["hire", "buy", "compare", "learn", "fix"];
 const FUNNEL = ["awareness", "consideration", "decision"];
-const MAX_SUPPORTING = 15;
+const MAX_SUPPORTING = 30; // keep in sync with content-check.mjs and content/seo/strategy.md
 const clusters = readClusters();
 // Main keywords of service and tool pages: never used for posts.
 const RESERVED = ["next.js website development", "custom dashboard development", "ai chatbot for website", "react seo services", "free seo audit tool"].map(normalizeKeyword);

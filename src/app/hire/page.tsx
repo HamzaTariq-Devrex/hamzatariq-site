@@ -55,8 +55,11 @@ export default function HirePage() {
             <span className="page-status" aria-hidden="true" />
             Available for new projects
           </div>
+          <ul className="hire-availability">
+            <li>{SITE.availability.roles}</li>
+            <li>{SITE.availability.start}</li>
+          </ul>
           <WhereIWork />
-          <OwnerTodo what="Confirm availability: open to full-time, contract or remote roles?" />
           <div className="project-actions">
             <a href={`mailto:${SITE.email}?subject=${encodeURIComponent("Role / project enquiry")}`} className="page-btn page-btn-primary">
               Email me
