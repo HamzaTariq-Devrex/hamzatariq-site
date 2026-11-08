@@ -1,7 +1,7 @@
 .lead-form {
-  --lf-text: #f1f5f9;
-  --lf-muted: rgba(226, 232, 240, 0.62);
-  --lf-line: rgba(255, 255, 255, 0.12);
+  --lf-text: var(--fg);
+  --lf-muted: rgb(var(--ink-rgb) / 0.62);
+  --lf-line: rgb(var(--ink-rgb) / 0.12);
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -36,7 +36,7 @@
   padding: 11px 14px;
   border-radius: 12px;
   border: 1px solid var(--lf-line);
-  background: rgba(255, 255, 255, 0.04);
+  background: rgb(var(--ink-rgb) / 0.04);
   color: var(--lf-text);
   font: inherit;
   font-size: 16px;
@@ -49,11 +49,11 @@
 }
 
 .lead-form input::placeholder {
-  color: rgba(226, 232, 240, 0.35);
+  color: rgb(var(--ink-rgb) / 0.62);
 }
 
 .lead-form select option {
-  background: #0f1420;
+  background: var(--bg-elev);
 }
 
 .lead-form input:focus,
@@ -74,7 +74,7 @@
 .lead-form-error {
   margin: 0;
   font-size: 14px;
-  color: #fca5a5;
+  color: #b91c1c;
 }
 
 .lead-form-submit {

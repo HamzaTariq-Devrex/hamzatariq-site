@@ -6,6 +6,7 @@ import { SOLUTIONS_LINK } from "@/data/solutions";
 import BookCall from "./BookCall";
 import SiteHeader from "./SiteHeader";
 import Reveal from "./ds/Reveal";
+import Magnetic from "../motion/Magnetic";
 
 type Props = {
   children: React.ReactNode;
@@ -19,7 +20,7 @@ type Props = {
 const DEFAULT_CTA = {
   title: (
     <>
-      Let&apos;s build something <span>great</span> together.
+      Let&apos;s work <span>together.</span>
     </>
   ),
   text: "Tell me what you want to build or fix. You'll get a clear plan and quote after a free call.",
@@ -38,6 +39,16 @@ const SiteShell = ({ children, hideCta = false, cta = DEFAULT_CTA, stickyCta = f
       </div>
     )}
 
+    {!hideCta && (
+      <div className="cta-marquee" aria-hidden="true">
+        <div className="cta-marquee-track">
+          {Array.from({ length: 8 }, (_, i) => (
+            <span key={i}>Let&apos;s work together&nbsp;·&nbsp;</span>
+          ))}
+        </div>
+      </div>
+    )}
+
     <footer className="page-footer">
       {!hideCta && (
         <div className="page-cta" data-reveal>
@@ -45,7 +56,9 @@ const SiteShell = ({ children, hideCta = false, cta = DEFAULT_CTA, stickyCta = f
           <h2>{cta.title}</h2>
           {cta.text && <p className="page-cta-text">{cta.text}</p>}
           <div className="page-cta-actions">
-            <BookCall />
+            <Magnetic>
+              <BookCall />
+            </Magnetic>
             <a href={`mailto:${SITE.email}`} className="page-btn page-btn-ghost">
               {SITE.email}
             </a>

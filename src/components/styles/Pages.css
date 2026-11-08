@@ -6,10 +6,7 @@
   position: relative;
   min-height: 100vh;
   color: var(--fg);
-  /* A soft accent glow at the top of every page, fading into the near-black ground. */
-  background:
-    radial-gradient(70% 520px at 50% -120px, rgb(var(--accent-rgb) / 0.09), transparent 70%),
-    var(--bg);
+  background: var(--bg);
 }
 
 /* One centred container on every page (tokens in src/styles/system.css). */
@@ -40,22 +37,24 @@
   padding: clamp(20px, 3.5vw, 44px) 0 40px;
 }
 
+/* Small uppercase label with an accent dot. */
 .page-eyebrow {
   display: inline-flex;
   align-items: center;
-  gap: 12px;
-  font-size: 12px;
+  gap: 10px;
+  font-size: 11.5px;
   font-weight: 600;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--accent-hi);
+  color: var(--fg);
 }
 
 .page-eyebrow::before {
   content: "";
-  width: 28px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, currentColor);
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
 }
 
 .page-hero {
@@ -72,12 +71,9 @@
   letter-spacing: -0.03em;
 }
 
-.page-hero h1 span,
-.page-cta h2 span {
-  background: linear-gradient(110deg, var(--accent-hi), var(--accent));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+.page-hero h1 > span:not(.ln),
+.page-cta h2 > span:not(.ln) {
+  color: var(--accent-hi);
 }
 
 .page-hero p {
@@ -106,27 +102,27 @@
   font: inherit;
   font-size: 13px;
   font-weight: 500;
-  color: rgba(226, 232, 240, 0.75);
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgb(var(--ink-rgb) / 0.75);
+  background: rgb(var(--ink-rgb) / 0.03);
+  border: 1px solid rgb(var(--ink-rgb) / 0.1);
   cursor: pointer;
   transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .page-filter span {
   font-size: 11px;
-  color: rgba(226, 232, 240, 0.45);
+  color: rgb(var(--ink-rgb) / 0.62);
 }
 
 .page-filter:hover {
   color: var(--page-text);
-  border-color: rgba(255, 255, 255, 0.25);
+  border-color: rgb(var(--ink-rgb) / 0.25);
 }
 
 .page-filter.is-active {
   color: var(--on-accent);
-  background: var(--accent-hi);
-  border-color: var(--accent-hi);
+  background: var(--accent);
+  border-color: var(--accent);
 }
 
 .page-filter.is-active span {
@@ -162,31 +158,28 @@
   stroke-linejoin: round;
 }
 
+/* Primary: ink pill that turns accent on hover. Ghost: white pill with a hairline. */
 .page-btn-primary {
-  color: var(--on-accent);
-  background: var(--accent-hi);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 10px 30px -10px rgb(var(--accent-rgb) / 0.6);
+  color: #fff;
+  background: var(--fg);
 }
 
 .page-btn-primary:hover {
   color: var(--on-accent);
+  background: var(--accent);
   transform: translateY(-1px);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 16px 40px -10px rgb(var(--accent-rgb) / 0.75);
 }
 
 .page-btn-ghost {
   color: var(--fg);
   border: 1px solid var(--line-strong);
-  background: var(--surface);
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
+  background: var(--bg-elev);
 }
 
 .page-btn-ghost:hover {
   color: var(--fg);
   transform: translateY(-1px);
-  border-color: rgb(var(--accent-rgb) / 0.55);
-  background: var(--surface-2);
+  border-color: var(--fg);
 }
 
 .project-crumbs {
@@ -195,11 +188,11 @@
   gap: 10px;
   margin-bottom: 36px;
   font-size: 13px;
-  color: rgba(226, 232, 240, 0.45);
+  color: rgb(var(--ink-rgb) / 0.62);
 }
 
 .project-crumbs a {
-  color: rgba(226, 232, 240, 0.7);
+  color: rgb(var(--ink-rgb) / 0.7);
 }
 
 .project-crumbs [aria-current] {
@@ -237,8 +230,8 @@
   padding: 0 20px;
   border-radius: 100px;
   font-size: 13px;
-  color: rgba(226, 232, 240, 0.6);
-  border: 1px dashed rgba(255, 255, 255, 0.2);
+  color: rgb(var(--ink-rgb) / 0.6);
+  border: 1px dashed rgb(var(--ink-rgb) / 0.2);
 }
 
 .project-meta {
@@ -257,7 +250,7 @@
   font-size: 11px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: rgba(226, 232, 240, 0.45);
+  color: rgb(var(--ink-rgb) / 0.62);
 }
 
 .project-meta dd {
@@ -283,9 +276,9 @@
 .project-phone {
   margin: 0;
   overflow: hidden;
-  background: #111827;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+  background: var(--bg-elev);
+  border: 1px solid rgb(var(--ink-rgb) / 0.1);
+  box-shadow: 0 30px 80px rgba(14, 14, 16, 0.16);
 }
 
 .project-browser {
@@ -297,8 +290,8 @@
   align-items: center;
   gap: 7px;
   padding: 12px 16px;
-  background: #1a2130;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  background: #ececef;
+  border-bottom: 1px solid rgb(var(--ink-rgb) / 0.06);
 }
 
 .project-browser-bar span {
@@ -325,8 +318,8 @@
   font-style: normal;
   font-size: 12px;
   text-align: center;
-  color: rgba(226, 232, 240, 0.55);
-  background: rgba(255, 255, 255, 0.05);
+  color: rgb(var(--ink-rgb) / 0.62);
+  background: rgb(var(--ink-rgb) / 0.05);
 }
 
 .project-browser img,
@@ -341,7 +334,7 @@
   top: 110px;
   border-radius: 34px;
   padding: 10px;
-  background: #0d1220;
+  background: var(--bg-elev);
 }
 
 .project-phone img {
@@ -379,7 +372,7 @@
   align-items: center;
   gap: 12px;
   font-size: 16px;
-  color: rgba(226, 232, 240, 0.85);
+  color: rgb(var(--ink-rgb) / 0.85);
 }
 
 .project-features svg {
@@ -411,7 +404,7 @@
   padding: 22px 24px;
   border-radius: 18px;
   border: 1px solid var(--page-line);
-  background: rgba(255, 255, 255, 0.02);
+  background: rgb(var(--ink-rgb) / 0.02);
   transition: border-color 0.3s ease, transform 0.35s var(--page-ease);
 }
 
@@ -430,7 +423,7 @@
   font-size: 11px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: rgba(226, 232, 240, 0.45);
+  color: rgb(var(--ink-rgb) / 0.62);
 }
 
 .project-pager-link strong {
@@ -456,7 +449,7 @@
   border-radius: 100px;
   font-size: 13px;
   font-weight: 600;
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  border: 1px solid rgb(var(--ink-rgb) / 0.16);
 }
 
 .page-404 {
@@ -464,56 +457,64 @@
 }
 
 .page-footer {
-  margin-top: var(--section-gap);
   padding-bottom: 32px;
 }
 
-/* Closing CTA band: a quiet grid texture and a glow from below. */
+/* "Let's work together ·" line moving across the page before the footer. */
+.cta-marquee {
+  overflow: hidden;
+  margin-top: var(--section-gap);
+  padding: 18px 0;
+  border-block: 1px solid var(--line);
+  user-select: none;
+}
+
+.cta-marquee-track {
+  display: flex;
+  width: max-content;
+  animation: ctaMarquee 40s linear infinite;
+}
+
+.cta-marquee span {
+  flex: none;
+  font-size: clamp(40px, 7vw, 112px);
+  font-weight: var(--weight-display);
+  letter-spacing: var(--tracking-display);
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.cta-marquee span:nth-child(even) {
+  color: var(--accent-hi);
+}
+
+@keyframes ctaMarquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* Closing CTA: giant type, no box. */
 .page-cta {
   position: relative;
-  overflow: hidden;
-  padding: clamp(48px, 7vw, 88px) clamp(22px, 5vw, 64px);
-  border-radius: 28px;
-  text-align: center;
-  border: 1px solid var(--line);
-  background:
-    radial-gradient(60% 90% at 50% 120%, rgb(var(--accent-rgb) / 0.22), transparent 70%),
-    linear-gradient(var(--line) 1px, transparent 1px) 0 0 / 56px 56px,
-    linear-gradient(90deg, var(--line) 1px, transparent 1px) 0 0 / 56px 56px,
-    var(--bg-elev);
-}
-
-.page-cta::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: radial-gradient(70% 70% at 50% 40%, transparent 40%, var(--bg-elev) 100%);
-}
-
-.page-cta > * {
-  position: relative;
-  z-index: 1;
+  padding: clamp(56px, 8vw, 112px) 0 clamp(40px, 5vw, 64px);
+  text-align: left;
 }
 
 .page-cta h2 {
-  margin: 18px auto 18px;
-  max-width: 760px;
-  font-size: var(--fs-h2);
-  font-weight: 600;
-  line-height: 1.06;
-  letter-spacing: var(--tracking-h);
-}
-
-.page-cta .page-eyebrow::before {
-  display: none;
+  margin: 20px 0 20px;
+  max-width: 14ch;
+  font-size: var(--fs-display);
+  font-weight: var(--weight-display);
+  line-height: 0.98;
+  letter-spacing: var(--tracking-display);
 }
 
 .page-cta-actions {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
-  gap: 10px;
+  align-items: center;
+  gap: 12px;
 }
 
 .page-footer-bottom {
@@ -523,7 +524,7 @@
   gap: 16px;
   margin-top: 28px;
   font-size: 13px;
-  color: rgba(226, 232, 240, 0.45);
+  color: rgb(var(--ink-rgb) / 0.62);
 }
 
 @keyframes pagePing {

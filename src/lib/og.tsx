@@ -5,80 +5,83 @@ export const OG_SIZE = { width: 1200, height: 630 };
 
 type OgProps = { eyebrow: string; title: string; subtitle?: string; footer?: string };
 
+// Social preview images in the site's light style: off-white ground, ink type, one vermilion accent and
+// the hero's glossy shapes as the motif (drawn with gradients; no remote images, so it renders offline).
+const INK = "#0e0e10";
+const ACCENT = "#ff4a1c";
+
 export const renderOg = ({ eyebrow, title, subtitle, footer = "hamzatariq.site" }: OgProps) =>
   new ImageResponse(
     (
       <div
         style={{
+          position: "relative",
           width: "100%",
           height: "100%",
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
-          padding: "64px 72px",
-          backgroundColor: "#0a0e17",
-          backgroundImage: "radial-gradient(circle at 85% 0%, rgba(45,212,191,0.24), rgba(10,14,23,0) 55%)",
-          color: "#f1f5f9",
+          padding: "60px 72px",
+          backgroundColor: "#f2f2ef",
+          color: INK,
           fontFamily: "sans-serif",
+          overflow: "hidden",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={SITE.logo} alt="" width={234} height={96} style={{ margin: "-30px -36px" }} />
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 12,
-              padding: "10px 20px",
-              borderRadius: 100,
-              border: "1px solid rgba(255,255,255,0.14)",
-              fontSize: 22,
-              color: "rgba(226,232,240,0.8)",
-            }}
-          >
-            <div style={{ width: 12, height: 12, borderRadius: 12, background: "#22c55e" }} />
-            Available for new projects
-          </div>
+        {/* Motif: a glossy accent sphere and an ink capsule, top right. */}
+        <div
+          style={{
+            position: "absolute",
+            right: -70,
+            top: -90,
+            width: 400,
+            height: 400,
+            borderRadius: 400,
+            backgroundImage: `radial-gradient(circle at 34% 30%, #ffb59e 0%, ${ACCENT} 42%, #b42d08 100%)`,
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            right: 250,
+            top: 220,
+            width: 96,
+            height: 210,
+            borderRadius: 96,
+            transform: "rotate(-24deg)",
+            backgroundImage: "linear-gradient(110deg, #3a3a40 0%, #0e0e10 55%, #2a2a2f 100%)",
+          }}
+        />
+
+        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+          <div style={{ width: 16, height: 16, borderRadius: 16, background: ACCENT }} />
+          <div style={{ display: "flex", fontSize: 30, fontWeight: 700, letterSpacing: -1 }}>{SITE.name}</div>
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column" }}>
-          <div
-            style={{
-              display: "flex",
-              fontSize: 24,
-              letterSpacing: 6,
-              textTransform: "uppercase",
-              color: "#2dd4bf",
-              marginBottom: 20,
-            }}
-          >
+        <div style={{ display: "flex", flexDirection: "column", maxWidth: 880 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, fontSize: 22, fontWeight: 700, letterSpacing: 4, textTransform: "uppercase", marginBottom: 22 }}>
+            <div style={{ width: 10, height: 10, borderRadius: 10, background: ACCENT }} />
             {eyebrow}
           </div>
-          <div style={{ display: "flex", fontSize: title.length > 34 ? 64 : 80, fontWeight: 700, lineHeight: 1.05, letterSpacing: -2 }}>
-            {title}
-          </div>
-          {subtitle && (
-            <div style={{ display: "flex", marginTop: 24, fontSize: 28, lineHeight: 1.4, color: "rgba(226,232,240,0.7)", maxWidth: 960 }}>
-              {subtitle}
-            </div>
-          )}
+          <div style={{ display: "flex", fontSize: title.length > 34 ? 62 : 78, fontWeight: 600, lineHeight: 1.02, letterSpacing: -3 }}>{title}</div>
+          {subtitle && <div style={{ display: "flex", marginTop: 22, fontSize: 28, lineHeight: 1.4, color: "rgba(14,14,16,0.6)" }}>{subtitle}</div>}
         </div>
 
         <div
           style={{
             display: "flex",
             justifyContent: "space-between",
-            borderTop: "1px solid rgba(255,255,255,0.12)",
-            paddingTop: 24,
-            fontSize: 24,
-            color: "rgba(226,232,240,0.6)",
+            alignItems: "center",
+            borderTop: "1px solid rgba(14,14,16,0.14)",
+            paddingTop: 22,
+            fontSize: 22,
+            color: "rgba(14,14,16,0.6)",
           }}
         >
-          <span>{SITE.name}, {SITE.jobTitle}</span>
-          <span style={{ color: "#5eead4" }}>{footer}</span>
+          <span>{SITE.jobTitle}</span>
+          <span style={{ display: "flex", padding: "8px 18px", borderRadius: 100, background: INK, color: "#ffffff" }}>{footer}</span>
         </div>
       </div>
     ),
-    OG_SIZE
+    OG_SIZE,
   );

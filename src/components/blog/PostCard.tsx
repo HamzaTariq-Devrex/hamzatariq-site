@@ -5,7 +5,7 @@ import Icon from "@/components/site/ds/Icon";
 
 /** Blog listing card. Scheduled posts only appear on local and preview builds, with a badge. */
 const PostCard = ({ post, featured = false }: { post: Post; featured?: boolean }) => (
-  <Link href={`/blog/${post.slug}`} className={`post-card${featured ? " is-featured" : ""}`} data-reveal>
+  <Link href={`/blog/${post.slug}`} className={`post-card${featured ? " is-featured" : ""}`} data-reveal data-cursor-label="Read">
     {post.cover && (
       <div className="post-card-cover">
         <Image

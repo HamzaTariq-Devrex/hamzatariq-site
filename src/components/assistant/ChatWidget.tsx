@@ -1,5 +1,7 @@
 "use client";
 
+import BotMark from "./BotMark";
+
 // "Ask Hamza's AI" chat widget, adapted from the /bot skill. Answers stream from /api/chat;
 // when the visitor is ready to start, the reply carries a lead signal and the lead form opens in the chat.
 import { useEffect, useRef, useState } from "react";
@@ -10,7 +12,6 @@ import "../styles/ChatWidget.css";
 import { trackEvent } from "@/lib/analytics";
 
 const BOT_NAME = "Hamza's AI";
-const AVATAR = "/bot-avatar.webp"; // 256px, circle-cropped; source in D:\PROJECTS\ai-assets\hamzatariq-site
 const GREETING =
   "Hi, I'm Hamza's AI assistant. Ask me about his services, prices, past work or how a project works. I answer from this site.";
 const SUGGESTIONS = [
@@ -331,8 +332,7 @@ export default function ChatWidget({ startOpen = false }: { startOpen?: boolean 
       {open && (
         <div className="ai-chat-panel" role="dialog" aria-label={`${BOT_NAME}, AI assistant`}>
           <div className="ai-chat-head">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={AVATAR} alt="" className="ai-chat-avatar" width={38} height={38} />
+            <BotMark size={38} className="ai-chat-avatar" />
             <div className="ai-chat-title">
               <div>
                 {BOT_NAME} <span>· AI assistant</span>
@@ -360,7 +360,7 @@ export default function ChatWidget({ startOpen = false }: { startOpen?: boolean 
           <div ref={listRef} aria-live="polite" className="ai-chat-body">
             <div className="ai-chat-row">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={AVATAR} alt="" className="ai-chat-row-avatar" width={26} height={26} />
+              <BotMark size={26} className="ai-chat-row-avatar" />
               <div className="ai-chat-msg assistant" dir="auto">
                 {GREETING}
               </div>
@@ -383,7 +383,7 @@ export default function ChatWidget({ startOpen = false }: { startOpen?: boolean 
               <div key={i} className={`ai-chat-row ${m.role}`}>
                 {m.role === "assistant" && (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={AVATAR} alt="" className="ai-chat-row-avatar" width={26} height={26} />
+                  <BotMark size={26} className="ai-chat-row-avatar" />
                 )}
                 <div className={`ai-chat-msg ${m.role}`} dir="auto">
                   {m.content ? (
@@ -470,8 +470,7 @@ export default function ChatWidget({ startOpen = false }: { startOpen?: boolean 
 
       {nudge && !open && (
         <div className="ai-chat-nudge" role="status">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={AVATAR} alt="" width={36} height={36} />
+          <BotMark size={36} />
           <button type="button" className="ai-chat-nudge-open" onClick={() => setOpen(true)}>
             {NUDGE_MESSAGES[nudgeIndex % NUDGE_MESSAGES.length]}
           </button>
@@ -494,8 +493,7 @@ export default function ChatWidget({ startOpen = false }: { startOpen?: boolean 
           </svg>
         ) : (
           <>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={AVATAR} alt="" width={56} height={56} />
+            <BotMark size={56} />
             <span className="ai-chat-online" aria-hidden="true" />
             {!openedThisVisit && (
               <span className="ai-chat-badge" aria-hidden="true" />

@@ -38,8 +38,8 @@
   z-index: -1;
   border-radius: inherit;
   border: 1px solid var(--line);
-  background: rgba(12, 14, 19, 0.72);
-  box-shadow: 0 12px 40px -18px rgba(0, 0, 0, 0.8);
+  background: rgb(255 255 255 / 0.72);
+  box-shadow: 0 12px 40px -18px rgba(14, 14, 16, 0.28);
   backdrop-filter: blur(16px) saturate(150%);
   -webkit-backdrop-filter: blur(16px) saturate(150%);
   opacity: 0;
@@ -68,23 +68,17 @@
   border-radius: 10px;
 }
 
-/* Wordmark: "HT" monogram tile + name (crisp at every size; the logo image stays for schema/favicon). */
+/* Wordmark: accent dot + name (crisp at every size; the logo image stays for schema). */
 .site-mark {
-  display: grid;
-  place-items: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 9px;
-  font-size: 12.5px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  color: var(--on-accent);
-  background: linear-gradient(140deg, var(--accent-hi), var(--accent));
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 6px 18px -6px rgb(var(--accent-rgb) / 0.7);
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 4px rgb(var(--accent-rgb) / 0.14);
 }
 
 .site-name {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
   letter-spacing: -0.02em;
   white-space: nowrap;
@@ -157,9 +151,9 @@
   gap: 4px;
   padding: 8px;
   border-radius: 18px;
-  background: rgba(13, 15, 20, 0.97);
+  background: rgb(255 255 255 / 0.97);
   border: 1px solid var(--line-strong);
-  box-shadow: 0 30px 70px -20px rgba(0, 0, 0, 0.75);
+  box-shadow: 0 30px 70px -20px rgba(14, 14, 16, 0.26);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   opacity: 0;
@@ -204,7 +198,7 @@
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: rgba(226, 232, 240, 0.45);
+  color: rgb(var(--ink-rgb) / 0.62);
 }
 
 .site-nav-col.is-side .site-nav-heading:not(:first-child) {
@@ -233,28 +227,42 @@
 .site-nav-menu span {
   font-size: 12px;
   line-height: 1.45;
-  color: rgba(226, 232, 240, 0.55);
+  color: rgb(var(--ink-rgb) / 0.62);
 }
 
 .site-cta {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 10px;
   height: 40px;
   padding: 0 18px;
   border-radius: 999px;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   white-space: nowrap;
-  color: var(--on-accent) !important;
-  background: var(--accent-hi);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 8px 24px -8px rgb(var(--accent-rgb) / 0.6);
-  transition: transform 0.35s var(--sh-ease), box-shadow 0.3s ease;
+  color: #fff !important;
+  background: var(--fg);
+  transition: background-color 0.3s ease, transform 0.35s var(--sh-ease);
 }
 
 .site-cta:hover {
+  background: var(--accent);
   transform: translateY(-1px);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 14px 34px -8px rgb(var(--accent-rgb) / 0.75);
+}
+
+.site-cta-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  transition: background-color 0.3s ease;
+}
+
+.site-cta:hover .site-cta-dot {
+  background: #fff;
 }
 
 /* ---------- Mobile ---------- */
@@ -312,9 +320,9 @@
   gap: 2px;
   padding: 12px;
   border-radius: 20px;
-  background: rgba(13, 15, 20, 0.98);
+  background: rgb(255 255 255 / 0.98);
   border: 1px solid var(--line-strong);
-  box-shadow: 0 30px 70px -20px rgba(0, 0, 0, 0.75);
+  box-shadow: 0 30px 70px -20px rgba(14, 14, 16, 0.26);
   animation: siteMenuIn 0.25s var(--sh-ease);
 }
 
@@ -339,7 +347,7 @@
 .site-mobile-panel a.is-sub {
   padding: 8px 12px 8px 26px;
   font-size: 14px;
-  color: rgba(226, 232, 240, 0.65);
+  color: rgb(var(--ink-rgb) / 0.65);
 }
 
 .site-mobile-panel a.is-active {
@@ -373,9 +381,8 @@
     padding: 6px 6px 6px 14px;
   }
 
-  .site-mark {
-    width: 30px;
-    height: 30px;
+  .site-name {
+    font-size: 15px;
   }
 }
 

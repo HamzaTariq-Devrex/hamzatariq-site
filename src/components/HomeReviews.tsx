@@ -41,7 +41,14 @@ const MarqueeCard = ({ t }: { t: Testimonial }) => {
 
 // Server-rendered rows; the Marquee island clones the cards in the browser for a seamless loop.
 const Row = ({ items, reverse }: { items: Testimonial[]; reverse?: boolean }) => (
-  <Marquee className={`trust-marquee${reverse ? " is-reverse" : ""}`} trackClassName="trust-track" copyClassName="trust-copy">
+  <Marquee
+    className={`trust-marquee${reverse ? " is-reverse" : ""}`}
+    trackClassName="trust-track"
+    copyClassName="trust-copy"
+    speed={reverse ? -34 : 34}
+    draggable
+    cursorLabel="Drag"
+  >
     {items.map((t) => (
       <MarqueeCard key={t.id} t={t} />
     ))}

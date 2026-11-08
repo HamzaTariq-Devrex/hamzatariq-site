@@ -1,11 +1,11 @@
 /* /admin (owner only, noindex). Uses the .page tokens from Pages.css. */
 .admin {
-  --adm-card: rgba(255, 255, 255, 0.025);
-  --adm-line: rgba(255, 255, 255, 0.08);
-  --adm-surface: #111722;
+  --adm-card: rgb(var(--ink-rgb) / 0.025);
+  --adm-line: rgb(var(--ink-rgb) / 0.08);
+  --adm-surface: var(--bg-elev);
   --adm-teal: var(--accent);
   --adm-teal-soft: var(--accent-hi);
-  --adm-mark: #0d9488; /* chart bars: validated against #111722 for dark mode */
+  --adm-mark: #0d9488; /* chart bars: validated against var(--bg-elev) for dark mode */
   --adm-ease: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -38,8 +38,8 @@
   min-height: 46px;
   padding: 0 14px;
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgb(var(--ink-rgb) / 0.12);
+  background: rgb(var(--ink-rgb) / 0.04);
   color: var(--page-text);
   font: inherit;
   font-size: 16px;
@@ -59,7 +59,7 @@
 .admin-error,
 .adm-error {
   margin: 0;
-  color: #fca5a5;
+  color: #b91c1c;
 }
 
 /* ---------- Shell ---------- */
@@ -78,7 +78,7 @@
   gap: 28px;
   padding: 24px 16px;
   border-right: 1px solid var(--adm-line);
-  background: rgba(255, 255, 255, 0.015);
+  background: rgb(var(--ink-rgb) / 0.015);
   box-sizing: border-box;
 }
 
@@ -133,7 +133,7 @@
 
 .adm-nav nav a:hover,
 .adm-logout button:hover {
-  background: rgba(255, 255, 255, 0.04);
+  background: rgb(var(--ink-rgb) / 0.04);
   color: var(--page-text);
 }
 
@@ -152,7 +152,7 @@
 .adm-logout span {
   padding: 0 12px;
   font-size: 12px;
-  color: rgba(226, 232, 240, 0.45);
+  color: rgb(var(--ink-rgb) / 0.62);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -261,7 +261,7 @@
   font-weight: 500;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: rgba(226, 232, 240, 0.55);
+  color: rgb(var(--ink-rgb) / 0.62);
 }
 
 .adm-stat-value {
@@ -280,15 +280,15 @@
   display: block;
   margin-top: 2px;
   font-size: 12px;
-  color: rgba(226, 232, 240, 0.45);
+  color: rgb(var(--ink-rgb) / 0.62);
 }
 
 .adm-change.is-up {
-  color: #4ade80;
+  color: #16a34a;
 }
 
 .adm-change.is-down {
-  color: #fca5a5;
+  color: #b91c1c;
 }
 
 /* ---------- Charts ---------- */
@@ -307,17 +307,17 @@
 }
 
 .adm-chart-grid {
-  stroke: rgba(255, 255, 255, 0.06);
+  stroke: rgb(var(--ink-rgb) / 0.06);
   stroke-width: 1;
 }
 
 .adm-chart-baseline {
-  stroke: rgba(255, 255, 255, 0.18);
+  stroke: rgb(var(--ink-rgb) / 0.18);
   stroke-width: 1;
 }
 
 .adm-chart-axis {
-  fill: rgba(226, 232, 240, 0.5);
+  fill: rgb(var(--ink-rgb) / 0.5);
   font-size: 11px;
   font-variant-numeric: tabular-nums;
 }
@@ -340,8 +340,8 @@
   padding: 8px 12px;
   border-radius: 10px;
   border: 1px solid var(--adm-line);
-  background: #182030;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  background: var(--bg-elev);
+  box-shadow: 0 10px 30px rgba(14, 14, 16, 0.14);
   font-size: 13px;
   white-space: nowrap;
   pointer-events: none;
@@ -386,7 +386,7 @@
 .adm-barlist-track {
   height: 10px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgb(var(--ink-rgb) / 0.05);
   overflow: hidden;
 }
 
@@ -431,22 +431,22 @@
 }
 
 .adm-badge.is-replied {
-  color: #fcd34d;
-  background: rgba(251, 191, 36, 0.1);
-  border-color: rgba(251, 191, 36, 0.3);
+  color: #a16207;
+  background: rgba(202, 138, 4, 0.1);
+  border-color: rgba(202, 138, 4, 0.3);
 }
 
 .adm-badge.is-won {
-  color: #86efac;
-  background: rgba(74, 222, 128, 0.1);
-  border-color: rgba(74, 222, 128, 0.3);
+  color: #15803d;
+  background: rgba(22, 163, 74, 0.1);
+  border-color: rgba(22, 163, 74, 0.3);
 }
 
 .adm-badge.is-lost,
 .adm-badge.is-muted {
-  color: rgba(226, 232, 240, 0.6);
-  background: rgba(255, 255, 255, 0.04);
-  border-color: rgba(255, 255, 255, 0.1);
+  color: rgb(var(--ink-rgb) / 0.6);
+  background: rgb(var(--ink-rgb) / 0.04);
+  border-color: rgb(var(--ink-rgb) / 0.1);
 }
 
 .adm-btn {
@@ -457,8 +457,8 @@
   min-height: 40px;
   padding: 0 16px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgb(var(--ink-rgb) / 0.14);
+  background: rgb(var(--ink-rgb) / 0.04);
   color: var(--page-text);
   font: inherit;
   font-size: 13.5px;
@@ -488,8 +488,8 @@
 }
 
 .adm-btn.is-whatsapp {
-  color: #4ade80;
-  border-color: rgba(74, 222, 128, 0.32);
+  color: #16a34a;
+  border-color: rgba(22, 163, 74, 0.32);
   background: rgba(34, 197, 94, 0.1);
 }
 
@@ -524,7 +524,7 @@
 }
 
 .adm-icon-btn:hover {
-  background: rgba(255, 255, 255, 0.06);
+  background: rgb(var(--ink-rgb) / 0.06);
 }
 
 .adm-muted {
@@ -597,7 +597,7 @@
 }
 
 .adm-latest a:hover {
-  background: rgba(255, 255, 255, 0.03);
+  background: rgb(var(--ink-rgb) / 0.03);
 }
 
 .adm-latest-main,
@@ -634,8 +634,8 @@
   min-height: 42px;
   padding: 0 14px;
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgb(var(--ink-rgb) / 0.12);
+  background: rgb(var(--ink-rgb) / 0.03);
   color: var(--page-muted);
 }
 
@@ -667,8 +667,8 @@
   min-height: 42px;
   padding: 0 12px;
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgb(var(--ink-rgb) / 0.12);
+  background: rgb(var(--ink-rgb) / 0.03);
   color: var(--page-text);
   font: inherit;
   font-size: 14px;
@@ -677,7 +677,7 @@
 
 .adm-filters select option,
 .adm-field select option {
-  background: #111722;
+  background: var(--bg-elev);
 }
 
 .adm-date {
@@ -721,14 +721,14 @@
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: rgba(226, 232, 240, 0.5);
+  color: rgb(var(--ink-rgb) / 0.62);
   border-bottom: 1px solid var(--adm-line);
   white-space: nowrap;
 }
 
 .adm-table td {
   padding: 12px 14px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgb(var(--ink-rgb) / 0.05);
   vertical-align: middle;
 }
 
@@ -781,7 +781,7 @@
   position: absolute;
   inset: 0;
   border: 0;
-  background: rgba(3, 6, 12, 0.6);
+  background: rgb(255 255 255 / 0.6);
   cursor: pointer;
 }
 
@@ -791,9 +791,9 @@
   flex-direction: column;
   width: min(520px, 100%);
   height: 100%;
-  background: #0f1420;
+  background: var(--bg-elev);
   border-left: 1px solid var(--adm-line);
-  box-shadow: -30px 0 70px rgba(0, 0, 0, 0.45);
+  box-shadow: -30px 0 70px rgba(14, 14, 16, 0.16);
   animation: admPanelIn 0.28s var(--adm-ease);
   outline: none;
 }
@@ -855,7 +855,7 @@
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: rgba(226, 232, 240, 0.5);
+  color: rgb(var(--ink-rgb) / 0.62);
 }
 
 .adm-field select {
@@ -871,11 +871,11 @@
 }
 
 .adm-field select.is-replied {
-  border-color: rgba(251, 191, 36, 0.5);
+  border-color: rgba(202, 138, 4, 0.5);
 }
 
 .adm-field select.is-won {
-  border-color: rgba(74, 222, 128, 0.5);
+  border-color: rgba(22, 163, 74, 0.5);
 }
 
 .adm-details {
@@ -889,7 +889,7 @@
   font-size: 11.5px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: rgba(226, 232, 240, 0.5);
+  color: rgb(var(--ink-rgb) / 0.62);
 }
 
 .adm-details dd {
@@ -912,7 +912,7 @@
   margin: 0;
   padding: 14px;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.04);
+  background: rgb(var(--ink-rgb) / 0.04);
   white-space: pre-wrap;
   line-height: 1.6;
   font-size: 14px;
@@ -944,7 +944,7 @@
 
 .adm-saved {
   font-size: 13px;
-  color: #86efac;
+  color: #15803d;
 }
 
 /* ---------- Transcript ---------- */
@@ -961,8 +961,8 @@
   max-width: 92%;
   padding: 10px 14px;
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgb(var(--ink-rgb) / 0.04);
+  border: 1px solid rgb(var(--ink-rgb) / 0.06);
 }
 
 .adm-transcript li.is-user {
@@ -975,7 +975,7 @@
   font-size: 11px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: rgba(226, 232, 240, 0.5);
+  color: rgb(var(--ink-rgb) / 0.62);
 }
 
 .adm-transcript p {
@@ -997,8 +997,8 @@
   padding: 2px 8px;
   border-radius: 999px;
   font-size: 11px;
-  color: rgba(226, 232, 240, 0.7);
-  background: rgba(255, 255, 255, 0.06);
+  color: rgb(var(--ink-rgb) / 0.7);
+  background: rgb(var(--ink-rgb) / 0.06);
 }
 
 /* ---------- Chats ---------- */
@@ -1016,7 +1016,7 @@
   align-items: center;
   gap: 12px;
   padding: 10px 4px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgb(var(--ink-rgb) / 0.05);
 }
 
 .adm-top-rank {
@@ -1071,7 +1071,7 @@
 
 .adm-session:hover,
 .adm-sessions li.is-open .adm-session {
-  background: rgba(255, 255, 255, 0.03);
+  background: rgb(var(--ink-rgb) / 0.03);
 }
 
 .adm-session-q {
@@ -1122,7 +1122,7 @@
     padding: 10px 12px;
     border-right: 0;
     border-bottom: 1px solid var(--adm-line);
-    background: rgba(10, 14, 23, 0.92);
+    background: rgb(255 255 255 / 0.92);
     backdrop-filter: blur(12px);
   }
 
@@ -1350,13 +1350,13 @@
   gap: 4px;
   padding: 14px;
   border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgb(var(--ink-rgb) / 0.08);
+  background: rgb(var(--ink-rgb) / 0.02);
 }
 
 .adm-event > span {
   font-size: 13px;
-  color: rgba(226, 232, 240, 0.6);
+  color: rgb(var(--ink-rgb) / 0.6);
 }
 
 .adm-event > strong {
@@ -1372,7 +1372,7 @@
   margin: 0 0 10px;
   font-size: 14px;
   font-weight: 600;
-  color: rgba(226, 232, 240, 0.75);
+  color: rgb(var(--ink-rgb) / 0.75);
 }
 
 /* Laptops (1280–1440): the leads/chats tables fit the content column without sideways scrolling;

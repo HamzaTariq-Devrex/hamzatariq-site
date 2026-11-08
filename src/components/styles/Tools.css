@@ -43,7 +43,7 @@
   position: relative;
   cursor: pointer;
   border: 1px solid var(--x-line);
-  background: rgba(255, 255, 255, 0.02);
+  background: rgb(var(--ink-rgb) / 0.02);
   transition: border-color 0.2s ease, background-color 0.2s ease;
 }
 
@@ -132,7 +132,7 @@
   align-items: center;
   border: 1px solid var(--x-line);
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.03);
+  background: rgb(var(--ink-rgb) / 0.03);
   overflow: hidden;
 }
 
@@ -243,7 +243,7 @@
   margin: 0 0 14px;
   padding: 14px;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.03);
+  background: rgb(var(--ink-rgb) / 0.03);
   border: 1px solid var(--x-line);
 }
 

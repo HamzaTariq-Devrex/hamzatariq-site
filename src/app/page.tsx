@@ -3,10 +3,9 @@ import Image from "next/image";
 import SiteShell from "@/components/site/SiteShell";
 import CvLink from "@/components/site/CvLink";
 import HeroCtas from "@/components/home/HeroCtas";
-import HeroDemo from "@/components/home/HeroDemo";
+import HeroVisual from "@/components/home/HeroVisual";
 import HomeReviews from "@/components/HomeReviews";
-import LogoStrip from "@/components/home/LogoStrip";
-import { FreeTools, HowIWork, LatestPosts, SelectedWork, ServicesBento } from "@/components/home/HomeSections";
+import { ClientWordmarks, FreeTools, HowIWork, LatestPosts, SelectedWork, ServiceRows, Statement } from "@/components/home/HomeSections";
 import "@/components/styles/Blog.css";
 import "@/components/styles/Home.css";
 import { SITE } from "@/lib/site";
@@ -76,36 +75,40 @@ export default function HomePage() {
         <div className="hero-text">
           <div className="hero-who">
             <span className="hero-photo">
-              <Image src={SITE.photo.src} alt={SITE.photo.alt} width={SITE.photo.width} height={SITE.photo.height} sizes="64px" />
+              <Image src={SITE.photo.src} alt={SITE.photo.alt} width={SITE.photo.width} height={SITE.photo.height} sizes="48px" />
             </span>
             <span className="hero-who-text">
               <strong>{SITE.name}</strong>
               <span>{SITE.role}</span>
             </span>
-            <span className="hero-badge">
-              <span className="page-status" aria-hidden="true" /> Available for new projects
-            </span>
           </div>
+          <p className="hero-badge">
+            <span className="page-status" aria-hidden="true" /> Available for new projects
+          </p>
           <h1 className="hero-title">
-            I build <span>fast, custom</span> websites, dashboards and AI chatbots for businesses worldwide.
+            I build fast websites, dashboards and AI chatbots that bring businesses <span>customers.</span>
           </h1>
           <p className="hero-lead">
-            Custom-coded in Next.js, ready for Google from day one and built to turn visitors into customers. With my team at{" "}
-            {SITE.agency.name} I&apos;ve delivered for 45+ brands.
+            Custom-coded in Next.js and ready for Google from day one. Based in Pakistan, working with clients worldwide.
           </p>
           <HeroCtas />
           <p className="hero-meta">
-            <span>{SITE.location}</span>
             <CvLink href={SITE.cvUrl ?? "/hire"} className="hero-cv" from="home" />
           </p>
         </div>
-        <div className="hero-demo">
-          <HeroDemo />
-        </div>
+        <HeroVisual />
       </section>
+      <div className="hero-scroll" aria-hidden="true">
+        <span>+</span>
+        <span>+</span>
+        <span className="hero-scroll-cue">Scroll to explore</span>
+        <span>+</span>
+        <span>+</span>
+      </div>
 
-      <LogoStrip />
-      <ServicesBento />
+      <ClientWordmarks />
+      <Statement />
+      <ServiceRows />
       <SelectedWork />
       <HomeReviews />
       <HowIWork />

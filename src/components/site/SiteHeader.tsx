@@ -20,7 +20,6 @@ const NAV: { href: string; label: string; badge?: string }[] = [
   { href: "/about", label: "About" },
   { href: "/blog", label: "Blog" },
   { href: SEO_AUDIT_TOOL.href, label: "Free SEO Audit", badge: "Free" },
-  { href: "/contact", label: "Contact" },
 ];
 
 const isActive = (pathname: string, href: string) => pathname === href || pathname.startsWith(`${href}/`);
@@ -109,7 +108,8 @@ const SiteHeader = () => {
 
   const link = { pathname, onNavigate: () => setOpen(false) };
   const cls = (href: string) => (isActive(pathname, href) ? "is-active" : "");
-  const book = <BookCall bare className="site-cta" onClick={() => setOpen(false)} />;
+  // "Let's talk": the same booking action as every "Book a free call" button (Calendly or /contact).
+  const book = <BookCall bare label="Let's talk" className="site-cta" onClick={() => setOpen(false)} icon={<span className="site-cta-dot" aria-hidden="true" />} />;
   const hover = (e: React.SyntheticEvent<HTMLElement>) => {
     const target = (e.target as HTMLElement).closest<HTMLElement>(".site-nav > a, .site-nav-services");
     if (target) moveLine(target);
@@ -119,9 +119,7 @@ const SiteHeader = () => {
     <header className={`site-header${scrolled ? " is-scrolled" : ""}`}>
       <div className="site-header-inner">
         <Link href="/" className="site-logo" title="Home">
-          <span className="site-mark" aria-hidden="true">
-            HT
-          </span>
+          <span className="site-mark" aria-hidden="true" />
           <span className="site-name">{SITE.name}</span>
         </Link>
 
@@ -214,6 +212,9 @@ const SiteHeader = () => {
                   {n.badge && <span className="site-badge">{n.badge}</span>}
                 </NavLink>
               ))}
+              <NavLink {...link} href="/contact" className={cls("/contact")}>
+                Contact
+              </NavLink>
               <NavLink {...link} href="/hire" className={cls("/hire")}>
                 Hire me
               </NavLink>

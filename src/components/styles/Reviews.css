@@ -5,7 +5,7 @@
    becomes a static grid with prefers-reduced-motion. */
 .review-card,
 .trust-card {
-  --rv-line: rgba(255, 255, 255, 0.08);
+  --rv-line: rgb(var(--ink-rgb) / 0.08);
   --rv-glow: rgb(var(--accent-rgb) / 0.45);
   --rv-ease: cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -19,7 +19,7 @@
   padding: 24px 26px;
   border-radius: 20px;
   border: 1px solid var(--rv-line);
-  background: rgba(255, 255, 255, 0.025);
+  background: rgb(var(--ink-rgb) / 0.025);
   min-width: 0;
   transition: border-color 0.35s var(--rv-ease), box-shadow 0.35s var(--rv-ease), opacity 0.7s var(--rv-ease), transform 0.7s var(--rv-ease);
 }
@@ -62,7 +62,7 @@
 .review-who strong {
   font-size: 15px;
   font-weight: 600;
-  color: #f1f5f9;
+  color: var(--fg);
 }
 
 .review-who a {
@@ -80,8 +80,8 @@
   font-size: 11px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: rgba(226, 232, 240, 0.6);
-  border: 1px solid var(--rv-line, rgba(255, 255, 255, 0.08));
+  color: rgb(var(--ink-rgb) / 0.6);
+  border: 1px solid var(--rv-line, rgb(var(--ink-rgb) / 0.08));
 }
 
 .review-card blockquote {
@@ -93,13 +93,13 @@
   margin: 0;
   font-size: 16.5px;
   line-height: 1.65;
-  color: #f1f5f9;
+  color: var(--fg);
 }
 
 .review-label {
   margin: 0;
   font-size: 12.5px;
-  color: rgba(226, 232, 240, 0.6);
+  color: rgb(var(--ink-rgb) / 0.6);
 }
 
 .review-label a {
@@ -166,8 +166,8 @@
   width: 64px;
   padding: 3px;
   border-radius: 12px;
-  background: #1a2130;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14), 0 14px 30px -14px rgba(0, 0, 0, 0.8);
+  background: var(--device);
+  box-shadow: inset 0 0 0 1px rgb(var(--ink-rgb) / 0.14), 0 14px 30px -14px rgba(14, 14, 16, 0.28);
   transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease;
 }
 
@@ -212,7 +212,7 @@
 }
 
 .review-lightbox::backdrop {
-  background: rgba(5, 8, 14, 0.82);
+  background: rgb(var(--ink-rgb) / 0.82);
   backdrop-filter: blur(6px);
 }
 
@@ -227,7 +227,7 @@
   max-height: 90vh;
   object-fit: contain;
   border-radius: 22px;
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12), 0 40px 80px -20px rgba(0, 0, 0, 0.9);
+  box-shadow: 0 0 0 1px rgb(var(--ink-rgb) / 0.12), 0 40px 80px -20px rgba(14, 14, 16, 0.32);
 }
 
 .review-lightbox-close {
@@ -239,9 +239,9 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  background: rgba(10, 14, 23, 0.85);
-  color: #f1f5f9;
+  border: 1px solid rgb(var(--ink-rgb) / 0.2);
+  background: rgb(255 255 255 / 0.85);
+  color: var(--fg);
   cursor: pointer;
 }
 
@@ -275,9 +275,9 @@
   justify-content: center;
   gap: 0;
   margin: 32px 0 0;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgb(var(--ink-rgb) / 0.08);
   border-radius: 100px;
-  background: rgba(255, 255, 255, 0.025);
+  background: rgb(var(--ink-rgb) / 0.025);
 }
 
 .review-stats div {
@@ -288,20 +288,20 @@
 }
 
 .review-stats div + div {
-  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  border-left: 1px solid rgb(var(--ink-rgb) / 0.08);
 }
 
 .review-stats dt {
   order: 2;
   font-size: 13px;
-  color: rgba(226, 232, 240, 0.6);
+  color: rgb(var(--ink-rgb) / 0.6);
 }
 
 .review-stats dd {
   margin: 0;
   font-size: 20px;
   font-weight: 650;
-  color: #f1f5f9;
+  color: var(--fg);
   font-variant-numeric: tabular-nums;
 }
 
@@ -330,9 +330,9 @@
   gap: 8px;
   padding: 8px 14px;
   border-radius: 100px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.025);
-  color: rgba(226, 232, 240, 0.8);
+  border: 1px solid rgb(var(--ink-rgb) / 0.1);
+  background: rgb(var(--ink-rgb) / 0.025);
+  color: rgb(var(--ink-rgb) / 0.8);
   font: inherit;
   font-size: 13.5px;
   cursor: pointer;
@@ -341,7 +341,7 @@
 
 .review-chip span {
   font-size: 12px;
-  color: rgba(226, 232, 240, 0.5);
+  color: rgb(var(--ink-rgb) / 0.62);
 }
 
 .review-chip:hover {
@@ -355,7 +355,7 @@
 }
 
 .review-chip[aria-pressed="true"] span {
-  color: rgba(4, 34, 31, 0.7);
+  color: inherit;
 }
 
 .review-chip:focus-visible {
@@ -367,7 +367,7 @@
   margin: 0 0 28px;
   text-align: center;
   font-size: 13px;
-  color: rgba(226, 232, 240, 0.5);
+  color: rgb(var(--ink-rgb) / 0.62);
 }
 
 /* Masonry: CSS columns (cards keep their natural height, read top to bottom per column). */
@@ -418,7 +418,7 @@
   padding: 40px 44px;
   border-radius: 24px;
   border: 1px solid rgb(var(--accent-rgb) / 0.22);
-  background: radial-gradient(120% 140% at 0% 0%, rgb(var(--accent-rgb) / 0.1), transparent 60%), rgba(255, 255, 255, 0.02);
+  background: radial-gradient(120% 140% at 0% 0%, rgb(var(--accent-rgb) / 0.1), transparent 60%), rgb(var(--ink-rgb) / 0.02);
 }
 
 .project-quote-body {
@@ -434,7 +434,7 @@
   font-weight: 550;
   line-height: 1.35;
   letter-spacing: -0.015em;
-  color: #f1f5f9;
+  color: var(--fg);
   text-wrap: pretty;
 }
 
@@ -465,8 +465,8 @@
   margin: 0 0 48px;
   padding: clamp(28px, 4vw, 52px) clamp(22px, 4vw, 56px);
   border-radius: 28px;
-  border: 1px solid rgb(var(--accent-rgb) / 0.25);
-  background: radial-gradient(70% 120% at 50% 0%, rgb(var(--accent-rgb) / 0.12), transparent 65%), rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--line);
+  background: var(--bg-elev);
   text-align: center;
 }
 
@@ -477,7 +477,7 @@
   font-weight: 550;
   line-height: 1.35;
   letter-spacing: -0.015em;
-  color: #f1f5f9;
+  color: var(--fg);
   text-wrap: balance;
 }
 
@@ -511,7 +511,7 @@
 
 .trust-featured-who small {
   font-size: 13px;
-  color: rgba(226, 232, 240, 0.6);
+  color: rgb(var(--ink-rgb) / 0.6);
 }
 
 .trust-verified {
@@ -544,7 +544,7 @@
 .trust-label {
   margin: 18px 0 0;
   font-size: 12.5px;
-  color: rgba(226, 232, 240, 0.55);
+  color: rgb(var(--ink-rgb) / 0.62);
 }
 
 /* Marquee wall: inside the container, cards fade in and out at both edges; two rows in opposite
@@ -570,29 +570,24 @@
   width: max-content;
 }
 
-.trust-marquee.is-looping .trust-track {
-  animation: trustScroll 90s linear infinite;
+.trust-track {
+  will-change: transform;
 }
 
-.trust-marquee.is-looping.is-reverse .trust-track {
-  animation-direction: reverse;
-  animation-duration: 100s;
+.trust-marquee {
+  cursor: grab;
+  user-select: none;
 }
 
-.trust-marquee:hover .trust-track,
-.trust-marquee:focus-within .trust-track {
-  animation-play-state: paused;
+.trust-marquee.is-dragging {
+  cursor: grabbing;
 }
 
-/* Each track holds the cards twice; moving it by half its width (plus half a gap) loops seamlessly. */
-@keyframes trustScroll {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(calc(-50% - 10px));
-  }
-}
+
+
+
+
+
 
 .trust-card {
   display: flex;
@@ -604,7 +599,7 @@
   padding: 20px 22px;
   border-radius: 18px;
   border: 1px solid var(--rv-line);
-  background: rgba(255, 255, 255, 0.03);
+  background: rgb(var(--ink-rgb) / 0.03);
   transition: border-color 0.35s var(--rv-ease), box-shadow 0.35s var(--rv-ease);
 }
 
@@ -631,7 +626,7 @@
 .trust-card-head a {
   font-size: 14px;
   font-weight: 600;
-  color: #f1f5f9;
+  color: var(--fg);
 }
 
 .trust-card-head a:hover {
@@ -640,14 +635,14 @@
 
 .trust-card-head small {
   font-size: 12px;
-  color: rgba(226, 232, 240, 0.55);
+  color: rgb(var(--ink-rgb) / 0.62);
 }
 
 .trust-card blockquote {
   margin: 0;
   font-size: 14.5px;
   line-height: 1.6;
-  color: rgba(241, 245, 249, 0.92);
+  color: rgb(var(--ink-rgb) / 0.92);
 }
 
 .trust-card-foot {
@@ -661,7 +656,7 @@
 .trust-card-label {
   margin: 0;
   font-size: 11.5px;
-  color: rgba(226, 232, 240, 0.5);
+  color: rgb(var(--ink-rgb) / 0.62);
 }
 
 .trust-card-more {

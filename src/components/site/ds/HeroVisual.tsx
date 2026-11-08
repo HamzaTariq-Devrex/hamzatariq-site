@@ -1,4 +1,4 @@
-import Image from "next/image";
+import BotMark from "@/components/assistant/BotMark";
 import { IMAGE_BASE } from "@/data/projects";
 import { OWN_SITE_RESULTS } from "@/data/ownSite";
 import { Browser, Phone } from "./Mockups";
@@ -84,7 +84,7 @@ const ChatVisual = () => (
   <div className="x-visual x-visual-chat">
     <div className="x-chatdemo" role="img" aria-label="Example conversation with an AI chatbot">
       <div className="x-chatdemo-head">
-        <Image src="/bot-avatar.webp" alt="" width={36} height={36} />
+        <BotMark size={36} />
         <div>
           <strong>Hamza&apos;s AI</strong>
           <small>Answers from this site</small>

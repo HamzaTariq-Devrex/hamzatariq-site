@@ -20,13 +20,13 @@
   font-weight: 600;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: rgba(226, 232, 240, 0.45);
+  color: rgb(var(--ink-rgb) / 0.62);
 }
 
 .page-footer-cols a,
 .page-footer-bottom a {
   font-size: 14px;
-  color: rgba(226, 232, 240, 0.75);
+  color: rgb(var(--ink-rgb) / 0.75);
 }
 
 /* ---------- Owner TODO marker (non-production only) ---------- */
@@ -34,20 +34,20 @@
   margin: 16px 0;
   padding: 14px 16px;
   border-radius: 12px;
-  border: 1px dashed #facc15;
-  background: rgba(250, 204, 21, 0.08);
-  color: #fde68a;
+  border: 1px dashed #ca8a04;
+  background: rgba(202, 138, 4, 0.08);
+  color: #a16207;
   font-size: 14px;
   line-height: 1.5;
 }
 
 .owner-todo strong {
-  color: #facc15;
+  color: #ca8a04;
 }
 
 .owner-todo-fallback {
   margin-top: 10px;
-  color: rgba(226, 232, 240, 0.8);
+  color: rgb(var(--ink-rgb) / 0.8);
 }
 
 /* ---------- Shared section layout ---------- */
@@ -64,11 +64,8 @@
   letter-spacing: -0.03em;
 }
 
-.svc-hero h1 span {
-  background: linear-gradient(110deg, var(--accent-hi), var(--accent));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+.svc-hero h1 > span:not(.ln) {
+  color: var(--accent-hi);
 }
 
 .svc-hero > p {
@@ -83,7 +80,7 @@
   margin-top: 22px !important;
   font-size: 13px !important;
   letter-spacing: 0.04em;
-  color: rgba(226, 232, 240, 0.45) !important;
+  color: rgb(var(--ink-rgb) / 0.62) !important;
 }
 
 .svc-section {
@@ -104,7 +101,7 @@
   gap: 10px;
   padding: 24px;
   border-radius: 18px;
-  background: rgba(255, 255, 255, 0.025);
+  background: rgb(var(--ink-rgb) / 0.025);
   border: 1px solid var(--page-line);
   transition: border-color 0.3s ease, transform 0.35s var(--page-ease), background-color 0.3s ease;
 }
@@ -126,7 +123,7 @@
 .svc-link:hover {
   color: inherit;
   border-color: rgb(var(--accent-rgb) / 0.4);
-  background: rgba(255, 255, 255, 0.04);
+  background: rgb(var(--ink-rgb) / 0.04);
   transform: translateY(-3px);
 }
 
@@ -159,7 +156,7 @@
   padding: 24px 22px;
   border-radius: 18px;
   border: 1px solid var(--page-line);
-  background: rgba(255, 255, 255, 0.02);
+  background: rgb(var(--ink-rgb) / 0.02);
 }
 
 .svc-step {
@@ -212,7 +209,7 @@
   gap: 12px;
   font-size: 16px;
   line-height: 1.5;
-  color: rgba(226, 232, 240, 0.85);
+  color: rgb(var(--ink-rgb) / 0.85);
 }
 
 .svc-features svg,
@@ -248,7 +245,7 @@
   justify-content: space-between;
   gap: 24px;
   padding: 22px 26px;
-  background: rgba(255, 255, 255, 0.02);
+  background: rgb(var(--ink-rgb) / 0.02);
 }
 
 .svc-price + .svc-price {
@@ -278,7 +275,7 @@
   font-size: 11px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: rgba(226, 232, 240, 0.45);
+  color: rgb(var(--ink-rgb) / 0.62);
 }
 
 .svc-price-value strong {
@@ -291,7 +288,7 @@
 .svc-note {
   margin: 16px 0 0;
   font-size: 14px;
-  color: rgba(226, 232, 240, 0.6);
+  color: rgb(var(--ink-rgb) / 0.6);
 }
 
 .svc-price p.svc-price-time {
@@ -309,14 +306,14 @@
   padding: 16px 18px;
   border-radius: 16px;
   border: 1px solid var(--page-line);
-  background: rgba(255, 255, 255, 0.025);
+  background: rgb(var(--ink-rgb) / 0.025);
 }
 
 .svc-terms dt {
   font-size: 11px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: rgba(226, 232, 240, 0.45);
+  color: rgb(var(--ink-rgb) / 0.62);
 }
 
 .svc-terms dd {
@@ -456,7 +453,7 @@
 
 .svc-index-item:hover {
   color: inherit;
-  background: rgba(255, 255, 255, 0.02);
+  background: rgb(var(--ink-rgb) / 0.02);
 }
 
 .svc-index-item h2 {
@@ -485,7 +482,7 @@
   padding: 6px 12px;
   border-radius: 100px;
   font-size: 13px;
-  color: rgba(226, 232, 240, 0.8);
+  color: rgb(var(--ink-rgb) / 0.8);
   border: 1px solid var(--page-line);
 }
 
@@ -513,7 +510,7 @@
   padding: 28px;
   border-radius: 22px;
   border: 1px solid var(--page-line);
-  background: rgba(255, 255, 255, 0.025);
+  background: rgb(var(--ink-rgb) / 0.025);
 }
 
 .author-box-photo {
@@ -573,11 +570,8 @@
   letter-spacing: -0.03em;
 }
 
-.about-hero h1 span {
-  background: linear-gradient(110deg, var(--accent-hi), var(--accent));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+.about-hero h1 > span:not(.ln) {
+  color: var(--accent-hi);
 }
 
 .about-hero-text > p {
@@ -599,7 +593,7 @@
   height: auto;
   border-radius: 28px;
   border: 1px solid var(--page-line);
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 30px 80px rgba(14, 14, 16, 0.16);
 }
 
 .about-timeline {
@@ -656,15 +650,15 @@
   border-radius: 100px;
   font-size: 13px;
   font-weight: 500;
-  color: rgba(226, 232, 240, 0.85);
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgb(var(--ink-rgb) / 0.85);
+  background: rgb(var(--ink-rgb) / 0.04);
+  border: 1px solid rgb(var(--ink-rgb) / 0.1);
 }
 
 .about-plain {
   margin: 0;
   font-size: 18px;
-  color: rgba(226, 232, 240, 0.85);
+  color: rgb(var(--ink-rgb) / 0.85);
 }
 
 .hire-status {
@@ -675,7 +669,7 @@
   padding: 8px 14px;
   border-radius: 100px;
   font-size: 14px;
-  color: #86efac;
+  color: #15803d;
   background: rgba(34, 197, 94, 0.1);
   border: 1px solid rgba(34, 197, 94, 0.3);
 }
@@ -704,7 +698,7 @@
   font-size: 11px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: rgba(226, 232, 240, 0.45);
+  color: rgb(var(--ink-rgb) / 0.62);
 }
 
 .hire-facts strong {
@@ -722,7 +716,7 @@
   margin: 0 0 12px;
   font-size: 15px;
   font-weight: 600;
-  color: rgba(226, 232, 240, 0.7);
+  color: rgb(var(--ink-rgb) / 0.7);
 }
 
 /* ---------- Contact ---------- */
@@ -732,7 +726,7 @@
   padding: 28px;
   border-radius: 22px;
   border: 1px solid rgb(var(--accent-rgb) / 0.25);
-  background: rgba(255, 255, 255, 0.025);
+  background: rgb(var(--ink-rgb) / 0.025);
 }
 
 .contact-form h2 {
@@ -757,7 +751,7 @@
   padding: 28px;
   border-radius: 22px;
   border: 1px solid var(--page-line);
-  background: rgba(255, 255, 255, 0.025);
+  background: rgb(var(--ink-rgb) / 0.025);
 }
 
 .contact-book h2 {
@@ -810,7 +804,7 @@
 .cs-result-label {
   font-size: 12px;
   letter-spacing: 0.06em;
-  color: rgba(226, 232, 240, 0.6);
+  color: rgb(var(--ink-rgb) / 0.6);
 }
 
 .cs-result-value {
@@ -822,7 +816,7 @@
 
 .cs-result-value s {
   font-weight: 500;
-  color: rgba(226, 232, 240, 0.45);
+  color: rgb(var(--ink-rgb) / 0.62);
 }
 
 .cs-result-value em {
@@ -839,7 +833,7 @@
   margin: 0;
   padding: 14px 24px;
   font-size: 13px;
-  color: rgba(226, 232, 240, 0.55);
+  color: rgb(var(--ink-rgb) / 0.62);
 }
 
 .cs-columns {
@@ -869,7 +863,7 @@
   gap: 14px;
   font-size: 16px;
   line-height: 1.7;
-  color: rgba(226, 232, 240, 0.8);
+  color: rgb(var(--ink-rgb) / 0.8);
 }
 
 .cs-list li::before {
@@ -1033,7 +1027,7 @@
   padding-left: 18px;
   display: grid;
   gap: 6px;
-  color: rgba(226, 232, 240, 0.75);
+  color: rgb(var(--ink-rgb) / 0.75);
   font-size: 15px;
   line-height: 1.6;
 }
@@ -1048,7 +1042,7 @@
   padding: 18px;
   border-radius: 18px;
   border: 1px solid var(--page-line);
-  background: rgba(255, 255, 255, 0.025);
+  background: rgb(var(--ink-rgb) / 0.025);
 }
 
 .hire-edu h3 {
@@ -1087,7 +1081,7 @@
   padding: 0;
   list-style: none;
   font-size: 15px;
-  color: rgba(226, 232, 240, 0.82);
+  color: rgb(var(--ink-rgb) / 0.82);
 }
 
 .hire-availability li {
