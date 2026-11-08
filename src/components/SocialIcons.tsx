@@ -57,9 +57,10 @@ const SocialIcons = () => {
   }, []);
 
   // The icons belong to the hero: once it is scrolled past they fade out (they are in the footer
-  // too), so they never sit on top of section content. The Resume button stays.
+  // too), so they never sit on top of section content. On phones the Resume button hides too
+  // (it turns vertical and covers content); on desktop it stays (SocialIcons.css).
   useEffect(() => {
-    const social = document.getElementById("social");
+    const social = document.querySelector<HTMLElement>(".icons-section");
     if (!social) return;
     let ticking = false;
     const update = () => {

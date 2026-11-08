@@ -121,13 +121,24 @@ div.resume-button span {
   }
 }
 
-/* Hidden once the hero is scrolled past (SocialIcons.tsx), so they never cover section content. */
-.social-icons {
-  transition: opacity 0.35s ease, visibility 0.35s;
+/* Hidden once the hero is scrolled past (.icons-section.is-past-hero, set in SocialIcons.tsx), so
+   they never cover section content. The Resume button hides too on phones only (below 768px it is
+   vertical on the right edge); on desktop it stays. */
+.social-icons,
+.resume-button {
+  transition: opacity 0.35s ease, visibility 0.35s, color 0.5s;
 }
 
-.social-icons.is-past-hero {
+.is-past-hero .social-icons {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
+}
+
+@media only screen and (max-width: 767px) {
+  .is-past-hero .resume-button {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
 }
