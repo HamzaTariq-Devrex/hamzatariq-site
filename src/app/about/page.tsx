@@ -189,6 +189,8 @@ export default function AboutPage() {
             sizes="(max-width: 960px) 72vw, 420px"
             priority
           />
+          {/* The owner's working photo (blue shirt at a desk) replaces this headshot once it's provided. */}
+          <OwnerTodo what="Send the working photo (blue shirt at a desk) for /about and the home 'How I work' section." />
         </div>
       </section>
 

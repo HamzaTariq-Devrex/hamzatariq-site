@@ -88,13 +88,13 @@
 
 .calc-option:hover,
 .calc-chip:hover {
-  border-color: rgba(45, 212, 191, 0.4);
+  border-color: rgb(var(--accent-rgb) / 0.4);
 }
 
 .calc-option.is-on,
 .calc-chip.is-on {
   border-color: var(--x-teal);
-  background: rgba(45, 212, 191, 0.08);
+  background: rgb(var(--accent-rgb) / 0.08);
   color: var(--x-ink);
 }
 
@@ -164,7 +164,7 @@
 .calc-result {
   position: sticky;
   top: 100px;
-  border-color: rgba(45, 212, 191, 0.3) !important;
+  border-color: rgb(var(--accent-rgb) / 0.3) !important;
 }
 
 .calc .calc-big {

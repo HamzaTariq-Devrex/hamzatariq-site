@@ -13,16 +13,30 @@ const Reveal = () => {
 
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    // [data-stagger]: its children reveal one after another (70ms apart).
+    document.querySelectorAll<HTMLElement>("[data-stagger]").forEach((group) => {
+      [...group.children].forEach((child, i) => {
+        const el = child as HTMLElement;
+        if (el.hasAttribute("data-reveal")) return;
+        el.setAttribute("data-reveal", "");
+        el.style.transitionDelay = `${Math.min(i, 8) * 70}ms`;
+      });
+    });
     const items = [...document.querySelectorAll<HTMLElement>("[data-reveal]:not(.is-in)")];
     const inView = (el: HTMLElement) => el.getBoundingClientRect().top < window.innerHeight * 0.92;
-    items.filter(inView).forEach((el) => el.classList.add("is-in"));
+    // Stagger delays only apply to the reveal; cleared afterwards so hover effects stay instant.
+    const show = (el: HTMLElement) => {
+      el.classList.add("is-in");
+      if (el.style.transitionDelay) window.setTimeout(() => (el.style.transitionDelay = ""), 1300);
+    };
+    items.filter(inView).forEach(show);
     document.documentElement.classList.add("reveal-ready");
 
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
           if (!entry.isIntersecting) continue;
-          entry.target.classList.add("is-in");
+          show(entry.target as HTMLElement);
           observer.unobserve(entry.target);
         }
       },

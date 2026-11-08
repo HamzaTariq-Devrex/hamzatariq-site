@@ -5,9 +5,6 @@ import { TOOLS } from "@/data/tools";
 import { SOLUTIONS_LINK } from "@/data/solutions";
 import BookCall from "./BookCall";
 import SiteHeader from "./SiteHeader";
-import "../styles/Pages.css";
-import "../styles/Content.css";
-import "../styles/Premium.css";
 import Reveal from "./ds/Reveal";
 
 type Props = {

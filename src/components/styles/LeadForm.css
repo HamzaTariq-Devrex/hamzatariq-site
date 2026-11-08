@@ -60,7 +60,7 @@
 .lead-form select:focus,
 .lead-form textarea:focus {
   outline: none;
-  border-color: #2dd4bf;
+  border-color: var(--accent);
 }
 
 .lead-form-trap {
@@ -86,9 +86,9 @@
   font: inherit;
   font-size: 14px;
   font-weight: 600;
-  color: #04221f;
-  background: #2dd4bf;
-  box-shadow: 0 8px 24px rgba(45, 212, 191, 0.25);
+  color: var(--on-accent);
+  background: var(--accent);
+  box-shadow: 0 8px 24px rgb(var(--accent-rgb) / 0.25);
   cursor: pointer;
   transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.2s ease;
 }
@@ -105,7 +105,7 @@
 
 .lead-form-done strong {
   font-size: 16px;
-  color: #5eead4;
+  color: var(--accent-hi);
 }
 
 .lead-form-done p {
@@ -119,8 +119,8 @@
   gap: 10px;
   padding: 14px;
   border-radius: 16px;
-  border: 1px solid rgba(45, 212, 191, 0.3);
-  background: rgba(45, 212, 191, 0.05);
+  border: 1px solid rgb(var(--accent-rgb) / 0.3);
+  background: rgb(var(--accent-rgb) / 0.05);
 }
 
 .lead-form.is-compact input,

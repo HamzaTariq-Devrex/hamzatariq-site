@@ -1,8 +1,8 @@
 /* "Ask Hamza's AI" widget. Site-wide (home included), so it carries its own tokens. */
 .ai-chat {
-  --ai-accent: #2dd4bf;
-  --ai-accent-soft: #5eead4;
-  --ai-on-accent: #04221f;
+  --ai-accent: var(--accent);
+  --ai-accent-soft: var(--accent-hi);
+  --ai-on-accent: var(--on-accent);
   --ai-panel: #0f1420;
   --ai-text: #f1f5f9;
   --ai-muted: rgba(226, 232, 240, 0.62);
@@ -23,14 +23,14 @@
   height: 56px;
   padding: 0;
   border-radius: 50%;
-  border: 1px solid rgba(94, 234, 212, 0.45);
-  background: #0a0e17;
+  border: 1px solid rgb(var(--accent-hi-rgb) / 0.45);
+  background: var(--bg);
   color: var(--ai-text);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), 0 0 0 3px rgba(45, 212, 191, 0.18);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), 0 0 0 3px rgb(var(--accent-rgb) / 0.18);
   transition: transform 0.25s var(--ai-ease);
 }
 
@@ -52,7 +52,7 @@
   height: 12px;
   border-radius: 50%;
   background: #4ade80;
-  border: 2px solid #0a0e17;
+  border: 2px solid var(--bg);
 }
 
 .ai-chat-badge::after {
@@ -74,7 +74,7 @@
   font-weight: 700;
   line-height: 16px;
   text-align: center;
-  border: 2px solid #0a0e17;
+  border: 2px solid var(--bg);
   animation: aiBadgePop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
@@ -98,7 +98,7 @@
   flex-direction: column;
   overflow: hidden;
   background: var(--ai-panel);
-  border: 1px solid rgba(45, 212, 191, 0.28);
+  border: 1px solid rgb(var(--accent-rgb) / 0.28);
   border-radius: 20px;
   box-shadow: 0 30px 70px rgba(0, 0, 0, 0.5);
   color: var(--ai-text);
@@ -122,7 +122,7 @@
   gap: 12px;
   padding: 14px 10px 14px 16px;
   border-bottom: 1px solid var(--ai-line);
-  background: rgba(45, 212, 191, 0.08);
+  background: rgb(var(--accent-rgb) / 0.08);
 }
 
 .ai-chat-avatar {
@@ -130,7 +130,7 @@
   height: 38px;
   border-radius: 50%;
   flex-shrink: 0;
-  border: 1px solid rgba(45, 212, 191, 0.45);
+  border: 1px solid rgb(var(--accent-rgb) / 0.45);
 }
 
 .ai-chat-title {
@@ -211,7 +211,7 @@
   height: 26px;
   border-radius: 50%;
   flex-shrink: 0;
-  border: 1px solid rgba(45, 212, 191, 0.35);
+  border: 1px solid rgb(var(--accent-rgb) / 0.35);
 }
 
 .ai-chat-msg {
@@ -297,8 +297,8 @@
   min-height: 44px;
   padding: 8px 14px;
   border-radius: 999px;
-  border: 1px solid rgba(45, 212, 191, 0.32);
-  background: rgba(45, 212, 191, 0.07);
+  border: 1px solid rgb(var(--accent-rgb) / 0.32);
+  background: rgb(var(--accent-rgb) / 0.07);
   color: var(--ai-text);
   font: inherit;
   font-size: 13px;
@@ -309,8 +309,8 @@
 }
 
 .ai-chat-chip:hover {
-  background: rgba(45, 212, 191, 0.16);
-  border-color: rgba(45, 212, 191, 0.6);
+  background: rgb(var(--accent-rgb) / 0.16);
+  border-color: rgb(var(--accent-rgb) / 0.6);
   transform: translateY(-1px);
 }
 
@@ -385,7 +385,7 @@
 }
 
 .ai-chat-action.is-email:hover {
-  border-color: rgba(45, 212, 191, 0.6);
+  border-color: rgb(var(--accent-rgb) / 0.6);
 }
 
 .ai-chat-compose {
@@ -461,7 +461,7 @@
   align-items: flex-start;
   gap: 6px;
   background: var(--ai-panel);
-  border: 1px solid rgba(45, 212, 191, 0.35);
+  border: 1px solid rgb(var(--accent-rgb) / 0.35);
   border-radius: 16px;
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
   color: var(--ai-text);

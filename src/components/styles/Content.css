@@ -65,9 +65,10 @@
 }
 
 .svc-hero h1 span {
-  color: var(--accentColor);
-  font-style: italic;
-  font-weight: 500;
+  background: linear-gradient(110deg, var(--accent-hi), var(--accent));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 .svc-hero > p {
@@ -124,7 +125,7 @@
 
 .svc-link:hover {
   color: inherit;
-  border-color: rgba(45, 212, 191, 0.4);
+  border-color: rgb(var(--accent-rgb) / 0.4);
   background: rgba(255, 255, 255, 0.04);
   transform: translateY(-3px);
 }
@@ -134,7 +135,7 @@
   padding-top: 6px;
   font-size: 13px;
   font-weight: 600;
-  color: var(--accentColor);
+  color: var(--accent-hi);
 }
 
 .svc-problems {
@@ -167,7 +168,7 @@
   font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.12em;
-  color: var(--accentColor);
+  color: var(--accent-hi);
 }
 
 .svc-process h3 {
@@ -226,11 +227,11 @@
   border-radius: 50%;
   box-sizing: border-box;
   fill: none;
-  stroke: var(--accentColor);
+  stroke: var(--accent-hi);
   stroke-width: 2.5;
   stroke-linecap: round;
   stroke-linejoin: round;
-  background: rgba(45, 212, 191, 0.12);
+  background: rgb(var(--accent-rgb) / 0.12);
 }
 
 .svc-pricing {
@@ -284,7 +285,7 @@
   font-size: 28px;
   font-weight: 700;
   letter-spacing: -0.02em;
-  color: var(--accentColor);
+  color: var(--accent-hi);
 }
 
 .svc-note {
@@ -294,7 +295,7 @@
 }
 
 .svc-price p.svc-price-time {
-  color: #5eead4;
+  color: var(--accent-hi);
 }
 
 .svc-terms {
@@ -338,8 +339,8 @@
   margin: -16px 0 72px;
   padding: 24px 28px;
   border-radius: 20px;
-  border: 1px solid rgba(45, 212, 191, 0.25);
-  background: rgba(45, 212, 191, 0.05);
+  border: 1px solid rgb(var(--accent-rgb) / 0.25);
+  background: rgb(var(--accent-rgb) / 0.05);
 }
 
 .svc-proof > div {
@@ -356,7 +357,7 @@
 
 .svc-proof-value em {
   font-style: normal;
-  color: var(--accentColor);
+  color: var(--accent-hi);
 }
 
 .svc-proof-label {
@@ -368,7 +369,7 @@
   margin-left: auto;
   font-size: 14px;
   font-weight: 600;
-  color: var(--accentColor);
+  color: var(--accent-hi);
 }
 
 .svc-faq {
@@ -405,7 +406,7 @@
   display: grid;
   place-items: center;
   font-size: 18px;
-  color: var(--accentColor);
+  color: var(--accent-hi);
   transition: transform 0.35s var(--page-ease);
 }
 
@@ -489,13 +490,13 @@
 }
 
 .svc-index-item li strong {
-  color: var(--accentColor);
+  color: var(--accent-hi);
   font-weight: 600;
 }
 
 .svc-index-arrow {
   font-size: 28px;
-  color: var(--accentColor);
+  color: var(--accent-hi);
   transition: transform 0.35s var(--page-ease);
 }
 
@@ -532,7 +533,7 @@
 .author-box-role {
   margin: 0 0 12px;
   font-size: 14px;
-  color: var(--accentColor);
+  color: var(--accent-hi);
 }
 
 .author-box-bio {
@@ -573,9 +574,10 @@
 }
 
 .about-hero h1 span {
-  color: var(--accentColor);
-  font-style: italic;
-  font-weight: 500;
+  background: linear-gradient(110deg, var(--accent-hi), var(--accent));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 .about-hero-text > p {
@@ -630,7 +632,7 @@
 .about-timeline-company {
   margin: 4px 0 12px;
   font-size: 14px;
-  color: var(--accentColor);
+  color: var(--accent-hi);
 }
 
 .about-timeline li p:not(.about-timeline-company) {
@@ -729,7 +731,7 @@
   margin-bottom: 40px;
   padding: 28px;
   border-radius: 22px;
-  border: 1px solid rgba(45, 212, 191, 0.25);
+  border: 1px solid rgb(var(--accent-rgb) / 0.25);
   background: rgba(255, 255, 255, 0.025);
 }
 
@@ -791,8 +793,8 @@
   gap: 0;
   margin-bottom: 56px;
   border-radius: 20px;
-  border: 1px solid rgba(45, 212, 191, 0.25);
-  background: rgba(45, 212, 191, 0.04);
+  border: 1px solid rgb(var(--accent-rgb) / 0.25);
+  background: rgb(var(--accent-rgb) / 0.04);
   overflow: hidden;
 }
 
@@ -825,11 +827,11 @@
 
 .cs-result-value em {
   font-style: normal;
-  color: var(--accentColor);
+  color: var(--accent-hi);
 }
 
 .cs-result-value strong {
-  color: var(--accentColor);
+  color: var(--accent-hi);
 }
 
 .cs-results-note {
@@ -876,7 +878,7 @@
   height: 7px;
   margin-top: 10px;
   border-radius: 50%;
-  background: var(--accentColor);
+  background: var(--accent-hi);
 }
 
 /* ---------- Responsive ---------- */
@@ -1101,5 +1103,5 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #5eead4;
+  background: var(--accent-hi);
 }

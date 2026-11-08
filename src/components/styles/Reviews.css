@@ -6,7 +6,7 @@
 .review-card,
 .trust-card {
   --rv-line: rgba(255, 255, 255, 0.08);
-  --rv-glow: rgba(45, 212, 191, 0.45);
+  --rv-glow: rgb(var(--accent-rgb) / 0.45);
   --rv-ease: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -27,7 +27,7 @@
 .review-card:hover,
 .trust-card:hover {
   border-color: var(--rv-glow);
-  box-shadow: 0 0 0 1px rgba(45, 212, 191, 0.12), 0 18px 50px -20px rgba(45, 212, 191, 0.35);
+  box-shadow: 0 0 0 1px rgb(var(--accent-rgb) / 0.12), 0 18px 50px -20px rgb(var(--accent-rgb) / 0.35);
 }
 
 .review-grid .review-card,
@@ -69,7 +69,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: #5eead4;
+  color: var(--accent-hi);
 }
 
 .review-cat {
@@ -103,7 +103,7 @@
 }
 
 .review-label a {
-  color: #5eead4;
+  color: var(--accent-hi);
 }
 
 /* ---------- Strips (service, industry, /hire, /about): 3 per row, scroll-snap slider on phones ---------- */
@@ -155,7 +155,7 @@
   padding: 0;
   border: 0;
   background: none;
-  color: #5eead4;
+  color: var(--accent-hi);
   font: inherit;
   font-size: 12.5px;
   cursor: zoom-in;
@@ -193,11 +193,11 @@
 .review-phone:hover .review-phone-screen,
 .review-phone:focus-visible .review-phone-screen {
   transform: translateY(-3px);
-  box-shadow: inset 0 0 0 1px rgba(94, 234, 212, 0.5), 0 20px 40px -14px rgba(45, 212, 191, 0.35);
+  box-shadow: inset 0 0 0 1px rgb(var(--accent-hi-rgb) / 0.5), 0 20px 40px -14px rgb(var(--accent-rgb) / 0.35);
 }
 
 .review-phone:focus-visible {
-  outline: 2px solid #5eead4;
+  outline: 2px solid var(--accent-hi);
   outline-offset: 6px;
   border-radius: 14px;
 }
@@ -255,7 +255,7 @@
 }
 
 .review-lightbox-close:focus-visible {
-  outline: 2px solid #5eead4;
+  outline: 2px solid var(--accent-hi);
   outline-offset: 2px;
 }
 
@@ -266,7 +266,7 @@
 
 .reviews-hero .x-hero-lead a,
 .reviews-end a {
-  color: #5eead4;
+  color: var(--accent-hi);
 }
 
 .review-stats {
@@ -312,7 +312,7 @@
 .review-stats div:last-child dd {
   font-size: 14px;
   font-weight: 500;
-  color: #5eead4;
+  color: var(--accent-hi);
 }
 
 .review-chips {
@@ -345,13 +345,13 @@
 }
 
 .review-chip:hover {
-  border-color: rgba(94, 234, 212, 0.5);
+  border-color: rgb(var(--accent-hi-rgb) / 0.5);
 }
 
 .review-chip[aria-pressed="true"] {
   border-color: transparent;
-  background: #2dd4bf;
-  color: #04221f;
+  background: var(--accent);
+  color: var(--on-accent);
 }
 
 .review-chip[aria-pressed="true"] span {
@@ -359,7 +359,7 @@
 }
 
 .review-chip:focus-visible {
-  outline: 2px solid #5eead4;
+  outline: 2px solid var(--accent-hi);
   outline-offset: 2px;
 }
 
@@ -388,7 +388,7 @@
 }
 
 .review-masonry .review-card:target {
-  border-color: rgba(94, 234, 212, 0.6);
+  border-color: rgb(var(--accent-hi-rgb) / 0.6);
 }
 
 .review-foot {
@@ -417,8 +417,8 @@
   margin: -24px 0 72px;
   padding: 40px 44px;
   border-radius: 24px;
-  border: 1px solid rgba(45, 212, 191, 0.22);
-  background: radial-gradient(120% 140% at 0% 0%, rgba(45, 212, 191, 0.1), transparent 60%), rgba(255, 255, 255, 0.02);
+  border: 1px solid rgb(var(--accent-rgb) / 0.22);
+  background: radial-gradient(120% 140% at 0% 0%, rgb(var(--accent-rgb) / 0.1), transparent 60%), rgba(255, 255, 255, 0.02);
 }
 
 .project-quote-body {
@@ -460,86 +460,13 @@
 /* ---------- Home: "Trusted by N+ brands" ----------
    Everything sits in one centred .section-container (the same width as the other home sections):
    centred header, featured quote, the marquee (faded at both edges), logos, button. */
-.home-reviews {
-  position: relative;
-  z-index: 1;
-  background-color: var(--backgroundColor);
-  padding: 72px 0 96px;
-}
-
-.trust-container {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-}
-
-.trust-header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-  margin: 0 0 44px;
-  text-align: center;
-}
-
-.trust-header .work-eyebrow {
-  margin: 0;
-}
-
-.trust-header p {
-  max-width: 560px;
-  margin: 0;
-  font-size: 15.5px;
-  line-height: 1.6;
-  color: rgba(226, 232, 240, 0.6);
-}
-
-.home-reviews-title {
-  margin: 0;
-  font-size: clamp(40px, 4.6vw, 72px);
-  font-weight: 600;
-  line-height: 1.05;
-  letter-spacing: -0.02em;
-  text-wrap: balance;
-}
-
-.home-reviews-title > span {
-  color: var(--accentColor);
-  font-style: italic;
-  font-weight: 500;
-}
-
-/* Fade and rise in on scroll (HomeReviews arms it with JS; without JS or with reduced motion it is
-   simply visible). */
-.home-trust.is-armed .trust-rise {
-  opacity: 0;
-  transform: translateY(26px);
-  transition: opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1), transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.home-trust.is-armed.is-in .trust-rise {
-  opacity: 1;
-  transform: none;
-}
-
-.home-trust.is-in .trust-featured {
-  transition-delay: 0.08s;
-}
-
-.home-trust.is-in .trust-wall {
-  transition-delay: 0.16s;
-}
-
-.home-trust.is-in .trust-logos {
-  transition-delay: 0.24s;
-}
 
 .trust-featured {
   margin: 0 0 48px;
   padding: clamp(28px, 4vw, 52px) clamp(22px, 4vw, 56px);
   border-radius: 28px;
-  border: 1px solid rgba(45, 212, 191, 0.25);
-  background: radial-gradient(70% 120% at 50% 0%, rgba(45, 212, 191, 0.12), transparent 65%), rgba(255, 255, 255, 0.02);
+  border: 1px solid rgb(var(--accent-rgb) / 0.25);
+  background: radial-gradient(70% 120% at 50% 0%, rgb(var(--accent-rgb) / 0.12), transparent 65%), rgba(255, 255, 255, 0.02);
   text-align: center;
 }
 
@@ -593,15 +520,15 @@
   gap: 6px;
   padding: 8px 14px;
   border-radius: 100px;
-  border: 1px solid rgba(94, 234, 212, 0.4);
+  border: 1px solid rgb(var(--accent-hi-rgb) / 0.4);
   font-size: 13px;
   font-weight: 600;
-  color: #5eead4;
+  color: var(--accent-hi);
   transition: background 0.25s ease;
 }
 
 .trust-verified:hover {
-  background: rgba(45, 212, 191, 0.1);
+  background: rgb(var(--accent-rgb) / 0.1);
 }
 
 .trust-verified svg {
@@ -643,11 +570,11 @@
   width: max-content;
 }
 
-.trust-track {
+.trust-marquee.is-looping .trust-track {
   animation: trustScroll 90s linear infinite;
 }
 
-.trust-marquee.is-reverse .trust-track {
+.trust-marquee.is-looping.is-reverse .trust-track {
   animation-direction: reverse;
   animation-duration: 100s;
 }
@@ -708,7 +635,7 @@
 }
 
 .trust-card-head a:hover {
-  color: #5eead4;
+  color: var(--accent-hi);
 }
 
 .trust-card-head small {
@@ -741,7 +668,7 @@
   align-self: flex-start;
   font-size: 13px;
   font-weight: 600;
-  color: #5eead4;
+  color: var(--accent-hi);
 }
 
 /* Client logos (real logos only): one centred row that wraps into centred rows, greyscale at 60%,
@@ -780,7 +707,7 @@
 }
 
 .trust-logos a:focus-visible {
-  outline: 2px solid #5eead4;
+  outline: 2px solid var(--accent-hi);
   outline-offset: 3px;
 }
 
@@ -800,13 +727,6 @@
 }
 
 @media (max-width: 768px) {
-  .home-reviews {
-    padding: 48px 0 72px;
-  }
-
-  .trust-header {
-    margin-bottom: 32px;
-  }
 
   .trust-card {
     width: 264px;

@@ -1,12 +1,12 @@
 "use client";
 
-// The one site header, used on every page including the home page. Links always open real pages.
-// On the home page (`home`) every link is a plain <a> (full page load), so GSAP ScrollSmoother and
-// WebGL state never leak into other routes; elsewhere next/link is used.
+// The one site header, on every page. Links always open real pages. A full-width bar at the top
+// that turns into a compact frosted pill once the page scrolls (opacity/transform only), with one
+// underline that slides to the hovered or active link. From 1280px the full menu fits on one line;
+// below that it collapses into the burger menu.
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { SITE } from "@/lib/site";
 import { SERVICES } from "@/data/services";
 import { SEO_AUDIT_TOOL, TOOLS } from "@/data/tools";
@@ -25,29 +25,33 @@ const NAV: { href: string; label: string; badge?: string }[] = [
 
 const isActive = (pathname: string, href: string) => pathname === href || pathname.startsWith(`${href}/`);
 
-type LinkProps = { href: string; className?: string; children: React.ReactNode; home: boolean; pathname: string; onNavigate: () => void };
+type LinkProps = { href: string; className?: string; children: React.ReactNode; pathname: string; onNavigate: () => void };
 
-const NavLink = ({ href, className, children, home, pathname, onNavigate }: LinkProps) => {
-  const props = {
-    href,
-    className,
-    "aria-current": isActive(pathname, href) ? ("page" as const) : undefined,
-    "data-cursor": "disable",
-    onClick: (e: React.MouseEvent<HTMLAnchorElement>) => {
+const NavLink = ({ href, className, children, pathname, onNavigate }: LinkProps) => (
+  <Link
+    href={href}
+    className={className}
+    aria-current={isActive(pathname, href) ? "page" : undefined}
+    onClick={(e) => {
       if (href === SEO_AUDIT_TOOL.href) trackEvent("audit_cta_click", { location: "nav" });
       onNavigate();
       e.currentTarget.blur(); // lets the hover/focus dropdown close after a click
-    },
-  };
-  return home ? <a {...props}>{children}</a> : <Link {...props}>{children}</Link>;
-};
+    }}
+  >
+    {children}
+  </Link>
+);
 
-type Props = { home?: boolean };
+// useLayoutEffect on the client only (no warning during server rendering).
+const useIsoLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
-const SiteHeader = ({ home = false }: Props) => {
+const SiteHeader = () => {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const navRef = useRef<HTMLElement>(null);
+  const lineRef = useRef<HTMLSpanElement>(null);
 
   // Close the mobile menu after navigating, on Escape and on a click outside it.
   useEffect(() => setOpen(false), [pathname]);
@@ -63,102 +67,160 @@ const SiteHeader = ({ home = false }: Props) => {
     };
   }, [open]);
 
-  const link = { home, pathname, onNavigate: () => setOpen(false) };
+  // Compact pill after the first few pixels of scroll.
+  useEffect(() => {
+    let raf = 0;
+    const update = () => {
+      raf = 0;
+      setScrolled(window.scrollY > 12);
+    };
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(update);
+    };
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      cancelAnimationFrame(raf);
+    };
+  }, []);
+
+  // Sliding underline: moves (transform only) to the hovered link, or back to the active one.
+  const moveLine = useCallback((el: HTMLElement | null) => {
+    const line = lineRef.current;
+    const nav = navRef.current;
+    if (!line || !nav) return;
+    if (!el) {
+      line.style.opacity = "0";
+      return;
+    }
+    const n = nav.getBoundingClientRect();
+    const r = el.getBoundingClientRect();
+    line.style.opacity = "1";
+    line.style.transform = `translateX(${r.left - n.left + 14}px) scaleX(${Math.max(r.width - 28, 8) / 100})`;
+  }, []);
+  const activeLink = useCallback(() => navRef.current?.querySelector<HTMLElement>(".is-active") ?? null, []);
+  useIsoLayoutEffect(() => moveLine(activeLink()), [pathname, moveLine, activeLink]);
+  useEffect(() => {
+    const onResize = () => moveLine(activeLink());
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, [moveLine, activeLink]);
+
+  const link = { pathname, onNavigate: () => setOpen(false) };
   const cls = (href: string) => (isActive(pathname, href) ? "is-active" : "");
-  const book = <BookCall bare plain={home} className="site-cta" onClick={() => setOpen(false)} />;
+  const book = <BookCall bare className="site-cta" onClick={() => setOpen(false)} />;
+  const hover = (e: React.SyntheticEvent<HTMLElement>) => {
+    const target = (e.target as HTMLElement).closest<HTMLElement>(".site-nav > a, .site-nav-services");
+    if (target) moveLine(target);
+  };
 
   return (
-    <header className={`site-header${home ? " is-home" : ""}`}>
-      <a href="/" className="site-logo" aria-label="Hamza Tariq, home" data-cursor="disable">
-        <Image src={SITE.logo} alt="Hamza Tariq" width={156} height={64} priority />
-      </a>
+    <header className={`site-header${scrolled ? " is-scrolled" : ""}`}>
+      <div className="site-header-inner">
+        <Link href="/" className="site-logo" title="Home">
+          <span className="site-mark" aria-hidden="true">
+            HT
+          </span>
+          <span className="site-name">{SITE.name}</span>
+        </Link>
 
-      <nav className="site-nav" aria-label="Primary">
-        <div className="site-nav-drop">
-          <NavLink {...link} href="/services" className={`site-nav-services ${cls("/services")}`}>
-            Services
-          </NavLink>
-          <div className="site-nav-menu">
-            <div className="site-nav-col">
-              <p className="site-nav-heading">Services</p>
-              {SERVICES.map((s) => (
-                <NavLink {...link} key={s.slug} href={`/services/${s.slug}`} className={cls(`/services/${s.slug}`)}>
-                  <strong>{s.name}</strong>
-                  <span>{s.summary}</span>
-                </NavLink>
-              ))}
-            </div>
-            <div className="site-nav-col is-side">
-              <p className="site-nav-heading">By industry</p>
-              <NavLink {...link} href={SOLUTIONS_LINK.href} className={cls(SOLUTIONS_LINK.href)}>
-                <strong>{SOLUTIONS_LINK.name}</strong>
-                <span>{SOLUTIONS_LINK.summary}</span>
-              </NavLink>
-              <p className="site-nav-heading">Free tools</p>
-              {TOOLS.map((t) => (
-                <NavLink {...link} key={t.href} href={t.href} className={cls(t.href)}>
-                  <strong>{t.name}</strong>
-                  <span>{t.summary}</span>
-                </NavLink>
-              ))}
-            </div>
-          </div>
-        </div>
-        {NAV.map((n) => (
-          <NavLink {...link} key={n.href} href={n.href} className={`${cls(n.href)}${n.badge ? " site-nav-audit" : ""}`}>
-            {n.label}
-            {n.badge && <span className="site-badge">{n.badge}</span>}
-          </NavLink>
-        ))}
-      </nav>
-
-      <div className="site-cta-wrap">{book}</div>
-
-      <div className="site-mobile" ref={menuRef}>
-        <button
-          type="button"
-          className={`site-burger${open ? " is-open" : ""}`}
-          aria-label={open ? "Close menu" : "Open menu"}
-          aria-expanded={open}
-          aria-controls="site-mobile-panel"
-          onClick={() => setOpen((o) => !o)}
+        <nav
+          className="site-nav"
+          aria-label="Primary"
+          ref={navRef}
+          onMouseOver={hover}
+          onFocus={hover}
+          onMouseLeave={() => moveLine(activeLink())}
+          onBlur={() => moveLine(activeLink())}
         >
-          <span />
-          <span />
-        </button>
-        {open && (
-          <div className="site-mobile-panel" id="site-mobile-panel">
-            <a href="/" data-cursor="disable" onClick={() => setOpen(false)}>
-              Home
-            </a>
-            <NavLink {...link} href="/services" className={cls("/services")}>
+          <div className="site-nav-drop">
+            <NavLink {...link} href="/services" className={`site-nav-services ${cls("/services")}`}>
               Services
             </NavLink>
-            {SERVICES.map((s) => (
-              <NavLink {...link} key={s.slug} href={`/services/${s.slug}`} className={`is-sub ${cls(`/services/${s.slug}`)}`}>
-                {s.name}
-              </NavLink>
-            ))}
-            <NavLink {...link} href={SOLUTIONS_LINK.href} className={`is-sub ${cls(SOLUTIONS_LINK.href)}`}>
-              {SOLUTIONS_LINK.name}
-            </NavLink>
-            {TOOLS.map((t) => (
-              <NavLink {...link} key={t.href} href={t.href} className={`is-sub ${cls(t.href)}`}>
-                {t.name}
-              </NavLink>
-            ))}
-            {NAV.map((n) => (
-              <NavLink {...link} key={n.href} href={n.href} className={cls(n.href)}>
-                {n.label}
-                {n.badge && <span className="site-badge">{n.badge}</span>}
-              </NavLink>
-            ))}
-            <NavLink {...link} href="/hire" className={cls("/hire")}>
-              Hire me
-            </NavLink>
-            {book}
+            <div className="site-nav-menu">
+              <div className="site-nav-col">
+                <p className="site-nav-heading">Services</p>
+                {SERVICES.map((s) => (
+                  <NavLink {...link} key={s.slug} href={`/services/${s.slug}`} className={cls(`/services/${s.slug}`)}>
+                    <strong>{s.name}</strong>
+                    <span>{s.summary}</span>
+                  </NavLink>
+                ))}
+              </div>
+              <div className="site-nav-col is-side">
+                <p className="site-nav-heading">By industry</p>
+                <NavLink {...link} href={SOLUTIONS_LINK.href} className={cls(SOLUTIONS_LINK.href)}>
+                  <strong>{SOLUTIONS_LINK.name}</strong>
+                  <span>{SOLUTIONS_LINK.summary}</span>
+                </NavLink>
+                <p className="site-nav-heading">Free tools</p>
+                {TOOLS.map((t) => (
+                  <NavLink {...link} key={t.href} href={t.href} className={cls(t.href)}>
+                    <strong>{t.name}</strong>
+                    <span>{t.summary}</span>
+                  </NavLink>
+                ))}
+              </div>
+            </div>
           </div>
-        )}
+          {NAV.map((n) => (
+            <NavLink {...link} key={n.href} href={n.href} className={`${cls(n.href)}${n.badge ? " site-nav-audit" : ""}`}>
+              {n.label}
+              {n.badge && <span className="site-badge">{n.badge}</span>}
+            </NavLink>
+          ))}
+          <span className="site-nav-line" ref={lineRef} aria-hidden="true" />
+        </nav>
+
+        <div className="site-cta-wrap">{book}</div>
+
+        <div className="site-mobile" ref={menuRef}>
+          <button
+            type="button"
+            className={`site-burger${open ? " is-open" : ""}`}
+            aria-label={open ? "Close menu" : "Open menu"}
+            aria-expanded={open}
+            aria-controls="site-mobile-panel"
+            onClick={() => setOpen((o) => !o)}
+          >
+            <span />
+            <span />
+          </button>
+          {open && (
+            <div className="site-mobile-panel" id="site-mobile-panel">
+              <NavLink {...link} href="/" className={pathname === "/" ? "is-active" : ""}>
+                Home
+              </NavLink>
+              <NavLink {...link} href="/services" className={cls("/services")}>
+                Services
+              </NavLink>
+              {SERVICES.map((s) => (
+                <NavLink {...link} key={s.slug} href={`/services/${s.slug}`} className={`is-sub ${cls(`/services/${s.slug}`)}`}>
+                  {s.name}
+                </NavLink>
+              ))}
+              <NavLink {...link} href={SOLUTIONS_LINK.href} className={`is-sub ${cls(SOLUTIONS_LINK.href)}`}>
+                {SOLUTIONS_LINK.name}
+              </NavLink>
+              {TOOLS.map((t) => (
+                <NavLink {...link} key={t.href} href={t.href} className={`is-sub ${cls(t.href)}`}>
+                  {t.name}
+                </NavLink>
+              ))}
+              {NAV.map((n) => (
+                <NavLink {...link} key={n.href} href={n.href} className={cls(n.href)}>
+                  {n.label}
+                  {n.badge && <span className="site-badge">{n.badge}</span>}
+                </NavLink>
+              ))}
+              <NavLink {...link} href="/hire" className={cls("/hire")}>
+                Hire me
+              </NavLink>
+              {book}
+            </div>
+          )}
+        </div>
       </div>
     </header>
   );
