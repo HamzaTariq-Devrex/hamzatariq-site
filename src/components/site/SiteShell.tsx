@@ -7,6 +7,8 @@ import BookCall from "./BookCall";
 import SiteHeader from "./SiteHeader";
 import Reveal from "./ds/Reveal";
 import Magnetic from "../motion/Magnetic";
+import Marquee from "../ui/Marquee";
+import BackgroundBeams from "../ui/BackgroundBeams";
 
 type Props = {
   children: React.ReactNode;
@@ -41,23 +43,25 @@ const SiteShell = ({ children, hideCta = false, cta = DEFAULT_CTA, stickyCta = f
 
     {!hideCta && (
       <div className="cta-marquee" aria-hidden="true">
-        <div className="cta-marquee-track">
-          {Array.from({ length: 8 }, (_, i) => (
-            <span key={i}>Let&apos;s work together&nbsp;·&nbsp;</span>
-          ))}
-        </div>
+        {/* Magic UI Marquee */}
+        <Marquee duration={30} repeat={3}>
+          <span>Let&apos;s work together&nbsp;·&nbsp;</span>
+          <span>Let&apos;s work together&nbsp;·&nbsp;</span>
+        </Marquee>
       </div>
     )}
 
     <footer className="page-footer">
       {!hideCta && (
-        <div className="page-cta" data-reveal>
+        <div className="page-cta">
+          {/* Aceternity Background Beams */}
+          <BackgroundBeams />
           <span className="page-eyebrow">Have a project in mind?</span>
           <h2>{cta.title}</h2>
           {cta.text && <p className="page-cta-text">{cta.text}</p>}
           <div className="page-cta-actions">
             <Magnetic>
-              <BookCall />
+              <BookCall shimmer />
             </Magnetic>
             <a href={`mailto:${SITE.email}`} className="page-btn page-btn-ghost">
               {SITE.email}

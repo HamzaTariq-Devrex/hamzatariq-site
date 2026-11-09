@@ -4,7 +4,7 @@ How the blog wins search traffic as a new site, and the rules every topic in `co
 
 ## The idea in one paragraph
 
-A new domain can't rank for "web developer" or "React SEO". It can rank for long, specific questions asked by people who are close to buying: "hire next.js developer for ecommerce", "react site not indexed by google fix", "how much does a custom dashboard cost". So every post answers one such question better than the current top results, using things only Hamza has (his prices, his projects, his own site's measured results, his tools). The posts are grouped into topic clusters, so Google sees depth on eight subjects instead of dozens of unrelated pages.
+A new domain can't rank for "web developer" or "React SEO". It can rank for long, specific questions asked by people who are close to buying: "hire next.js developer for ecommerce", "react site not indexed by google fix", "how much does a custom dashboard cost". So every post answers one such question better than the current top results, using things only Hamza has (his prices, his projects, his tools). The posts are grouped into topic clusters, so Google sees depth on eight subjects instead of dozens of unrelated pages.
 
 ## Topic clusters
 
@@ -63,7 +63,7 @@ Sources for new topics, best first: Search Console queries the site already show
 
 - Real prices, delivery times and terms (`content/owner/profile.md`, `src/data/services.ts`).
 - Projects and case studies with screenshots (`src/data/caseStudies.ts`, `content/owner/projects/`, `public/images/work/`).
-- Measured results on hamzatariq.site (SEO 83 → 100, LCP 18.0 s → 2.6 s, the assistant's free-tier measurements).
+- The assistant's free-tier measurements (the site itself is never shown as a project or result; at most one line in a post body).
 - Client reviews in `content/testimonials.json` (none yet; the owner adds them).
 - Aggregate, anonymised results of the free SEO audit tool: `node scripts/autopilot/audit-stats.mjs`. Usable only once **30+ sites** have been audited (2 on 2026-11-05).
 - Code, checklists and configuration from this site's own codebase.

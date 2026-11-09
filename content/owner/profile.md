@@ -62,7 +62,7 @@ Main keywords: Next.js website development; custom dashboard development; AI cha
 
 ## Own site results
 
-hamzatariq.site, measured with mobile Lighthouse on a local production build (2026-10-22). Not a case study or portfolio project: mention these briefly as "on my own site" and link to `/services/react-nextjs-seo`, never to a case study page (`/work/hamzatariq-site` redirects there). Details in `projects/hamzatariq-site.md`.
+hamzatariq.site, measured with mobile Lighthouse on a local production build (2026-10-22). Never shown in the UI (owner, 2026-11-09): not a project, case study, card, image, cover, figure or headline anywhere. A blog post may mention it in at most one line of body text. Never link to a case study page (`/work/hamzatariq-site` redirects there). Details in `projects/hamzatariq-site.md`.
 
 - Vite + React to Next.js 15 migration (App Router, React 19), keeping the 3D character and GSAP animations; 31 project pages pre-rendered.
 - Mobile SEO score, home: 83 → 100.

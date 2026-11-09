@@ -15,7 +15,6 @@ import WhereIWork from "@/components/site/WhereIWork";
 import ReviewStrip from "@/components/site/ReviewStrip";
 import { ABOUT_REVIEWS } from "@/lib/testimonials";
 import { IMAGE_BASE, PROJECTS } from "@/data/projects";
-import { OWN_SITE_RESULTS } from "@/data/ownSite";
 import { SITE } from "@/lib/site";
 import { jsonLd } from "@/lib/seo";
 
@@ -44,13 +43,11 @@ const structuredData = {
   ],
 };
 
-const seoAfter = Number(OWN_SITE_RESULTS.seo.after);
-
 const STATS = [
   { value: 45, suffix: "+", label: "Brands served", note: `With my team at ${SITE.agency.name}` },
   { value: PROJECTS.length, suffix: "", label: "Projects in my portfolio", note: "Browse them on the work page" },
   { value: SERVICES.length, suffix: "", label: "Services", note: "Websites, dashboards, AI chatbots, SEO" },
-  { value: seoAfter, suffix: "", label: "Mobile SEO score", note: "This site, Lighthouse, after the Next.js move" },
+  { value: 40, suffix: "+", label: "Live websites shipped", note: "As the sole frontend developer on each build" },
 ];
 
 const devrex = JOBS.find((j) => j.company === "Devrex Digital")!;
@@ -99,7 +96,7 @@ const STACK = [
 const VALUES: { title: string; text: string; icon: IconName }[] = [
   { title: "Custom code, no templates", text: "Every site is designed and built around your business, not around what a theme allows.", icon: "code" },
   { title: "Built for speed", text: "Pre-rendered pages and optimised images, so your site loads fast on the phones your customers use.", icon: "speed" },
-  { title: "SEO built in", text: "Titles, descriptions, sitemap and structured data from day one, the same setup this site uses.", icon: "search" },
+  { title: "SEO built in", text: "Titles, descriptions, sitemap and structured data on every page from day one.", icon: "search" },
   { title: "Direct communication", text: "You talk to me, the person building your project, from the first call to launch and after.", icon: "chat" },
 ];
 

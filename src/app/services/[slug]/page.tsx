@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Timeline from "@/components/ui/Timeline";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import SiteShell from "@/components/site/SiteShell";
@@ -15,7 +16,6 @@ import { Laptop, Phone } from "@/components/site/ds/Mockups";
 import { SERVICES, PRICE_NOTE, PROJECT_TERMS, formatPrice, getService } from "@/data/services";
 import { IMAGE_BASE, PROJECTS } from "@/data/projects";
 import { CASE_STUDIES } from "@/data/caseStudies";
-import { OWN_SITE_RESULTS } from "@/data/ownSite";
 import { SITE, isProductionSite } from "@/lib/site";
 import { reviewsForPage } from "@/lib/testimonials";
 import { fitDescription, jsonLd } from "@/lib/seo";
@@ -49,7 +49,6 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   };
 }
 
-const STEP_ICONS: IconName[] = ["call", "plan", "code", "rocket"];
 const TERM_ICONS: IconName[] = ["tag", "repeat", "shield"];
 
 // Bento of features in 3 columns: widen the first (and last) card only when that fills the last row.
@@ -79,8 +78,6 @@ export default async function ServicePage({ params }: Params) {
     .map((s) => CASE_STUDIES.find((c) => c.slug === s))
     .filter((c) => c !== undefined);
   const hasRelated = projects.length + caseStudies.length > 0;
-  // Own-site results, mentioned briefly on the SEO service (not a case study, no link).
-  const proof = service.slug === "react-nextjs-seo" ? [OWN_SITE_RESULTS.seo, OWN_SITE_RESULTS.lcp] : null;
 
   // Real screenshots: case study images, and the desktop/mobile shots from the portfolio.
   const work: WorkItem[] = [
@@ -189,20 +186,6 @@ export default async function ServicePage({ params }: Params) {
         <HeroVisual slug={service.slug} />
       </section>
 
-      {proof && (
-        <section className="x-proof" aria-label="Results on my own site" data-reveal>
-          {proof.map((r) => (
-            <div key={r.label}>
-              <strong>
-                {r.before} <em>→</em> {r.after}
-              </strong>
-              <span>{r.label}</span>
-            </div>
-          ))}
-          <span className="x-proof-note">On my own site, after moving it from Vite + React to Next.js 15 (mobile Lighthouse)</span>
-        </section>
-      )}
-
       <Section label="The problem" title="Problems I solve">
         <div className="x-grid-4">
           {service.problems.map((p) => (
@@ -265,18 +248,7 @@ export default async function ServicePage({ params }: Params) {
       </Section>
 
       <Section label="Process" title="How it works">
-        <ol className="x-steps">
-          {service.process.map((step, i) => (
-            <li key={step.title} data-reveal style={{ transitionDelay: `${i * 80}ms` }}>
-              <span className="x-step-icon">
-                <Icon name={STEP_ICONS[i] ?? "check"} />
-              </span>
-              <span className="x-step-num">0{i + 1}</span>
-              <h3>{step.title}</h3>
-              <p>{step.text}</p>
-            </li>
-          ))}
-        </ol>
+        <Timeline data={service.process.map((step, i) => ({ kicker: String(i + 1).padStart(2, "0"), title: step.title, content: <p>{step.text}</p> }))} />
       </Section>
 
       {(hasRelated || !isProductionSite) && (

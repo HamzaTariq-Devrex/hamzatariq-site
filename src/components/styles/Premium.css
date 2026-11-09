@@ -14,16 +14,6 @@
   --accent-grad: linear-gradient(var(--accent-hi), var(--accent-hi));
 }
 
-/* ---------- Reveal on scroll ---------- */
-[data-reveal] {
-  transition: opacity 0.7s var(--x-ease), transform 0.7s var(--x-ease);
-}
-
-html.reveal-ready [data-reveal]:not(.is-in) {
-  opacity: 0;
-  transform: translateY(22px);
-}
-
 /* ---------- Type & rhythm ---------- */
 .x-label {
   display: inline-flex;
@@ -1885,7 +1875,6 @@ a.x-card:focus-visible {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  [data-reveal],
   .x-card,
   .x-price-card,
   .x-work-item,
@@ -2041,27 +2030,3 @@ a.x-card:focus-visible {
   opacity: 0.6;
 }
 
-/* Line-by-line heading reveal (Reveal.tsx wraps words in masks below the fold). */
-.lines-ready .ln {
-  display: inline-block;
-  overflow: hidden;
-  vertical-align: top;
-  padding-bottom: 0.1em;
-  margin-bottom: -0.1em;
-}
-
-.lines-ready .ln-in {
-  display: inline-block;
-  transform: translateY(105%);
-  transition: transform 1s var(--ease-out);
-  transition-delay: calc(var(--ln, 0) * 90ms);
-}
-
-.lines-ready.is-in .ln-in {
-  transform: none;
-}
-
-/* The mask wrapper is not hidden by the generic data-reveal fade. */
-html.reveal-ready [data-reveal-lines]:not(.is-in) {
-  opacity: 1;
-}

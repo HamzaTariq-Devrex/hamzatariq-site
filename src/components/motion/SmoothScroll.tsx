@@ -1,15 +1,18 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useLayoutEffect } from "react";
 import { usePathname } from "next/navigation";
 import Lenis from "lenis";
 
 /**
  * Lenis smooth scrolling for the whole site (mouse wheel and trackpad; native touch scrolling stays).
  * Off for reduced motion. Scrollable panels (chat, mobile menu, dropdowns, admin) keep native
- * scrolling. Scrolls to the top on every route change, and handles #anchor links.
+ * scrolling. Navigation is never delayed: on a route change Lenis drops any running scroll and jumps
+ * to the top before the new page paints (or to the #anchor), so it can't pull the page back.
  */
 let lenis: Lenis | null = null;
+
+const useIsoLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
 const SmoothScroll = () => {
   const pathname = usePathname();
@@ -28,8 +31,12 @@ const SmoothScroll = () => {
     };
   }, []);
 
-  useEffect(() => {
-    if (!window.location.hash) lenis?.scrollTo(0, { immediate: true });
+  useIsoLayoutEffect(() => {
+    if (!lenis) return;
+    lenis.stop();
+    if (!window.location.hash) lenis.scrollTo(0, { immediate: true, force: true });
+    lenis.start();
+    lenis.resize();
   }, [pathname]);
 
   return null;

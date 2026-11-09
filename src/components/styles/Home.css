@@ -3,6 +3,8 @@
 
 /* ---------- Hero ---------- */
 .hero {
+  position: relative;
+  isolation: isolate;
   display: grid;
   grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.88fr);
   align-items: center;
@@ -78,8 +80,30 @@
   letter-spacing: var(--tracking-display);
 }
 
-.hero-title > span:not(.ln) {
+.hero-title > span:not(.ln):not(.word-rotate) {
   color: var(--accent-hi);
+}
+
+/* Word Rotate: the rotating word sits on its own line in the accent colour. */
+.hero-rotate {
+  display: block;
+  color: var(--accent-hi);
+}
+
+/* Spotlight + grid behind the hero (decorative, never wider than the page). */
+.hero-grid {
+  z-index: -2;
+  inset: -40px calc(-1 * var(--gutter)) 0;
+  -webkit-mask-image: radial-gradient(70% 70% at 30% 40%, #000 30%, transparent 75%);
+  mask-image: radial-gradient(70% 70% at 30% 40%, #000 30%, transparent 75%);
+}
+
+.hero-spotlight {
+  z-index: -1;
+  left: -12%;
+  top: -42%;
+  width: 92%;
+  height: 160%;
 }
 
 .hero-lead {
@@ -197,7 +221,7 @@
   }
 }
 
-/* ---------- Client wordmarks ---------- */
+/* ---------- Client wordmarks (Magic UI Marquee) ---------- */
 .wordmarks {
   margin: 0 0 var(--section-gap);
 }
@@ -208,54 +232,46 @@
 }
 
 .wordmarks-track {
-  overflow: hidden;
+  --gap: clamp(36px, 4.4vw, 72px);
   -webkit-mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
   mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
 }
 
-.wordmarks-rows,
-.wordmarks-copy {
-  display: flex;
-  flex: none;
-  width: max-content;
-}
-
-.wordmarks-rows {
-  will-change: transform;
-}
-
-.wordmarks-row {
-  display: flex;
-  flex: none;
-  align-items: center;
-  gap: clamp(32px, 4vw, 64px);
-  margin: 0;
-  padding: 0 clamp(16px, 2vw, 32px);
-  list-style: none;
-}
-
-.wordmarks-row li {
-  font-size: clamp(20px, 2vw, 30px);
+.wordmark {
+  font-size: clamp(22px, 2.2vw, 34px);
   font-weight: 600;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.035em;
   white-space: nowrap;
   color: var(--muted);
   transition: color 0.3s ease;
 }
 
-.wordmarks-row li:hover {
+.wordmark:hover {
   color: var(--fg);
 }
 
-/* ---------- Statement ---------- */
+/* ---------- Statement + numbers ---------- */
 .statement-block {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr);
+  align-items: end;
+  gap: clamp(40px, 6vw, 96px);
   margin: 0 0 var(--section-gap);
+}
+
+.statement-dots {
+  z-index: -1;
+  inset: -48px -24px;
+  -webkit-mask-image: radial-gradient(60% 60% at 80% 60%, #000, transparent 72%);
+  mask-image: radial-gradient(60% 60% at 80% 60%, #000, transparent 72%);
 }
 
 .statement {
   margin: 0;
-  max-width: 22ch;
-  font-size: clamp(36px, 5.4vw, 88px);
+  max-width: 20ch;
+  font-size: clamp(34px, 4.6vw, 76px);
   font-weight: var(--weight-display);
   line-height: 1.02;
   letter-spacing: var(--tracking-display);
@@ -266,233 +282,137 @@
 }
 
 .statement-side {
-  display: grid;
-  grid-template-columns: minmax(0, 420px) auto;
-  align-items: end;
-  justify-content: end;
-  gap: 24px 40px;
-  margin-top: clamp(32px, 4vw, 56px);
-}
-
-.statement-side p {
-  margin: 0;
+  margin: clamp(24px, 3vw, 40px) 0 0;
+  max-width: 520px;
   font-size: var(--fs-lead);
   line-height: 1.65;
   color: var(--muted);
 }
 
-/* ---------- Services rows ---------- */
-.services-rows {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  border-top: 1px solid var(--line-strong);
+.statement-side .x-link {
+  white-space: nowrap;
 }
 
-.services-rows li {
-  border-bottom: 1px solid var(--line-strong);
-}
-
-.services-row {
-  position: relative;
+.stats {
   display: grid;
-  grid-template-columns: 64px minmax(0, 1.1fr) minmax(0, 1fr) 260px 48px;
-  align-items: center;
-  gap: 24px;
-  min-height: 132px;
-  padding: 24px 0;
-  isolation: isolate;
-}
-
-/* Hover: an ink panel rises behind the row (transform), the text turns light. */
-.services-row::before {
-  content: "";
-  position: absolute;
-  inset: 0 calc(-1 * clamp(12px, 1.6vw, 24px));
-  z-index: -1;
-  border-radius: 18px;
-  background: var(--fg);
-  transform: scaleY(0);
-  transform-origin: bottom;
-  transition: transform 0.55s var(--ease-out);
-}
-
-.services-row:hover::before,
-.services-row:focus-visible::before {
-  transform: scaleY(1);
-}
-
-.services-num {
-  font-size: 13px;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  color: var(--muted);
-  transition: color 0.3s ease;
-}
-
-.services-row h3 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
   margin: 0;
-  font-size: clamp(28px, 3.4vw, 52px);
-  font-weight: var(--weight-display);
-  line-height: 1;
-  letter-spacing: var(--tracking-h);
-  transition: color 0.3s ease, transform 0.5s var(--ease-out);
 }
 
-.services-meta {
+.stat {
   display: flex;
-  flex-direction: column;
+  flex-direction: column-reverse;
+  justify-content: flex-end;
   gap: 6px;
   min-width: 0;
+  padding: 22px 22px 20px;
+  border-radius: 20px;
+  border: 1px solid var(--line);
+  background: var(--bg-elev);
 }
 
-.services-price {
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--accent-hi);
-  transition: color 0.3s ease;
-}
-
-.services-summary {
-  font-size: 15px;
-  line-height: 1.55;
-  color: var(--muted);
-  transition: color 0.3s ease;
-}
-
-.services-visual {
-  position: relative;
-  height: 96px;
-  opacity: 0;
-  transform: translateY(14px) scale(0.96);
-  transition: opacity 0.4s ease, transform 0.55s var(--ease-out);
-}
-
-.services-arrow {
-  display: grid;
-  place-items: center;
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  border: 1px solid var(--line-strong);
-  transition: transform 0.5s var(--ease-out), background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
-}
-
-.services-row:hover .services-num,
-.services-row:hover .services-summary,
-.services-row:focus-visible .services-num,
-.services-row:focus-visible .services-summary {
-  color: rgb(255 255 255 / 0.62);
-}
-
-.services-row:hover h3,
-.services-row:focus-visible h3 {
-  color: #fff;
-  transform: translateX(8px);
-}
-
-.services-row:hover .services-price,
-.services-row:focus-visible .services-price {
-  color: var(--accent);
-}
-
-.services-row:hover .services-visual,
-.services-row:focus-visible .services-visual {
-  opacity: 1;
-  transform: none;
-}
-
-.services-row:hover .services-arrow,
-.services-row:focus-visible .services-arrow {
-  color: var(--on-accent);
-  background: var(--accent);
-  border-color: var(--accent);
-  transform: rotate(-45deg);
-}
-
-.services-shot {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: top;
-  border-radius: 10px;
-}
-
-.services-bars {
-  display: flex;
-  align-items: flex-end;
-  gap: 8px;
-  height: 100%;
-}
-
-.services-bars i {
-  flex: 1;
-  border-radius: 6px 6px 2px 2px;
-  background: var(--accent);
-}
-
-.services-chat {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  font-size: 12px;
-  line-height: 1.4;
-}
-
-.services-chat i {
-  font-style: normal;
-  max-width: 92%;
-  padding: 7px 10px;
-  border-radius: 10px;
-}
-
-.services-chat .is-user {
-  align-self: flex-end;
-  background: var(--accent);
-  color: var(--on-accent);
-}
-
-.services-chat .is-bot {
-  background: rgb(255 255 255 / 0.12);
-  color: #fff;
-}
-
-.services-score {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  height: 100%;
-  color: #fff;
-}
-
-.services-score strong {
-  font-size: 44px;
+.stat dd {
+  margin: 0;
+  font-size: clamp(38px, 3.6vw, 56px);
   font-weight: var(--weight-display);
-  letter-spacing: -0.04em;
   line-height: 1;
+  letter-spacing: var(--tracking-display);
+  font-variant-numeric: tabular-nums;
 }
 
-.services-score em {
-  font-style: normal;
-  font-size: 12px;
-  color: rgb(255 255 255 / 0.6);
+.stat dt {
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: var(--muted);
 }
 
-/* ---------- Selected work: big cards ---------- */
-.work-big {
+/* ---------- Selected work: pinned horizontal track of 3D cards ---------- */
+.hwork {
+  position: relative;
+  margin: 0 0 var(--section-gap);
+}
+
+.hwork-head {
+  margin-bottom: clamp(28px, 3vw, 44px);
+}
+
+.hwork-track {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: clamp(28px, 3vw, 44px) clamp(16px, 2vw, 28px);
 }
 
-.work-card {
+.hwork-more {
+  display: flex;
+  justify-content: center;
+  margin: 40px 0 0;
+}
+
+/* Desktop: the section is as tall as the sideways distance; its content sticks and the track moves. */
+.hwork.is-pinned {
+  height: calc(100vh + var(--hwork-dist, 0px));
+}
+
+.hwork.is-pinned .hwork-sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  justify-content: center;
+}
+
+/* Desktop: one horizontal row (a scrollable strip without JavaScript; pinned and moved by scroll
+   with it). */
+@media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
+  .hwork-viewport {
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .hwork-track {
+    display: flex;
+    width: max-content;
+    gap: clamp(20px, 2vw, 32px);
+  }
+
+  .hwork .work-card {
+    width: min(46vw, 640px, calc((100vh - 300px) * 1.45));
+  }
+
+  /* Pinned: the track spans the full screen width (cards slide in from the screen edge), starting
+     and ending in line with the container. */
+  .hwork.is-pinned .hwork-viewport {
+    overflow: visible;
+    margin-inline: calc(50% - 50vw);
+    padding-inline: calc(50vw - 50%);
+  }
+
+  .hwork.is-pinned .hwork-track {
+    will-change: transform;
+  }
+}
+
+.hwork.is-pinned .hwork-head {
+  margin-bottom: clamp(20px, 3vh, 36px);
+}
+
+.hwork.is-pinned .hwork-more {
+  justify-content: flex-start;
+  margin-top: clamp(16px, 3vh, 32px);
+}
+
+.work-card {
+  display: block;
   min-width: 0;
+  color: inherit;
+}
+
+.work-card .card3d-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .work-card-frame {
@@ -500,12 +420,11 @@
   overflow: hidden;
   background: var(--bg-elev);
   box-shadow: 0 0 0 1px var(--line);
-  transition: transform 0.7s var(--ease-out), box-shadow 0.4s ease;
+  transition: box-shadow 0.4s ease, transform 0.25s linear;
 }
 
 .work-card:hover .work-card-frame {
-  transform: scale(1.015);
-  box-shadow: 0 0 0 1px var(--line-strong), 0 30px 60px -30px rgba(14, 14, 16, 0.35);
+  box-shadow: 0 0 0 1px var(--line-strong), 0 40px 70px -36px rgba(14, 14, 16, 0.42);
 }
 
 .work-card-bar {
@@ -533,6 +452,7 @@
 /* The screenshot is taller than the 16:10 frame: hovering scrolls through it like a short preview
    (--work-shift is the hidden part, set per card). */
 .work-card-screen {
+  display: block;
   aspect-ratio: 16 / 10;
   overflow: hidden;
 }
@@ -549,20 +469,18 @@
 }
 
 .work-card-text {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
   gap: 16px;
+  width: 100%;
 }
 
-.work-card-label {
-  order: 2;
-  font-size: 11.5px;
+.work-card-num {
+  font-size: 12.5px;
   font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--muted);
-  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent-hi);
 }
 
 .work-card h3 {
@@ -572,27 +490,51 @@
   letter-spacing: -0.03em;
 }
 
+.work-card-label {
+  display: block;
+  margin-top: 2px;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.work-card-go {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--line-strong);
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.4s var(--ease);
+}
+
+.work-card:hover .work-card-go {
+  color: var(--on-accent);
+  background: var(--accent);
+  border-color: var(--accent);
+  transform: rotate(-45deg);
+}
+
 .section-more {
   display: flex;
   justify-content: center;
   margin: 44px 0 0;
 }
 
-/* ---------- How I work ---------- */
-.process {
-  display: grid;
-  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
-  align-items: center;
-  gap: clamp(32px, 5vw, 80px);
-}
-
+/* ---------- How I work: photo beside the timeline ---------- */
 .process-photo {
   position: relative;
   margin: 0;
+}
+
+.process-photo-frame {
+  display: block;
   border-radius: var(--r-lg);
   overflow: hidden;
   aspect-ratio: 4 / 5;
-  max-height: 600px;
+  max-height: 560px;
   box-shadow: 0 0 0 1px var(--line);
 }
 
@@ -601,6 +543,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  scale: 1.14;
 }
 
 .process-photo .owner-todo {
@@ -609,47 +552,6 @@
   right: 12px;
   bottom: 12px;
   margin: 0;
-}
-
-.process-steps {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.process-steps li {
-  display: grid;
-  grid-template-columns: 56px minmax(0, 1fr);
-  gap: 16px;
-  padding: 26px 0;
-  border-top: 1px solid var(--line-strong);
-}
-
-.process-steps li:last-child {
-  border-bottom: 1px solid var(--line-strong);
-}
-
-.process-num {
-  padding-top: 6px;
-  font-size: 13px;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  color: var(--accent-hi);
-}
-
-.process-steps h3 {
-  margin: 0;
-  font-size: clamp(22px, 2.2vw, 32px);
-  font-weight: var(--weight-display);
-  letter-spacing: -0.03em;
-}
-
-.process-steps p {
-  margin: 8px 0 0;
-  max-width: 460px;
-  font-size: 15.5px;
-  line-height: 1.6;
-  color: var(--muted);
 }
 
 /* ---------- Tools ---------- */
@@ -711,16 +613,6 @@
 }
 
 /* ---------- Responsive ---------- */
-@media (max-width: 1180px) {
-  .services-row {
-    grid-template-columns: 48px minmax(0, 1fr) minmax(0, 1fr) 48px;
-  }
-
-  .services-visual {
-    display: none;
-  }
-}
-
 @media (max-width: 1023px) {
   .hero {
     grid-template-columns: minmax(0, 1fr);
@@ -732,61 +624,30 @@
     aspect-ratio: 4 / 3;
   }
 
-  .statement-side {
+  .statement-block {
     grid-template-columns: minmax(0, 1fr);
-    justify-content: start;
-    justify-items: start;
+    align-items: start;
   }
 }
 
 @media (max-width: 900px) {
-  .process {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .process-photo {
-    max-width: 440px;
-    aspect-ratio: 1 / 1;
-  }
-
   .tools-row {
     grid-template-columns: minmax(0, 1fr);
   }
 }
 
 @media (max-width: 760px) {
-  .services-row {
-    grid-template-columns: minmax(0, 1fr) 40px;
-    gap: 10px 16px;
-    min-height: 0;
-    padding: 22px 0;
-  }
-
-  .services-num {
-    display: none;
-  }
-
-  .services-meta {
-    grid-column: 1 / -1;
-    grid-row: 2;
-  }
-
-  .services-arrow {
-    width: 40px;
-    height: 40px;
-  }
-
-  .services-row::before {
-    inset: 0 -12px;
-  }
-
-  .work-big {
+  .hwork-track {
     grid-template-columns: minmax(0, 1fr);
   }
 
   .hero-scroll span:nth-child(2),
   .hero-scroll span:nth-child(4) {
     display: none;
+  }
+
+  .stat {
+    padding: 18px 16px 16px;
   }
 }
 
@@ -813,33 +674,15 @@
   }
 }
 
-/* Reduced motion: the wordmarks wrap into centred lines; no scroll cue bounce. */
 @media (prefers-reduced-motion: reduce) {
-  .wordmarks-track {
-    -webkit-mask-image: none;
-    mask-image: none;
-  }
-
-  .wordmarks-rows {
-    width: 100%;
-  }
-
-  .wordmarks-row {
-    flex: 1;
-    flex-wrap: wrap;
-    justify-content: center;
-    row-gap: 14px;
-  }
-
   .hero-scroll-cue {
     animation: none;
   }
 }
 
 /* Below-the-fold home sections skip layout and paint until they near the viewport (faster first
-   paint on phones). contain-intrinsic-size keeps the scrollbar stable before they render. */
-.page-main > .x-section,
-.statement-block {
+   paint on phones). Not the sections with sticky, scroll-linked parts. */
+.page-main > .x-section:not(.home-trust):not(:has(.timeline)) {
   content-visibility: auto;
   contain-intrinsic-size: auto 900px;
 }

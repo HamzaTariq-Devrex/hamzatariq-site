@@ -469,12 +469,6 @@
   user-select: none;
 }
 
-.cta-marquee-track {
-  display: flex;
-  width: max-content;
-  animation: ctaMarquee 40s linear infinite;
-}
-
 .cta-marquee span {
   flex: none;
   font-size: clamp(40px, 7vw, 112px);
@@ -484,14 +478,8 @@
   white-space: nowrap;
 }
 
-.cta-marquee span:nth-child(even) {
+.cta-marquee .mq-group span:nth-child(even) {
   color: var(--accent-hi);
-}
-
-@keyframes ctaMarquee {
-  to {
-    transform: translateX(-50%);
-  }
 }
 
 /* Closing CTA: giant type, no box. */

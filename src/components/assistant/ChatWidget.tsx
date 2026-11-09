@@ -105,7 +105,6 @@ export default function ChatWidget({ startOpen = false }: { startOpen?: boolean 
   const [error, setError] = useState("");
   const [nudge, setNudge] = useState(false);
   const [nudgeIndex, setNudgeIndex] = useState(0);
-  const [openedThisVisit, setOpenedThisVisit] = useState(false); // hides the "1" badge until reload
   const listRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -210,7 +209,6 @@ export default function ChatWidget({ startOpen = false }: { startOpen?: boolean 
     if (!open) return;
     setNudge(false);
     setNudgeIndex((i) => i + 1);
-    setOpenedThisVisit(true);
   }, [open]);
 
   const dismissNudge = () => {
@@ -492,13 +490,11 @@ export default function ChatWidget({ startOpen = false }: { startOpen?: boolean 
             <path d="M18 6L6 18M6 6l12 12" />
           </svg>
         ) : (
-          <>
-            <BotMark size={56} />
-            <span className="ai-chat-online" aria-hidden="true" />
-            {!openedThisVisit && (
-              <span className="ai-chat-badge" aria-hidden="true" />
-            )}
-          </>
+          // Minimal launcher: a chat bubble with a small spark, white on ink (no avatar, no badges).
+          <svg className="ai-chat-launcher-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M20 11.5a7.5 7.5 0 0 1-10.9 6.7L4 19.5l1.3-4.6A7.5 7.5 0 1 1 20 11.5z" />
+            <path d="M12 8.2v6.6M8.7 11.5h6.6" />
+          </svg>
         )}
       </button>
     </div>

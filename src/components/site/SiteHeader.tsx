@@ -1,11 +1,15 @@
 "use client";
 
-// The one site header, on every page. Links always open real pages. A full-width bar at the top
-// that turns into a compact frosted pill once the page scrolls (opacity/transform only), with one
-// underline that slides to the hovered or active link. From 1280px the full menu fits on one line;
-// below that it collapses into the burger menu.
+// The one site header, on every page. Links always open real pages. Behaves like Aceternity UI's
+// Floating Navbar (ui.aceternity.com/components/floating-navbar): a full-width bar at the top that
+// becomes a frosted floating pill once the page scrolls, slides away while scrolling down and comes
+// back on any scroll up (useScroll + useMotionValueEvent, transform/opacity only). One underline
+// slides to the hovered or active link. From 1280px the full menu fits on one line; below that it
+// collapses into the burger menu. Every menu route is prefetched when the browser is idle, so clicks
+// open the next page at once.
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { m, useMotionValueEvent, useScroll } from "framer-motion";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { SITE } from "@/lib/site";
 import { SERVICES } from "@/data/services";
@@ -48,6 +52,9 @@ const SiteHeader = () => {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [hidden, setHidden] = useState(false);
+  const router = useRouter();
+  const { scrollY } = useScroll();
   const menuRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLElement>(null);
   const lineRef = useRef<HTMLSpanElement>(null);
@@ -66,23 +73,26 @@ const SiteHeader = () => {
     };
   }, [open]);
 
-  // Compact pill after the first few pixels of scroll.
+  // Floating pill once scrolled; hidden while scrolling down, shown again on any scroll up.
+  useMotionValueEvent(scrollY, "change", (y) => {
+    const prev = scrollY.getPrevious() ?? 0;
+    setScrolled(y > 12);
+    if (y < 140) setHidden(false);
+    else if (Math.abs(y - prev) > 2) setHidden(y > prev);
+  });
   useEffect(() => {
-    let raf = 0;
-    const update = () => {
-      raf = 0;
-      setScrolled(window.scrollY > 12);
-    };
-    const onScroll = () => {
-      if (!raf) raf = requestAnimationFrame(update);
-    };
-    update();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      cancelAnimationFrame(raf);
-    };
-  }, []);
+    setScrolled(window.scrollY > 12);
+    setHidden(false);
+  }, [pathname]);
+
+  // Prefetch every menu route once the browser is idle (links in the closed dropdown and mobile menu
+  // are not in the viewport, so next/link alone would not prefetch them).
+  useEffect(() => {
+    const hrefs = ["/", "/services", ...SERVICES.map((s) => `/services/${s.slug}`), SOLUTIONS_LINK.href, ...TOOLS.map((t) => t.href), ...NAV.map((n) => n.href), "/contact", "/hire"];
+    const go = () => hrefs.forEach((h) => router.prefetch(h));
+    const id = typeof window.requestIdleCallback === "function" ? window.requestIdleCallback(go, { timeout: 3000 }) : window.setTimeout(go, 1500);
+    return () => (typeof window.cancelIdleCallback === "function" ? window.cancelIdleCallback(id as number) : window.clearTimeout(id as number));
+  }, [router]);
 
   // Sliding underline: moves (transform only) to the hovered link, or back to the active one.
   const moveLine = useCallback((el: HTMLElement | null) => {
@@ -116,7 +126,13 @@ const SiteHeader = () => {
   };
 
   return (
-    <header className={`site-header${scrolled ? " is-scrolled" : ""}`}>
+    <m.header
+      className={`site-header${scrolled ? " is-scrolled" : ""}`}
+      initial={false}
+      animate={{ y: hidden && !open ? "-130%" : "0%", opacity: hidden && !open ? 0 : 1 }}
+      transition={{ duration: 0.2 }}
+      onFocusCapture={() => setHidden(false)}
+    >
       <div className="site-header-inner">
         <Link href="/" className="site-logo" title="Home">
           <span className="site-mark" aria-hidden="true" />
@@ -223,7 +239,7 @@ const SiteHeader = () => {
           )}
         </div>
       </div>
-    </header>
+    </m.header>
   );
 };
 

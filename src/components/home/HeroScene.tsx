@@ -160,6 +160,20 @@ const Shapes = ({ accent }: { accent: string }) => {
   );
 };
 
+// Leaving the home page unmounts the scene: free the GPU context right away (geometries, materials
+// and the environment map are disposed by their own cleanups).
+const ReleaseGpu = () => {
+  const gl = useThree((state) => state.gl);
+  useEffect(
+    () => () => {
+      gl.dispose();
+      gl.forceContextLoss();
+    },
+    [gl],
+  );
+  return null;
+};
+
 const HeroScene = ({ running, onReady }: { running: boolean; onReady?: () => void }) => {
   const accent = useMemo(() => getComputedStyle(document.documentElement).getPropertyValue("--accent").trim() || "#ff4a1c", []);
   return (
@@ -180,6 +194,7 @@ const HeroScene = ({ running, onReady }: { running: boolean; onReady?: () => voi
       <directionalLight position={[4, 6, 6]} intensity={1.6} />
       <directionalLight position={[-6, -2, 4]} intensity={0.5} color="#dfe3ff" />
       <Shapes accent={accent} />
+      <ReleaseGpu />
     </Canvas>
   );
 };

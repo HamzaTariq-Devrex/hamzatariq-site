@@ -20,6 +20,8 @@ const nextConfig: NextConfig = {
       { source: "/Hamza%20Tariq%20Resume.pdf", destination: "/Hamza_Tariq_CV.pdf", permanent: true },
       // The own-site case study page was removed (owner: client projects only on work pages).
       { source: "/work/hamzatariq-site", destination: "/services/react-nextjs-seo", statusCode: 301 },
+      // The own-site migration post was unpublished (owner, 2026-11-09).
+      { source: "/blog/vite-react-to-nextjs-migration", destination: "/blog", statusCode: 301 },
       {
         source: "/:path*",
         has: [{ type: "host", value: "www.hamzatariq.site" }],

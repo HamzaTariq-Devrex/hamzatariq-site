@@ -40,7 +40,7 @@ const Review = ({ id }: { id: string }) => {
 
 /** Image with required alt text (checked by content:check) and an optional caption. */
 const Figure = ({ src, alt, width, height, caption }: { src: string; alt: string; width: number; height: number; caption?: string }) => (
-  <figure className="post-figure">
+  <figure className="post-figure" data-clip>
     <Image src={src} alt={alt} width={width} height={height} sizes="(max-width: 760px) 92vw, 720px" />
     {caption && <figcaption>{caption}</figcaption>}
   </figure>

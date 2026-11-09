@@ -96,11 +96,9 @@ Structured data (JSON-LD) tells Google what a page is: a person, a business, a s
 Speed matters for both people and rankings. Google measures it with Core Web Vitals; the main one is Largest Contentful Paint (LCP), the time until the largest thing on screen appears. On React sites the usual problems are heavy JavaScript, a preloader that hides content, unoptimized images and web fonts loaded late.
 
 <FromMyWork>
-My own portfolio started as a Vite + React single-page app. Every URL returned the same nearly empty HTML, there was one hard-coded title for all pages, and there was no meta description, sitemap, robots.txt or structured data.
+At Devrex Digital I've shipped 40+ live production websites in Next.js, React and TypeScript, as the sole frontend developer on each build. Stores with a large catalogue, like [Nagina House of Jewels](/work/nagina-jewels) with its bridal, kundan, earring and necklace collections, are where these basics matter most: every collection needs its own address, title and a first screen that loads fast on a phone.
 
-I moved it to Next.js 15 and kept the design, the GSAP animations and the 3D character. All pages are now pre-rendered, including 31 project pages, each with its own title, description, canonical URL and JSON-LD.
-
-Results on mobile Lighthouse: the SEO score went from **83 to 100**, and LCP on the home page dropped from **18.0 s to 2.6 s**. That's what my [React and Next.js SEO service](/services/react-nextjs-seo) does for client sites.
+That's what my [React and Next.js SEO service](/services/react-nextjs-seo) sets up for client sites.
 </FromMyWork>
 
 ## Should you migrate to Next.js or patch your React app?
@@ -113,7 +111,7 @@ You have three realistic options. Here is how I explain them to clients.
 | Migrate to Next.js | Real HTML, metadata, sitemap, speed | Sites that need Google traffic or leads |
 | Rebuild from scratch | Everything, plus a new design | Sites that need a redesign anyway |
 
-Patching is cheaper at first, but it leaves the empty HTML in place. Prerender services add another moving part that can break quietly. For most business sites the migration is the better deal: your components and design stay, and every page starts working for search. I documented every step of my own [Vite React to Next.js migration](/blog/vite-react-to-nextjs-migration), including what broke. If your site runs on WordPress rather than React, the trade-offs are different; I compare them in [Next.js vs WordPress for a business website](/blog/nextjs-vs-wordpress-for-business-website).
+Patching is cheaper at first, but it leaves the empty HTML in place. Prerender services add another moving part that can break quietly. For most business sites the migration is the better deal: your components and design stay, and every page starts working for search. If your site runs on WordPress rather than React, the trade-offs are different; I compare them in [Next.js vs WordPress for a business website](/blog/nextjs-vs-wordpress-for-business-website).
 
 If you're unsure, start with an audit. You'll know which problems you actually have before you spend money on fixing them.
 

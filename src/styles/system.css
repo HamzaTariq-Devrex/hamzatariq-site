@@ -189,12 +189,3 @@ p {
   }
 }
 
-/* Page transition curtain (src/app/template.tsx): ink panel that lifts away on navigation. */
-.page-curtain {
-  position: fixed;
-  inset: 0;
-  z-index: 10040;
-  background: var(--fg);
-  transform-origin: top center;
-  pointer-events: none;
-}

@@ -24,8 +24,7 @@
   transition: border-color 0.35s var(--rv-ease), box-shadow 0.35s var(--rv-ease), opacity 0.7s var(--rv-ease), transform 0.7s var(--rv-ease);
 }
 
-.review-card:hover,
-.trust-card:hover {
+.review-card:hover {
   border-color: var(--rv-glow);
   box-shadow: 0 0 0 1px rgb(var(--accent-rgb) / 0.12), 0 18px 50px -20px rgb(var(--accent-rgb) / 0.35);
 }
@@ -458,39 +457,31 @@
 }
 
 /* ---------- Home: "Trusted by N+ brands" ----------
-   Everything sits in one centred .section-container (the same width as the other home sections):
-   centred header, featured quote, the marquee (faded at both edges), logos, button. */
-
-.trust-featured {
-  margin: 0 0 48px;
-  padding: clamp(28px, 4vw, 52px) clamp(22px, 4vw, 56px);
-  border-radius: 28px;
-  border: 1px solid var(--line);
-  background: var(--bg-elev);
+   The featured quote is a Magic UI Text Reveal (Ui.css): its words light up while the block is
+   pinned. Then two Aceternity Infinite Moving Cards rows (Ui.css `.imc`) of word-for-word excerpts. */
+.trust-featured .text-reveal-sticky {
   text-align: center;
 }
 
-.trust-featured blockquote {
-  max-width: 800px;
+.trust-featured .text-reveal-text {
+  max-width: 920px;
   margin: 0 auto;
-  font-size: clamp(22px, 2.3vw, 34px);
-  font-weight: 550;
-  line-height: 1.35;
-  letter-spacing: -0.015em;
-  color: var(--fg);
-  text-wrap: balance;
+  font-size: clamp(26px, 3.2vw, 48px);
+  font-weight: var(--weight-display);
+  line-height: 1.2;
+  letter-spacing: -0.03em;
 }
 
-.trust-featured figcaption {
+.trust-featured-foot {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
   gap: 12px 16px;
-  margin-top: 28px;
+  margin-top: clamp(24px, 4vh, 40px);
 }
 
-.trust-featured figcaption img {
+.trust-featured-foot img {
   width: 52px;
   height: 52px;
   border-radius: 50%;
@@ -511,7 +502,7 @@
 
 .trust-featured-who small {
   font-size: 13px;
-  color: rgb(var(--ink-rgb) / 0.6);
+  color: rgb(var(--ink-rgb) / 0.62);
 }
 
 .trust-verified {
@@ -541,66 +532,35 @@
   stroke-linejoin: round;
 }
 
-.trust-label {
-  margin: 18px 0 0;
-  font-size: 12.5px;
-  color: rgb(var(--ink-rgb) / 0.62);
-}
-
-/* Marquee wall: inside the container, cards fade in and out at both edges; two rows in opposite
-   directions. Every card has the same size; label and link sit at the bottom. */
 .trust-wall {
-  --trust-gap: 20px;
   display: flex;
   flex-direction: column;
-  gap: var(--trust-gap);
-  overflow: hidden;
-  -webkit-mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
-  mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+  gap: 4px;
 }
-
-.trust-marquee {
-  overflow: hidden;
-}
-
-.trust-track,
-.trust-copy {
-  display: flex;
-  gap: var(--trust-gap);
-  width: max-content;
-}
-
-.trust-track {
-  will-change: transform;
-}
-
-.trust-marquee {
-  cursor: grab;
-  user-select: none;
-}
-
-.trust-marquee.is-dragging {
-  cursor: grabbing;
-}
-
-
-
-
-
-
 
 .trust-card {
+  flex: none;
+  list-style: none;
+}
+
+.trust-card figure {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  width: 300px;
+  box-sizing: border-box;
+  width: 340px;
   height: 252px;
   margin: 0;
   padding: 20px 22px;
   border-radius: 18px;
   border: 1px solid var(--rv-line);
-  background: rgb(var(--ink-rgb) / 0.03);
+  background: var(--bg-elev);
   transition: border-color 0.35s var(--rv-ease), box-shadow 0.35s var(--rv-ease);
+}
+
+.trust-card:hover figure {
+  border-color: var(--rv-glow);
+  box-shadow: 0 0 0 1px rgb(var(--accent-rgb) / 0.12), 0 18px 50px -20px rgb(var(--accent-rgb) / 0.35);
 }
 
 .trust-card-head {
@@ -666,76 +626,10 @@
   color: var(--accent-hi);
 }
 
-/* Client logos (real logos only): one centred row that wraps into centred rows, greyscale at 60%,
-   full colour on hover or focus. */
-/* Even rows: half the logos per row on wide screens (--logo-cols from HomeReviews), 5 per row on
-   smaller screens. */
-.trust-logos {
-  display: grid;
-  grid-template-columns: repeat(var(--logo-cols, 10), 56px);
-  justify-content: center;
-  gap: 18px 22px;
-  margin: 56px auto 0;
-  padding: 0;
-  list-style: none;
-}
-
-@media (max-width: 1100px) {
-  .trust-logos {
-    grid-template-columns: repeat(5, 56px);
-  }
-}
-
-.trust-logos a {
-  display: block;
-  border-radius: 50%;
-  filter: grayscale(1);
-  opacity: 0.6;
-  transition: filter 0.35s ease, opacity 0.35s ease, transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.trust-logos a:hover,
-.trust-logos a:focus-visible {
-  filter: none;
-  opacity: 1;
-  transform: translateY(-2px);
-}
-
-.trust-logos a:focus-visible {
-  outline: 2px solid var(--accent-hi);
-  outline-offset: 3px;
-}
-
-.trust-logos img {
-  display: block;
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  background: #fff;
-  object-fit: cover;
-}
-
-.trust-more {
-  display: flex;
-  justify-content: center;
-  margin-top: 48px;
-}
-
 @media (max-width: 768px) {
-
-  .trust-card {
-    width: 264px;
+  .trust-card figure {
+    width: 272px;
     height: 264px;
-  }
-
-  .trust-logos {
-    grid-template-columns: repeat(5, 44px);
-    gap: 14px 18px;
-  }
-
-  .trust-logos img {
-    width: 44px;
-    height: 44px;
   }
 
   .review-stats {
@@ -749,28 +643,6 @@
 
 /* Reduced motion: no marquee (a static, wrapping grid of the cards), no hover lifts. */
 @media (prefers-reduced-motion: reduce) {
-  .trust-wall {
-    -webkit-mask-image: none;
-    mask-image: none;
-  }
-
-  .trust-marquee,
-  .trust-track {
-    overflow: visible;
-  }
-
-  .trust-track {
-    animation: none;
-    width: auto;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-
-  .trust-copy {
-    display: none;
-  }
-
-  .trust-logos a,
   .review-phone-screen {
     transition: none;
   }

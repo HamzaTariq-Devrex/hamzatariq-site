@@ -4,7 +4,7 @@ import Image from "next/image";
 type Shot = { src: string; alt: string; width: number; height: number; sizes?: string; priority?: boolean };
 
 export const Laptop = ({ src, alt, width, height, sizes = "(max-width: 760px) 90vw, 560px", priority }: Shot) => (
-  <div className="x-laptop">
+  <div className="x-laptop" data-clip>
     <div className="x-laptop-screen">
       <Image src={src} alt={alt} width={width} height={height} sizes={sizes} priority={priority} />
     </div>
@@ -21,7 +21,7 @@ export const Phone = ({ src, alt, width, height, sizes = "200px", priority }: Sh
 );
 
 export const Browser = ({ src, alt, width, height, sizes = "(max-width: 760px) 90vw, 560px", priority, url }: Shot & { url?: string }) => (
-  <div className="x-browser">
+  <div className="x-browser" data-clip>
     <div className="x-browser-bar" aria-hidden="true">
       <i />
       <i />

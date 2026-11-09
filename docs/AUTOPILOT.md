@@ -114,6 +114,7 @@ Top pages and top queries tables.
 
 ## Safety rules
 
+- Never feature the owner's own site (hamzatariq.site) as a project, case study, card, image, cover, figure, `<FromMyWork>` box or headline, and never write a post about migrating or rebuilding it (owner, repeated; 2026-11-09). A post may mention it in at most one line of body text. Use client projects (`src/data/projects.ts`) and the assistant/tools facts instead.
 - Never print env values. Never commit `.env*` files.
 - Never edit or delete `public/google0a499a204a55eeb8.html` or the IndexNow key file.
 - Only `content/blog/`, `content/seo/briefs/`, `content/backlog.json`, `public/images/blog/`, `reports/` and `OWNER_TODO.md` change in autopilot commits (`finish.mjs` enforces this). Never edit `content/testimonials.json`: only the owner adds reviews.

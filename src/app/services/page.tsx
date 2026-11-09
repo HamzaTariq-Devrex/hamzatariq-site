@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
+import ServiceBento from "@/components/site/ServiceBento";
+import Timeline from "@/components/ui/Timeline";
 import Link from "next/link";
 import SiteShell from "@/components/site/SiteShell";
 import Section from "@/components/site/ds/Section";
 import Faq from "@/components/site/ds/Faq";
 import Icon from "@/components/site/ds/Icon";
 import OpenChat from "@/components/site/ds/OpenChat";
-import { GENERAL_FAQS, PRICE_NOTE, PROCESS, SERVICES, formatPrice } from "@/data/services";
+import { GENERAL_FAQS, PRICE_NOTE, PROCESS, SERVICES } from "@/data/services";
 import { SITE } from "@/lib/site";
 import { jsonLd } from "@/lib/seo";
 
@@ -69,33 +71,8 @@ export default function ServicesPage() {
         <p className="x-hero-lead">{SITE.positioning}</p>
       </section>
 
-      <section className="x-bento" aria-label="Services">
-        {SERVICES.map((s, i) => (
-          <Link key={s.slug} href={`/services/${s.slug}`} className={`x-card x-bento-item${i === 0 ? " is-wide" : ""}`} data-reveal>
-            <span className="x-card-icon is-lg">
-              <Icon name={s.icon} size={26} />
-            </span>
-            <span className="x-label is-small">{s.eyebrow}</span>
-            <h2>{s.name}</h2>
-            <p>{s.summary}</p>
-            <ul className="x-checks">
-              {s.features.slice(0, 3).map((f) => (
-                <li key={f}>
-                  <Icon name="check" size={16} />
-                  {f}
-                </li>
-              ))}
-            </ul>
-            <div className="x-bento-foot">
-              <span className="x-price">
-                <small>From</small> {formatPrice(s.pricing[0])}
-              </span>
-              <span className="x-link">
-                Learn more <Icon name="arrow" size={16} />
-              </span>
-            </div>
-          </Link>
-        ))}
+      <section className="x-section svc-bento" aria-label="Services">
+        <ServiceBento />
       </section>
       <p className="svc-note">{PRICE_NOTE}</p>
 
@@ -118,19 +95,8 @@ export default function ServicesPage() {
         </div>
       </section>
 
-      <Section label="Process" title="How every project works" center>
-        <ol className="x-steps">
-          {PROCESS.map((p, i) => (
-            <li key={p.title} data-reveal style={{ transitionDelay: `${i * 80}ms` }}>
-              <span className="x-step-icon">
-                <Icon name={p.icon} />
-              </span>
-              <span className="x-step-num">0{i + 1}</span>
-              <h3>{p.title}</h3>
-              <p>{p.text}</p>
-            </li>
-          ))}
-        </ol>
+      <Section label="Process" title="How every project works">
+        <Timeline data={PROCESS.map((p, i) => ({ kicker: String(i + 1).padStart(2, "0"), title: p.title, content: <p>{p.text}</p> }))} />
       </Section>
 
       <Section label="FAQ" title="Questions before you start">

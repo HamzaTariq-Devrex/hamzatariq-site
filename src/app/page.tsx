@@ -5,7 +5,10 @@ import CvLink from "@/components/site/CvLink";
 import HeroCtas from "@/components/home/HeroCtas";
 import HeroVisual from "@/components/home/HeroVisual";
 import HomeReviews from "@/components/HomeReviews";
-import { ClientWordmarks, FreeTools, HowIWork, LatestPosts, SelectedWork, ServiceRows, Statement } from "@/components/home/HomeSections";
+import { ClientWordmarks, FreeTools, HowIWork, LatestPosts, SelectedWork, ServicesBento, Statement } from "@/components/home/HomeSections";
+import Spotlight from "@/components/ui/Spotlight";
+import WordRotate from "@/components/ui/WordRotate";
+import { GridPattern } from "@/components/ui/Patterns";
 import "@/components/styles/Blog.css";
 import "@/components/styles/Home.css";
 import { SITE } from "@/lib/site";
@@ -72,6 +75,9 @@ export default function HomePage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(structuredData)} />
 
       <section className="hero">
+        {/* Aceternity Spotlight + Magic UI Grid Pattern behind the hero. */}
+        <GridPattern className="hero-grid" />
+        <Spotlight className="hero-spotlight" />
         <div className="hero-text">
           <div className="hero-who">
             <span className="hero-photo">
@@ -85,8 +91,9 @@ export default function HomePage() {
           <p className="hero-badge">
             <span className="page-status" aria-hidden="true" /> Available for new projects
           </p>
-          <h1 className="hero-title">
-            I build fast websites, dashboards and AI chatbots that bring businesses <span>customers.</span>
+          {/* Magic UI Word Rotate: the first word is in the server HTML; all three are in the accessible text. */}
+          <h1 className="hero-title" data-motion="none">
+            I build <WordRotate words={["websites", "dashboards", "AI chatbots"]} className="hero-rotate" /> that bring businesses customers.
           </h1>
           <p className="hero-lead">
             Custom-coded in Next.js and ready for Google from day one. Based in Pakistan, working with clients worldwide.
@@ -108,7 +115,7 @@ export default function HomePage() {
 
       <ClientWordmarks />
       <Statement />
-      <ServiceRows />
+      <ServicesBento />
       <SelectedWork />
       <HomeReviews />
       <HowIWork />

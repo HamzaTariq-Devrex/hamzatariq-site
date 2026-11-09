@@ -5,6 +5,7 @@
 import Link from "next/link";
 import { SITE } from "@/lib/site";
 import { trackEvent } from "@/lib/analytics";
+import ShimmerLayers from "@/components/ui/Shimmer";
 
 type Props = {
   label?: string;
@@ -17,6 +18,8 @@ type Props = {
   onClick?: () => void;
   /** Shown after the label (e.g. an arrow). */
   icon?: React.ReactNode;
+  /** Magic UI Shimmer Button layers (a light spark running around the pill's edge). */
+  shimmer?: boolean;
 };
 
 declare global {
@@ -48,8 +51,9 @@ const loadCalendly = () => {
   return loading;
 };
 
-const BookCall = ({ label = "Book a free call", variant = "primary", className = "", bare = false, plain = false, onClick: onClickProp, icon }: Props) => {
-  const cls = bare ? className : `page-btn page-btn-${variant} ${className}`.trim();
+const BookCall = ({ label = "Book a free call", variant = "primary", className = "", bare = false, plain = false, onClick: onClickProp, icon, shimmer = variant === "primary" && !bare }: Props) => {
+  const cls = `${bare ? className : `page-btn page-btn-${variant} ${className}`}${shimmer ? " shimmer-btn" : ""}`.trim();
+  const layers = shimmer ? <ShimmerLayers /> : null;
   const url = SITE.bookingUrl;
   const onClick = () => {
     trackEvent("booking_clicked", { calendly: !!url });
@@ -69,6 +73,7 @@ const BookCall = ({ label = "Book a free call", variant = "primary", className =
     };
     return (
       <a href={url} target="_blank" rel="noreferrer" className={cls} onClick={open} data-cursor="disable">
+        {layers}
         {label}
         {icon}
       </a>
@@ -76,11 +81,13 @@ const BookCall = ({ label = "Book a free call", variant = "primary", className =
   }
   return plain ? (
     <a href="/contact" className={cls} onClick={onClick} data-cursor="disable">
+      {layers}
       {label}
       {icon}
     </a>
   ) : (
     <Link href="/contact" className={cls} onClick={onClick}>
+      {layers}
       {label}
       {icon}
     </Link>

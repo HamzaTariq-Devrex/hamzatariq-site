@@ -16,9 +16,9 @@ export type CaseStudy = {
   services: string[];
 };
 
-// Client case studies with measured results (owner facts only). Empty for now: the own-site results
-// are not shown as a case study (owner, November 2026); they live in src/data/ownSite.ts and
-// content/owner/profile.md. /work/hamzatariq-site redirects (301) to /services/react-nextjs-seo.
+// Client case studies with measured results (owner facts only). Empty for now. The owner's own site is
+// never shown as a project or case study (owner, November 2026); /work/hamzatariq-site redirects (301)
+// to /services/react-nextjs-seo.
 export const CASE_STUDIES: CaseStudy[] = [];
 
 export const getCaseStudy = (slug: string) => CASE_STUDIES.find((c) => c.slug === slug);

@@ -16,7 +16,8 @@ const Cursor = () => {
     const el = dot.current;
     if (!el) return;
     if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      el.remove();
+      // Hide, never remove: React owns this node (removing it breaks the next page navigation).
+      el.style.display = "none";
       return;
     }
     let x = -100;

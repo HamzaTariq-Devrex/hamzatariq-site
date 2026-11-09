@@ -5,6 +5,7 @@ import AssistantLoader from "@/components/assistant/AssistantLoader";
 import MotionProvider from "@/components/motion/MotionProvider";
 import SmoothScroll from "@/components/motion/SmoothScroll";
 import Cursor from "@/components/motion/Cursor";
+import NavProgress from "@/components/motion/NavProgress";
 import { Analytics } from "@vercel/analytics/next";
 import "@/styles/system.css";
 // Shared shell styles load here (not only from SiteShell): Next.js leaves CSS imported inside SiteShell
@@ -12,6 +13,7 @@ import "@/styles/system.css";
 import "@/components/styles/Pages.css";
 import "@/components/styles/Content.css";
 import "@/components/styles/Premium.css";
+import "@/components/styles/Ui.css";
 
 // Instrument Sans (SIL OFL 1.1), self-hosted from the @fontsource-variable package: the Latin subset
 // of the variable weight axis, so builds never fetch Google Fonts. Chosen over Satoshi/General Sans
@@ -20,7 +22,7 @@ const display = localFont({
   src: "../../node_modules/@fontsource-variable/instrument-sans/files/instrument-sans-latin-wght-normal.woff2",
   variable: "--font-display",
   weight: "400 700",
-  display: "swap",
+  display: "optional",
 });
 
 export const metadata: Metadata = {
@@ -61,6 +63,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script dangerouslySetInnerHTML={{ __html: accentScript }} />
       </head>
       <body>
+        <NavProgress />
         <MotionProvider>{children}</MotionProvider>
         <SmoothScroll />
         <Cursor />
