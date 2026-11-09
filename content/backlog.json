@@ -224,8 +224,9 @@
         "how much does a chatbot cost?"
       ],
       "angle": "The hub for the cluster, built around a chatbot running on this site: how it is built, what it costs to run on a free tier, what happens when the AI fails, and links to every supporting post.",
-      "status": "queued",
-      "publishedSlug": null
+      "status": "published",
+      "publishedSlug": "ai-chatbot-for-small-business",
+      "published": "2026-11-10"
     },
     {
       "keyword": "hire next.js developer for ecommerce",
