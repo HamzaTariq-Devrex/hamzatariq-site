@@ -249,8 +249,9 @@
         "how much does a next.js store cost?"
       ],
       "angle": "Store-specific checks (checkout, stock, admin, product SEO) plus my real store packages: up to 10 pages with unlimited products, admin dashboard included.",
-      "status": "queued",
-      "publishedSlug": null
+      "status": "published",
+      "publishedSlug": "hire-nextjs-developer-for-ecommerce",
+      "published": "2026-11-10"
     },
     {
       "keyword": "custom ecommerce website",
