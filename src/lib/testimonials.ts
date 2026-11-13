@@ -50,7 +50,7 @@ export const reviewsForPage = (page: "service:nextjs-websites" | "solution:ecomm
   return [];
 };
 
-/** Home "Trusted by" featured quote (owner's example: Nagina House of Jewels). */
+/** Home reviews featured quote (owner's example: Nagina House of Jewels). */
 export const HOME_FEATURED_ID = "nagina-house-of-jewels";
 /** Home logo row: real logos only. */
 export const LOGO_REVIEWS = TESTIMONIALS.filter((t) => !t.logoIsPhoto);

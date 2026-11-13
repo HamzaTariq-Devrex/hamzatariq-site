@@ -13,6 +13,13 @@
   padding: 14px 0;
   color: var(--sh-text);
   font-family: var(--font-sans);
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+/* Hidden while scrolling down (SiteHeader.tsx), back on any scroll up. */
+.site-header.is-hidden {
+  transform: translateY(-130%);
+  opacity: 0;
 }
 
 .site-header-inner {
@@ -23,7 +30,7 @@
   gap: 16px;
   width: min(var(--container), calc(100% - 2 * var(--gutter)));
   margin: 0 auto;
-  padding: 8px 8px 8px 18px;
+  padding: 8px 8px 8px 10px;
   border-radius: 999px;
   isolation: isolate;
   transition: transform 0.45s var(--sh-ease);
@@ -37,9 +44,9 @@
   inset: 0;
   z-index: -1;
   border-radius: inherit;
-  border: 1px solid var(--line);
-  background: rgb(255 255 255 / 0.72);
-  box-shadow: 0 12px 40px -18px rgba(14, 14, 16, 0.28);
+  border: 1px solid var(--line-strong);
+  background: rgb(12 11 26 / 0.7);
+  box-shadow: 0 18px 50px -20px rgba(0, 0, 0, 0.8), 0 0 60px -30px rgb(var(--accent-rgb) / 0.9), inset 0 1px 0 rgb(var(--ink-rgb) / 0.08);
   backdrop-filter: blur(16px) saturate(150%);
   -webkit-backdrop-filter: blur(16px) saturate(150%);
   opacity: 0;
@@ -84,23 +91,45 @@
   white-space: nowrap;
 }
 
+/* The links sit in a glass capsule (on a pseudo-element, for the same Chrome reason as above); it
+   fades away once the whole bar becomes the frosted pill. */
 .site-nav {
   position: relative;
+  isolation: isolate;
   display: flex;
   align-items: center;
   gap: 2px;
+  padding: 5px;
+  border-radius: 999px;
+}
+
+.site-nav::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  border-radius: inherit;
+  border: 1px solid var(--line);
+  background: rgb(var(--ink-rgb) / 0.045);
+  -webkit-backdrop-filter: blur(14px) saturate(150%);
+  backdrop-filter: blur(14px) saturate(150%);
+  transition: opacity 0.4s var(--sh-ease);
+}
+
+.site-header.is-scrolled .site-nav::before {
+  opacity: 0;
 }
 
 .site-nav > a,
 .site-nav-services {
   display: inline-flex;
   align-items: center;
-  padding: 9px 14px;
+  padding: 9px 16px;
   border-radius: 999px;
   font-size: 14px;
   font-weight: 500;
   letter-spacing: -0.005em;
-  color: var(--sh-muted);
+  color: var(--fg-2);
   transition: color 0.25s ease;
 }
 
@@ -111,19 +140,20 @@
   color: var(--sh-text);
 }
 
-/* Sliding underline: 100px wide, positioned and scaled with transform from SiteHeader.tsx. */
+/* Sliding highlight pill behind the hovered or active link (width and position from SiteHeader.tsx). */
 .site-nav-line {
   position: absolute;
   left: 0;
-  bottom: 2px;
-  width: 100px;
-  height: 1.5px;
-  border-radius: 2px;
-  background: var(--accent-grad, linear-gradient(90deg, var(--accent-hi), var(--accent)));
-  transform-origin: left center;
+  top: 5px;
+  bottom: 5px;
+  z-index: -1;
+  width: 80px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgb(var(--ink-rgb) / 0.14), rgb(var(--ink-rgb) / 0.07));
+  box-shadow: inset 0 0 0 1px rgb(var(--ink-rgb) / 0.12), inset 0 1px 0 rgb(var(--ink-rgb) / 0.16), 0 8px 22px -12px rgb(var(--accent-rgb) / 0.9);
   opacity: 0;
   pointer-events: none;
-  transition: transform 0.45s var(--sh-ease), opacity 0.3s ease;
+  transition: transform 0.45s var(--sh-ease), width 0.45s var(--sh-ease), opacity 0.3s ease;
 }
 
 .site-nav-drop {
@@ -151,9 +181,9 @@
   gap: 4px;
   padding: 8px;
   border-radius: 18px;
-  background: rgb(255 255 255 / 0.97);
+  background: rgb(14 13 30 / 0.96);
   border: 1px solid var(--line-strong);
-  box-shadow: 0 30px 70px -20px rgba(14, 14, 16, 0.26);
+  box-shadow: 0 30px 70px -20px rgba(0, 0, 0, 0.26);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   opacity: 0;
@@ -230,39 +260,43 @@
   color: rgb(var(--ink-rgb) / 0.62);
 }
 
+/* "Let's talk": gradient pill with an arrow in a white circle that turns on hover. */
 .site-cta {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  height: 40px;
-  padding: 0 18px;
+  gap: 12px;
+  height: 46px;
+  padding: 0 6px 0 20px;
   border-radius: 999px;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  letter-spacing: -0.005em;
   white-space: nowrap;
   color: #fff !important;
-  background: var(--fg);
-  transition: background-color 0.3s ease, transform 0.35s var(--sh-ease);
+  background: var(--accent-fill);
+  box-shadow: 0 10px 30px -12px rgb(var(--accent-rgb) / 0.95), inset 0 1px 0 rgb(255 255 255 / 0.25);
+  transition: box-shadow 0.35s var(--sh-ease), transform 0.35s var(--sh-ease);
 }
 
 .site-cta:hover {
-  background: var(--accent);
   transform: translateY(-1px);
+  box-shadow: 0 16px 40px -10px rgb(var(--accent-rgb) / 1), inset 0 1px 0 rgb(255 255 255 / 0.3);
 }
 
 .site-cta-dot {
-  width: 6px;
-  height: 6px;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
-  background: var(--accent);
-  transition: background-color 0.3s ease;
+  color: var(--accent);
+  background: #fff;
+  transition: transform 0.45s var(--sh-ease);
 }
 
 .site-cta:hover .site-cta-dot {
-  background: #fff;
+  transform: rotate(-45deg);
 }
 
 /* ---------- Mobile ---------- */
@@ -320,9 +354,10 @@
   gap: 2px;
   padding: 12px;
   border-radius: 20px;
-  background: rgb(255 255 255 / 0.98);
+  /* Solid, so the page never shows through the links. */
+  background: var(--bg-elev);
   border: 1px solid var(--line-strong);
-  box-shadow: 0 30px 70px -20px rgba(14, 14, 16, 0.26);
+  box-shadow: 0 30px 70px -20px rgba(0, 0, 0, 0.6);
   animation: siteMenuIn 0.25s var(--sh-ease);
 }
 
@@ -338,14 +373,14 @@
 }
 
 .site-mobile-panel a:not(.site-cta) {
-  padding: 11px 12px;
+  padding: 10px 12px;
   border-radius: 10px;
   font-size: 15px;
   font-weight: 500;
 }
 
 .site-mobile-panel a.is-sub {
-  padding: 8px 12px 8px 26px;
+  padding: 6px 12px 6px 26px;
   font-size: 14px;
   color: rgb(var(--ink-rgb) / 0.65);
 }
@@ -357,7 +392,8 @@
 
 .site-mobile-panel .site-cta {
   margin-top: 10px;
-  height: 46px;
+  height: 50px;
+  justify-content: space-between;
 }
 
 /* The full menu (6 links, the audit badge and the CTA) needs 1280px; below that the burger menu. */

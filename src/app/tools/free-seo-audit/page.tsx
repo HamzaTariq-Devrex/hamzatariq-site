@@ -13,7 +13,7 @@ import "@/components/styles/Audit.css";
 export const metadata: Metadata = {
   title: "Free SEO Audit Tool for Any Website",
   description:
-    "Free SEO audit tool: check if Google can read your site, plus titles, meta tags, headings, structured data, robots.txt, sitemap and mobile speed, with a fix list.",
+    "Free SEO audit tool: check if Google can read your site, plus titles, meta tags, headings, schema, robots.txt, sitemap and mobile speed, with a fix list.",
   alternates: { canonical: SEO_AUDIT_TOOL.href },
 };
 

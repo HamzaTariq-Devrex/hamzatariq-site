@@ -52,7 +52,7 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgb(255 255 255 / 0.55), transparent 45%);
+  background: linear-gradient(to top, rgb(6 6 15 / 0.7), transparent 45%);
   opacity: 0;
   transition: opacity 0.4s ease;
 }

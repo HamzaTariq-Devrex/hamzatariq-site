@@ -3,19 +3,20 @@
 // The one site header, on every page. Links always open real pages. Behaves like Aceternity UI's
 // Floating Navbar (ui.aceternity.com/components/floating-navbar): a full-width bar at the top that
 // becomes a frosted floating pill once the page scrolls, slides away while scrolling down and comes
-// back on any scroll up (useScroll + useMotionValueEvent, transform/opacity only). One underline
-// slides to the hovered or active link. From 1280px the full menu fits on one line; below that it
+// back on any scroll up (useScroll + useMotionValueEvent, transform/opacity only). The links sit in a
+// glass capsule; one highlight pill slides to the hovered or active link. From 1280px the full menu fits on one line; below that it
 // collapses into the burger menu. Every menu route is prefetched when the browser is idle, so clicks
 // open the next page at once.
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { m, useMotionValueEvent, useScroll } from "framer-motion";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { SITE } from "@/lib/site";
 import { SERVICES } from "@/data/services";
 import { SEO_AUDIT_TOOL, TOOLS } from "@/data/tools";
 import { SOLUTIONS_LINK } from "@/data/solutions";
 import BookCall from "./BookCall";
+import Logo from "./Logo";
+import Icon from "./ds/Icon";
 import { trackEvent } from "@/lib/analytics";
 import "../styles/SiteHeader.css";
 
@@ -54,7 +55,7 @@ const SiteHeader = () => {
   const [scrolled, setScrolled] = useState(false);
   const [hidden, setHidden] = useState(false);
   const router = useRouter();
-  const { scrollY } = useScroll();
+
   const menuRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLElement>(null);
   const lineRef = useRef<HTMLSpanElement>(null);
@@ -74,12 +75,20 @@ const SiteHeader = () => {
   }, [open]);
 
   // Floating pill once scrolled; hidden while scrolling down, shown again on any scroll up.
-  useMotionValueEvent(scrollY, "change", (y) => {
-    const prev = scrollY.getPrevious() ?? 0;
-    setScrolled(y > 12);
-    if (y < 140) setHidden(false);
-    else if (Math.abs(y - prev) > 2) setHidden(y > prev);
-  });
+  // A passive scroll listener (no Framer Motion here, so the header adds no animation library to the
+  // first load of any page); React bails out when the values don't change.
+  useEffect(() => {
+    let prev = window.scrollY;
+    const onScroll = () => {
+      const y = window.scrollY;
+      setScrolled(y > 12);
+      if (y < 140) setHidden(false);
+      else if (Math.abs(y - prev) > 2) setHidden(y > prev);
+      prev = y;
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
   useEffect(() => {
     setScrolled(window.scrollY > 12);
     setHidden(false);
@@ -94,7 +103,7 @@ const SiteHeader = () => {
     return () => (typeof window.cancelIdleCallback === "function" ? window.cancelIdleCallback(id as number) : window.clearTimeout(id as number));
   }, [router]);
 
-  // Sliding underline: moves (transform only) to the hovered link, or back to the active one.
+  // Sliding highlight pill: moves to the hovered link, or back to the active one.
   const moveLine = useCallback((el: HTMLElement | null) => {
     const line = lineRef.current;
     const nav = navRef.current;
@@ -106,37 +115,37 @@ const SiteHeader = () => {
     const n = nav.getBoundingClientRect();
     const r = el.getBoundingClientRect();
     line.style.opacity = "1";
-    line.style.transform = `translateX(${r.left - n.left + 14}px) scaleX(${Math.max(r.width - 28, 8) / 100})`;
+    line.style.width = `${r.width}px`;
+    line.style.transform = `translateX(${r.left - n.left}px)`;
   }, []);
   const activeLink = useCallback(() => navRef.current?.querySelector<HTMLElement>(".is-active") ?? null, []);
   useIsoLayoutEffect(() => moveLine(activeLink()), [pathname, moveLine, activeLink]);
   useEffect(() => {
     const onResize = () => moveLine(activeLink());
     window.addEventListener("resize", onResize);
+    // The web fonts change the link widths when they swap in: measure again.
+    void document.fonts?.ready.then(onResize);
     return () => window.removeEventListener("resize", onResize);
   }, [moveLine, activeLink]);
 
   const link = { pathname, onNavigate: () => setOpen(false) };
   const cls = (href: string) => (isActive(pathname, href) ? "is-active" : "");
   // "Let's talk": the same booking action as every "Book a free call" button (Calendly or /contact).
-  const book = <BookCall bare label="Let's talk" className="site-cta" onClick={() => setOpen(false)} icon={<span className="site-cta-dot" aria-hidden="true" />} />;
+  const book = <BookCall bare label="Let's talk" className="site-cta" onClick={() => setOpen(false)} icon={<span className="site-cta-dot" aria-hidden="true"><Icon name="arrow" size={14} /></span>} />;
   const hover = (e: React.SyntheticEvent<HTMLElement>) => {
     const target = (e.target as HTMLElement).closest<HTMLElement>(".site-nav > a, .site-nav-services");
     if (target) moveLine(target);
   };
 
   return (
-    <m.header
-      className={`site-header${scrolled ? " is-scrolled" : ""}`}
-      initial={false}
-      animate={{ y: hidden && !open ? "-130%" : "0%", opacity: hidden && !open ? 0 : 1 }}
-      transition={{ duration: 0.2 }}
+    <header
+      className={`site-header${scrolled ? " is-scrolled" : ""}${hidden && !open ? " is-hidden" : ""}`}
       onFocusCapture={() => setHidden(false)}
     >
       <div className="site-header-inner">
         <Link href="/" className="site-logo" title="Home">
-          <span className="site-mark" aria-hidden="true" />
-          <span className="site-name">{SITE.name}</span>
+          <Logo />
+          <span className="sr-only">{SITE.name}, home</span>
         </Link>
 
         <nav
@@ -239,7 +248,7 @@ const SiteHeader = () => {
           )}
         </div>
       </div>
-    </m.header>
+    </header>
   );
 };
 

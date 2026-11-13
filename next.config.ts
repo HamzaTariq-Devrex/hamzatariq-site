@@ -5,8 +5,8 @@ const nextConfig: NextConfig = {
   env: { NEXT_PUBLIC_CALENDLY_URL: process.env.CALENDLY_URL ?? "" },
   // `next dev` gets its own folder so `npm run build` (required before every commit) can't break a running dev server.
   distDir: process.env.NODE_ENV === "development" ? ".next-dev" : ".next",
-  // Inline the (small) CSS into the HTML: saves the render-blocking stylesheet round trips on mobile.
-  experimental: { inlineCss: true },
+  // No `experimental.inlineCss`: it put every stylesheet into the HTML twice (a <style> tag plus the
+  // RSC payload, ~100 KB each) and into every prefetch, which cost more on mobile than the CSS request.
   images: {
     formats: ["image/avif", "image/webp"],
     remotePatterns: [

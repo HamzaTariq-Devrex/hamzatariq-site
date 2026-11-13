@@ -1,8 +1,9 @@
 "use client";
 
-// Text Reveal, ported from Magic UI (magicui.design/docs/components/text-reveal): a tall section with a
-// sticky block of text whose words light up one by one as you scroll (useScroll + useTransform on
-// opacity). Adapted: the faint "ghost" copy of each word is a CSS pseudo-element (the text exists once
+// Text Reveal, ported from Magic UI (magicui.design/docs/components/text-reveal): a block of text whose
+// words light up one by one as you scroll (useScroll + useTransform on opacity). Adapted: it is not
+// pinned (the original's tall sticky section left a screen of empty space around the quote); the
+// words light up while the block travels up the screen. The faint "ghost" copy of each word is a CSS pseudo-element (the text exists once
 // in the HTML), the block can carry a footer (who said it), and with reduced motion all words show.
 // CSS in Ui.css (`.text-reveal`).
 import { useRef } from "react";
@@ -22,7 +23,7 @@ const Word = ({ word, progress, range }: { word: string; progress: MotionValue<n
 const TextReveal = ({ text, className = "", children, as = "blockquote" }: Props) => {
   const ref = useRef<HTMLDivElement>(null);
   const reduce = useReducedMotion();
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end end"] });
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start 0.92", "end 0.62"] });
   const words = text.split(" ");
   const Tag = as;
 

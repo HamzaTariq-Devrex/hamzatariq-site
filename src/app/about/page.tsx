@@ -13,6 +13,9 @@ import { PROCESS, SERVICES, formatPrice } from "@/data/services";
 import { EDUCATION_HISTORY, JOBS } from "@/data/experience";
 import WhereIWork from "@/components/site/WhereIWork";
 import ReviewStrip from "@/components/site/ReviewStrip";
+import TechOrbs from "@/components/ui/TechOrbs";
+import Timeline from "@/components/ui/Timeline";
+import VelocityBand from "@/components/ui/VelocityBand";
 import { ABOUT_REVIEWS } from "@/lib/testimonials";
 import { IMAGE_BASE, PROJECTS } from "@/data/projects";
 import { SITE } from "@/lib/site";
@@ -178,6 +181,13 @@ export default function AboutPage() {
           </div>
         </div>
         <div className="x-portrait">
+          <span className="x-portrait-ring" aria-hidden="true" />
+          <span className="x-portrait-chip is-a" aria-hidden="true">
+            <strong>45+</strong> brands served
+          </span>
+          <span className="x-portrait-chip is-b" aria-hidden="true">
+            <Icon name="code" size={16} /> React &amp; Next.js
+          </span>
           <Image
             src={SITE.photo.src}
             alt={SITE.photo.alt}
@@ -203,26 +213,26 @@ export default function AboutPage() {
         ))}
       </section>
 
-      <Section label="My story" title="From computer science to agency founder" text="How I got here, in four steps.">
-        <ol className="x-timeline">
-          {STORY.map((s) => (
-            <li key={s.title} data-reveal>
-              <span className="x-timeline-logo" aria-hidden="true">
-                {s.badge}
-              </span>
-              <div className="x-timeline-card">
-                <span className="x-timeline-when">{s.when ?? s.place}</span>
-                <h3>{s.title}</h3>
-                {s.when && <p className="x-timeline-place">{s.place}</p>}
+      <VelocityBand top={SERVICES.map((s) => s.name)} bottom={VALUES.map((v) => v.title)} />
+
+      <Section label="My story" title={<>From computer science to <span>agency founder</span></>} text="How I got here, in four steps.">
+        {/* Aceternity Timeline: the line fills in as you scroll through the four steps. */}
+        <Timeline
+          data={STORY.map((s) => ({
+            kicker: s.when ?? s.place,
+            title: s.title,
+            content: (
+              <>
+                {s.when && <p className="x-story-place">{s.place}</p>}
                 <p>{s.text}</p>
                 {s.todo && <OwnerTodo what={s.todo} />}
-              </div>
-            </li>
-          ))}
-        </ol>
+              </>
+            ),
+          }))}
+        />
       </Section>
 
-      <Section label="How I work" title="A simple process, from first call to launch" center>
+      <Section label="How I work" title={<>A simple process, from <span>first call to launch</span></>} center>
         <ol className="x-steps">
           {PROCESS.map((p, i) => (
             <li key={p.title} data-reveal style={{ transitionDelay: `${i * 80}ms` }}>
@@ -237,21 +247,11 @@ export default function AboutPage() {
         </ol>
       </Section>
 
-      <Section label="Tech stack" title="The tools I build with" text="Modern, proven tools, chosen for speed, SEO and easy changes later.">
-        <ul className="x-stack">
-          {STACK.map(({ name, Icon: Logo, use }) => (
-            <li key={name} tabIndex={0} data-reveal aria-label={`${name}: ${use}`}>
-              <Logo aria-hidden="true" />
-              <span>{name}</span>
-              <span className="x-tip" role="tooltip">
-                {use}
-              </span>
-            </li>
-          ))}
-        </ul>
+      <Section label="Tech stack" title={<>The tools I <span>build with</span></>} text="Modern, proven tools, chosen for speed, SEO and easy changes later.">
+        <TechOrbs items={STACK.map(({ name, Icon: Logo, use }) => ({ name, use, icon: <Logo /> }))} />
       </Section>
 
-      <Section label="Why work with me" title="What you can count on">
+      <Section label="Why work with me" title={<>What you can <span>count on</span></>}>
         <div className="x-grid-4">
           {VALUES.map((v) => (
             <div key={v.title} className="x-card" data-reveal>
@@ -284,7 +284,7 @@ export default function AboutPage() {
         text="Reviews posted on Instagram by brands whose websites I led at Devrex Digital. Word for word."
       />
 
-      <Section label="Selected work" title="Recent projects" text="Client websites built at Devrex Digital, in projects I led.">
+      <Section label="Selected work" title={<>Recent <span>projects</span></>} text="Client websites built at Devrex Digital, in projects I led.">
         <div className="x-work">
           {WORK.map((w) => (
             <Link key={w.href} href={w.href} className="x-work-item" data-reveal>

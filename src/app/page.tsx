@@ -3,12 +3,11 @@ import Image from "next/image";
 import SiteShell from "@/components/site/SiteShell";
 import CvLink from "@/components/site/CvLink";
 import HeroCtas from "@/components/home/HeroCtas";
-import HeroVisual from "@/components/home/HeroVisual";
+import Aurora from "@/components/home/Aurora";
 import HomeReviews from "@/components/HomeReviews";
 import { ClientWordmarks, FreeTools, HowIWork, LatestPosts, SelectedWork, ServicesBento, Statement } from "@/components/home/HomeSections";
-import Spotlight from "@/components/ui/Spotlight";
+import VelocityBand from "@/components/ui/VelocityBand";
 import WordRotate from "@/components/ui/WordRotate";
-import { GridPattern } from "@/components/ui/Patterns";
 import "@/components/styles/Blog.css";
 import "@/components/styles/Home.css";
 import { SITE } from "@/lib/site";
@@ -74,44 +73,60 @@ export default function HomePage() {
     <SiteShell>
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(structuredData)} />
 
-      <section className="hero">
-        {/* Aceternity Spotlight + Magic UI Grid Pattern behind the hero. */}
-        <GridPattern className="hero-grid" />
-        <Spotlight className="hero-spotlight" />
-        <div className="hero-text">
-          <div className="hero-who">
-            <span className="hero-photo">
-              <Image src={SITE.photo.src} alt={SITE.photo.alt} width={SITE.photo.width} height={SITE.photo.height} sizes="48px" />
-            </span>
-            <span className="hero-who-text">
-              <strong>{SITE.name}</strong>
-              <span>{SITE.role}</span>
-            </span>
-          </div>
+      <section className="hero" data-motion="none">
+        {/* Live aurora (WebGL shader) over a CSS gradient; full width, behind the header too. */}
+        <div className="hero-bg" aria-hidden="true">
+          <Aurora />
+        </div>
+
+        <div className="hero-top">
           <p className="hero-badge">
             <span className="page-status" aria-hidden="true" /> Available for new projects
           </p>
-          {/* Magic UI Word Rotate: the first word is in the server HTML; all three are in the accessible text. */}
-          <h1 className="hero-title" data-motion="none">
-            I build <WordRotate words={["websites", "dashboards", "AI chatbots"]} className="hero-rotate" /> that bring businesses customers.
-          </h1>
-          <p className="hero-lead">
-            Custom-coded in Next.js and ready for Google from day one. Based in Pakistan, working with clients worldwide.
-          </p>
-          <HeroCtas />
-          <p className="hero-meta">
-            <CvLink href={SITE.cvUrl ?? "/hire"} className="hero-cv" from="home" />
-          </p>
+          <p className="hero-place">{SITE.location}</p>
         </div>
-        <HeroVisual />
+
+        {/* Magic UI Word Rotate: the first word is in the server HTML; all three are in the accessible text. */}
+        <h1 className="hero-title">
+          <span className="hero-line is-1">
+            I build <WordRotate words={["websites", "dashboards", "AI chatbots"]} className="hero-rotate" />
+          </span>{" "}
+          <span className="hero-line is-2">that bring businesses</span>{" "}
+          <span className="hero-line is-3">
+            <em>customers.</em>
+          </span>
+        </h1>
+
+        <div className="hero-bottom">
+          <div className="hero-intro">
+            <div className="hero-who">
+              <span className="hero-photo">
+                <Image src={SITE.photo.src} alt={SITE.photo.alt} width={SITE.photo.width} height={SITE.photo.height} sizes="48px" />
+              </span>
+              <span className="hero-who-text">
+                <strong>{SITE.name}</strong>
+                <span>{SITE.role}</span>
+              </span>
+            </div>
+            <p className="hero-lead">
+              Custom-coded in Next.js and ready for Google from day one. Based in Pakistan, working with clients worldwide.
+            </p>
+          </div>
+          <div className="hero-actions">
+            <HeroCtas />
+            <p className="hero-meta">
+              <CvLink href={SITE.cvUrl ?? "/hire"} className="hero-cv" from="home" />
+            </p>
+          </div>
+        </div>
+
+        <div className="hero-scroll" aria-hidden="true">
+          <span className="hero-scroll-cue">Scroll</span>
+          <i />
+        </div>
       </section>
-      <div className="hero-scroll" aria-hidden="true">
-        <span>+</span>
-        <span>+</span>
-        <span className="hero-scroll-cue">Scroll to explore</span>
-        <span>+</span>
-        <span>+</span>
-      </div>
+
+      <VelocityBand top={["Websites", "Dashboards", "AI chatbots", "React SEO"]} bottom={["Custom code", "No templates", "Fast pages", "Ready for Google"]} />
 
       <ClientWordmarks />
       <Statement />

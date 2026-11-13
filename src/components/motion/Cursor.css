@@ -1,4 +1,6 @@
-/* Custom cursor (Cursor.tsx). Positioned with transform; the ring scales up over labelled targets. */
+/* Custom cursor (Cursor.tsx): a dot on the pointer, a trailing glow ring that opens over links and
+   buttons, and a filled label bubble over [data-cursor-label] targets. Positioned with transform;
+   only transform and opacity animate. */
 .cursor {
   position: fixed;
   left: 0;
@@ -13,7 +15,72 @@
   opacity: 1;
 }
 
-.cursor-ring {
+.cursor-follow,
+.cursor-dot {
+  position: absolute;
+  left: 0;
+  top: 0;
+  will-change: transform;
+}
+
+.cursor-dot {
+  width: 6px;
+  height: 6px;
+  margin: -3px 0 0 -3px;
+  border-radius: 50%;
+  background: var(--accent-hi);
+  box-shadow: 0 0 10px 1px rgb(var(--accent-rgb) / 0.9);
+  transition: opacity 0.2s ease;
+}
+
+/* The ring is drawn at its largest size and scaled down, so growing it never re-lays out. */
+.cursor-outline {
+  position: absolute;
+  left: -30px;
+  top: -30px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 1.5px solid rgb(var(--accent-hi-rgb) / 0.55);
+  background: rgb(var(--accent-rgb) / 0);
+  box-shadow:
+    0 0 18px -4px rgb(var(--accent-rgb) / 0.7),
+    inset 0 0 12px -6px rgb(var(--accent-hi-rgb) / 0.6);
+  transform: scale(0.6);
+  transition:
+    transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 0.3s ease,
+    border-color 0.3s ease,
+    opacity 0.25s ease;
+}
+
+.cursor.is-hover .cursor-outline {
+  transform: scale(1);
+  border-color: rgb(var(--accent-hi-rgb) / 0.9);
+  background: rgb(var(--accent-rgb) / 0.14);
+}
+
+.cursor.is-hover .cursor-dot {
+  opacity: 0;
+}
+
+.cursor.is-down .cursor-outline {
+  transform: scale(0.45);
+  transition-duration: 0.15s;
+}
+
+.cursor.is-hover.is-down .cursor-outline {
+  transform: scale(0.8);
+}
+
+/* Text fields: the native I-beam does the job; the ring steps aside. */
+.cursor.is-text .cursor-outline {
+  transform: scale(0.25);
+  opacity: 0;
+}
+
+/* Labelled targets ("View", "Read", "Drag"): a filled bubble with the label. */
+.cursor-bubble {
   position: absolute;
   left: -44px;
   top: -44px;
@@ -23,12 +90,29 @@
   place-items: center;
   border-radius: 50%;
   background: var(--accent);
-  transform: scale(0.1);
-  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  opacity: 0;
+  transform: scale(0.3);
+  transition:
+    transform 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.25s ease;
 }
 
-.cursor.is-big .cursor-ring {
+.cursor.is-big .cursor-bubble {
+  opacity: 1;
   transform: scale(1);
+}
+
+.cursor.is-big .cursor-outline {
+  opacity: 0;
+  transform: scale(1.4);
+}
+
+.cursor.is-big .cursor-dot {
+  opacity: 0;
+}
+
+.cursor.is-big.is-down .cursor-bubble {
+  transform: scale(0.88);
 }
 
 .cursor-label {

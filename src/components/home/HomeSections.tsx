@@ -6,7 +6,7 @@ import OwnerTodo from "@/components/site/OwnerTodo";
 import PostCard from "@/components/blog/PostCard";
 import Marquee from "@/components/ui/Marquee";
 import NumberTicker from "@/components/ui/NumberTicker";
-import ServiceBento from "@/components/site/ServiceBento";
+import ServiceStack from "@/components/site/ServiceStack";
 import { CardBody, CardContainer, CardItem } from "@/components/ui/Card3D";
 import { DotPattern } from "@/components/ui/Patterns";
 import Timeline from "@/components/ui/Timeline";
@@ -22,7 +22,7 @@ import { SITE } from "@/lib/site";
 export const ClientWordmarks = () => (
   <section className="wordmarks" aria-label="Brands we built websites for" data-motion="self">
     <p className="wordmarks-label">
-      <span className="u-label">Trusted by {TESTIMONIALS.length}+ brands</span>
+      <span className="u-label">Brands I&apos;ve built for</span>
     </p>
     <Marquee className="wordmarks-track" duration={46} pauseOnHover>
       {TESTIMONIALS.map((t) => (
@@ -70,10 +70,10 @@ export const Statement = () => (
   </section>
 );
 
-/* ---------- Services: Aceternity Bento Grid (shared with /services) ---------- */
+/* ---------- Services: stacking cards (shared with /services) ---------- */
 export const ServicesBento = () => (
   <Section label="Services" title={<>What I <span>build</span></>} text="Four services, one developer from the first call to launch. Prices are starting prices in USD.">
-    <ServiceBento />
+    <ServiceStack />
   </Section>
 );
 

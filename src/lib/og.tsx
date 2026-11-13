@@ -5,10 +5,10 @@ export const OG_SIZE = { width: 1200, height: 630 };
 
 type OgProps = { eyebrow: string; title: string; subtitle?: string; footer?: string };
 
-// Social preview images in the site's light style: off-white ground, ink type, one vermilion accent and
-// the hero's glossy shapes as the motif (drawn with gradients; no remote images, so it renders offline).
-const INK = "#0e0e10";
-const ACCENT = "#ff4a1c";
+// Social preview images in the site's dark style: indigo-black ground, light type, the violet accent and
+// two glossy shapes as the motif (drawn with gradients; no remote images, so it renders offline).
+const INK = "#f4f2ff";
+const ACCENT = "#7b55ff";
 
 export const renderOg = ({ eyebrow, title, subtitle, footer = "hamzatariq.site" }: OgProps) =>
   new ImageResponse(
@@ -22,7 +22,7 @@ export const renderOg = ({ eyebrow, title, subtitle, footer = "hamzatariq.site" 
           flexDirection: "column",
           justifyContent: "space-between",
           padding: "60px 72px",
-          backgroundColor: "#f2f2ef",
+          backgroundColor: "#06050f",
           color: INK,
           fontFamily: "sans-serif",
           overflow: "hidden",
@@ -37,7 +37,7 @@ export const renderOg = ({ eyebrow, title, subtitle, footer = "hamzatariq.site" 
             width: 400,
             height: 400,
             borderRadius: 400,
-            backgroundImage: `radial-gradient(circle at 34% 30%, #ffb59e 0%, ${ACCENT} 42%, #b42d08 100%)`,
+            backgroundImage: `radial-gradient(circle at 34% 30%, #cbbcff 0%, ${ACCENT} 42%, #2a1a8f 100%)`,
           }}
         />
         <div
@@ -49,7 +49,7 @@ export const renderOg = ({ eyebrow, title, subtitle, footer = "hamzatariq.site" 
             height: 210,
             borderRadius: 96,
             transform: "rotate(-24deg)",
-            backgroundImage: "linear-gradient(110deg, #3a3a40 0%, #0e0e10 55%, #2a2a2f 100%)",
+            backgroundImage: "linear-gradient(110deg, #63d6ff 0%, #5b8cff 55%, #3b3fd0 100%)",
           }}
         />
 
@@ -64,7 +64,7 @@ export const renderOg = ({ eyebrow, title, subtitle, footer = "hamzatariq.site" 
             {eyebrow}
           </div>
           <div style={{ display: "flex", fontSize: title.length > 34 ? 62 : 78, fontWeight: 600, lineHeight: 1.02, letterSpacing: -3 }}>{title}</div>
-          {subtitle && <div style={{ display: "flex", marginTop: 22, fontSize: 28, lineHeight: 1.4, color: "rgba(14,14,16,0.6)" }}>{subtitle}</div>}
+          {subtitle && <div style={{ display: "flex", marginTop: 22, fontSize: 28, lineHeight: 1.4, color: "rgba(232,229,255,0.7)" }}>{subtitle}</div>}
         </div>
 
         <div
@@ -72,14 +72,14 @@ export const renderOg = ({ eyebrow, title, subtitle, footer = "hamzatariq.site" 
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            borderTop: "1px solid rgba(14,14,16,0.14)",
+            borderTop: "1px solid rgba(232,229,255,0.16)",
             paddingTop: 22,
             fontSize: 22,
-            color: "rgba(14,14,16,0.6)",
+            color: "rgba(232,229,255,0.7)",
           }}
         >
           <span>{SITE.jobTitle}</span>
-          <span style={{ display: "flex", padding: "8px 18px", borderRadius: 100, background: INK, color: "#ffffff" }}>{footer}</span>
+          <span style={{ display: "flex", padding: "8px 18px", borderRadius: 100, background: ACCENT, color: "#ffffff" }}>{footer}</span>
         </div>
       </div>
     ),

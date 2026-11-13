@@ -6,6 +6,8 @@ import MotionProvider from "@/components/motion/MotionProvider";
 import SmoothScroll from "@/components/motion/SmoothScroll";
 import Cursor from "@/components/motion/Cursor";
 import NavProgress from "@/components/motion/NavProgress";
+import Ambient from "@/components/motion/Ambient";
+import Preloader, { PRELOADER_SCRIPT } from "@/components/site/Preloader";
 import { Analytics } from "@vercel/analytics/next";
 import "@/styles/system.css";
 // Shared shell styles load here (not only from SiteShell): Next.js leaves CSS imported inside SiteShell
@@ -14,15 +16,40 @@ import "@/components/styles/Pages.css";
 import "@/components/styles/Content.css";
 import "@/components/styles/Premium.css";
 import "@/components/styles/Ui.css";
+// The Nebula theme layer (accent words, glass cards, glows, ambient background) loads last.
+import "@/components/styles/Theme.css";
 
-// Instrument Sans (SIL OFL 1.1), self-hosted from the @fontsource-variable package: the Latin subset
-// of the variable weight axis, so builds never fetch Google Fonts. Chosen over Satoshi/General Sans
-// because their Fontshare licence forbids keeping the font files in a public repository.
+// Fonts, all SIL OFL and self-hosted from npm packages (builds never fetch Google Fonts):
+// Bricolage Grotesque (display headings), Geist (text) and Instrument Serif italic (accent words).
+// display "swap", never "optional": with "optional" Chrome skipped the fonts on a first visit and the
+// whole site rendered in Arial. Each has a size-matched fallback measured on the site's text (the
+// "… Fallback" faces in system.css; next/font's adjustFontFallback was too wide and shifted the layout
+// when the fonts swapped in). Geist is the Latin subset (29 KB), not the full 70 KB file.
+// Not Satoshi/General Sans: their Fontshare licence forbids keeping font files in a public repository.
 const display = localFont({
-  src: "../../node_modules/@fontsource-variable/instrument-sans/files/instrument-sans-latin-wght-normal.woff2",
+  src: "../../node_modules/@fontsource-variable/bricolage-grotesque/files/bricolage-grotesque-latin-wght-normal.woff2",
   variable: "--font-display",
-  weight: "400 700",
-  display: "optional",
+  weight: "200 800",
+  display: "swap",
+  adjustFontFallback: false,
+  fallback: ['"Bricolage Fallback"'],
+});
+const text = localFont({
+  src: "../../node_modules/@fontsource-variable/geist/files/geist-latin-wght-normal.woff2",
+  variable: "--font-text",
+  weight: "100 900",
+  display: "swap",
+  adjustFontFallback: false,
+  fallback: ['"Geist Fallback"'],
+});
+const accent = localFont({
+  src: "../../node_modules/@fontsource/instrument-serif/files/instrument-serif-latin-400-italic.woff2",
+  variable: "--font-accent",
+  weight: "400",
+  style: "italic",
+  display: "swap",
+  adjustFontFallback: false,
+  fallback: ['"Instrument Serif Fallback"'],
 });
 
 export const metadata: Metadata = {
@@ -46,29 +73,27 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#f2f2ef",
+  themeColor: "#06050f",
   width: "device-width",
   initialScale: 1,
 };
 
-// Accent colour (src/styles/system.css): vermilion by default. For comparing on localhost,
-// ?accent=cobalt (or ?accent=vermilion) switches it and remembers the choice in this browser.
-const ACCENT = process.env.NEXT_PUBLIC_ACCENT === "cobalt" ? "cobalt" : "vermilion";
-const accentScript = `try{var q=new URLSearchParams(location.search).get("accent");if(q==="cobalt"||q==="vermilion")localStorage.setItem("accent",q);var a=localStorage.getItem("accent");if(a==="cobalt"||a==="vermilion")document.documentElement.dataset.accent=a}catch(e){}`;
-
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={display.variable} data-accent={ACCENT} suppressHydrationWarning>
+    <html lang="en" className={`${display.variable} ${text.variable} ${accent.variable}`} suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: accentScript }} />
+        <script dangerouslySetInnerHTML={{ __html: PRELOADER_SCRIPT }} />
       </head>
       <body>
+        <Preloader />
+        <Ambient />
         <NavProgress />
         <MotionProvider>{children}</MotionProvider>
         <SmoothScroll />
         <Cursor />
         <AssistantLoader />
-        <Analytics />
+        {/* Only on Vercel: elsewhere /_vercel/insights/script.js is a 404 (a console error in Lighthouse). */}
+        {process.env.VERCEL ? <Analytics /> : null}
       </body>
     </html>
   );

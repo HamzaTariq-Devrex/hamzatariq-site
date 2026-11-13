@@ -12,7 +12,7 @@ import { jsonLd } from "@/lib/seo";
 import "@/components/styles/Tools.css";
 
 export const metadata: Metadata = {
-  title: "Website Cost Calculator: Price and Delivery Time",
+  title: "Website Cost Calculator: Price and Timeline",
   description:
     "Free website cost calculator: pick your site type, pages and features to see a starting price and delivery time based on real published prices. No sign-up.",
   alternates: { canonical: COST_CALCULATOR_TOOL.href },

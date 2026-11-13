@@ -15,7 +15,7 @@ Use `/schedule` in Claude Code (cloud routine on this repo) or any cron that run
 
 **Restricted network (cloud sandbox).** Scheduled runs may have no access to outside sites. Two things are built for that:
 
-- **Fonts:** Geist is self-hosted from the `geist` npm package (`next/font/local`), so `npm run build` never needs the network.
+- **Fonts:** all three fonts (Bricolage Grotesque, Geist, Instrument Serif) are self-hosted from `@fontsource` npm packages (`next/font/local`), so `npm run build` never needs the network.
 - **Outside links:** scheduled runs use `npm run content:check -- --external=skip-if-blocked <slugs>`. A link the network blocks (no connection, or 403/407/429 from a proxy) passes as "not verified" when it's on a trusted domain (developers.google.com, web.dev, nextjs.org, react.dev, supabase.com, vercel.com, ai.google.dev, developer.mozilla.org) and fails otherwise. Links that do answer are checked normally, so a real 404 still fails. Local runs keep the full check (`npm run content:check`).
 
 So in new posts, link outside sources on the trusted domains. A link elsewhere can't be checked from the sandbox and fails the run.
@@ -50,6 +50,7 @@ A run writes **up to 3 posts**. Do steps 1–10 for one post; after it is finish
    - Match the intent (STYLE.md "Search intent match"). Answer the query in the first 100 words; a list, table or bold definition before the second H2; one H2 per question in the brief.
    - Cover what the top results cover, better and shorter, plus the brief's unique additions. At least 2 kinds of information gain, one `<FromMyWork>` box (with a `<Figure>` screenshot when a real one exists in `public/images/work/`), 4–5 FAQ items.
    - Links: the pillar (`/blog/<pillar.slug>` if `pillar.exists`), 2 of `siblings`, `cluster.servicePage`, 1–2 official outside sources; descriptive anchor text only.
+   - When a client project really fits the topic (stores, a sector, a feature it has), link its page `/work/<slug>` from `src/data/projects.ts` once, with an anchor that names the brand and what it is ("the Dulhahouse wedding wear store"). Describe only what `projects.ts` says about it. Skip offline projects without features (`isThinProject`): they are not in the sitemap.
    - A **pillar** (`role: pillar`) is the complete guide to the cluster: 2,500–3,500 words, 8–14 H2s, linking every existing supporting post in context (the page also lists them automatically).
 8. **Link from older posts.** Add one natural sentence with a descriptive link to the new post in 2–3 of `backlinkCandidates` (same cluster first). Edit only that sentence or paragraph. If the new post is a pillar, also add the link up to it in every supporting post of the cluster that doesn't have one.
 9. `npm run content:check -- --external=skip-if-blocked <slug> <each edited older slug>`. Fix every error. Then `npm run build`; it must pass. List any "not verified" links in the run log (they're fine; the owner's local check verifies them later).
@@ -118,5 +119,5 @@ Top pages and top queries tables.
 - Never print env values. Never commit `.env*` files.
 - Never edit or delete `public/google0a499a204a55eeb8.html` or the IndexNow key file.
 - Only `content/blog/`, `content/seo/briefs/`, `content/backlog.json`, `public/images/blog/`, `reports/` and `OWNER_TODO.md` change in autopilot commits (`finish.mjs` enforces this). Never edit `content/testimonials.json`: only the owner adds reviews.
-- One new post per run. Edits to older posts are limited to adding links to the new post (and, in monthly runs, the improvements above).
+- Up to 3 new posts per run ("Every run"). Edits to older posts are limited to adding links to the new post (and, in monthly runs, the improvements above).
 - If anything is unclear or a fact is missing, block the topic instead of guessing.

@@ -3,10 +3,10 @@
  * DOM API (`animate` with springs, `inView`, `scroll`):
  *
  * - Content slides in from the sides as it enters the viewport (20% visible, once): text from the left,
- *   images, cards and visuals from the right; opacity 0 → 1, blur 8px → 0, spring (stiffness 80,
- *   damping 20). Phones move 40px instead of 80px.
+ *   images, cards and visuals from the right; opacity 0 → 1, blur 10px → 0, spring (stiffness 70,
+ *   damping 15, a small overshoot). 140px on desktop, 44px on phones.
  * - Grids (`[data-stagger]`, or any CSS grid with items side by side) stagger their items 0.08 s apart,
- *   alternating left/right, scale 0.95 → 1. Two-column sections: left column from the left, right
+ *   alternating left/right, scale 0.88 → 1 with a 5° swing (desktop). Two-column sections: left column from the left, right
  *   column from the right.
  * - Headings (h2, the closing CTA, `[data-words]`, and the h1 after a client-side navigation): words
  *   slide up one by one inside a mask, the accent word (`<span>`) last.
@@ -21,7 +21,7 @@
  */
 import { animate, inView, scroll } from "framer-motion";
 
-const SPRING = { type: "spring", stiffness: 80, damping: 20, mass: 1 } as const;
+const SPRING = { type: "spring", stiffness: 70, damping: 15, mass: 1 } as const;
 const FADE = { duration: 0.8, ease: [0.22, 1, 0.36, 1] } as const;
 const WORD = { duration: 0.75, ease: [0.16, 1, 0.3, 1] } as const;
 
@@ -90,7 +90,8 @@ const autoUnits = (block: HTMLElement) => {
 export function run(isFirst: boolean): Stop[] {
   const stops: Stop[] = [];
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const dist = window.innerWidth < 768 ? 40 : 80;
+  const dist = window.innerWidth < 768 ? 44 : 140;
+  const tilt = window.innerWidth < 768 ? 0 : 5;
   const vh = window.innerHeight;
   const onScreen = (el: HTMLElement) => {
     const r = el.getBoundingClientRect();
@@ -129,11 +130,13 @@ export function run(isFirst: boolean): Stop[] {
     if (el.parentElement && el.parentElement !== el && scrollsSidewaysParent(el.parentElement)) return;
     el.dataset.motionDone = "1";
     const x = dir === "left" ? -dist : dir === "right" ? dist : 0;
-    const y = dir === "up" ? 32 : 0;
+    const y = dir === "up" ? 48 : 0;
+    // Cards also swing in: a few degrees of rotation that settle with the spring.
+    const rot = scale < 1 && x ? (x > 0 ? tilt : -tilt) : 0;
     // Hidden in place; the slide offset is applied when the animation starts, so the element is
     // observed at its real position (an offset could push it outside the page's clip box).
     el.style.opacity = "0";
-    if (!reduce) el.style.filter = "blur(8px)";
+    if (!reduce) el.style.filter = "blur(10px)";
     watch(el, () => {
       const done = () => {
         el.style.removeProperty("opacity");
@@ -146,7 +149,7 @@ export function run(isFirst: boolean): Stop[] {
       }
       animate(
         el,
-        { x: [x, 0], y: [y, 0], scale: [scale, 1], opacity: [0, 1], filter: ["blur(8px)", "blur(0px)"] },
+        { x: [x, 0], y: [y, 0], rotate: [rot, 0], scale: [scale, 1], opacity: [0, 1], filter: ["blur(10px)", "blur(0px)"] },
         { default: { ...SPRING, delay }, opacity: { ...FADE, delay }, filter: { ...FADE, delay } },
       ).then(done);
     });
@@ -160,7 +163,7 @@ export function run(isFirst: boolean): Stop[] {
     [...grid.children].forEach((child, i) => {
       const el = child as HTMLElement;
       const forced = el.dataset.reveal as Dir | undefined;
-      reveal(el, forced === "left" || forced === "right" || forced === "up" ? forced : i % 2 ? "right" : "left", Math.min(i, 10) * 0.08, 0.95);
+      reveal(el, forced === "left" || forced === "right" || forced === "up" ? forced : i % 2 ? "right" : "left", Math.min(i, 10) * 0.09, 0.88);
     });
   };
 

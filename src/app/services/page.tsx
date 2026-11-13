@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import ServiceBento from "@/components/site/ServiceBento";
+import ServiceStack from "@/components/site/ServiceStack";
 import Timeline from "@/components/ui/Timeline";
 import Link from "next/link";
 import SiteShell from "@/components/site/SiteShell";
@@ -72,7 +72,7 @@ export default function ServicesPage() {
       </section>
 
       <section className="x-section svc-bento" aria-label="Services">
-        <ServiceBento />
+        <ServiceStack level={2} />
       </section>
       <p className="svc-note">{PRICE_NOTE}</p>
 

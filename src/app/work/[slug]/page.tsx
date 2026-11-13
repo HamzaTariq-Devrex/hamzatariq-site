@@ -4,7 +4,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import SiteShell from "@/components/site/SiteShell";
 import ReviewStory from "@/components/site/ReviewStory";
-import { IMAGE_BASE, PROJECTS } from "@/data/projects";
+import ProjectCard from "@/components/ProjectCard";
+import { IMAGE_BASE, PROJECTS, isStoreProject, isThinProject } from "@/data/projects";
 import { SITE } from "@/lib/site";
 import { REVIEW_LABEL, brandLinkLabel, getProjectReview } from "@/lib/testimonials";
 import { jsonLd, projectDescription, projectTitle } from "@/lib/seo";
@@ -49,6 +50,10 @@ export default async function ProjectPage({ params }: Params) {
   const next = PROJECTS[(index + 1) % PROJECTS.length];
   const pageUrl = `${SITE.url}/work/${project.slug}`;
   const review = getProjectReview(project.slug);
+  const isStore = isStoreProject(project);
+  // Up to three more projects, same category first, live and indexable ones only.
+  const others = PROJECTS.filter((p) => p.slug !== project.slug && !isThinProject(p));
+  const related = [...others.filter((p) => p.category === project.category), ...others.filter((p) => p.category !== project.category)].slice(0, 3);
   const structuredData = {
     "@context": "https://schema.org",
     "@graph": [
@@ -197,6 +202,26 @@ export default async function ProjectPage({ params }: Params) {
           </ul>
         </section>
       )}
+
+      <section className="svc-section">
+        <h2>More {isStore ? "online stores" : "websites"} like this</h2>
+        <p className="x-lead project-related-lead">
+          {isStore ? "Want a store like this for your brand? " : "Want a website like this for your business? "}
+          See <Link href="/services/nextjs-websites">Next.js website development</Link>
+          {isStore ? (
+            <>
+              {" "}
+              and how I build <Link href="/solutions/ecommerce-brands">custom ecommerce websites for brands</Link>
+            </>
+          ) : null}
+          , with packages, prices and delivery times.
+        </p>
+        <div className="project-grid is-static">
+          {related.map((p, i) => (
+            <ProjectCard key={p.slug} project={p} index={i} />
+          ))}
+        </div>
+      </section>
 
       <nav className="project-pager" aria-label="More projects">
         <Link href={`/work/${prev.slug}`} className="project-pager-link">

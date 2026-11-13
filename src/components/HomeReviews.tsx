@@ -7,8 +7,8 @@ import "./styles/Reviews.css";
 import { HOME_FEATURED_ID, REVIEW_LABEL, TESTIMONIALS, brandLinkLabel, getTestimonial, shortQuote, type Testimonial } from "@/lib/testimonials";
 
 /**
- * Home "Trusted by" section: the featured quote lights up word by word as you scroll (Magic UI Text
- * Reveal), then two rows of short quotes moving in opposite directions (Aceternity Infinite Moving
+ * Home reviews section (no brand count in the heading: owner, 2026-11-12): the featured quote lights
+ * up word by word as it scrolls up the screen (Magic UI Text Reveal), then two rows of short quotes moving in opposite directions (Aceternity Infinite Moving
  * Cards: faded edges, pause on hover, a static grid with reduced motion). Every quote is word for
  * word; cut ones end in "…" and link to the full review on /reviews.
  */
@@ -55,7 +55,7 @@ const HomeReviews = () => {
       label="Reviews"
       title={
         <>
-          Trusted by {TESTIMONIALS.length}+ <span>brands</span>
+          What clients <span>say</span>
         </>
       }
       text="Reviews brands posted on Instagram after we built their websites. Word for word, each linked to the brand."
