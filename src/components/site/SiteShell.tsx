@@ -5,10 +5,10 @@ import { TOOLS } from "@/data/tools";
 import { SOLUTIONS_LINK } from "@/data/solutions";
 import BookCall from "./BookCall";
 import SiteHeader from "./SiteHeader";
-import "../styles/Pages.css";
-import "../styles/Content.css";
-import "../styles/Premium.css";
 import Reveal from "./ds/Reveal";
+import Magnetic from "../motion/Magnetic";
+import Marquee from "../ui/Marquee";
+import BackgroundBeams from "../ui/BackgroundBeams";
 
 type Props = {
   children: React.ReactNode;
@@ -22,7 +22,7 @@ type Props = {
 const DEFAULT_CTA = {
   title: (
     <>
-      Let&apos;s build something <span>great</span> together.
+      Let&apos;s work <span>together.</span>
     </>
   ),
   text: "Tell me what you want to build or fix. You'll get a clear plan and quote after a free call.",
@@ -41,14 +41,28 @@ const SiteShell = ({ children, hideCta = false, cta = DEFAULT_CTA, stickyCta = f
       </div>
     )}
 
+    {!hideCta && (
+      <div className="cta-marquee" aria-hidden="true">
+        {/* Magic UI Marquee */}
+        <Marquee duration={30} repeat={3}>
+          <span>Let&apos;s work together&nbsp;·&nbsp;</span>
+          <span>Let&apos;s work together&nbsp;·&nbsp;</span>
+        </Marquee>
+      </div>
+    )}
+
     <footer className="page-footer">
       {!hideCta && (
-        <div className="page-cta" data-reveal>
+        <div className="page-cta">
+          {/* Aceternity Background Beams */}
+          <BackgroundBeams />
           <span className="page-eyebrow">Have a project in mind?</span>
           <h2>{cta.title}</h2>
           {cta.text && <p className="page-cta-text">{cta.text}</p>}
           <div className="page-cta-actions">
-            <BookCall />
+            <Magnetic>
+              <BookCall shimmer />
+            </Magnetic>
             <a href={`mailto:${SITE.email}`} className="page-btn page-btn-ghost">
               {SITE.email}
             </a>

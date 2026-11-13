@@ -8,6 +8,8 @@ import Faq from "@/components/site/ds/Faq";
 import Section from "@/components/site/ds/Section";
 import PostCard from "@/components/blog/PostCard";
 import PostCta from "@/components/blog/PostCta";
+import PostCover from "@/components/blog/PostCover";
+import TocSpy from "@/components/blog/TocSpy";
 import { renderMdx } from "@/components/blog/mdx";
 import { formatPostDate, getClusterPosts, getPost, getPosts, getRelatedPosts, isLivePost, isScheduled, tagSlug } from "@/lib/blog";
 import { SITE } from "@/lib/site";
@@ -113,13 +115,12 @@ export default async function PostPage({ params }: Params) {
   return (
     <SiteShell hideCta>
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(structuredData)} />
-      <nav className="project-crumbs" aria-label="Breadcrumb">
-        <Link href="/blog">Blog</Link>
-        <span>/</span>
-        <Link href={`/blog/category/${post.category.slug}`}>{post.category.name}</Link>
-      </nav>
-
       <header className="post-head">
+        <nav className="post-crumbs" aria-label="Breadcrumb">
+          <Link href="/blog">Blog</Link>
+          <span aria-hidden="true">/</span>
+          <Link href={`/blog/category/${post.category.slug}`}>{post.category.name}</Link>
+        </nav>
         {isScheduled(post) && <p className="post-scheduled">Scheduled: goes live on {formatPostDate(post.published)}</p>}
         <p className="post-kicker">
           <Link href={`/blog/category/${post.category.slug}`} className="x-label">
@@ -164,9 +165,14 @@ export default async function PostPage({ params }: Params) {
         )}
       </header>
 
+      <div className="post-hero-cover">
+        <PostCover post={post} size="hero" priority />
+      </div>
+
       <div className="post-layout">
         {post.toc.length > 2 && (
           <aside className="post-toc" aria-label="On this page">
+            <TocSpy />
             <p>On this page</p>
             <ol>
               {post.toc

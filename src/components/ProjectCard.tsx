@@ -42,7 +42,7 @@ const ProjectCard = ({ project, index, fullReload = false, priority = false }: P
 
   const props = {
     className: "project-card",
-    "data-cursor": "disable",
+    "data-cursor-label": "View",
     style: { transitionDelay: `${(index % 3) * 0.08}s` },
   };
 

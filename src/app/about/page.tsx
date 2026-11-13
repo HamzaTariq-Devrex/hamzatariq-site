@@ -13,9 +13,11 @@ import { PROCESS, SERVICES, formatPrice } from "@/data/services";
 import { EDUCATION_HISTORY, JOBS } from "@/data/experience";
 import WhereIWork from "@/components/site/WhereIWork";
 import ReviewStrip from "@/components/site/ReviewStrip";
+import TechOrbs from "@/components/ui/TechOrbs";
+import Timeline from "@/components/ui/Timeline";
+import VelocityBand from "@/components/ui/VelocityBand";
 import { ABOUT_REVIEWS } from "@/lib/testimonials";
 import { IMAGE_BASE, PROJECTS } from "@/data/projects";
-import { OWN_SITE_RESULTS } from "@/data/ownSite";
 import { SITE } from "@/lib/site";
 import { jsonLd } from "@/lib/seo";
 
@@ -44,13 +46,11 @@ const structuredData = {
   ],
 };
 
-const seoAfter = Number(OWN_SITE_RESULTS.seo.after);
-
 const STATS = [
   { value: 45, suffix: "+", label: "Brands served", note: `With my team at ${SITE.agency.name}` },
   { value: PROJECTS.length, suffix: "", label: "Projects in my portfolio", note: "Browse them on the work page" },
   { value: SERVICES.length, suffix: "", label: "Services", note: "Websites, dashboards, AI chatbots, SEO" },
-  { value: seoAfter, suffix: "", label: "Mobile SEO score", note: "This site, Lighthouse, after the Next.js move" },
+  { value: 40, suffix: "+", label: "Live websites shipped", note: "As the sole frontend developer on each build" },
 ];
 
 const devrex = JOBS.find((j) => j.company === "Devrex Digital")!;
@@ -99,7 +99,7 @@ const STACK = [
 const VALUES: { title: string; text: string; icon: IconName }[] = [
   { title: "Custom code, no templates", text: "Every site is designed and built around your business, not around what a theme allows.", icon: "code" },
   { title: "Built for speed", text: "Pre-rendered pages and optimised images, so your site loads fast on the phones your customers use.", icon: "speed" },
-  { title: "SEO built in", text: "Titles, descriptions, sitemap and structured data from day one, the same setup this site uses.", icon: "search" },
+  { title: "SEO built in", text: "Titles, descriptions, sitemap and structured data on every page from day one.", icon: "search" },
   { title: "Direct communication", text: "You talk to me, the person building your project, from the first call to launch and after.", icon: "chat" },
 ];
 
@@ -181,6 +181,13 @@ export default function AboutPage() {
           </div>
         </div>
         <div className="x-portrait">
+          <span className="x-portrait-ring" aria-hidden="true" />
+          <span className="x-portrait-chip is-a" aria-hidden="true">
+            <strong>45+</strong> brands served
+          </span>
+          <span className="x-portrait-chip is-b" aria-hidden="true">
+            <Icon name="code" size={16} /> React &amp; Next.js
+          </span>
           <Image
             src={SITE.photo.src}
             alt={SITE.photo.alt}
@@ -189,6 +196,8 @@ export default function AboutPage() {
             sizes="(max-width: 960px) 72vw, 420px"
             priority
           />
+          {/* The owner's working photo (blue shirt at a desk) replaces this headshot once it's provided. */}
+          <OwnerTodo what="Send the working photo (blue shirt at a desk) for /about and the home 'How I work' section." />
         </div>
       </section>
 
@@ -204,26 +213,26 @@ export default function AboutPage() {
         ))}
       </section>
 
-      <Section label="My story" title="From computer science to agency founder" text="How I got here, in four steps.">
-        <ol className="x-timeline">
-          {STORY.map((s) => (
-            <li key={s.title} data-reveal>
-              <span className="x-timeline-logo" aria-hidden="true">
-                {s.badge}
-              </span>
-              <div className="x-timeline-card">
-                <span className="x-timeline-when">{s.when ?? s.place}</span>
-                <h3>{s.title}</h3>
-                {s.when && <p className="x-timeline-place">{s.place}</p>}
+      <VelocityBand top={SERVICES.map((s) => s.name)} bottom={VALUES.map((v) => v.title)} />
+
+      <Section label="My story" title={<>From computer science to <span>agency founder</span></>} text="How I got here, in four steps.">
+        {/* Aceternity Timeline: the line fills in as you scroll through the four steps. */}
+        <Timeline
+          data={STORY.map((s) => ({
+            kicker: s.when ?? s.place,
+            title: s.title,
+            content: (
+              <>
+                {s.when && <p className="x-story-place">{s.place}</p>}
                 <p>{s.text}</p>
                 {s.todo && <OwnerTodo what={s.todo} />}
-              </div>
-            </li>
-          ))}
-        </ol>
+              </>
+            ),
+          }))}
+        />
       </Section>
 
-      <Section label="How I work" title="A simple process, from first call to launch" center>
+      <Section label="How I work" title={<>A simple process, from <span>first call to launch</span></>} center>
         <ol className="x-steps">
           {PROCESS.map((p, i) => (
             <li key={p.title} data-reveal style={{ transitionDelay: `${i * 80}ms` }}>
@@ -238,21 +247,11 @@ export default function AboutPage() {
         </ol>
       </Section>
 
-      <Section label="Tech stack" title="The tools I build with" text="Modern, proven tools, chosen for speed, SEO and easy changes later.">
-        <ul className="x-stack">
-          {STACK.map(({ name, Icon: Logo, use }) => (
-            <li key={name} tabIndex={0} data-reveal aria-label={`${name}: ${use}`}>
-              <Logo aria-hidden="true" />
-              <span>{name}</span>
-              <span className="x-tip" role="tooltip">
-                {use}
-              </span>
-            </li>
-          ))}
-        </ul>
+      <Section label="Tech stack" title={<>The tools I <span>build with</span></>} text="Modern, proven tools, chosen for speed, SEO and easy changes later.">
+        <TechOrbs items={STACK.map(({ name, Icon: Logo, use }) => ({ name, use, icon: <Logo /> }))} />
       </Section>
 
-      <Section label="Why work with me" title="What you can count on">
+      <Section label="Why work with me" title={<>What you can <span>count on</span></>}>
         <div className="x-grid-4">
           {VALUES.map((v) => (
             <div key={v.title} className="x-card" data-reveal>
@@ -285,7 +284,7 @@ export default function AboutPage() {
         text="Reviews posted on Instagram by brands whose websites I led at Devrex Digital. Word for word."
       />
 
-      <Section label="Selected work" title="Recent projects" text="Client websites built at Devrex Digital, in projects I led.">
+      <Section label="Selected work" title={<>Recent <span>projects</span></>} text="Client websites built at Devrex Digital, in projects I led.">
         <div className="x-work">
           {WORK.map((w) => (
             <Link key={w.href} href={w.href} className="x-work-item" data-reveal>

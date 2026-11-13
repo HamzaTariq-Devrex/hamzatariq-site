@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { PROJECTS } from "@/data/projects";
+import { PROJECTS, isThinProject } from "@/data/projects";
 import { SERVICES } from "@/data/services";
 import { CASE_STUDIES } from "@/data/caseStudies";
 import { TOOLS } from "@/data/tools";
@@ -40,6 +40,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     page("/hire", 0.7),
     ...(hasReviews ? [page("/reviews", 0.6)] : []),
     page("/contact", 0.7),
-    ...PROJECTS.map((p) => page(`/work/${p.slug}`, p.url ? 0.6 : 0.4, "yearly")),
+    ...PROJECTS.filter((p) => !isThinProject(p)).map((p) => page(`/work/${p.slug}`, p.url ? 0.6 : 0.4, "yearly")),
   ];
 }

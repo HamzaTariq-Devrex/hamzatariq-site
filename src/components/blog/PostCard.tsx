@@ -1,22 +1,16 @@
-import Image from "next/image";
 import Link from "next/link";
 import { formatPostDate, isScheduled, type Post } from "@/lib/blog";
 import Icon from "@/components/site/ds/Icon";
+import PostCover from "./PostCover";
 
-/** Blog listing card. Scheduled posts only appear on local and preview builds, with a badge. */
+/**
+ * Blog listing card: cover art on top (beside the text for the featured post), then category, date and
+ * reading time, title, summary and "Read the post". Scheduled posts only appear on local and preview
+ * builds, with a badge.
+ */
 const PostCard = ({ post, featured = false }: { post: Post; featured?: boolean }) => (
-  <Link href={`/blog/${post.slug}`} className={`post-card${featured ? " is-featured" : ""}`} data-reveal>
-    {post.cover && (
-      <div className="post-card-cover">
-        <Image
-          src={post.cover.src}
-          alt={post.cover.alt}
-          width={post.cover.width}
-          height={post.cover.height}
-          sizes={featured ? "(max-width: 960px) 92vw, 640px" : "(max-width: 760px) 92vw, 380px"}
-        />
-      </div>
-    )}
+  <Link href={`/blog/${post.slug}`} className={`post-card${featured ? " is-featured" : ""}`} data-reveal data-cursor-label="Read">
+    <PostCover post={post} size={featured ? "feature" : "card"} />
     <div className="post-card-body">
       <span className="post-card-meta">
         <span className="post-cat">{post.category.name}</span>
@@ -29,8 +23,11 @@ const PostCard = ({ post, featured = false }: { post: Post; featured?: boolean }
       </span>
       <h2>{post.title}</h2>
       <p>{post.description}</p>
-      <span className="x-link">
-        Read the post <Icon name="arrow" size={16} />
+      <span className="post-card-more">
+        Read the post
+        <span className="post-card-arrow">
+          <Icon name="arrow" size={15} />
+        </span>
       </span>
     </div>
   </Link>

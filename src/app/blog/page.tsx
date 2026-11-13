@@ -3,6 +3,7 @@ import Link from "next/link";
 import SiteShell from "@/components/site/SiteShell";
 import PostCard from "@/components/blog/PostCard";
 import { EmptyBlog } from "@/components/blog/EmptyBlog";
+import OpenChat from "@/components/site/ds/OpenChat";
 import { BLOG_CATEGORIES, getPosts, getPostsInCategory } from "@/lib/blog";
 import { SITE } from "@/lib/site";
 import { jsonLd } from "@/lib/seo";
@@ -20,6 +21,7 @@ export const metadata: Metadata = {
 export default function BlogPage() {
   const posts = getPosts();
   const [featured, ...rest] = posts;
+  const topics = BLOG_CATEGORIES.map((c) => ({ ...c, count: getPostsInCategory(c.slug).length })).filter((c) => c.count > 0);
   const structuredData = {
     "@context": "https://schema.org",
     "@graph": [
@@ -44,44 +46,60 @@ export default function BlogPage() {
   return (
     <SiteShell>
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(structuredData)} />
-      <section className="x-hero x-hero-center blog-hero">
-        <span className="x-label">Blog</span>
-        <h1 className="x-h1">
-          Notes from <span>building fast websites</span>
-        </h1>
-        <p className="x-hero-lead">
-          Practical guides on Next.js websites, dashboards, AI chatbots and React SEO, with real numbers from my own projects.
-        </p>
-      </section>
-
-      <nav className="blog-cats" aria-label="Categories">
-        <Link href="/blog" className="is-active">
-          All posts <span>{posts.length}</span>
-        </Link>
-        {BLOG_CATEGORIES.filter((c) => getPostsInCategory(c.slug).length > 0).map((c) => (
-          <Link key={c.slug} href={`/blog/category/${c.slug}`}>
-            {c.name} <span>{getPostsInCategory(c.slug).length}</span>
+      <section className="blog-top">
+        <div className="blog-intro">
+          <span className="x-label">Blog</span>
+          <h1 className="x-h1">
+            Notes from <span>building fast websites</span>
+          </h1>
+          <p className="x-hero-lead">
+            Practical guides on Next.js websites, dashboards, AI chatbots and React SEO, with real numbers from my own projects.
+          </p>
+        </div>
+        <nav className="blog-topics" aria-label="Topics">
+          <p className="blog-topics-title">Browse by topic</p>
+          <Link href="/blog" className="is-active" aria-current="page">
+            All posts <span>{posts.length}</span>
           </Link>
-        ))}
-      </nav>
+          {topics.map((c) => (
+            <Link key={c.slug} href={`/blog/category/${c.slug}`}>
+              {c.name} <span>{c.count}</span>
+            </Link>
+          ))}
+        </nav>
+      </section>
 
       {featured ? (
         <>
+          <p className="blog-kicker">Latest guide</p>
           <PostCard post={featured} featured />
           {rest.length > 0 && (
-            <div className="post-grid">
-              {rest.map((p) => (
-                <PostCard key={p.slug} post={p} />
-              ))}
-            </div>
+            <>
+              <h2 className="blog-kicker">More guides</h2>
+              <div className="post-grid" data-stagger>
+                {rest.map((p) => (
+                  <PostCard key={p.slug} post={p} />
+                ))}
+              </div>
+            </>
           )}
         </>
       ) : (
         <EmptyBlog />
       )}
-      <p className="blog-rss">
-        <a href="/blog/rss.xml">Subscribe with RSS</a>
-      </p>
+
+      <section className="blog-follow" data-reveal>
+        <div>
+          <h2>Get the next guide</h2>
+          <p>Every new post goes into the RSS feed. Have a question about your own site? My AI assistant answers from these guides and my services.</p>
+        </div>
+        <div className="blog-follow-actions">
+          <a href="/blog/rss.xml" className="page-btn page-btn-ghost">
+            RSS feed
+          </a>
+          <OpenChat className="page-btn page-btn-primary">Ask my AI assistant</OpenChat>
+        </div>
+      </section>
     </SiteShell>
   );
 }

@@ -1,0 +1,854 @@
+/* Home page (src/app/page.tsx, src/components/home/). Tokens from src/styles/system.css. Sections sit
+   in the page container; the hero stage and the velocity band run the full width of the screen. */
+
+/* ---------- Hero: giant type over a live aurora ---------- */
+.hero {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100svh - 76px - clamp(20px, 3.5vw, 44px));
+  padding: clamp(4px, 1.2vh, 14px) 0 clamp(54px, 8vh, 84px);
+}
+
+/* Full-width stage behind the hero and the header. The gradient is the server-rendered look; the
+   WebGL canvas (Aurora.tsx) fades in over it. */
+.hero-bg {
+  position: absolute;
+  z-index: -1;
+  top: -160px;
+  bottom: -90px;
+  left: calc(50% - 50vw);
+  width: 100vw;
+  overflow: hidden;
+  pointer-events: none;
+  background:
+    radial-gradient(60% 46% at 22% 100%, rgb(var(--accent-rgb) / 0.62), transparent 70%),
+    radial-gradient(56% 42% at 78% 96%, rgb(var(--accent-2-rgb) / 0.55), transparent 72%),
+    radial-gradient(38% 26% at 52% 78%, rgb(var(--accent-3-rgb) / 0.22), transparent 70%),
+    radial-gradient(50% 40% at 76% 0%, rgb(var(--accent-rgb) / 0.2), transparent 70%);
+  -webkit-mask-image: linear-gradient(#000 82%, transparent);
+  mask-image: linear-gradient(#000 82%, transparent);
+}
+
+.aurora {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 1.4s ease;
+}
+
+.aurora.is-live {
+  opacity: 1;
+}
+
+.hero-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  animation: heroFade 0.9s var(--ease) both;
+}
+
+.hero-badge,
+.hero-place {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.hero-badge {
+  padding: 7px 14px 7px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--line-strong);
+  background: rgb(var(--ink-rgb) / 0.05);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+.hero-place {
+  color: var(--muted);
+}
+
+.hero-title {
+  margin: auto 0;
+  padding: clamp(28px, 6vh, 72px) 0;
+  font-size: clamp(42px, min(7.9vw, 14.6vh), 132px);
+  font-weight: 600;
+  line-height: 0.94;
+  letter-spacing: -0.05em;
+  text-wrap: nowrap;
+}
+
+/* Each line flies in from a side. Transform only: the text is painted once, in the first frame, so it
+   counts as the largest paint straight away (a blur filter here repainted every frame and moved LCP
+   to the end of the animation). */
+.hero-line {
+  display: block;
+  animation: heroLineL 1.15s var(--ease-out) both;
+}
+
+.hero-line.is-2 {
+  padding-left: clamp(0px, 9vw, 160px);
+  animation-name: heroLineR;
+  animation-delay: 0.08s;
+}
+
+.hero-line.is-3 {
+  padding-left: clamp(0px, 4vw, 70px);
+  animation-delay: 0.16s;
+}
+
+.hero-title em,
+.hero-rotate .word-rotate-word,
+.hero-rotate .word-rotate-sizer {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 1.07em;
+  letter-spacing: -0.03em;
+  padding-right: 0.08em;
+}
+
+.hero-title em,
+.hero-rotate .word-rotate-word {
+  background: var(--accent-grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+.hero-title em {
+  display: inline-block;
+  padding-bottom: 0.12em;
+  margin-bottom: -0.12em;
+}
+
+.hero-rotate .word-rotate-stage {
+  overflow-clip-margin: 0.24em;
+}
+
+@keyframes heroLineL {
+  from {
+    transform: translate3d(-16vw, 0, 0) skewX(12deg);
+  }
+}
+
+@keyframes heroLineR {
+  from {
+    transform: translate3d(16vw, 0, 0) skewX(-12deg);
+  }
+}
+
+@keyframes heroFade {
+  from {
+    transform: translate3d(0, 22px, 0);
+  }
+}
+
+.hero-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: clamp(24px, 4vw, 64px);
+  padding-top: clamp(20px, 3vh, 30px);
+  border-top: 1px solid rgb(var(--ink-rgb) / 0.16);
+  animation: heroFade 1s var(--ease) 0.25s both;
+}
+
+.hero-intro {
+  min-width: 0;
+}
+
+.hero-who {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.hero-photo {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px rgb(var(--ink-rgb) / 0.3), 0 0 0 5px rgb(var(--ink-rgb) / 0.07);
+}
+
+.hero-photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hero-who-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.3;
+}
+
+.hero-who-text strong {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.hero-who-text span {
+  font-size: 13px;
+  color: var(--fg-2);
+}
+
+.hero-lead {
+  margin: 16px 0 0;
+  max-width: 470px;
+  font-size: var(--fs-lead);
+  line-height: 1.6;
+  color: var(--fg-2);
+}
+
+.hero-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex: none;
+}
+
+.hero-ctas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.hero-ctas .page-btn {
+  height: 54px;
+  padding: 0 26px;
+  font-size: 15px;
+}
+
+.hero-free {
+  margin-left: 2px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--on-accent);
+  background: var(--accent);
+}
+
+.hero-meta {
+  margin: 14px 4px 0;
+  font-size: 13.5px;
+}
+
+.hero-cv {
+  color: var(--fg-2);
+  text-decoration: underline;
+  text-decoration-color: rgb(var(--ink-rgb) / 0.35);
+  text-underline-offset: 4px;
+  transition: text-decoration-color 0.25s ease, color 0.25s ease;
+}
+
+.hero-cv:hover {
+  color: var(--fg);
+  text-decoration-color: var(--accent-3);
+}
+
+/* "Scroll" cue with a line that keeps dropping, centred at the bottom of the hero. */
+.hero-scroll {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  transform: translateX(-50%);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.hero-scroll i {
+  position: relative;
+  width: 1px;
+  height: 34px;
+  overflow: hidden;
+  background: rgb(var(--ink-rgb) / 0.16);
+}
+
+.hero-scroll i::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(transparent, var(--accent-3));
+  animation: scrollCue 2.2s var(--ease) infinite;
+}
+
+@keyframes scrollCue {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(100%);
+  }
+}
+
+/* ---------- Velocity band under the hero ---------- */
+.vband {
+  display: grid;
+  gap: clamp(6px, 1vw, 14px);
+  margin: clamp(40px, 6vw, 88px) calc(50% - 50vw) var(--section-gap);
+  padding: clamp(18px, 2.4vw, 34px) 0;
+  overflow: hidden;
+  rotate: -2deg;
+  scale: 1.04;
+  border-block: 1px solid var(--line);
+  user-select: none;
+}
+
+.vband-track {
+  display: flex;
+  width: max-content;
+  will-change: transform;
+}
+
+.vband-copy {
+  display: flex;
+  flex: none;
+}
+
+.vband-word {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-head);
+  font-size: clamp(40px, 7.4vw, 124px);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.045em;
+  white-space: nowrap;
+}
+
+.vband-word i {
+  width: 0.2em;
+  height: 0.2em;
+  margin: 0 0.34em;
+  border-radius: 50%;
+  background: var(--accent-fill);
+  box-shadow: 0 0 28px rgb(var(--accent-rgb) / 0.9);
+}
+
+.vband-row.is-outline .vband-word {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.03em;
+  background: var(--accent-grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  padding-bottom: 0.1em;
+}
+
+/* ---------- Client wordmarks (Magic UI Marquee) ---------- */
+.wordmarks {
+  margin: 0 0 var(--section-gap);
+}
+
+.wordmarks-label {
+  margin: 0 0 22px;
+  color: var(--muted);
+}
+
+.wordmarks-track {
+  --gap: clamp(36px, 4.4vw, 72px);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+}
+
+.wordmark {
+  font-size: clamp(22px, 2.2vw, 34px);
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  white-space: nowrap;
+  color: var(--muted);
+  transition: color 0.3s ease;
+}
+
+.wordmark:hover {
+  color: var(--fg);
+}
+
+/* ---------- Statement + numbers ---------- */
+.statement-block {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr);
+  align-items: end;
+  gap: clamp(40px, 6vw, 96px);
+  margin: 0 0 var(--section-gap);
+}
+
+.statement-dots {
+  z-index: -1;
+  inset: -48px -24px;
+  -webkit-mask-image: radial-gradient(60% 60% at 80% 60%, #000, transparent 72%);
+  mask-image: radial-gradient(60% 60% at 80% 60%, #000, transparent 72%);
+}
+
+.statement {
+  margin: 0;
+  max-width: 20ch;
+  font-size: clamp(34px, 4.6vw, 76px);
+  font-weight: var(--weight-display);
+  line-height: 1.02;
+  letter-spacing: var(--tracking-display);
+}
+
+.statement > span:not(.ln) {
+  color: var(--accent-hi);
+}
+
+.statement-side {
+  margin: clamp(24px, 3vw, 40px) 0 0;
+  max-width: 520px;
+  font-size: var(--fs-lead);
+  line-height: 1.65;
+  color: var(--muted);
+}
+
+.statement-side .x-link {
+  white-space: nowrap;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column-reverse;
+  justify-content: flex-end;
+  gap: 6px;
+  min-width: 0;
+  padding: 22px 22px 20px;
+  border-radius: 20px;
+  border: 1px solid var(--line);
+  background: var(--bg-elev);
+}
+
+.stat dd {
+  margin: 0;
+  font-size: clamp(38px, 3.6vw, 56px);
+  font-weight: var(--weight-display);
+  line-height: 1;
+  letter-spacing: var(--tracking-display);
+  font-variant-numeric: tabular-nums;
+}
+
+.stat dt {
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+/* ---------- Selected work: pinned horizontal track of 3D cards ---------- */
+.hwork {
+  position: relative;
+  margin: 0 0 var(--section-gap);
+}
+
+.hwork-head {
+  margin-bottom: clamp(28px, 3vw, 44px);
+}
+
+.hwork-track {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(28px, 3vw, 44px) clamp(16px, 2vw, 28px);
+}
+
+.hwork-more {
+  display: flex;
+  justify-content: center;
+  margin: 40px 0 0;
+}
+
+/* Desktop: the section is as tall as the sideways distance; its content sticks and the track moves. */
+.hwork.is-pinned {
+  height: calc(100vh + var(--hwork-dist, 0px));
+}
+
+.hwork.is-pinned .hwork-sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* Desktop: one horizontal row (a scrollable strip without JavaScript; pinned and moved by scroll
+   with it). */
+@media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
+  .hwork-viewport {
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .hwork-track {
+    display: flex;
+    width: max-content;
+    gap: clamp(20px, 2vw, 32px);
+  }
+
+  .hwork .work-card {
+    width: min(46vw, 640px, calc((100vh - 300px) * 1.45));
+  }
+
+  /* Pinned: the track spans the full screen width (cards slide in from the screen edge), starting
+     and ending in line with the container. */
+  .hwork.is-pinned .hwork-viewport {
+    overflow: visible;
+    margin-inline: calc(50% - 50vw);
+    padding-inline: calc(50vw - 50%);
+  }
+
+  .hwork.is-pinned .hwork-track {
+    will-change: transform;
+  }
+}
+
+.hwork.is-pinned .hwork-head {
+  margin-bottom: clamp(20px, 3vh, 36px);
+}
+
+.hwork.is-pinned .hwork-more {
+  justify-content: flex-start;
+  margin-top: clamp(16px, 3vh, 32px);
+}
+
+.work-card {
+  display: block;
+  min-width: 0;
+  color: inherit;
+}
+
+.work-card .card3d-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.work-card-frame {
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  background: var(--bg-elev);
+  box-shadow: 0 0 0 1px var(--line);
+  transition: box-shadow 0.4s ease, transform 0.25s linear;
+}
+
+.work-card:hover .work-card-frame {
+  box-shadow: 0 0 0 1px var(--line-strong), 0 40px 70px -36px rgba(0, 0, 0, 0.42);
+}
+
+.work-card-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.work-card-bar i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgb(var(--ink-rgb) / 0.16);
+}
+
+.work-card-bar em {
+  margin-left: 10px;
+  font-style: normal;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* The screenshot is taller than the 16:10 frame: hovering scrolls through it like a short preview
+   (--work-shift is the hidden part, set per card). */
+.work-card-screen {
+  display: block;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+}
+
+.work-card-screen img {
+  display: block;
+  width: 100%;
+  height: auto;
+  transition: transform 4.5s cubic-bezier(0.45, 0, 0.25, 1);
+}
+
+.work-card:hover .work-card-screen img {
+  transform: translateY(calc(-1 * var(--work-shift, 0%)));
+}
+
+.work-card-text {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+}
+
+.work-card-num {
+  font-size: 12.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent-hi);
+}
+
+.work-card h3 {
+  margin: 0;
+  font-size: clamp(22px, 2vw, 30px);
+  font-weight: var(--weight-display);
+  letter-spacing: -0.03em;
+}
+
+.work-card-label {
+  display: block;
+  margin-top: 2px;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.work-card-go {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--line-strong);
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.4s var(--ease);
+}
+
+.work-card:hover .work-card-go {
+  color: var(--on-accent);
+  background: var(--accent);
+  border-color: var(--accent);
+  transform: rotate(-45deg);
+}
+
+.section-more {
+  display: flex;
+  justify-content: center;
+  margin: 44px 0 0;
+}
+
+/* ---------- How I work: photo beside the timeline ---------- */
+.process-photo {
+  position: relative;
+  margin: 0;
+}
+
+.process-photo-frame {
+  display: block;
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  aspect-ratio: 4 / 5;
+  max-height: 560px;
+  box-shadow: 0 0 0 1px var(--line);
+}
+
+.process-photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  scale: 1.14;
+}
+
+.process-photo .owner-todo {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  margin: 0;
+}
+
+/* ---------- Tools ---------- */
+.tools-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.tool-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  padding: 28px;
+  border-radius: var(--r-lg);
+  border: 1px solid var(--line);
+  background: var(--bg-elev);
+  transition: transform 0.5s var(--ease-out), box-shadow 0.4s ease, border-color 0.3s ease;
+}
+
+.tool-tile:hover {
+  transform: translateY(-4px);
+  border-color: var(--line-strong);
+  box-shadow: 0 30px 60px -34px rgba(0, 0, 0, 0.35);
+}
+
+.tool-icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  color: var(--on-accent);
+  background: var(--accent);
+}
+
+.tool-tile h3 {
+  margin: 10px 0 0;
+  font-size: var(--fs-h3);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.tool-tile p {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+.tool-tile .x-link {
+  margin-top: auto;
+  padding-top: 12px;
+}
+
+.home-posts {
+  margin: 0;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1023px) {
+  .hero-bottom {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .hero-actions {
+    align-items: flex-start;
+  }
+
+  .statement-block {
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+  }
+}
+
+@media (max-width: 900px) {
+  .tools-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 760px) {
+  .hwork-track {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .hero {
+    min-height: 0;
+    padding-bottom: 28px;
+  }
+
+  .hero-bg {
+    bottom: -60px;
+  }
+
+  .hero-place,
+  .hero-scroll {
+    display: none;
+  }
+
+  /* Phones: the lines wrap and sit flush left. */
+  .hero-title {
+    padding: 40px 0 44px;
+    font-size: clamp(40px, 12.4vw, 64px);
+    text-wrap: balance;
+  }
+
+  .hero-line.is-2,
+  .hero-line.is-3 {
+    padding-left: 0;
+  }
+
+  /* The rotating word gets its own line, so the longest one always fits. */
+  .hero-rotate {
+    display: block;
+  }
+
+  .hero-ctas .page-btn {
+    height: 50px;
+    padding: 0 20px;
+  }
+
+  .stat {
+    padding: 18px 16px 16px;
+  }
+}
+
+/* Short laptop screens: keep the whole hero above the fold. */
+@media (min-width: 1024px) and (max-height: 760px) {
+  .hero-title {
+    padding: 18px 0;
+  }
+
+  .hero-lead {
+    margin-top: 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-line,
+  .hero-top,
+  .hero-bottom,
+  .hero-scroll i::after {
+    animation: none;
+  }
+
+  .vband {
+    rotate: none;
+    scale: none;
+  }
+}
+
+/* Below-the-fold home sections skip layout and paint until they near the viewport (faster first
+   paint on phones). Not the sections with sticky, scroll-linked parts. */
+.page-main > .x-section:not(.home-trust):not(:has(.timeline)):not(:has(.sstack)) {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 900px;
+}

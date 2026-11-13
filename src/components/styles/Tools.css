@@ -43,7 +43,7 @@
   position: relative;
   cursor: pointer;
   border: 1px solid var(--x-line);
-  background: rgba(255, 255, 255, 0.02);
+  background: rgb(var(--ink-rgb) / 0.02);
   transition: border-color 0.2s ease, background-color 0.2s ease;
 }
 
@@ -88,13 +88,13 @@
 
 .calc-option:hover,
 .calc-chip:hover {
-  border-color: rgba(45, 212, 191, 0.4);
+  border-color: rgb(var(--accent-rgb) / 0.4);
 }
 
 .calc-option.is-on,
 .calc-chip.is-on {
   border-color: var(--x-teal);
-  background: rgba(45, 212, 191, 0.08);
+  background: rgb(var(--accent-rgb) / 0.08);
   color: var(--x-ink);
 }
 
@@ -132,7 +132,7 @@
   align-items: center;
   border: 1px solid var(--x-line);
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.03);
+  background: rgb(var(--ink-rgb) / 0.03);
   overflow: hidden;
 }
 
@@ -164,7 +164,7 @@
 .calc-result {
   position: sticky;
   top: 100px;
-  border-color: rgba(45, 212, 191, 0.3) !important;
+  border-color: rgb(var(--accent-rgb) / 0.3) !important;
 }
 
 .calc .calc-big {
@@ -243,7 +243,7 @@
   margin: 0 0 14px;
   padding: 14px;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.03);
+  background: rgb(var(--ink-rgb) / 0.03);
   border: 1px solid var(--x-line);
 }
 

@@ -90,36 +90,10 @@
         "why is my react website not on google?",
         "can google crawl react?"
       ],
-      "angle": "Starts with a 2-minute view-source test the owner can run, then the fixes in order, with my own site as the before/after.",
+      "angle": "Starts with a 2-minute view-source test the owner can run, then the fixes in order of impact.",
       "status": "published",
       "publishedSlug": "react-website-not-ranking-on-google",
       "published": "2026-11-02"
-    },
-    {
-      "keyword": "vite react to next.js migration",
-      "title": "How I Migrated a Vite React Site to Next.js 15 (SEO 83 → 100)",
-      "cluster": "react-seo",
-      "pillar": "react-seo-guide",
-      "role": "supporting",
-      "intent": "learn",
-      "funnel": "decision",
-      "category": "react-nextjs-seo",
-      "targetPage": "/services/react-nextjs-seo",
-      "reader": "founder",
-      "secondary": [
-        "migrate vite to next.js",
-        "react to next.js migration",
-        "vite vs next.js seo",
-        "convert react app to next.js"
-      ],
-      "questions": [
-        "how long does a vite to next.js migration take?",
-        "will i lose my animations when moving to next.js?"
-      ],
-      "angle": "The official guide keeps the app as a client-rendered SPA first, which doesn't fix SEO; this is a full migration on a live site with 3D and GSAP, measured before and after.",
-      "status": "published",
-      "publishedSlug": "vite-react-to-nextjs-migration",
-      "published": "2026-11-10"
     },
     {
       "keyword": "ai chatbot for website cost",
@@ -172,7 +146,7 @@
         "does google index javascript sites?",
         "is next.js good for seo?"
       ],
-      "angle": "The hub for the cluster: why client-rendered React fails, the exact fixes in order of impact, and my own measured migration (SEO 83 to 100, LCP 18.0 s to 2.6 s), linking every supporting post.",
+      "angle": "The hub for the cluster: why client-rendered React fails and the exact fixes in order of impact, linking every supporting post.",
       "status": "published",
       "publishedSlug": "react-seo-guide",
       "published": "2026-11-13"
@@ -523,7 +497,7 @@
         "how do you spot a bad developer?",
         "what are red flags in a developer portfolio?"
       ],
-      "angle": "A red-flag list a non-technical founder can check in 10 minutes: view-source on their past sites, Lighthouse on their own site, who owns the code and accounts. I run each check on my own site in the post.",
+      "angle": "A red-flag list a non-technical founder can check in 10 minutes: view-source on their past sites, Lighthouse on their own site, who owns the code and accounts.",
       "status": "queued",
       "publishedSlug": null
     },
@@ -670,7 +644,7 @@
         "what is a good lcp score?",
         "why is my lcp so high in next.js?"
       ],
-      "angle": "The specific changes that took my home page LCP from 18.0 s to 2.6 s while keeping a 3D scene, in the order of how much each helped.",
+      "angle": "The changes that cut LCP on a Next.js site with heavy visuals (hero images, fonts, 3D, third-party scripts), in the order they usually help, with a check the reader can run after each.",
       "status": "queued",
       "publishedSlug": null
     },
@@ -1639,7 +1613,7 @@
         "how long does a website redesign take?",
         "will a redesign hurt my google rankings?"
       ],
-      "angle": "The hub for the cluster: decide from measurable goals (leads, speed, mobile) instead of looks, with real starting prices and delivery times and my own measured rebuild (mobile SEO 83 to 100, home LCP 18.0 s to 2.6 s), linking every supporting post.",
+      "angle": "The hub for the cluster: decide from measurable goals (leads, speed, mobile) instead of looks, with real starting prices and delivery times, linking every supporting post.",
       "status": "queued",
       "publishedSlug": null,
       "source": "Buyer questions, checked with web search 2026-11-07 (owner request: new cluster)"
@@ -1774,7 +1748,7 @@
         "how do i check my website speed?",
         "does a slow website hurt sales?"
       ],
-      "angle": "Each cause is matched to what the owner sees in a free PageSpeed or SEO audit report, ordered by impact, with my own home page as the example (LCP 18.0 s down to 2.6 s on mobile).",
+      "angle": "Each cause is matched to what the owner sees in a free PageSpeed or SEO audit report, ordered by impact.",
       "status": "queued",
       "publishedSlug": null,
       "source": "Buyer questions, checked with web search 2026-11-07 (owner request: new cluster)"
@@ -1826,7 +1800,7 @@
         "what is the difference between a website redesign and a rebuild?",
         "can i keep my design and change the code?"
       ],
-      "angle": "My own site is the example of a rebuild with the design kept: same look and animations, new Next.js code underneath, and the measured result of changing only the code.",
+      "angle": "When to keep the design and rebuild only the code underneath, and when a full redesign pays off, with the questions to answer before choosing.",
       "status": "queued",
       "publishedSlug": null,
       "source": "Buyer questions, checked with web search 2026-11-07 (owner request: new cluster)"

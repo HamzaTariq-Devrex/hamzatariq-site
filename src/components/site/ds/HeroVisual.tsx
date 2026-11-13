@@ -1,6 +1,5 @@
-import Image from "next/image";
+import BotMark from "@/components/assistant/BotMark";
 import { IMAGE_BASE } from "@/data/projects";
-import { OWN_SITE_RESULTS } from "@/data/ownSite";
 import { Browser, Phone } from "./Mockups";
 import Icon from "./Icon";
 
@@ -84,7 +83,7 @@ const ChatVisual = () => (
   <div className="x-visual x-visual-chat">
     <div className="x-chatdemo" role="img" aria-label="Example conversation with an AI chatbot">
       <div className="x-chatdemo-head">
-        <Image src="/bot-avatar.webp" alt="" width={36} height={36} />
+        <BotMark size={36} />
         <div>
           <strong>Hamza&apos;s AI</strong>
           <small>Answers from this site</small>
@@ -109,33 +108,37 @@ const ChatVisual = () => (
   </div>
 );
 
-const Ring = ({ value, label, note }: { value: number; label: string; note: string }) => (
-  <div className="x-ring">
-    <svg viewBox="0 0 120 120" aria-hidden="true">
-      <circle cx="60" cy="60" r="52" className="x-ring-track" />
-      <circle cx="60" cy="60" r="52" className="x-ring-value" style={{ "--v": value } as React.CSSProperties} />
-    </svg>
-    <strong>{value}</strong>
-    <span>{label}</span>
-    <small>{note}</small>
+// What the SEO service sets up (its feature list), as a checklist; no scores.
+const SEO_CHECKS = [
+  "Real HTML on every URL",
+  "Unique titles, descriptions and canonical URLs",
+  "JSON-LD structured data",
+  "Sitemap, robots.txt and IndexNow",
+  "Core Web Vitals and images",
+];
+
+const SeoVisual = () => (
+  <div className="x-visual x-visual-seo">
+    <div className="x-checklist" role="img" aria-label="What the React and Next.js SEO service sets up">
+      <p className="x-checklist-head">
+        <Icon name="search" size={16} /> Technical SEO checklist
+      </p>
+      <ul>
+        {SEO_CHECKS.map((c, i) => (
+          <li key={c} style={{ animationDelay: `${0.15 + i * 0.12}s` }}>
+            <span className="x-checklist-tick">
+              <Icon name="check" size={14} />
+            </span>
+            {c}
+          </li>
+        ))}
+      </ul>
+    </div>
+    <span className="x-chip x-chip-static">
+      <Icon name="sparkle" size={16} /> Check your site with the free SEO audit
+    </span>
   </div>
 );
-
-const SeoVisual = () => {
-  const { seo, lcp, projectPerformance: pages, workPerformance: work } = OWN_SITE_RESULTS;
-  return (
-    <div className="x-visual x-visual-seo">
-      <div className="x-rings" role="img" aria-label={`Mobile Lighthouse after the Next.js migration of hamzatariq.site: SEO ${seo.after}, performance ${pages.after} on project pages and ${work.after} on /work`}>
-        <Ring value={Number(seo.after)} label="SEO" note={`Home, was ${seo.before}`} />
-        <Ring value={Number(pages.after)} label="Performance" note={`Project pages, was ${pages.before}`} />
-        <Ring value={Number(work.after)} label="Performance" note={`/work, was ${work.before}`} />
-      </div>
-      <span className="x-chip x-chip-static">
-        <Icon name="speed" size={16} /> On my own site: home LCP {lcp.before} → {lcp.after}
-      </span>
-    </div>
-  );
-};
 
 const VISUALS: Record<string, () => React.ReactElement> = {
   "nextjs-websites": SiteVisual,

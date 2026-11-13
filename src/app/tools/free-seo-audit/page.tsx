@@ -13,7 +13,7 @@ import "@/components/styles/Audit.css";
 export const metadata: Metadata = {
   title: "Free SEO Audit Tool for Any Website",
   description:
-    "Free SEO audit tool: check if Google can read your site, plus titles, meta tags, headings, structured data, robots.txt, sitemap and mobile speed, with a fix list.",
+    "Free SEO audit tool: check if Google can read your site, plus titles, meta tags, headings, schema, robots.txt, sitemap and mobile speed, with a fix list.",
   alternates: { canonical: SEO_AUDIT_TOOL.href },
 };
 
@@ -124,10 +124,8 @@ export default function FreeSeoAuditPage() {
             browser. People with a fast phone never notice. Many crawlers, link previews and AI search tools see a blank page.
           </p>
           <p>
-            My own portfolio had exactly this problem. It was a Vite + React single-page app with one title for every page and no meta description,
-            sitemap, robots.txt or structured data. After I moved it to Next.js 15, the mobile Lighthouse SEO score went from 83 to 100 and the home page
-            Largest Contentful Paint dropped from 18.0 s to 2.6 s. My{" "}
-            <Link href="/services/react-nextjs-seo">React and Next.js SEO service</Link> makes the same fixes on client sites.
+            My <Link href="/services/react-nextjs-seo">React and Next.js SEO service</Link> fixes exactly this on client sites: real HTML for every
+            address, unique titles and descriptions, a sitemap and structured data.
           </p>
           <p>
             This tool runs the checks I start every audit with. It reads one page at a time, usually the home page, so run it on your most important
@@ -147,8 +145,8 @@ export default function FreeSeoAuditPage() {
           </ul>
           <p>
             If the server rendering check is red on a React site, the usual fix is a move to Next.js, which keeps your components and design. I explain
-            why in <Link href="/blog/react-website-not-ranking-on-google">why a React website is not ranking on Google</Link>, and the full migration
-            story in <Link href="/blog/vite-react-to-nextjs-migration">how I migrated a Vite React site to Next.js 15</Link>.
+            why in <Link href="/blog/react-website-not-ranking-on-google">why a React website is not ranking on Google</Link>, and every fix in order
+            of impact in my <Link href="/blog/react-seo-guide">React SEO guide</Link>.
           </p>
           <h3>What this tool doesn&apos;t check</h3>
           <p>

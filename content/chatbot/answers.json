@@ -634,7 +634,7 @@
     },
     {
       "id": "own-site-results",
-      "answer": "On his own site, Hamza moved from a Vite and React app to Next.js 15, keeping the 3D design. On mobile, the home page SEO score went from 83 to 100 and its main content now loads in 2.6 seconds instead of 18. He makes the same fixes on client sites: https://hamzatariq.site/services/react-nextjs-seo",
+      "answer": "Hamza moves React sites to Next.js or fixes them in place: real HTML for every page, unique titles and descriptions, structured data, a sitemap and a faster first screen, without changing your design. Details and prices: https://hamzatariq.site/services/react-nextjs-seo",
       "keywords": [
         "results",
         "lighthouse",

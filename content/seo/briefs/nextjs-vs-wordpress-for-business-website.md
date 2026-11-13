@@ -42,7 +42,7 @@ A Next.js developer who says when WordPress wins, backs the speed and SEO claims
 
 ## Unique additions
 
-- Measured before/after from my own site (SEO 83 to 100, LCP 18.0 s to 2.6 s, /work 85 to 97) with a screenshot.
+- Real custom Next.js stores (Dulhahouse lookbooks and custom/WhatsApp orders, Nagina's large catalogue) and why a theme would fight those features.
 - A real price list and project terms instead of yearly estimates.
 - An honest caveat the agency results skip: the framework doesn't rank a page by itself; content, hosting and setup do.
 - A step-by-step plan to move from WordPress without losing rankings.

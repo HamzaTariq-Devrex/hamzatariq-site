@@ -1,20 +1,18 @@
 .page {
-  --page-text: #f1f5f9;
-  --page-muted: rgba(226, 232, 240, 0.62);
-  --page-line: rgba(255, 255, 255, 0.08);
-  --page-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --page-text: var(--fg);
+  --page-muted: var(--muted);
+  --page-line: var(--line);
+  --page-ease: var(--ease);
+  position: relative;
   min-height: 100vh;
-  color: var(--page-text);
-  user-select: text;
-  -webkit-user-select: text;
-  background:
-    radial-gradient(60vw 40vw at 85% -10%, rgba(45, 212, 191, 0.08), transparent 60%),
-    var(--backgroundColor);
+  color: var(--fg);
+  background: var(--bg);
 }
 
+/* One centred container on every page (tokens in src/styles/system.css). */
 .page-main,
 .page-footer {
-  width: min(1240px, calc(100% - 32px));
+  width: min(var(--container), calc(100% - 2 * var(--gutter)));
   margin: 0 auto;
 }
 
@@ -36,25 +34,27 @@
 }
 
 .page-main {
-  padding: 72px 0 40px;
+  padding: clamp(20px, 3.5vw, 44px) 0 40px;
 }
 
+/* Small uppercase label with an accent dot. */
 .page-eyebrow {
   display: inline-flex;
   align-items: center;
-  gap: 14px;
-  font-size: 12px;
+  gap: 10px;
+  font-size: 11.5px;
   font-weight: 600;
-  letter-spacing: 0.35em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--accentColor);
+  color: var(--fg);
 }
 
 .page-eyebrow::before {
   content: "";
-  width: 32px;
-  height: 1px;
-  background: currentColor;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
 }
 
 .page-hero {
@@ -71,11 +71,9 @@
   letter-spacing: -0.03em;
 }
 
-.page-hero h1 span,
-.page-cta h2 span {
-  color: var(--accentColor);
-  font-style: italic;
-  font-weight: 500;
+.page-hero h1 > span:not(.ln),
+.page-cta h2 > span:not(.ln) {
+  color: var(--accent-hi);
 }
 
 .page-hero p {
@@ -104,46 +102,50 @@
   font: inherit;
   font-size: 13px;
   font-weight: 500;
-  color: rgba(226, 232, 240, 0.75);
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgb(var(--ink-rgb) / 0.75);
+  background: rgb(var(--ink-rgb) / 0.03);
+  border: 1px solid rgb(var(--ink-rgb) / 0.1);
   cursor: pointer;
   transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .page-filter span {
   font-size: 11px;
-  color: rgba(226, 232, 240, 0.45);
+  color: rgb(var(--ink-rgb) / 0.62);
 }
 
 .page-filter:hover {
   color: var(--page-text);
-  border-color: rgba(255, 255, 255, 0.25);
+  border-color: rgb(var(--ink-rgb) / 0.25);
 }
 
 .page-filter.is-active {
-  color: #04221f;
-  background: var(--accentColor);
-  border-color: var(--accentColor);
+  color: var(--on-accent);
+  background: var(--accent);
+  border-color: var(--accent);
 }
 
 .page-filter.is-active span {
-  color: #04221f;
+  color: var(--on-accent);
 }
 
+/* Buttons: pill, 46px. Primary = accent fill with a top highlight; ghost = hairline glass. */
 .page-btn {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  height: 48px;
-  padding: 0 22px;
-  border-radius: 100px;
-  font-size: 14px;
+  height: 46px;
+  padding: 0 20px;
+  border-radius: 999px;
+  font-size: 14.5px;
   font-weight: 600;
+  letter-spacing: -0.005em;
   white-space: nowrap;
-  transition: transform 0.35s var(--page-ease), box-shadow 0.3s ease, border-color 0.3s ease,
-    color 0.3s ease;
+  cursor: pointer;
+  transition: transform 0.35s var(--ease), box-shadow 0.35s var(--ease), border-color 0.25s ease,
+    background-color 0.25s ease, color 0.25s ease;
 }
 
 .page-btn svg {
@@ -156,27 +158,28 @@
   stroke-linejoin: round;
 }
 
+/* Primary: ink pill that turns accent on hover. Ghost: white pill with a hairline. */
 .page-btn-primary {
-  color: #04221f;
-  background: var(--accentColor);
-  box-shadow: 0 8px 24px rgba(45, 212, 191, 0.25);
+  color: #fff;
+  background: var(--fg);
 }
 
 .page-btn-primary:hover {
-  color: #04221f;
-  transform: translateY(-2px);
-  box-shadow: 0 12px 32px rgba(45, 212, 191, 0.4);
+  color: var(--on-accent);
+  background: var(--accent);
+  transform: translateY(-1px);
 }
 
 .page-btn-ghost {
-  color: var(--page-text);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  background: rgba(255, 255, 255, 0.03);
+  color: var(--fg);
+  border: 1px solid var(--line-strong);
+  background: var(--bg-elev);
 }
 
 .page-btn-ghost:hover {
-  transform: translateY(-2px);
-  border-color: rgba(45, 212, 191, 0.6);
+  color: var(--fg);
+  transform: translateY(-1px);
+  border-color: var(--fg);
 }
 
 .project-crumbs {
@@ -185,11 +188,11 @@
   gap: 10px;
   margin-bottom: 36px;
   font-size: 13px;
-  color: rgba(226, 232, 240, 0.45);
+  color: rgb(var(--ink-rgb) / 0.62);
 }
 
 .project-crumbs a {
-  color: rgba(226, 232, 240, 0.7);
+  color: rgb(var(--ink-rgb) / 0.7);
 }
 
 .project-crumbs [aria-current] {
@@ -227,8 +230,8 @@
   padding: 0 20px;
   border-radius: 100px;
   font-size: 13px;
-  color: rgba(226, 232, 240, 0.6);
-  border: 1px dashed rgba(255, 255, 255, 0.2);
+  color: rgb(var(--ink-rgb) / 0.6);
+  border: 1px dashed rgb(var(--ink-rgb) / 0.2);
 }
 
 .project-meta {
@@ -247,7 +250,7 @@
   font-size: 11px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: rgba(226, 232, 240, 0.45);
+  color: rgb(var(--ink-rgb) / 0.62);
 }
 
 .project-meta dd {
@@ -273,9 +276,9 @@
 .project-phone {
   margin: 0;
   overflow: hidden;
-  background: #111827;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+  background: var(--bg-elev);
+  border: 1px solid rgb(var(--ink-rgb) / 0.1);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.16);
 }
 
 .project-browser {
@@ -287,8 +290,8 @@
   align-items: center;
   gap: 7px;
   padding: 12px 16px;
-  background: #1a2130;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  background: var(--device-2);
+  border-bottom: 1px solid rgb(var(--ink-rgb) / 0.06);
 }
 
 .project-browser-bar span {
@@ -315,8 +318,8 @@
   font-style: normal;
   font-size: 12px;
   text-align: center;
-  color: rgba(226, 232, 240, 0.55);
-  background: rgba(255, 255, 255, 0.05);
+  color: rgb(var(--ink-rgb) / 0.62);
+  background: rgb(var(--ink-rgb) / 0.05);
 }
 
 .project-browser img,
@@ -331,7 +334,7 @@
   top: 110px;
   border-radius: 34px;
   padding: 10px;
-  background: #0d1220;
+  background: var(--bg-elev);
 }
 
 .project-phone img {
@@ -369,7 +372,7 @@
   align-items: center;
   gap: 12px;
   font-size: 16px;
-  color: rgba(226, 232, 240, 0.85);
+  color: rgb(var(--ink-rgb) / 0.85);
 }
 
 .project-features svg {
@@ -380,11 +383,11 @@
   border-radius: 50%;
   box-sizing: border-box;
   fill: none;
-  stroke: var(--accentColor);
+  stroke: var(--accent-hi);
   stroke-width: 2.5;
   stroke-linecap: round;
   stroke-linejoin: round;
-  background: rgba(45, 212, 191, 0.12);
+  background: rgb(var(--accent-rgb) / 0.12);
 }
 
 .project-pager {
@@ -401,13 +404,13 @@
   padding: 22px 24px;
   border-radius: 18px;
   border: 1px solid var(--page-line);
-  background: rgba(255, 255, 255, 0.02);
+  background: rgb(var(--ink-rgb) / 0.02);
   transition: border-color 0.3s ease, transform 0.35s var(--page-ease);
 }
 
 .project-pager-link:hover {
   color: inherit;
-  border-color: rgba(45, 212, 191, 0.4);
+  border-color: rgb(var(--accent-rgb) / 0.4);
   transform: translateY(-2px);
 }
 
@@ -420,7 +423,7 @@
   font-size: 11px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: rgba(226, 232, 240, 0.45);
+  color: rgb(var(--ink-rgb) / 0.62);
 }
 
 .project-pager-link strong {
@@ -435,7 +438,7 @@
   width: 18px;
   height: 18px;
   fill: none;
-  stroke: var(--accentColor);
+  stroke: var(--accent-hi);
   stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -446,7 +449,7 @@
   border-radius: 100px;
   font-size: 13px;
   font-weight: 600;
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  border: 1px solid rgb(var(--ink-rgb) / 0.16);
 }
 
 .page-404 {
@@ -454,38 +457,52 @@
 }
 
 .page-footer {
-  margin-top: 80px;
   padding-bottom: 32px;
 }
 
+/* "Let's work together ·" line moving across the page before the footer. */
+.cta-marquee {
+  overflow: hidden;
+  margin-top: var(--section-gap);
+  padding: 18px 0;
+  border-block: 1px solid var(--line);
+  user-select: none;
+}
+
+.cta-marquee span {
+  flex: none;
+  font-size: clamp(40px, 7vw, 112px);
+  font-weight: var(--weight-display);
+  letter-spacing: var(--tracking-display);
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.cta-marquee .mq-group span:nth-child(even) {
+  color: var(--accent-hi);
+}
+
+/* Closing CTA: giant type, no box. */
 .page-cta {
-  padding: 56px 48px;
-  border-radius: 28px;
-  text-align: center;
-  background:
-    radial-gradient(80% 120% at 50% 0%, rgba(45, 212, 191, 0.14), transparent 70%),
-    rgba(255, 255, 255, 0.025);
-  border: 1px solid var(--page-line);
+  position: relative;
+  padding: clamp(56px, 8vw, 112px) 0 clamp(40px, 5vw, 64px);
+  text-align: left;
 }
 
 .page-cta h2 {
-  margin: 16px auto 28px;
-  max-width: 720px;
-  font-size: clamp(30px, 4vw, 52px);
-  font-weight: 600;
-  line-height: 1.1;
-  letter-spacing: -0.02em;
-}
-
-.page-cta .page-eyebrow::before {
-  display: none;
+  margin: 20px 0 20px;
+  max-width: 14ch;
+  font-size: var(--fs-display);
+  font-weight: var(--weight-display);
+  line-height: 0.98;
+  letter-spacing: var(--tracking-display);
 }
 
 .page-cta-actions {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
-  gap: 10px;
+  align-items: center;
+  gap: 12px;
 }
 
 .page-footer-bottom {
@@ -495,7 +512,7 @@
   gap: 16px;
   margin-top: 28px;
   font-size: 13px;
-  color: rgba(226, 232, 240, 0.45);
+  color: rgb(var(--ink-rgb) / 0.62);
 }
 
 @keyframes pagePing {
@@ -595,10 +612,22 @@
   }
 }
 
-/* Big desktops: a wider container (kept in sync with .site-header in SiteHeader.css). */
-@media (min-width: 1600px) {
-  .page-main,
-  .page-footer {
-    width: min(1360px, calc(100% - 64px));
-  }
+
+
+/* The footer (CTA band + link columns) is always below the fold: skip its layout until it nears view. */
+.page-footer {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 700px;
+}
+
+/* Project page: "More online stores like this" lead with the service and industry links. */
+.project-related-lead {
+  margin: 0 0 28px;
+}
+
+.project-related-lead a {
+  color: var(--accent-hi);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
 }

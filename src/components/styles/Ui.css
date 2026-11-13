@@ -1,0 +1,969 @@
+/* Ported premium components (src/components/ui/) and the scroll-motion engine (ds/Reveal.tsx).
+   Sources: Aceternity UI (ui.aceternity.com), Magic UI (magicui.design). Their Tailwind classes are
+   rewritten here on the site tokens. Motion is transform/opacity/filter only
+   and stops for prefers-reduced-motion. Loaded once in the root layout. */
+
+/* ---------- Sections: slide-ins never widen the page ---------- */
+.page {
+  overflow-x: clip;
+}
+
+/* ---------- Nav progress (instant click feedback) ---------- */
+.nav-progress {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 10050;
+  height: 2px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left center;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.nav-progress.is-start {
+  opacity: 1;
+}
+
+.nav-progress.is-going {
+  transform: scaleX(0.72);
+  transition: transform 1.6s cubic-bezier(0.1, 0.7, 0.2, 1);
+}
+
+.nav-progress.is-done {
+  transform: scaleX(1);
+  opacity: 0;
+  transition: transform 0.2s ease, opacity 0.25s ease 0.12s;
+}
+
+/* Every link and button answers a press at once. */
+.page a:active,
+.page button:active,
+.site-header a:active {
+  opacity: 0.72;
+}
+
+/* ---------- Heading words (masked slide-up, set up by Reveal) ---------- */
+.words-ready .ln {
+  display: inline-block;
+  overflow: clip;
+  overflow-clip-margin: 0.08em;
+  vertical-align: top;
+  padding-bottom: 0.1em;
+  margin-bottom: -0.1em;
+}
+
+.words-ready .ln-in {
+  display: inline-block;
+  will-change: transform;
+}
+
+.words-ready .ln-in.is-accent {
+  color: var(--accent-hi);
+}
+
+/* ---------- Spotlight (Aceternity) ---------- */
+.spotlight {
+  position: absolute;
+  pointer-events: none;
+  opacity: 0;
+  animation: spotlight 2s ease 0.75s 1 forwards;
+}
+
+@keyframes spotlight {
+  0% {
+    opacity: 0;
+    transform: translate(-72%, -62%) scale(0.5);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -40%) scale(1);
+  }
+}
+
+/* ---------- Grid / Dot Pattern (Magic UI) ---------- */
+.pattern {
+  position: absolute;
+  pointer-events: none;
+  width: 100%;
+  height: 100%;
+}
+
+.pattern-grid {
+  inset: 0;
+  stroke: rgb(var(--ink-rgb) / 0.07);
+}
+
+.pattern-grid path {
+  stroke: inherit;
+}
+
+.pattern-dots {
+  inset: 0;
+  fill: rgb(var(--ink-rgb) / 0.16);
+}
+
+/* ---------- Word Rotate (Magic UI) ---------- */
+.word-rotate-stage {
+  display: inline-grid;
+  vertical-align: bottom;
+  overflow: clip;
+  overflow-clip-margin: 0.12em;
+  padding-bottom: 0.08em;
+  margin-bottom: -0.08em;
+}
+
+.word-rotate-stage > * {
+  grid-area: 1 / 1;
+  white-space: nowrap;
+}
+
+.word-rotate-sizer {
+  visibility: hidden;
+}
+
+.word-rotate-word {
+  display: inline-block;
+}
+
+/* ---------- Shimmer Button (Magic UI) ---------- */
+.shimmer-btn {
+  --spread: 90deg;
+  --shimmer-color: #ffffff;
+  --speed: 3s;
+  --cut: 0.08em;
+  --sbg: var(--fg);
+  position: relative;
+  z-index: 0;
+  isolation: isolate;
+  overflow: hidden;
+  background: var(--sbg) !important;
+  transition: transform 0.3s ease-in-out, --sbg 0.3s ease;
+}
+
+.shimmer-btn:active {
+  transform: translateY(1px);
+}
+
+.shimmer-btn.page-btn-primary:hover {
+  --sbg: var(--accent);
+}
+
+.shimmer-btn.is-light {
+  --sbg: var(--bg-elev);
+  --shimmer-color: var(--accent);
+}
+
+.shimmer-btn.is-light:hover {
+  --sbg: var(--bg-elev-2);
+}
+
+.shimmer-spark-wrap {
+  position: absolute;
+  inset: 0;
+  z-index: -3;
+  overflow: visible;
+  filter: blur(2px);
+  container-type: size;
+}
+
+.shimmer-spark {
+  position: absolute;
+  inset: 0;
+  aspect-ratio: 1;
+  height: 100cqh;
+  animation: shimmer-slide var(--speed) ease-in-out infinite alternate;
+}
+
+.shimmer-spark::before {
+  content: "";
+  position: absolute;
+  inset: -100%;
+  width: auto;
+  background: conic-gradient(from calc(270deg - (var(--spread) * 0.5)), transparent 0, var(--shimmer-color) var(--spread), transparent var(--spread));
+  animation: spin-around calc(var(--speed) * 2) infinite linear;
+}
+
+.shimmer-highlight {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 -8px 10px rgb(255 255 255 / 0.12);
+  pointer-events: none;
+  transition: box-shadow 0.3s ease-in-out;
+}
+
+.shimmer-btn:hover .shimmer-highlight {
+  box-shadow: inset 0 -6px 10px rgb(255 255 255 / 0.25);
+}
+
+.shimmer-btn.is-light .shimmer-highlight {
+  box-shadow: none;
+}
+
+.shimmer-backdrop {
+  position: absolute;
+  inset: var(--cut);
+  z-index: -2;
+  border-radius: inherit;
+  background: var(--sbg);
+  transition: background-color 0.25s ease;
+}
+
+@keyframes shimmer-slide {
+  to {
+    transform: translate(calc(100cqw - 100%), 0);
+  }
+}
+
+@keyframes spin-around {
+  0% {
+    transform: translateZ(0) rotate(0);
+  }
+  15%,
+  35% {
+    transform: translateZ(0) rotate(90deg);
+  }
+  65%,
+  85% {
+    transform: translateZ(0) rotate(270deg);
+  }
+  100% {
+    transform: translateZ(0) rotate(360deg);
+  }
+}
+
+/* ---------- Marquee (Magic UI) ---------- */
+.mq {
+  --gap: 1rem;
+  --duration: 40s;
+  display: flex;
+  gap: var(--gap);
+  overflow: hidden;
+  user-select: none;
+}
+
+.mq-group {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: space-around;
+  gap: var(--gap);
+  animation: marquee var(--duration) linear infinite;
+}
+
+.mq-reverse .mq-group {
+  animation-direction: reverse;
+}
+
+.mq-pause:hover .mq-group {
+  animation-play-state: paused;
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(calc(-100% - var(--gap)));
+  }
+}
+
+.cta-marquee .mq {
+  --gap: 0px;
+}
+
+/* ---------- Bento Grid (Aceternity) ---------- */
+.bento {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-auto-rows: minmax(360px, auto);
+  gap: 16px;
+}
+
+.bento-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 20px;
+  min-width: 0;
+  padding: 16px 16px 22px;
+  border-radius: 22px;
+  border: 1px solid var(--line);
+  background: var(--bg-elev);
+  color: inherit;
+  box-shadow: 0 1px 2px rgb(var(--ink-rgb) / 0.04);
+  transition: box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.bento-item.is-wide {
+  grid-column: span 2;
+}
+
+.bento-item:hover {
+  border-color: var(--line-strong);
+  box-shadow: 0 30px 60px -32px rgba(0, 0, 0, 0.32);
+}
+
+.bento-header {
+  position: relative;
+  flex: 1;
+  min-height: 190px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: radial-gradient(90% 90% at 70% 10%, rgb(var(--accent-rgb) / 0.22), var(--bg) 80%);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.bento-body {
+  padding: 0 8px;
+  transition: transform 0.2s ease;
+}
+
+.bento-item:hover .bento-body {
+  transform: translateX(8px);
+}
+
+.bento-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  color: var(--accent-hi);
+  background: rgb(var(--accent-rgb) / 0.1);
+}
+
+.bento-title {
+  margin: 12px 0 6px;
+  font-size: clamp(20px, 1.7vw, 26px);
+  font-weight: var(--weight-display);
+  letter-spacing: -0.03em;
+}
+
+.bento-desc {
+  margin: 0;
+  max-width: 52ch;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--muted);
+}
+
+.bento-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--fg);
+}
+
+.bento-meta svg {
+  color: var(--accent-hi);
+  transition: transform 0.3s var(--ease);
+}
+
+.bento-item:hover .bento-meta svg {
+  transform: translateX(4px);
+}
+
+/* Bento visuals */
+.bento-browser {
+  position: absolute;
+  inset: 22px 22px -40px;
+  display: flex;
+  flex-direction: column;
+  border-radius: 12px 12px 0 0;
+  overflow: hidden;
+  background: var(--bg-elev-2);
+  box-shadow: 0 0 0 1px var(--line), 0 30px 60px -30px rgba(0, 0, 0, 0.35);
+}
+
+.bento-browser-bar {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.bento-browser-bar i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgb(var(--ink-rgb) / 0.16);
+}
+
+.bento-browser-bar em {
+  margin-left: 8px;
+  font-style: normal;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.bento-browser-screen {
+  flex: 1;
+  overflow: hidden;
+}
+
+.bento-browser-screen img {
+  display: block;
+  width: 100%;
+  height: auto;
+  scale: 1.12;
+  transform-origin: top center;
+}
+
+.bento-dash {
+  position: absolute;
+  inset: 22px;
+  display: grid;
+  grid-template-columns: 34% 1fr;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--device);
+  box-shadow: 0 30px 60px -30px rgba(0, 0, 0, 0.45);
+}
+
+.bento-dash-side {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 10px;
+  border-right: 1px solid rgb(255 255 255 / 0.08);
+}
+
+.bento-dash-side i {
+  font-style: normal;
+  font-size: 11px;
+  padding: 6px 8px;
+  border-radius: 7px;
+  color: rgb(255 255 255 / 0.6);
+}
+
+.bento-dash-side i.is-on {
+  color: #fff;
+  background: rgb(255 255 255 / 0.1);
+}
+
+.bento-dash-main {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+}
+
+.bento-dash-kpis {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.bento-dash-kpis i {
+  height: 34px;
+  border-radius: 8px;
+  background: rgb(255 255 255 / 0.07);
+}
+
+.bento-dash-bars {
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  padding: 10px;
+  border-radius: 8px;
+  background: rgb(255 255 255 / 0.05);
+}
+
+.bento-dash-bars i {
+  flex: 1;
+  border-radius: 4px 4px 0 0;
+  background: var(--accent);
+  transform-origin: bottom;
+  transition: transform 0.6s var(--ease);
+}
+
+.bento-item:hover .bento-dash-bars i:nth-child(odd) {
+  transform: scaleY(0.82);
+}
+
+.bento-chat {
+  position: absolute;
+  inset: 22px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+}
+
+.bento-chat i {
+  max-width: 85%;
+  padding: 10px 14px;
+  border-radius: 16px;
+  font-style: normal;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.bento-chat .is-user {
+  align-self: flex-end;
+  border-bottom-right-radius: 5px;
+  color: var(--on-accent);
+  background: var(--accent);
+}
+
+.bento-chat .is-bot {
+  align-self: flex-start;
+  border-bottom-left-radius: 5px;
+  background: var(--bg-elev-2);
+  box-shadow: 0 0 0 1px var(--line);
+}
+
+.bento-checks {
+  position: absolute;
+  inset: 22px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-content: center;
+  gap: 8px;
+}
+
+.bento-checks i {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-style: normal;
+  font-size: 13px;
+  background: var(--bg-elev-2);
+  box-shadow: 0 0 0 1px var(--line);
+}
+
+.bento-checks svg {
+  flex: none;
+  padding: 3px;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  color: var(--on-accent);
+  background: var(--accent);
+}
+
+@media (max-width: 1023px) {
+  .bento {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .bento-item.is-wide {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 680px) {
+  .bento {
+    grid-template-columns: minmax(0, 1fr);
+    grid-auto-rows: auto;
+  }
+
+  .bento-item.is-wide {
+    grid-column: auto;
+  }
+
+  .bento-header {
+    min-height: 210px;
+  }
+
+  .bento-checks {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
+  }
+
+  .bento-checks i:nth-child(n + 5) {
+    display: none;
+  }
+}
+
+/* ---------- 3D Card Effect (Aceternity) ---------- */
+.card3d-wrap {
+  perspective: 1000px;
+}
+
+.card3d {
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.2s linear;
+}
+
+.card3d-body,
+.card3d-body > * {
+  transform-style: preserve-3d;
+}
+
+.card3d-item {
+  transition: transform 0.2s linear;
+}
+
+/* ---------- Infinite Moving Cards (Aceternity) ---------- */
+.imc {
+  position: relative;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+}
+
+.imc-list {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 16px;
+  width: max-content;
+  min-width: 100%;
+  margin: 0;
+  padding: 14px 0;
+  list-style: none;
+}
+
+.imc-list.is-running {
+  animation: imc-scroll var(--imc-duration, 40s) var(--imc-direction, forwards) linear infinite;
+}
+
+.imc-list.is-pausable:hover {
+  animation-play-state: paused;
+}
+
+@keyframes imc-scroll {
+  to {
+    transform: translateX(calc(-50% - 8px));
+  }
+}
+
+/* ---------- Text Reveal (Magic UI) ---------- */
+.text-reveal {
+  position: relative;
+  margin: 0 0 clamp(36px, 5vw, 64px);
+}
+
+/* Not pinned: the words light up while the block travels up the screen. */
+.text-reveal-sticky {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.text-reveal-text {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: 0;
+}
+
+.text-reveal-word {
+  position: relative;
+  margin: 0 0.12em;
+}
+
+/* The faint copy of each word (CSS only, so the text is in the HTML once). */
+.text-reveal-word::before {
+  content: attr(data-w);
+  position: absolute;
+  inset: 0;
+  opacity: 0.2;
+}
+
+/* ---------- Timeline (Aceternity) ---------- */
+.timeline {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(32px, 5vw, 80px);
+}
+
+.timeline.has-aside {
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr);
+  align-items: start;
+}
+
+.timeline-entries {
+  position: relative;
+}
+
+.timeline-entry {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr);
+  gap: 24px;
+  padding: clamp(28px, 6vh, 64px) 0;
+}
+
+.timeline-title {
+  position: sticky;
+  top: 140px;
+  align-self: start;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-left: 56px;
+}
+
+.timeline-dot {
+  position: absolute;
+  left: 4px;
+  top: 2px;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--bg);
+}
+
+.timeline-dot i {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid var(--line-strong);
+  background: var(--bg-elev);
+}
+
+.timeline-kicker {
+  font-size: 12.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent-hi);
+}
+
+.timeline-title h3 {
+  margin: 0;
+  font-size: clamp(24px, 2.6vw, 40px);
+  font-weight: var(--weight-display);
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+}
+
+.timeline-content p {
+  margin: 0;
+  max-width: 44ch;
+  font-size: 16.5px;
+  line-height: 1.65;
+  color: var(--muted);
+}
+
+.timeline-rail {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 19px;
+  width: 2px;
+  overflow: hidden;
+  background: linear-gradient(to bottom, transparent, var(--line-strong) 10%, var(--line-strong) 90%, transparent);
+}
+
+.timeline-fill {
+  position: absolute;
+  inset: 0;
+  transform-origin: top;
+  border-radius: 2px;
+  background: linear-gradient(to bottom, transparent, var(--accent) 12%, var(--accent-hi));
+}
+
+.timeline-aside {
+  position: sticky;
+  top: 120px;
+}
+
+@media (max-width: 900px) {
+  .timeline.has-aside {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .timeline-aside {
+    position: relative;
+    top: auto;
+    order: -1;
+    max-width: 440px;
+  }
+
+  .timeline-entry {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+    padding: 26px 0;
+  }
+
+  .timeline-title {
+    position: relative;
+    top: auto;
+  }
+
+  .timeline-content {
+    padding-left: 56px;
+  }
+}
+
+/* ---------- Number Ticker (Magic UI) ---------- */
+.number-ticker {
+  display: inline-block;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Background Beams (Aceternity) behind the closing CTA ---------- */
+.page-cta {
+  isolation: isolate;
+}
+
+.beams {
+  position: absolute;
+  inset: 0 calc(-1 * var(--gutter));
+  z-index: -1;
+  pointer-events: none;
+  -webkit-mask-image: radial-gradient(80% 90% at 50% 50%, #000 40%, transparent 85%);
+  mask-image: radial-gradient(80% 90% at 50% 50%, #000 40%, transparent 85%);
+}
+
+.beams-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* ---------- SEO service hero visual: checklist (no scores) ---------- */
+.x-checklist {
+  width: min(100%, 440px);
+  margin: 0 auto;
+  padding: 22px;
+  border-radius: 22px;
+  border: 1px solid var(--line);
+  background: var(--bg-elev);
+  box-shadow: 0 30px 60px -34px rgba(0, 0, 0, 0.35);
+}
+
+.x-checklist-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 14px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.x-checklist ul {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.x-checklist li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 12px;
+  border-radius: 12px;
+  font-size: 14.5px;
+  background: var(--bg);
+  animation: checklistIn 0.6s var(--ease) both;
+}
+
+.x-checklist-tick {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  color: var(--on-accent);
+  background: var(--accent);
+}
+
+@keyframes checklistIn {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+}
+
+/* ---------- Chat launcher: minimal icon ---------- */
+.ai-chat-launcher {
+  color: #fff !important;
+  background: var(--fg) !important;
+  border-color: transparent !important;
+  box-shadow: 0 14px 34px -14px rgba(0, 0, 0, 0.55);
+}
+
+.ai-chat-launcher:hover {
+  background: var(--accent) !important;
+  color: var(--on-accent) !important;
+}
+
+/* ---------- Reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .spotlight {
+    animation: none;
+    opacity: 1;
+    transform: translate(-50%, -40%);
+  }
+
+  .shimmer-spark,
+  .shimmer-spark::before,
+  .mq-group,
+  .x-checklist li {
+    animation: none;
+  }
+
+  .mq {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .mq-group {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .mq-group[aria-hidden] {
+    display: none;
+  }
+
+  .imc {
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+
+  .imc-list {
+    width: auto;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .text-reveal {
+    height: auto;
+  }
+
+  .text-reveal-sticky {
+    position: relative;
+    height: auto;
+    padding: 24px 0;
+  }
+
+  .text-reveal-word::before {
+    content: none;
+  }
+
+  .card3d,
+  .card3d-item,
+  .bento-body {
+    transition: none;
+  }
+}
+
+/* The chat nudge bubble only shows where the side margin can hold it (it would cover content
+   otherwise); the launcher button stays everywhere. */
+@media (max-width: 1679px) {
+  .ai-chat-nudge {
+    display: none !important;
+  }
+}

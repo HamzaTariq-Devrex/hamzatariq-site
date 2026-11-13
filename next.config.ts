@@ -5,6 +5,8 @@ const nextConfig: NextConfig = {
   env: { NEXT_PUBLIC_CALENDLY_URL: process.env.CALENDLY_URL ?? "" },
   // `next dev` gets its own folder so `npm run build` (required before every commit) can't break a running dev server.
   distDir: process.env.NODE_ENV === "development" ? ".next-dev" : ".next",
+  // No `experimental.inlineCss`: it put every stylesheet into the HTML twice (a <style> tag plus the
+  // RSC payload, ~100 KB each) and into every prefetch, which cost more on mobile than the CSS request.
   images: {
     formats: ["image/avif", "image/webp"],
     remotePatterns: [
@@ -18,6 +20,8 @@ const nextConfig: NextConfig = {
       { source: "/Hamza%20Tariq%20Resume.pdf", destination: "/Hamza_Tariq_CV.pdf", permanent: true },
       // The own-site case study page was removed (owner: client projects only on work pages).
       { source: "/work/hamzatariq-site", destination: "/services/react-nextjs-seo", statusCode: 301 },
+      // The own-site migration post was unpublished (owner, 2026-11-09).
+      { source: "/blog/vite-react-to-nextjs-migration", destination: "/blog", statusCode: 301 },
       {
         source: "/:path*",
         has: [{ type: "host", value: "www.hamzatariq.site" }],

@@ -94,7 +94,7 @@ export const SERVICES: Service[] = [
       { q: "Why Next.js instead of a WordPress or Shopify theme?", a: "Next.js pre-renders your pages into HTML, so they load fast and Google can read them straight away. Because the site is custom code, the design is not limited by a theme and you don't carry the weight of plugins you don't need." },
       { q: "Do you use templates?", a: "No. I write everything in custom code, so every site is built around the business it serves." },
       { q: "Can you build an online store with an admin dashboard?", a: "Yes. An ecommerce store with an admin dashboard starts from $1,000, and a full ecommerce app with user accounts and orders starts from $2,000. Stores built at Devrex Digital include Dulhahouse and Nagina Jewels." },
-      { q: "Will my new website be SEO-ready?", a: "Yes. Every site launches with pre-rendered pages, unique titles and descriptions, a sitemap and structured data. It is the same setup I used on this site." },
+      { q: "Will my new website be SEO-ready?", a: "Yes. Every site launches with pre-rendered pages, unique titles and descriptions, a sitemap and structured data." },
     ],
   },
   {

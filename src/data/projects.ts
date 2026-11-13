@@ -50,3 +50,9 @@ export const PROJECTS: Project[] = [
   {"slug":"attire","title":"Attire","label":"Womenswear","category":"Fashion","url":null,"domain":"attireclique.it.com","image":"shot-73612-10.webp","description":"An everyday fashion online store.","features":[]},
   {"slug":"dua-art-studio","title":"Dua Art Studio","label":"Art Studio","category":"Home & Decor","url":null,"domain":"duaartstudio.com","image":"shot-73612-12.webp","description":"A portfolio and shop for an art studio.","features":[]},
 ];
+
+/** Offline projects with a one-line description and no feature list: too thin to promote (left out of the sitemap and related-project lists; still indexable, so Lighthouse SEO stays 100). */
+export const isThinProject = (p: Project) => !p.url && p.features.length === 0;
+
+/** Online stores (every category but "Other", plus the stores filed under it): they link to the ecommerce industry page. */
+export const isStoreProject = (p: Project) => p.category !== "Other" || /\bstore\b/i.test(p.description);

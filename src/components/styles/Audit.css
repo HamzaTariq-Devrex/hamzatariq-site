@@ -20,9 +20,9 @@
   gap: 10px;
   padding: 8px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(45, 212, 191, 0.35);
-  box-shadow: 0 0 0 6px rgba(45, 212, 191, 0.05);
+  background: rgb(var(--ink-rgb) / 0.04);
+  border: 1px solid rgb(var(--accent-rgb) / 0.35);
+  box-shadow: 0 0 0 6px rgb(var(--accent-rgb) / 0.05);
 }
 
 .audit-form input {
@@ -70,7 +70,7 @@
   height: 18px;
   flex: none;
   border-radius: 50%;
-  border: 2px solid rgba(45, 212, 191, 0.25);
+  border: 2px solid rgb(var(--accent-rgb) / 0.25);
   border-top-color: var(--x-teal);
   animation: audit-spin 0.8s linear infinite;
 }
@@ -89,9 +89,9 @@
   margin: 22px 0 0;
   padding: 14px 18px;
   border-radius: 14px;
-  background: rgba(248, 113, 113, 0.08);
-  border: 1px solid rgba(248, 113, 113, 0.3);
-  color: #fecaca;
+  background: rgba(220, 38, 38, 0.08);
+  border: 1px solid rgba(220, 38, 38, 0.3);
+  color: var(--bad);
   text-align: center;
 }
 
@@ -129,15 +129,15 @@
   width: 120px;
   height: 120px;
   flex: none;
-  --ring: #4ade80;
+  --ring: #16a34a;
 }
 
 .audit-ring.is-warn {
-  --ring: #facc15;
+  --ring: #ca8a04;
 }
 
 .audit-ring.is-fail {
-  --ring: #f87171;
+  --ring: #dc2626;
 }
 
 .audit-ring svg {
@@ -152,7 +152,7 @@
 }
 
 .audit-ring-track {
-  stroke: rgba(255, 255, 255, 0.08);
+  stroke: rgb(var(--ink-rgb) / 0.08);
 }
 
 .audit-ring-value {
@@ -202,24 +202,24 @@
   border-radius: 16px;
   background: var(--x-glass);
   border: 1px solid var(--x-line);
-  --tone: #4ade80;
-  --tone-bg: rgba(74, 222, 128, 0.1);
+  --tone: #16a34a;
+  --tone-bg: rgba(22, 163, 74, 0.1);
 }
 
 .audit-check.is-warn {
-  --tone: #facc15;
-  --tone-bg: rgba(250, 204, 21, 0.1);
+  --tone: #ca8a04;
+  --tone-bg: rgba(202, 138, 4, 0.1);
 }
 
 .audit-check.is-fail {
-  --tone: #f87171;
-  --tone-bg: rgba(248, 113, 113, 0.1);
-  border-color: rgba(248, 113, 113, 0.25);
+  --tone: #dc2626;
+  --tone-bg: rgba(220, 38, 38, 0.1);
+  border-color: rgba(220, 38, 38, 0.25);
 }
 
 .audit-check.is-skip {
-  --tone: rgba(226, 232, 240, 0.7);
-  --tone-bg: rgba(255, 255, 255, 0.06);
+  --tone: rgb(var(--ink-rgb) / 0.7);
+  --tone-bg: rgb(var(--ink-rgb) / 0.06);
 }
 
 .audit-pill {
@@ -275,15 +275,15 @@
   margin: 4px 0 0;
   font-size: 20px;
   font-weight: 700;
-  color: #4ade80;
+  color: #16a34a;
 }
 
 .audit-metrics .is-warn dd {
-  color: #facc15;
+  color: #ca8a04;
 }
 
 .audit-metrics .is-fail dd {
-  color: #f87171;
+  color: #dc2626;
 }
 
 .audit-metrics .is-skip dd {
@@ -310,7 +310,7 @@
 }
 
 .audit-cta {
-  border-color: rgba(45, 212, 191, 0.3) !important;
+  border-color: rgb(var(--accent-rgb) / 0.3) !important;
 }
 
 .audit-cta .x-actions {

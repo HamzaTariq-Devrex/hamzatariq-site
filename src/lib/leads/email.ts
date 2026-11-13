@@ -50,7 +50,7 @@ export const sendOwnerNotification = (lead: LeadInput, id: string, audit: AuditR
     )
     .join("")}</table>
 ${lead.message ? `<p style="margin:16px 0 0;padding:14px;background:#f8fafc;border-radius:10px;white-space:pre-wrap">${escape(lead.message)}</p>` : ""}
-<p style="margin:20px 0 0"><a href="${adminUrl}" style="color:#0d9488">Open in admin</a> · Reply to this email to answer ${escape(lead.name)}.</p>`);
+<p style="margin:20px 0 0"><a href="${adminUrl}" style="color:#d4380d">Open in admin</a> · Reply to this email to answer ${escape(lead.name)}.</p>`);
   const text = [
     `New lead from ${lead.name}`,
     ...rows.map(([k, v]) => `${k}: ${v}`),
@@ -88,8 +88,8 @@ export const sendVisitorReply = (lead: LeadInput) => {
   const html = layout(`<p style="margin:0 0 14px">Hi ${escape(first)},</p>
 <p style="margin:0 0 14px">Thanks for your message${escape(about)}. I've received your details and I'll reply within 24 hours.</p>
 <p style="margin:0 0 20px">${next.line}</p>
-<p style="margin:0 0 24px"><a href="${next.url}" style="display:inline-block;padding:12px 22px;border-radius:999px;background:#2dd4bf;color:#04221f;font-weight:bold;text-decoration:none">${next.label}</a></p>
-<p style="margin:0">Hamza Tariq<br><span style="color:#64748b">${escape(SITE.jobTitle)} · <a href="${SITE.url}" style="color:#0d9488">hamzatariq.site</a></span></p>`);
+<p style="margin:0 0 24px"><a href="${next.url}" style="display:inline-block;padding:12px 22px;border-radius:999px;background:#0e0e10;color:#ffffff;font-weight:bold;text-decoration:none">${next.label}</a></p>
+<p style="margin:0">Hamza Tariq<br><span style="color:#64748b">${escape(SITE.jobTitle)} · <a href="${SITE.url}" style="color:#d4380d">hamzatariq.site</a></span></p>`);
   const text = `Hi ${first},\n\nThanks for your message${about}. I've received your details and I'll reply within 24 hours.\n\n${next.line}\n${next.url}\n\nHamza Tariq\n${SITE.url}`;
   return send({
     from: `Hamza Tariq <${FROM}>`,
@@ -150,10 +150,10 @@ ${speed.length ? `<p style="margin:22px 0 8px;font-weight:bold;font-size:16px">S
 <div style="margin:26px 0 0;padding:18px;border-radius:12px;background:#f0fdfa;border:1px solid #99f6e4">
 <p style="margin:0 0 8px;font-weight:bold">Want me to fix this?</p>
 <p style="margin:0 0 14px">My SEO audit with a full fix plan starts at $150 (2–3 days), and I can also do the fixes for you. Reply to this email or book a free call.</p>
-<a href="${SITE.bookingUrl || `${SITE.url}/contact`}" style="display:inline-block;padding:12px 22px;border-radius:999px;background:#2dd4bf;color:#04221f;font-weight:bold;text-decoration:none">Book a free call</a>
-<a href="${SITE.url}/services/react-nextjs-seo" style="margin-left:12px;color:#0d9488">See the SEO service</a>
+<a href="${SITE.bookingUrl || `${SITE.url}/contact`}" style="display:inline-block;padding:12px 22px;border-radius:999px;background:#0e0e10;color:#ffffff;font-weight:bold;text-decoration:none">Book a free call</a>
+<a href="${SITE.url}/services/react-nextjs-seo" style="margin-left:12px;color:#d4380d">See the SEO service</a>
 </div>
-<p style="margin:24px 0 0">Hamza Tariq<br><span style="color:#64748b">${escape(SITE.jobTitle)} · <a href="${SITE.url}" style="color:#0d9488">hamzatariq.site</a></span></p>`);
+<p style="margin:24px 0 0">Hamza Tariq<br><span style="color:#64748b">${escape(SITE.jobTitle)} · <a href="${SITE.url}" style="color:#d4380d">hamzatariq.site</a></span></p>`);
   const text = [
     `Hi ${first},`,
     "",
@@ -196,8 +196,8 @@ export const sendToolResult = (lead: LeadInput, result: ToolResult) => {
     .map(([k, v]) => `<tr><td style="padding:6px 12px 6px 0;color:#64748b;vertical-align:top">${escape(k)}</td><td style="padding:6px 0">${escape(v)}</td></tr>`)
     .join("")}</table>
 <p style="margin:18px 0 20px;color:#475569">${escape(result.note)}</p>
-<p style="margin:0 0 24px"><a href="${result.cta.href}" style="display:inline-block;padding:12px 22px;border-radius:999px;background:#2dd4bf;color:#04221f;font-weight:bold;text-decoration:none">${escape(result.cta.label)}</a></p>
-<p style="margin:0">Hamza Tariq<br><span style="color:#64748b">${escape(SITE.jobTitle)} · <a href="${SITE.url}" style="color:#0d9488">hamzatariq.site</a></span></p>`);
+<p style="margin:0 0 24px"><a href="${result.cta.href}" style="display:inline-block;padding:12px 22px;border-radius:999px;background:#0e0e10;color:#ffffff;font-weight:bold;text-decoration:none">${escape(result.cta.label)}</a></p>
+<p style="margin:0">Hamza Tariq<br><span style="color:#64748b">${escape(SITE.jobTitle)} · <a href="${SITE.url}" style="color:#d4380d">hamzatariq.site</a></span></p>`);
   const text = [`Hi ${first},`, "", result.title, "", result.summary, "", result.note, `${result.cta.label}: ${result.cta.href}`, "", "Hamza Tariq", SITE.url].join("\n");
   return send({ from: `Hamza Tariq <${FROM}>`, to: lead.email, reply_to: SITE.email, subject: result.subject, html, text });
 };

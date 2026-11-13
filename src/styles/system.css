@@ -1,0 +1,303 @@
+/* hamzatariq.site design system (2026-11 "Nebula" redesign, dark). Loaded once in the root layout
+   before every page's own styles; every colour in the site's CSS reads these tokens.
+   Look: deep indigo-black ground, soft lavender-white ink, a violet → blue → cyan accent family,
+   a characterful grotesk for display (Bricolage Grotesque), Geist for text, and Instrument Serif
+   italic with the accent gradient for the accent words in headings. Glass cards with hairlines, a
+   live aurora behind the hero and slow glows behind every page (src/components/styles/Theme.css).
+   Layout: one centred container (--container) with equal side gutters (--gutter) on every page. */
+/* Size-matched fallbacks for the three web fonts (used in layout.tsx), shown until the fonts arrive.
+   Measured in Chrome on the site's own text (web font width / fallback width per weight), one face per
+   weight range: bold Arial for 550+ and real Times italic, because font-synthesis is off. next/font's own
+   fallbacks were too wide (Geist 106%, Bricolage 113% measured at its 800 default), so paragraphs and
+   headings lost a line when the fonts swapped in: a 0.11 layout shift on /blog. Ascent and descent are the
+   fonts' own metrics divided by size-adjust. Re-measure if a font or the body text changes a lot. */
+@font-face {
+  font-family: "Geist Fallback";
+  src: local("Arial"), local("ArialMT");
+  font-weight: 100 449;
+  size-adjust: 102.13%;
+  ascent-override: 98.40%;
+  descent-override: 28.88%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: "Geist Fallback";
+  src: local("Arial"), local("ArialMT");
+  font-weight: 450 549;
+  size-adjust: 104.54%;
+  ascent-override: 96.14%;
+  descent-override: 28.22%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: "Geist Fallback";
+  src: local("Arial Bold"), local("Arial-BoldMT");
+  font-weight: 550 649;
+  size-adjust: 99.72%;
+  ascent-override: 100.78%;
+  descent-override: 29.58%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: "Geist Fallback";
+  src: local("Arial Bold"), local("Arial-BoldMT");
+  font-weight: 650 900;
+  size-adjust: 101.93%;
+  ascent-override: 98.60%;
+  descent-override: 28.94%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: "Bricolage Fallback";
+  src: local("Arial"), local("ArialMT");
+  font-weight: 100 449;
+  size-adjust: 104.84%;
+  ascent-override: 88.71%;
+  descent-override: 25.75%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: "Bricolage Fallback";
+  src: local("Arial"), local("ArialMT");
+  font-weight: 450 549;
+  size-adjust: 106.32%;
+  ascent-override: 87.47%;
+  descent-override: 25.40%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: "Bricolage Fallback";
+  src: local("Arial Bold"), local("Arial-BoldMT");
+  font-weight: 550 624;
+  size-adjust: 100.28%;
+  ascent-override: 92.74%;
+  descent-override: 26.92%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: "Bricolage Fallback";
+  src: local("Arial Bold"), local("Arial-BoldMT");
+  font-weight: 625 674;
+  size-adjust: 100.94%;
+  ascent-override: 92.13%;
+  descent-override: 26.75%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: "Bricolage Fallback";
+  src: local("Arial Bold"), local("Arial-BoldMT");
+  font-weight: 675 900;
+  size-adjust: 101.60%;
+  ascent-override: 91.54%;
+  descent-override: 26.57%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: "Instrument Serif Fallback";
+  src: local("Times New Roman Italic"), local("TimesNewRomanPS-ItalicMT");
+  font-style: italic;
+  font-weight: 400;
+  size-adjust: 88.57%;
+  ascent-override: 111.78%;
+  descent-override: 35.00%;
+  line-gap-override: 0%;
+}
+
+:root {
+  /* Ground and surfaces */
+  --bg: #06050f;
+  --bg-elev: #0f0d1e;
+  --bg-elev-2: #17142b;
+  --ink-rgb: 232 229 255;
+  --surface: rgb(var(--ink-rgb) / 0.035);
+  --surface-2: rgb(var(--ink-rgb) / 0.07);
+  --line: rgb(var(--ink-rgb) / 0.1);
+  --line-strong: rgb(var(--ink-rgb) / 0.2);
+  /* Device frames around real screenshots. */
+  --device: #0b0a17;
+  --device-2: #1b1931;
+
+  /* Text */
+  --fg: #f4f2ff;
+  --fg-2: rgb(var(--ink-rgb) / 0.84);
+  --muted: rgb(var(--ink-rgb) / 0.66);
+  --faint: rgb(var(--ink-rgb) / 0.56);
+
+  /* Accent family. --accent fills buttons and shapes (white text on it passes 4.5:1); --accent-hi is
+     the light shade for text, links and icons on the dark ground; --accent-2/3 are the blue and cyan
+     ends of the gradient. --accent-grad paints accent words and thin lines. */
+  --accent: #6d4aff;
+  --accent-rgb: 109 74 255;
+  --accent-hi: #b9abff;
+  --accent-hi-rgb: 185 171 255;
+  --accent-2: #5b8cff;
+  --accent-2-rgb: 91 140 255;
+  --accent-3: #5fd4ff;
+  --accent-3-rgb: 95 212 255;
+  --on-accent: #ffffff;
+  --accent-grad: linear-gradient(100deg, #cbbcff 0%, #9d8bff 34%, #6f9bff 68%, #63d6ff 100%);
+  --accent-fill: linear-gradient(120deg, #7b55ff 0%, #5b47f5 55%, #4a63f0 100%);
+
+  /* States */
+  --ok: #4ade80;
+  --warn: #facc15;
+  --bad: #fb7185;
+
+  /* Type */
+  --font-sans: var(--font-text), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-head: var(--font-display), var(--font-text), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-accent), "Iowan Old Style", Georgia, serif;
+  --font-mono: ui-monospace, "SFMono-Regular", "Cascadia Code", Consolas, monospace;
+  --fs-display: clamp(46px, min(7.4vw, 12vh), 128px);
+  --fs-h1: clamp(42px, min(6vw, 9.6vh), 92px);
+  --fs-h2: clamp(34px, 4.4vw, 68px);
+  --fs-h3: clamp(19px, 1.5vw, 23px);
+  --fs-lead: clamp(16.5px, 1.25vw, 19px);
+  --tracking-display: -0.045em;
+  --tracking-h: -0.035em;
+  --weight-display: 600;
+
+  /* Layout */
+  --container: 1280px;
+  --gutter: clamp(20px, 3.4vw, 48px);
+  --section-gap: clamp(96px, 12vw, 176px);
+  --r-sm: 10px;
+  --r: 16px;
+  --r-lg: 24px;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Legacy aliases still read by older rules. */
+  --accentColor: var(--accent-hi);
+  --backgroundColor: var(--bg);
+  color-scheme: dark;
+}
+
+@media (min-width: 1700px) {
+  :root {
+    --container: 1400px;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--bg);
+  -webkit-text-size-adjust: 100%;
+}
+
+/* Lenis (src/components/motion/SmoothScroll.tsx) drives smooth scrolling when it runs. */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  overflow-x: clip;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.6;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img,
+svg,
+video {
+  max-width: 100%;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-head);
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent-hi);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+/* Shared container: every page section sits in this. */
+.container {
+  width: min(var(--container), calc(100% - 2 * var(--gutter)));
+  margin-inline: auto;
+}
+
+/* Small uppercase label with a dot. */
+.u-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+

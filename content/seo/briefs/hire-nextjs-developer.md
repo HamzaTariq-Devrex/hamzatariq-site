@@ -45,7 +45,7 @@ The hiring guide from the developer's side of the table, for a buyer with no eng
 ## Unique additions
 
 - A pass/fail table for testing live work with no technical help.
-- Measured scores from my own site, including the weak one (home page performance 66) and why it stays.
+- How I label team work: 31 projects shown as "Built at Devrex Digital", sole frontend developer on 40+ live sites.
 - An ownership checklist to agree before paying anything.
 - A table of what to test by project type.
 - A real fixed price table with add-ons, not hourly ranges.

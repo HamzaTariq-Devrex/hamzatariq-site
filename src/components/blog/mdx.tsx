@@ -40,7 +40,7 @@ const Review = ({ id }: { id: string }) => {
 
 /** Image with required alt text (checked by content:check) and an optional caption. */
 const Figure = ({ src, alt, width, height, caption }: { src: string; alt: string; width: number; height: number; caption?: string }) => (
-  <figure className="post-figure">
+  <figure className="post-figure" data-clip>
     <Image src={src} alt={alt} width={width} height={height} sizes="(max-width: 760px) 92vw, 720px" />
     {caption && <figcaption>{caption}</figcaption>}
   </figure>
@@ -84,6 +84,33 @@ const BlogAuditCta = () => <AuditCta location="blog" />;
 
 const components = { FromMyWork, MyTake, Review, Figure, a: A, table: Table, input: TaskBox, AuditCta: BlogAuditCta };
 
+type HastNode = { type: string; tagName?: string; properties?: Record<string, unknown>; children?: HastNode[] };
+const elements = (node: HastNode | undefined, tag: string) => (node?.children ?? []).filter((c) => c.type === "element" && c.tagName === tag);
+const isEmptyCell = (cell: HastNode | undefined) => !!cell && !(cell.children ?? []).some((c) => c.type !== "text" || String((c as { value?: string }).value ?? "").trim());
+
+/**
+ * Comparison tables (first header cell empty): the first cell of each body row becomes a row header
+ * (<th scope="row">), so every data cell has a header (Lighthouse "td-has-header"). Styled like a td.
+ */
+const rehypeRowHeaders = () => (tree: HastNode) => {
+  const walk = (node: HastNode) => {
+    if (node.type === "element" && node.tagName === "table") {
+      const headRow = elements(elements(node, "thead")[0], "tr")[0];
+      if (isEmptyCell(elements(headRow, "th")[0])) {
+        for (const row of elements(elements(node, "tbody")[0], "tr")) {
+          const first = elements(row, "td")[0];
+          if (first) {
+            first.tagName = "th";
+            first.properties = { ...first.properties, scope: "row" };
+          }
+        }
+      }
+    }
+    node.children?.forEach(walk);
+  };
+  walk(tree);
+};
+
 /** `auditCta`: insert the free SEO audit box after the first <FromMyWork> box (blog posts). */
 export const renderMdx = async (source: string, { auditCta = false }: { auditCta?: boolean } = {}) => {
   const end = source.indexOf("</FromMyWork>");
@@ -91,7 +118,7 @@ export const renderMdx = async (source: string, { auditCta = false }: { auditCta
   const { default: Content } = await evaluate(withCta, {
     ...runtime,
     remarkPlugins: [remarkGfm],
-    rehypePlugins: [rehypeSlug],
+    rehypePlugins: [rehypeSlug, rehypeRowHeaders],
   });
   return <Content components={components} />;
 };
