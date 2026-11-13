@@ -277,8 +277,9 @@
         "how long does it take to build an online store?"
       ],
       "angle": "The hub for the cluster: what a custom store includes, my real package prices and page limits, and links to every supporting post.",
-      "status": "queued",
-      "publishedSlug": null
+      "status": "published",
+      "publishedSlug": "custom-ecommerce-website-guide",
+      "published": "2026-11-13"
     },
     {
       "keyword": "react vs next.js for seo",
