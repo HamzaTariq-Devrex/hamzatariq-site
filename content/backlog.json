@@ -328,8 +328,9 @@
         "how do time zones work with a remote developer?"
       ],
       "angle": "The hub for the cluster, from the remote developer's side: time-zone overlap, payments, contracts, handover and the warning signs, linking every supporting post.",
-      "status": "queued",
-      "publishedSlug": null
+      "status": "published",
+      "publishedSlug": "working-with-a-remote-web-developer",
+      "published": "2026-11-13"
     },
     {
       "keyword": "how much does a custom dashboard cost",
