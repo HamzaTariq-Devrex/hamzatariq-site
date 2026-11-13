@@ -1,0 +1,300 @@
+---
+title: "React SEO Guide: How to Make React and Next.js Sites Rank"
+seoTitle: "React SEO Guide: Fixes in Order of Impact"
+description: "A React SEO guide from a real fix: why client-rendered React stays invisible, what to fix first, how to check your site, and my results (SEO 83 to 100)."
+keyword: "react seo guide"
+category: react-nextjs-seo
+cluster: react-seo
+role: pillar
+intent: learn
+funnel: awareness
+secondary: ["react seo", "next.js seo", "seo for single page applications", "react seo best practices", "technical seo for react"]
+trust: "I moved my own React site to Next.js 15 and measured it with mobile Lighthouse before and after (SEO 83 to 100, LCP 18.0 s to 2.6 s), I built the free SEO audit tool on this site, and I've shipped 40+ live production websites in React and Next.js."
+tags: [react, seo, next.js, technical seo, guide]
+published: 2026-11-13
+cover:
+  src: /images/work/hamzatariq-site-home.webp
+  alt: "hamzatariq.site home page with the 3D character, served as pre-rendered HTML"
+  width: 1440
+  height: 900
+faq:
+  - q: "Is React bad for SEO?"
+    a: "React itself is fine. The problem is client-side rendering, where every URL sends the same empty HTML and the content is built later in the browser. Render the HTML on the server or at build time and a React site can score 100 for SEO, as mine does."
+  - q: "Does Google index JavaScript sites?"
+    a: "Yes. Google crawls the page, puts it in a queue to run the JavaScript, and indexes what it sees after that. It works, but it's slower and breaks more easily than plain HTML, and many other crawlers and link previews never run JavaScript at all."
+  - q: "Is react-helmet enough for SEO?"
+    a: "No. It changes the title and meta tags in the browser after JavaScript runs, so the raw HTML still has one generic title for every page. Crawlers that skip JavaScript and social link previews never see the page-specific tags."
+  - q: "Is Next.js good for SEO?"
+    a: "Yes, when you use it to send real HTML. Next.js builds each page on the server or at build time, puts each page's title and description in that HTML, and generates the sitemap and robots.txt from code. A Next.js app that renders everything in the browser has the same problem as a plain React app."
+  - q: "How much does it cost to fix SEO on a React site?"
+    a: "With me, an SEO audit starts at $150 (2–3 days), a technical SEO setup for React or Next.js at $500, and a full React (Vite/CRA) to Next.js migration at $800. Every project is quoted after a free call."
+---
+
+This React SEO guide answers one question first: is React bad for SEO? No. Client-side rendering is. A standard React app sends the same nearly empty HTML for every URL and builds the page in the browser, so search engines get a blank page and one shared title. Fix how pages are delivered (real HTML per URL, its own title and description, a sitemap, fast first paint) and React ranks like any other site. On my own site this took the mobile SEO score from 83 to 100.
+
+Below are the fixes in the order I do them, the checks you can run yourself, and what each fix costs.
+
+**The fixes, in order of impact:**
+
+1. **Real HTML for every URL**, built on the server or at build time.
+2. **A unique title and meta description** in that HTML, for every page.
+3. **sitemap.xml, robots.txt and canonical URLs**, so crawlers find every page once.
+4. **Structured data** (JSON-LD) that says what each page is.
+5. **A fast first screen** (Core Web Vitals), with the real content painted first.
+6. **Crawlable links and clean URLs**, plus a ping to search engines after each deploy.
+
+If you only do the first two, you've fixed most of the damage. The rest is what turns an indexed site into one that competes.
+
+## Is React bad for SEO?
+
+React is a library for building interfaces. It doesn't decide where your HTML gets built. You do, through the setup you pick.
+
+There are two ways a React page can reach a visitor:
+
+- **Client-side rendering (CSR).** The server sends a small HTML file with an empty `<div id="root">` and a script. The browser downloads the script, runs it, and only then does the page have headings, text and links. Vite and Create React App work this way by default.
+- **Server or build-time rendering.** The HTML for each URL already contains the page. React then "hydrates" it in the browser (attaches the click handlers), so it still behaves like an app.
+
+The first is what people mean by "React is bad for SEO". The second is what Next.js, and frameworks like it, give you. Same components, same design, different delivery.
+
+So the honest answer: React is fine, a single-page app built with CSR is a weak starting point for search, and the fix is in the delivery, not a rewrite.
+
+## How does Google index a JavaScript site?
+
+Google does run JavaScript. Its own guide to [JavaScript SEO basics](https://developers.google.com/search/docs/crawling-indexing/javascript/javascript-seo-basics) describes three steps: crawl the URL, render the page (run the JavaScript in a headless browser), then index what it sees.
+
+The catch is the middle step. Rendering is expensive, so pages wait in a queue before Google runs them. For a client-rendered site, everything depends on that step going well:
+
+- If a script throws an error, Google indexes the empty shell.
+- If the content waits on an API call that is slow or blocked, Google may index the page before the data arrives.
+- If links are buttons with click handlers instead of real `<a href>` tags, Google can't follow them to your other pages.
+
+Google is the patient one. Plenty of other readers of your HTML never run JavaScript at all:
+
+- **Link previews** on WhatsApp, Slack, X and LinkedIn read only the raw HTML. An empty shell gives you a preview with no title, no description and no image.
+- **Many AI search tools and crawlers** fetch the HTML and move on.
+- **Other search engines** render less, and less often, than Google.
+
+That's why "Google can render JavaScript" isn't the end of the discussion. The question is not whether one crawler can eventually see your page. It's whether every reader sees the right page on the first request. Real HTML is the only answer that works for all of them.
+
+## How to check what search engines see on your site
+
+You can test this yourself without a developer. Use your home page and one inner page, such as a service or product page.
+
+1. **View the source.** Right-click the page and choose View page source (not Inspect). Press Ctrl+F and search for a sentence you can see on screen. If it isn't there, the content is built by JavaScript.
+2. **Compare the tab titles.** Open three different pages. If the browser tab shows the same title on all of them, that's what search engines see too.
+3. **Open /robots.txt and /sitemap.xml** on your domain. If either one shows your home page or an error instead of a plain text or XML file, crawlers have no map of the site.
+4. **Paste a page link into WhatsApp or Slack.** A preview with no title or image means the raw HTML is missing its tags.
+5. **Use URL Inspection in Google Search Console** if you have access. "View crawled page" shows the HTML Google stored, and the coverage report shows whether the page is indexed at all.
+
+If you'd rather get a scored list, my [free SEO audit tool](/tools/free-seo-audit) fetches the raw HTML the way a crawler does, checks the title, description, headings, structured data, robots.txt and sitemap, and runs Google's PageSpeed test. It's the same first pass I run before quoting any fix.
+
+When I find an empty source, a single shared title and no sitemap together, the diagnosis is almost always the one in my post on [why a React website is not ranking on Google](/blog/react-website-not-ranking-on-google), which walks through each of these causes in more detail.
+
+## How do I make a React app SEO friendly?
+
+This is the order I work in on client sites. Each step builds on the one before, so skipping ahead rarely pays.
+
+### 1. Send real HTML for every URL
+
+Everything else depends on this. Each URL should return HTML that already holds its headings, text, images and links.
+
+You have two clean ways to get there:
+
+- **Static generation (SSG):** the HTML for every page is built once, at deploy time, and served from a CDN. Fastest option, and right for most business sites, blogs, portfolios and product catalogues that don't change every minute.
+- **Server-side rendering (SSR):** the server builds the HTML on each request. Use it for pages that depend on who is asking or on data that changes constantly.
+
+Most real sites mix both. On my site, almost every page is static, including 31 pre-rendered project pages, and only a few pages that need fresh data are built on request.
+
+### 2. Give every page its own title and description
+
+Each page needs a unique `<title>` that fits in the search result and a meta description of 150–160 characters that tells the searcher what they get. Both must be in the HTML the server sends, not added later by a script.
+
+This is where react-helmet falls short. It sets the tags in the browser after React runs. Google may pick them up after rendering, but the raw HTML still carries the one title from `index.html`, and link previews show that.
+
+### 3. Add sitemap.xml, robots.txt and canonical URLs
+
+- **sitemap.xml** lists every page you want indexed, so new pages are found without waiting for a link.
+- **robots.txt** allows crawling and points to the sitemap. Check it doesn't block your JavaScript or CSS files; Google needs them to render.
+- **A canonical URL** on every page tells search engines which address is the real one, so `www` and non-`www`, trailing slashes or tracking parameters don't split your page into duplicates.
+
+### 4. Add structured data
+
+Structured data is a small block of JSON-LD that says what a page is: a person, a business, a service, an article, a product. It helps Google connect your pages to your brand and can make a result richer. Put it in the server HTML like everything else.
+
+### 5. Make the first screen fast
+
+Google measures real-user speed with Core Web Vitals. The one React sites fail most is Largest Contentful Paint (LCP): the time until the biggest thing on screen appears. I cover the React-specific causes in the speed section below.
+
+### 6. Keep links crawlable and tell search engines about changes
+
+Every link between your pages should be a real `<a href>`, not a `div` with an `onClick`. Use clean paths (`/services/seo`) rather than hash routes (`/#/services`), because search engines treat everything after `#` as the same page.
+
+After each deploy, notify search engines about new and changed pages. I submit the sitemap through IndexNow automatically after every production deploy of this site, which covers Bing and the other engines that support it.
+
+## SSR, static generation or a prerender service: which rendering fits?
+
+This is the decision that shapes every other fix. Here is how the options compare for SEO for single page applications and the sites that grow out of them.
+
+| Approach | What crawlers get | Good for | Watch out for |
+| --- | --- | --- | --- |
+| Client-side SPA (Vite, CRA) | Empty shell, one title | Logged-in apps that don't need search traffic | Invisible to link previews and many crawlers |
+| Prerender service in front of the SPA | A snapshot made for bots | A stopgap while you plan a migration | Another moving part; bots and people can see different pages |
+| Static generation (Next.js) | Full HTML built at deploy | Business sites, blogs, catalogues | Pages need a rebuild or revalidation to change |
+| Server-side rendering (Next.js) | Full HTML built per request | Personalised or fast-changing pages | Server cost and a slower first byte if data is slow |
+
+Prerender services deserve a word of caution. They detect bots and serve them a pre-built copy of the page, which is what Google calls dynamic rendering. Google's own documentation now describes [dynamic rendering as a workaround](https://developers.google.com/search/docs/crawling-indexing/javascript/dynamic-rendering) rather than a long-term solution, and recommends server rendering or static generation instead. When the snapshot service fails quietly, bots get stale or empty pages and nobody notices for weeks.
+
+<MyTake>
+For any React site that needs leads from search, I recommend moving to Next.js with static generation as the default and server rendering only where a page needs it. Patching a SPA with react-helmet and a prerender service costs less on day one, but you keep paying for it: two versions of every page, a third-party service to watch, and previews that still break. A migration keeps your components and design, and the problem is gone for good. The exception is a logged-in app with no public pages to rank; there, CSR is fine.
+</MyTake>
+
+## Is Next.js good for SEO?
+
+Yes, because it makes the right setup the default. Next.js SEO comes down to four built-in pieces that a plain React app has to bolt on.
+
+**Pages are rendered before they reach the browser.** In the App Router, components are server components unless you mark them otherwise, so their output is already HTML.
+
+**Metadata is part of each route.** You export `metadata` (or `generateMetadata` for dynamic pages) from the route file and Next.js writes the title, description, canonical and social tags into the server HTML. The [generateMetadata docs](https://nextjs.org/docs/app/api-reference/functions/generate-metadata) cover every field. This is roughly the pattern every page on this site uses:
+
+```tsx
+// src/app/services/[slug]/page.tsx
+import type { Metadata } from "next";
+import { getService } from "@/lib/services";
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const service = getService(slug);
+  return {
+    title: service.seoTitle,
+    description: service.description, // 150–160 characters
+    alternates: { canonical: `/services/${slug}` },
+    openGraph: { title: service.seoTitle, description: service.description },
+  };
+}
+```
+
+**The sitemap and robots.txt are code.** A `sitemap.ts` file in the `app` folder returns your URLs, so a new page can't be forgotten:
+
+```ts
+// src/app/sitemap.ts
+import type { MetadataRoute } from "next";
+import { getAllPosts } from "@/lib/blog";
+
+export default function sitemap(): MetadataRoute.Sitemap {
+  const base = "https://example.com";
+  const posts = getAllPosts().map((p) => ({ url: `${base}/blog/${p.slug}`, lastModified: p.updated ?? p.published }));
+  return [{ url: base }, { url: `${base}/services` }, ...posts];
+}
+```
+
+**Images and fonts are optimised for you.** `next/image` serves modern formats in the right size, and `next/font` self-hosts fonts so text doesn't wait on another server.
+
+One warning: Next.js doesn't fix SEO on its own. If you mark the whole app `"use client"` and fetch everything in a `useEffect`, you've rebuilt a client-side SPA on a different framework. The official migration guide even starts that way. I explain why that first stage changes nothing for crawlers, and what to do after it, in my write-up of the [Vite React to Next.js migration](/blog/vite-react-to-nextjs-migration) on this site.
+
+If you're choosing a platform from scratch rather than fixing an existing React app, I compare the trade-offs in [Next.js vs WordPress for a business website](/blog/nextjs-vs-wordpress-for-business-website).
+
+## React SEO best practices for speed
+
+Speed is the part of technical SEO for React that people see as well as search engines. Google's Core Web Vitals are LCP (how fast the main content appears), INP (how quickly the page responds to a tap) and CLS (how much the layout jumps). React sites tend to fail them for the same handful of reasons:
+
+- **A preloader that hides the page.** A spinner covering finished content pushes LCP back to whenever the spinner leaves. Show the real content first.
+- **One big JavaScript bundle.** Everything ships to every page, so the phone spends seconds parsing code it doesn't need. Split by route and load heavy parts only where they're used.
+- **Heavy libraries in the first paint.** 3D scenes, animation libraries and maps belong after the main content. In Next.js, load them with `next/dynamic` and `ssr: false` so the HTML arrives without them.
+- **Unsized, oversized images.** Use `next/image` with a width and height so the browser reserves the space (no layout jump) and gets a modern format at the right size.
+- **Fonts from another server.** Self-hosting removes a round trip before text can paint.
+
+My own home page is a good stress test. It has a Three.js 3D character, GSAP scroll animations and a preloader. Before the fix, mobile LCP was 18.0 s. After rendering the content first and loading the 3D scene behind it, LCP dropped to 2.6 s, and I kept every animation.
+
+## What I changed on my own site
+
+<FromMyWork title="My own React SEO fix, measured">
+<Figure
+  src="/images/work/hamzatariq-site-home.webp"
+  alt="hamzatariq.site home page with the 3D character after moving from Vite React to Next.js"
+  width={1440}
+  height={900}
+  caption="The home page after the fix: same 3D character and animations, now delivered as real HTML."
+/>
+
+This site started as a Vite + React single-page app. Every URL returned the same nearly empty HTML, one hard-coded title covered every page, and there was no meta description, sitemap, robots.txt or structured data.
+
+I moved it to Next.js 15 with the App Router and React 19, pre-rendered every page (including 31 project pages), and gave each one a unique title, a 150–160 character description, a canonical URL and JSON-LD. The 3D character and GSAP animations load on the client with `next/dynamic`, so they no longer hold back the first paint. Fonts are self-hosted, images go through `next/image`, and IndexNow runs after every production deploy.
+
+Measured with mobile Lighthouse on a local production build (2026-10-22):
+
+| Metric | Before | After |
+| --- | --- | --- |
+| SEO score, home | 83 | 100 |
+| LCP, home | 18.0 s | 2.6 s |
+| Performance, home | 35 | 66 |
+| Performance, /work | 85 | 97 |
+| Performance, project page | 88 | 99 |
+
+The home page performance score stays lower because it still runs a full 3D scene, which I chose to keep. I do the same work on client sites through my [React and Next.js SEO service](/services/react-nextjs-seo).
+</FromMyWork>
+
+## Is react-helmet enough for SEO?
+
+It's the most common half-fix I see, so it gets its own answer: no.
+
+react-helmet (and its maintained fork, react-helmet-async) changes the `<title>` and meta tags after React runs in the browser. That has three limits:
+
+- The HTML the server sends still has the single title from `index.html`, so every crawler that skips JavaScript sees one title for the whole site.
+- Link previews read that same raw HTML, so shared links show the wrong title and no image.
+- Google sees the right tags only if rendering succeeds, which puts your most important on-page signal behind the render queue.
+
+react-helmet-async can work well inside a server-rendered setup, because then the tags are in the first HTML. On a client-rendered SPA it treats the symptom, not the cause.
+
+## Common React SEO mistakes I find in audits
+
+These come up again and again when I audit React sites. Each one is cheap to fix once you know it's there.
+
+- **Hash routing.** URLs like `/#/about` look like separate pages to visitors, but search engines see one page. Switch to path-based routes.
+- **Links that aren't links.** Navigation built from `div`s or buttons with `onClick` handlers gives crawlers nothing to follow. Use real `<a href>` tags (Next.js `Link` renders one).
+- **A missing page that returns "OK".** A SPA answers every unknown URL with the same shell and a success status, so a typo URL looks like a real, empty page. Return a real not-found status for missing pages.
+- **noindex left over from staging.** A `noindex` tag or a robots.txt `Disallow: /` copied from a test site silently removes everything from search.
+- **Blocked scripts in robots.txt.** If Google can't fetch your JavaScript bundle, it can't render a client-side page at all.
+- **Content behind a click.** Text that only exists after someone opens a tab or presses "load more", when it's fetched on click, isn't in the HTML. Render it and hide it with CSS instead.
+- **The same title on every page.** Usually the sign that metadata still lives in `index.html`.
+
+## What will the fixes cost, and who should do them?
+
+Some of this a careful owner can check alone; the rendering change is developer work. These are my starting prices, in USD. Every project is quoted after a free call, because the final price depends on the size of the site.
+
+| Service | From | Delivery | What you get |
+| --- | --- | --- | --- |
+| SEO audit | $150 | 2–3 days | A report and a fix list in priority order |
+| Technical SEO setup for React/Next.js | $500 | | Metadata, sitemap, robots.txt, canonicals, structured data, speed fixes |
+| React (Vite/CRA) to Next.js migration | $800 | | Every page as real HTML, design and animations kept |
+| Monthly SEO + content | $400/month | | Ongoing fixes and posts |
+
+Payment is 50% upfront and 50% on delivery, with 2 free revision rounds and 30 days of free bug fixes after launch.
+
+A rough guide to which one you need: if view-source already shows your content, start with the audit or the technical setup. If it shows an empty root div, the migration is usually the better spend, because the setup work alone can't put content into HTML that doesn't exist.
+
+## How long until the fixes show up in Google?
+
+The technical results are visible the day you deploy: view-source shows the content, every tab has its own title, and Lighthouse reflects the new scores.
+
+Rankings take longer and depend on things no developer controls: how often Google crawls your site, how much useful content each page has, and who you compete with. I never promise a ranking date, and you should be wary of anyone who does.
+
+You can speed up discovery, though. Submit the sitemap in Search Console, request indexing for your most important pages with URL Inspection, and keep the sitemap current so new pages are found without waiting for a link. After that, the work that moves rankings is content that answers real questions, which is what every guide in this series does for one specific React SEO problem.
+
+## The React SEO guide as one checklist
+
+Copy this list and tick off what your site already does. Anything left empty is your to-do list, roughly in priority order.
+
+- [ ] View-source shows the page's real text, not an empty root div.
+- [ ] Every page has its own title and a 150–160 character meta description in the raw HTML.
+- [ ] Links between pages are real `<a href>` tags with clean paths, no `#/` routes.
+- [ ] `/robots.txt` allows crawling, doesn't block scripts or CSS, and points to the sitemap.
+- [ ] `/sitemap.xml` lists every page you want indexed and updates on deploy.
+- [ ] Every page has a canonical URL.
+- [ ] JSON-LD describes your business or person, and your articles or services.
+- [ ] Missing pages return a real not-found status.
+- [ ] No preloader hides finished content; heavy 3D, maps and animations load after it.
+- [ ] Images have a width, height, alt text and a modern format.
+- [ ] Shared links show the right title, description and image.
+- [ ] Search engines are notified of new pages after each deploy.
+
+If three or more boxes are empty, start with the [free SEO audit](/tools/free-seo-audit) to see the exact list for your site, or look at what my [React SEO services](/services/react-nextjs-seo) include if you'd rather have it fixed for you.

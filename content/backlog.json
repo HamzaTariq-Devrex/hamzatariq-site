@@ -173,8 +173,9 @@
         "is next.js good for seo?"
       ],
       "angle": "The hub for the cluster: why client-rendered React fails, the exact fixes in order of impact, and my own measured migration (SEO 83 to 100, LCP 18.0 s to 2.6 s), linking every supporting post.",
-      "status": "queued",
-      "publishedSlug": null
+      "status": "published",
+      "publishedSlug": "react-seo-guide",
+      "published": "2026-11-13"
     },
     {
       "keyword": "react site not indexed by google fix",
