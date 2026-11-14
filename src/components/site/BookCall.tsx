@@ -1,8 +1,7 @@
 "use client";
 
-// Every "Book a free call" button. With a Calendly link (CALENDLY_URL) it opens the Calendly popup,
-// loading Calendly's script only on click; without one it goes to /contact.
-import Link from "next/link";
+// Every call-to-action button ("Chat on WhatsApp", navbar "Let's talk"): opens WhatsApp in a new tab
+// with a prefilled message (SITE.whatsappUrl) and records a whatsapp_clicked event.
 import { SITE } from "@/lib/site";
 import { trackEvent } from "@/lib/analytics";
 import ShimmerLayers from "@/components/ui/Shimmer";
@@ -13,84 +12,40 @@ type Props = {
   className?: string;
   /** Use only `className`, without the default pill button classes. */
   bare?: boolean;
-  /** Plain <a> instead of next/link (home page: full page loads only). */
-  plain?: boolean;
   onClick?: () => void;
   /** Shown after the label (e.g. an arrow). */
   icon?: React.ReactNode;
+  /** Leading WhatsApp icon (on by default). */
+  waIcon?: boolean;
   /** Magic UI Shimmer Button layers (a light spark running around the pill's edge). */
   shimmer?: boolean;
 };
 
-declare global {
-  interface Window {
-    Calendly?: { initPopupWidget: (options: { url: string }) => void };
-  }
-}
+export const WhatsAppIcon = ({ size = 16 }: { size?: number }) => (
+  <svg className="wa-icon" width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.2 14.2c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.5-3.9-4.7-4.1-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.3 0 .5l-.4.6-.4.4c-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.3 2.4 1.5.3.1.5.1.6-.1l.9-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.6-.1 1.2z" />
+  </svg>
+);
 
-const CALENDLY_JS = "https://assets.calendly.com/assets/external/widget.js";
-const CALENDLY_CSS = "https://assets.calendly.com/assets/external/widget.css";
-
-let loading: Promise<void> | null = null;
-const loadCalendly = () => {
-  loading ??= new Promise<void>((resolve, reject) => {
-    const css = document.createElement("link");
-    css.rel = "stylesheet";
-    css.href = CALENDLY_CSS;
-    document.head.appendChild(css);
-    const js = document.createElement("script");
-    js.src = CALENDLY_JS;
-    js.async = true;
-    js.onload = () => resolve();
-    js.onerror = () => {
-      loading = null;
-      reject(new Error("Calendly failed to load"));
-    };
-    document.head.appendChild(js);
-  });
-  return loading;
-};
-
-const BookCall = ({ label = "Book a free call", variant = "primary", className = "", bare = false, plain = false, onClick: onClickProp, icon, shimmer = variant === "primary" && !bare }: Props) => {
+const BookCall = ({ label = "Chat on WhatsApp", variant = "primary", className = "", bare = false, onClick, icon, waIcon = true, shimmer = variant === "primary" && !bare }: Props) => {
   const cls = `${bare ? className : `page-btn page-btn-${variant} ${className}`}${shimmer ? " shimmer-btn" : ""}`.trim();
-  const layers = shimmer ? <ShimmerLayers /> : null;
-  const url = SITE.bookingUrl;
-  const onClick = () => {
-    trackEvent("booking_clicked", { calendly: !!url });
-    onClickProp?.();
-  };
-
-  if (url) {
-    const open = async (e: React.MouseEvent<HTMLAnchorElement>) => {
-      e.preventDefault();
-      onClick?.();
-      try {
-        await loadCalendly();
-        window.Calendly!.initPopupWidget({ url });
-      } catch {
-        window.open(url, "_blank", "noopener");
-      }
-    };
-    return (
-      <a href={url} target="_blank" rel="noreferrer" className={cls} onClick={open} data-cursor="disable">
-        {layers}
-        {label}
-        {icon}
-      </a>
-    );
-  }
-  return plain ? (
-    <a href="/contact" className={cls} onClick={onClick} data-cursor="disable">
-      {layers}
+  return (
+    <a
+      href={SITE.whatsappUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={cls}
+      data-cursor="disable"
+      onClick={() => {
+        trackEvent("whatsapp_clicked");
+        onClick?.();
+      }}
+    >
+      {shimmer ? <ShimmerLayers /> : null}
+      {waIcon ? <WhatsAppIcon /> : null}
       {label}
       {icon}
     </a>
-  ) : (
-    <Link href="/contact" className={cls} onClick={onClick}>
-      {layers}
-      {label}
-      {icon}
-    </Link>
   );
 };
 

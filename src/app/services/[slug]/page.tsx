@@ -156,7 +156,7 @@ export default async function ServicePage({ params }: Params) {
             Ready to start your <span>{service.name}</span> project?
           </>
         ),
-        text: "Book a free call. You'll get a clear quote, a delivery date and the payment terms up front.",
+        text: "Message me on WhatsApp. You'll get a clear quote, a delivery date and the payment terms up front.",
       }}
     >
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(structuredData)} />

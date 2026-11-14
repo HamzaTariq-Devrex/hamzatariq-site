@@ -15,7 +15,7 @@ type Props = {
   hideCta?: boolean;
   /** Heading and line for the closing CTA band. */
   cta?: { title: React.ReactNode; text?: string };
-  /** Sticky "Book a free call" bar on phones (service pages). */
+  /** Sticky "Chat on WhatsApp" bar on phones (service pages). */
   stickyCta?: boolean;
 };
 
@@ -25,7 +25,7 @@ const DEFAULT_CTA = {
       Let&apos;s work <span>together.</span>
     </>
   ),
-  text: "Tell me what you want to build or fix. You'll get a clear plan and quote after a free call.",
+  text: "Tell me what you want to build or fix. Message me on WhatsApp and you'll get a clear plan and quote.",
 };
 
 const SiteShell = ({ children, hideCta = false, cta = DEFAULT_CTA, stickyCta = false }: Props) => (
@@ -100,7 +100,7 @@ const SiteShell = ({ children, hideCta = false, cta = DEFAULT_CTA, stickyCta = f
         <div>
           <p className="page-footer-title">Connect</p>
           <a href={`mailto:${SITE.email}`}>Email</a>
-          <a href={SITE.social.whatsapp} target="_blank" rel="noreferrer">
+          <a href={SITE.whatsappUrl} target="_blank" rel="noopener noreferrer">
             WhatsApp
           </a>
           <a href={SITE.social.github} target="_blank" rel="noreferrer">

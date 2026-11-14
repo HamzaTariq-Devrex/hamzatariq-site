@@ -249,7 +249,7 @@ export const PROCESS: { title: string; text: string; icon: IconName }[] = [
 export const GENERAL_FAQS: Faq[] = [
   {
     q: "Which service do I need?",
-    a: "For a new website or online store, start with Next.js websites. If your team runs orders, stock or bookings from spreadsheets, a custom dashboard fits. To answer customer questions automatically, an AI chatbot. If your React site doesn't rank on Google, React & Next.js SEO. Not sure? Ask the AI assistant or book a free call.",
+    a: "For a new website or online store, start with Next.js websites. If your team runs orders, stock or bookings from spreadsheets, a custom dashboard fits. To answer customer questions automatically, an AI chatbot. If your React site doesn't rank on Google, React & Next.js SEO. Not sure? Ask the AI assistant or message me on WhatsApp.",
   },
   {
     q: "How much does a project cost?",

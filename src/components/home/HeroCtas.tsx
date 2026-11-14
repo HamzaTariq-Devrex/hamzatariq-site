@@ -8,7 +8,7 @@ import ShimmerLayers from "@/components/ui/Shimmer";
 import { SEO_AUDIT_TOOL } from "@/data/tools";
 import { trackEvent } from "@/lib/analytics";
 
-/** Hero buttons (Magic UI Shimmer Button): Book a free call, and the free SEO audit (tracked as a home entry point). */
+/** Hero buttons (Magic UI Shimmer Button): Chat on WhatsApp, and the free SEO audit (tracked as a home entry point). */
 const HeroCtas = () => (
   <div className="hero-ctas">
     <Magnetic>

@@ -4,11 +4,11 @@
 // browser only sends the others to /api/events. Browser-only module.
 import { track } from "@vercel/analytics";
 
-export const EVENT_NAMES = ["chat_started", "lead_submitted", "tool_used", "audit_run", "booking_clicked", "cv_downloaded", "audit_cta_click"] as const;
+export const EVENT_NAMES = ["chat_started", "lead_submitted", "tool_used", "audit_run", "whatsapp_clicked", "cv_downloaded", "audit_cta_click"] as const;
 export { AUDIT_CTA_LOCATIONS, type AuditCtaLocation } from "@/data/tools";
 export type EventName = (typeof EVENT_NAMES)[number];
 /** Events the browser reports to /api/events (the rest are logged server-side). */
-export const CLIENT_EVENTS = ["tool_used", "booking_clicked", "cv_downloaded", "audit_cta_click"] as const;
+export const CLIENT_EVENTS = ["tool_used", "whatsapp_clicked", "cv_downloaded", "audit_cta_click"] as const;
 
 type Props = Record<string, string | number | boolean | null>;
 

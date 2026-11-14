@@ -130,7 +130,7 @@ const SiteHeader = () => {
 
   const link = { pathname, onNavigate: () => setOpen(false) };
   const cls = (href: string) => (isActive(pathname, href) ? "is-active" : "");
-  // "Let's talk": the same booking action as every "Book a free call" button (Calendly or /contact).
+  // "Let's talk": opens WhatsApp like every "Chat on WhatsApp" button (BookCall).
   const book = <BookCall bare label="Let's talk" className="site-cta" onClick={() => setOpen(false)} icon={<span className="site-cta-dot" aria-hidden="true"><Icon name="arrow" size={14} /></span>} />;
   const hover = (e: React.SyntheticEvent<HTMLElement>) => {
     const target = (e.target as HTMLElement).closest<HTMLElement>(".site-nav > a, .site-nav-services");

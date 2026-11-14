@@ -71,7 +71,7 @@ const structuredData = {
 
 export default function WebsiteCostCalculatorPage() {
   return (
-    <SiteShell cta={{ title: <>Ready for an <span>exact quote</span>?</>, text: "Book a free call, tell me about your project, and you'll get a clear price and timeline afterwards." }}>
+    <SiteShell cta={{ title: <>Ready for an <span>exact quote</span>?</>, text: "Message me on WhatsApp, tell me about your project, and you'll get a clear price and timeline afterwards." }}>
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(structuredData)} />
       <section className="x-hero x-hero-center">
         <span className="x-label">Free tool</span>

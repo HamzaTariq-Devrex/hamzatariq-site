@@ -522,7 +522,7 @@
     },
     {
       "id": "process",
-      "answer": "It starts with a free call about your goals and the features you need, then you get a clear quote. Hamza plans and designs the pages first, builds in custom code while you review each part as it's ready, then launches with SEO set up. https://hamzatariq.site/contact",
+      "answer": "It starts with a chat on WhatsApp about your goals and the features you need, then you get a clear quote. Hamza plans and designs the pages first, builds in custom code while you review each part as it's ready, then launches with SEO set up. https://wa.me/923054122637",
       "keywords": [
         "process",
         "steps",
@@ -858,7 +858,7 @@
     },
     {
       "id": "availability",
-      "answer": "Yes, Hamza is available for new projects and can start within 2 weeks. He takes freelance projects and contract work, and is open to full-time remote roles. The best next step is a free call or leaving your project details, and he'll reply with a clear quote. Would you like to share your details?",
+      "answer": "Yes, Hamza is available for new projects and can start within 2 weeks. He takes freelance projects and contract work, and is open to full-time remote roles. The best next step is a message on WhatsApp (https://wa.me/923054122637) or leaving your project details, and he'll reply with a clear quote. Would you like to share your details?",
       "lead": true,
       "keywords": [
         "available",
@@ -937,8 +937,7 @@
     },
     {
       "id": "book-call",
-      "todo": "Cal.com booking link (SITE.bookingUrl).",
-      "answer": "Every project starts with a free call. Leave your details below or use the contact page, and Hamza will set up a time that suits you. https://hamzatariq.site/contact",
+      "answer": "The quickest way to talk to Hamza is WhatsApp: send him a message, and you can set up a voice call there if you prefer. You can also leave your details below. https://wa.me/923054122637",
       "lead": true,
       "keywords": [
         "call",
@@ -961,7 +960,7 @@
     },
     {
       "id": "contact",
-      "answer": "You can reach Hamza by email at hamzabuildsweb@gmail.com or on WhatsApp at +92 305 4122637, or send your project details through the form on https://hamzatariq.site/contact",
+      "answer": "The quickest way to reach Hamza is WhatsApp (+92 305 4122637): https://wa.me/923054122637 You can also email hamzabuildsweb@gmail.com or send your project details through the form on https://hamzatariq.site/contact",
       "keywords": [
         "contact",
         "email",

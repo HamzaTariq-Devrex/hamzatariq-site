@@ -58,7 +58,7 @@ export default function ServicesPage() {
             Tell me what you need. I&apos;ll show you the <span>fastest way</span> to get it.
           </>
         ),
-        text: "Book a free call and get a clear quote, a delivery date and the payment terms up front.",
+        text: "Message me on WhatsApp and get a clear quote, a delivery date and the payment terms up front.",
       }}
     >
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(structuredData)} />

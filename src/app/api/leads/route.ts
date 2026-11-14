@@ -69,8 +69,8 @@ export async function POST(req: Request) {
       subject: `Your website estimate: from ${usd(e.from)}`,
       title: `Starting price: from ${usd(e.from)}`,
       summary: summarizeEstimate(lead.toolInput, e),
-      note: "This is a starting price based on my published packages. The final quote comes after a short free call.",
-      cta: { label: "Book a free call", href: SITE.bookingUrl || `${SITE.url}/contact` },
+      note: "This is a starting price based on my published packages. The final quote comes after a short chat about your project.",
+      cta: { label: "Chat on WhatsApp", href: SITE.whatsappUrl },
     };
     lead.projectType ||= lead.toolInput.type === "store" ? "Ecommerce store" : lead.toolInput.type === "website" ? "Next.js website" : "Dashboard or web app";
   } else if (lead.source === "chatbot-roi-calculator") {

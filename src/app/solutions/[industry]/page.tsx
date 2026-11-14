@@ -70,7 +70,7 @@ export default async function SolutionPage({ params }: Props) {
   };
 
   return (
-    <SiteShell cta={{ title: <>Let&apos;s plan your <span>{s.industry.toLowerCase()}</span> project.</>, text: "Tell me what you need on a free call. You'll get a clear plan, price and timeline afterwards." }}>
+    <SiteShell cta={{ title: <>Let&apos;s plan your <span>{s.industry.toLowerCase()}</span> project.</>, text: "Tell me what you need on WhatsApp. You'll get a clear plan, price and timeline afterwards." }}>
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(structuredData)} />
       <nav className="project-crumbs" aria-label="Breadcrumb">
         <Link href="/solutions">Solutions</Link> <span aria-hidden="true">/</span> <span>{s.industry}</span>

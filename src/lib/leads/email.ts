@@ -80,10 +80,8 @@ const projectPhrase = (type: string) => {
 /** Automatic reply to the visitor. */
 export const sendVisitorReply = (lead: LeadInput) => {
   const first = lead.name.split(/\s+/)[0];
-  // Until the booking link exists (OWNER_TODO), WhatsApp is the quickest way to reach Hamza.
-  const next = SITE.bookingUrl
-    ? { line: "If you'd like to talk sooner, you can book a free call:", label: "Book a free call", url: SITE.bookingUrl }
-    : { line: "If it's urgent, you can also reach me on WhatsApp:", label: "Chat on WhatsApp", url: SITE.social.whatsapp };
+  // WhatsApp is the quickest way to reach Hamza (every CTA on the site opens it).
+  const next = { line: "If you'd like to talk sooner, message me on WhatsApp:", label: "Chat on WhatsApp", url: SITE.whatsappUrl };
   const about = projectPhrase(lead.projectType);
   const html = layout(`<p style="margin:0 0 14px">Hi ${escape(first)},</p>
 <p style="margin:0 0 14px">Thanks for your message${escape(about)}. I've received your details and I'll reply within 24 hours.</p>
@@ -149,8 +147,8 @@ ${speed.length ? `<p style="margin:22px 0 8px;font-weight:bold;font-size:16px">S
     .join("")}</table>` : ""}
 <div style="margin:26px 0 0;padding:18px;border-radius:12px;background:#f0fdfa;border:1px solid #99f6e4">
 <p style="margin:0 0 8px;font-weight:bold">Want me to fix this?</p>
-<p style="margin:0 0 14px">My SEO audit with a full fix plan starts at $150 (2–3 days), and I can also do the fixes for you. Reply to this email or book a free call.</p>
-<a href="${SITE.bookingUrl || `${SITE.url}/contact`}" style="display:inline-block;padding:12px 22px;border-radius:999px;background:#0e0e10;color:#ffffff;font-weight:bold;text-decoration:none">Book a free call</a>
+<p style="margin:0 0 14px">My SEO audit with a full fix plan starts at $150 (2–3 days), and I can also do the fixes for you. Reply to this email or message me on WhatsApp.</p>
+<a href="${SITE.whatsappUrl}" style="display:inline-block;padding:12px 22px;border-radius:999px;background:#0e0e10;color:#ffffff;font-weight:bold;text-decoration:none">Chat on WhatsApp</a>
 <a href="${SITE.url}/services/react-nextjs-seo" style="margin-left:12px;color:#d4380d">See the SEO service</a>
 </div>
 <p style="margin:24px 0 0">Hamza Tariq<br><span style="color:#64748b">${escape(SITE.jobTitle)} · <a href="${SITE.url}" style="color:#d4380d">hamzatariq.site</a></span></p>`);
@@ -164,8 +162,8 @@ ${speed.length ? `<p style="margin:22px 0 8px;font-weight:bold;font-size:16px">S
       ...checks.map((c) => `[${STATUS_STYLE[c.status].label}] ${c.label}: ${c.detail}${c.fix ? `\n  Fix: ${c.fix}` : ""}`),
     ]),
     "",
-    "Want me to fix this? SEO audit from $150. Reply to this email or book a free call:",
-    SITE.bookingUrl || `${SITE.url}/contact`,
+    "Want me to fix this? SEO audit from $150. Reply to this email or message me on WhatsApp:",
+    SITE.whatsappUrl,
     "",
     "Hamza Tariq",
     SITE.url,

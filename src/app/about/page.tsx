@@ -156,7 +156,7 @@ export default function AboutPage() {
             Let&apos;s build something that brings you <span>customers</span>.
           </>
         ),
-        text: "Tell me about your business and what you need. You'll get a clear plan and quote after a free call.",
+        text: "Tell me about your business and what you need. Message me on WhatsApp and you'll get a clear plan and quote.",
       }}
     >
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(structuredData)} />

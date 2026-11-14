@@ -740,44 +740,44 @@
   color: var(--page-muted);
 }
 
-.contact-grid {
-  display: grid;
-  grid-template-columns: 1.4fr 1fr;
-  gap: 24px;
-  margin-bottom: 80px;
-}
-
-.contact-book {
+.contact-whatsapp {
+  max-width: 760px;
+  margin-bottom: 24px;
   padding: 28px;
   border-radius: 22px;
-  border: 1px solid var(--page-line);
+  border: 1px solid rgb(var(--accent-rgb) / 0.25);
   background: rgb(var(--ink-rgb) / 0.025);
 }
 
-.contact-book h2 {
-  margin: 0 0 12px;
+.contact-whatsapp h2 {
+  margin: 0 0 6px;
   font-size: 26px;
   font-weight: 600;
 }
 
-.contact-embed {
-  width: 100%;
-  height: 640px;
-  border: 0;
-  border-radius: 14px;
+.contact-whatsapp > p {
+  margin: 0 0 20px;
+  color: var(--page-muted);
 }
 
-.contact-fallback {
-  margin: 0;
-  font-size: 16px;
-  line-height: 1.7;
+.contact-whatsapp-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+}
+
+.contact-whatsapp-number {
   color: var(--page-muted);
+  font-size: 14.5px;
 }
 
 .contact-ways {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  max-width: 760px;
+  margin-bottom: 80px;
 }
 
 /* ---------- Case study ---------- */
@@ -907,7 +907,6 @@
     border-top: 1px solid var(--page-line);
   }
 
-  .contact-grid,
   .cs-columns {
     grid-template-columns: 1fr;
   }
@@ -972,11 +971,13 @@
     padding: 22px;
   }
 
-  .contact-form {
+  .contact-form,
+  .contact-whatsapp {
     padding: 20px;
   }
 
-  .contact-form h2 {
+  .contact-form h2,
+  .contact-whatsapp h2 {
     font-size: 22px;
   }
 
@@ -1001,10 +1002,6 @@
 
   .page-footer-cols {
     grid-template-columns: 1fr 1fr;
-  }
-
-  .contact-embed {
-    height: 560px;
   }
 }
 

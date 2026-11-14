@@ -7,9 +7,7 @@ Facts and access only Hamza can provide. Nothing on the site may be invented to 
 
 - [x] **Client reviews.** 21 reviews from devrexdigital.site/reviews (posted on Instagram, permission confirmed) are in `content/testimonials.json`, word for word. To add more, send the brand, its Instagram, the exact words and the review image.
 - [ ] **Screenshots for posts** (optional, improves information gain): a screenshot of the AI assistant open on the site, and of the /admin leads screen with test data only. Save as WebP under 250 KB in `public/images/work/`.
-- [ ] **Calendly link.** Add `CALENDLY_URL` in Vercel (Production) and `.env.local`, then redeploy. Every "Book a free call" button then opens the Calendly popup and `/contact` shows the inline embed. Until then the buttons go to `/contact` (form, email, WhatsApp).
 - [ ] **More case studies.** For each: client type, problem, what you built, stack, results, screenshots, testimonial (if any), and whether it was your own client or Devrex Digital work. Dashboards and AI chatbots have no related case study yet, so their "Related work" sections are hidden on the live site.
-- [ ] **Code and account ownership at handover** (`/blog/hire-nextjs-developer`, proposal terms). The post used to say clients own the code and accounts after launch, but that isn't in `content/owner/profile.md`, so it now only advises readers to ask for this. Confirm what you offer (who owns the code, repository, domain, hosting and database accounts after the final payment) and it can be stated as your term.
 - [x] **Availability for roles** (`/hire`): open to full-time remote roles, contract work and freelance projects; available to start within 2 weeks (2026-11-07).
 - [ ] **PageSpeed API key** for the free SEO audit tool: Google Cloud console → enable "PageSpeed Insights API" → create an API key (restrict it to that API) → add `PAGESPEED_API_KEY` in Vercel and `.env.local`. Without it Google's shared quota is usually busy and the speed check is skipped.
 - [ ] **(Later) Search Console access for the autopilot:** create a Google Cloud service account, enable the Search Console API, add its email as a Restricted user on the hamzatariq.site property, and put its JSON key in `GSC_SERVICE_ACCOUNT_JSON` (where the autopilot runs). Skipped for now: refills use the AI assistant's top questions; monthly reports run without Search Console data.
@@ -21,6 +19,9 @@ Facts and access only Hamza can provide. Nothing on the site may be invented to 
 - [ ] Bing Webmaster Tools: verify the site (can import from Search Console).
 
 ## Done
+
+- [x] Calls to action (2026-11-15): Calendly dropped. Every "Chat on WhatsApp" / "Let's talk" button opens WhatsApp with a prefilled message; `/contact` leads with WhatsApp, then the form and email.
+- [x] Code and account ownership at handover (2026-11-15): not offered. Hamza keeps ownership of the code and accounts; nothing about it is stated on the site, and `/blog/hire-nextjs-developer` keeps only the general advice to ask about it.
 
 - [x] Blocked blog topics answered (2026-11-05): no Shopify work (Shopify topics dropped); can build booking/appointment systems but none built yet (no past-project claims); international payments by Payoneer and bank transfer. Facts in `content/owner/profile.md` and the assistant's answer bank.
 - [x] Supabase CLI logged in to the hamzabuildsweb account; all migrations applied (including `20261105090000_audit_stats`).

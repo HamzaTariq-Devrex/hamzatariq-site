@@ -1,3 +1,7 @@
+/** WhatsApp number without + or spaces (wa.me format). */
+const WHATSAPP_NUMBER = "923054122637";
+export const WHATSAPP_MESSAGE = "Hi Hamza, I found you on hamzatariq.site. I'd like to talk about a project.";
+
 export const SITE = {
   url: "https://hamzatariq.site",
   name: "Hamza Tariq",
@@ -27,12 +31,13 @@ export const SITE = {
   address: { addressLocality: "Bahawalpur", addressCountry: "PK" },
   social: {
     github: "https://github.com/HamzaTariq-Devrex",
-    whatsapp: "https://wa.me/923054122637",
+    whatsapp: `https://wa.me/${WHATSAPP_NUMBER}`,
     instagram: "https://www.instagram.com/hamzatariq.dev/",
   },
-  // Calendly link from the CALENDLY_URL env var (see next.config.ts). TODO(owner) until it is set:
-  // every "Book a free call" button goes to /contact (form, email, WhatsApp) instead.
-  bookingUrl: (process.env.NEXT_PUBLIC_CALENDLY_URL || null) as string | null,
+  /** WhatsApp number as shown to visitors. */
+  whatsappDisplay: "+92 305 4122637",
+  /** Every call-to-action (BookCall, emails, assistant): WhatsApp with a prefilled message (owner, 2026-11-15). */
+  whatsappUrl: `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(WHATSAPP_MESSAGE)}`,
   /** CV (November 2026): home Resume button and /hire "Download CV". */
   cvUrl: "/Hamza_Tariq_CV.pdf" as string | null,
 } as const;

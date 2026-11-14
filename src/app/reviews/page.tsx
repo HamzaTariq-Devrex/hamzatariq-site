@@ -59,7 +59,7 @@ export default function ReviewsPage() {
             Want a website your customers <span>talk about</span>?
           </>
         ),
-        text: "Tell me what you need on a free call. You'll get a clear plan, price and timeline afterwards.",
+        text: "Tell me what you need on WhatsApp. You'll get a clear plan, price and timeline afterwards.",
       }}
     >
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(structuredData)} />
@@ -97,7 +97,7 @@ export default function ReviewsPage() {
         <h2 className="x-h2">Next: your project</h2>
         <p className="x-lead">
           See the <Link href="/work">projects behind these reviews</Link> or the <Link href="/services/nextjs-websites">Next.js website service</Link>, then
-          book a free call or ask my AI assistant.
+          message me on WhatsApp or ask my AI assistant.
         </p>
         <div className="x-actions">
           <BookCall />

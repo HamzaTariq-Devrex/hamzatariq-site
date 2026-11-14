@@ -33,7 +33,7 @@ export async function POST(req: Request) {
   const ip = (req.headers.get("x-forwarded-for") || "").split(",")[0].trim() || "unknown";
   const ipHash = hashIp(ip);
   if (await auditLimited(ipHash)) {
-    return fail(429, "You've run a lot of audits in the last hour. Please try again later, or book a free call and I'll check your site myself.");
+    return fail(429, "You've run a lot of audits in the last hour. Please try again later, or message me on WhatsApp and I'll check your site myself.");
   }
   recordAuditHit(ipHash);
 

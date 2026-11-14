@@ -126,6 +126,15 @@
   display: inline-block;
 }
 
+/* WhatsApp icon in BookCall buttons */
+.wa-icon {
+  flex: none;
+}
+
+.site-cta .wa-icon {
+  margin-right: -6px;
+}
+
 /* ---------- Shimmer Button (Magic UI) ---------- */
 .shimmer-btn {
   --spread: 90deg;

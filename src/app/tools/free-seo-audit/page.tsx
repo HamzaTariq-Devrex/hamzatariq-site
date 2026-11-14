@@ -81,7 +81,7 @@ const structuredData = {
 
 export default function FreeSeoAuditPage() {
   return (
-    <SiteShell cta={{ title: <>Want your site <span>fixed</span>, not just checked?</>, text: "SEO audits from $150, technical SEO setup from $500, React to Next.js migrations from $800. Every project starts with a free call." }}>
+    <SiteShell cta={{ title: <>Want your site <span>fixed</span>, not just checked?</>, text: "SEO audits from $150, technical SEO setup from $500, React to Next.js migrations from $800. Every project starts with a quick chat on WhatsApp." }}>
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(structuredData)} />
       <section className="x-hero x-hero-center audit-hero">
         <span className="x-label">Free tool</span>

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import SiteShell from "@/components/site/SiteShell";
-import OwnerTodo from "@/components/site/OwnerTodo";
+import BookCall from "@/components/site/BookCall";
 import LeadForm from "@/components/assistant/LeadForm";
 import { SERVICES } from "@/data/services";
 import { SITE } from "@/lib/site";
@@ -9,9 +9,9 @@ import { jsonLd } from "@/lib/seo";
 import WhereIWork from "@/components/site/WhereIWork";
 
 export const metadata: Metadata = {
-  title: "Contact Hamza Tariq: Book a Free Call",
+  title: "Contact Hamza Tariq: Chat on WhatsApp",
   description:
-    "Book a free call with Hamza Tariq about your Next.js website, dashboard, AI chatbot or React SEO project. Reach out by email or WhatsApp to get a clear quote.",
+    "Chat with Hamza Tariq on WhatsApp about your Next.js website, dashboard, AI chatbot or React SEO project, or send the details by form or email for a clear quote.",
   alternates: { canonical: "/contact" },
 };
 
@@ -43,50 +43,33 @@ export default function ContactPage() {
           Let&apos;s talk about your <span>project</span>
         </h1>
         <p>
-          Tell me what you want to build or fix. We&apos;ll go through it on a free call, and you&apos;ll get a clear
+          Tell me what you want to build or fix. We&apos;ll go through it on WhatsApp, and you&apos;ll get a clear
           quote afterwards.
         </p>
         <WhereIWork className="is-center" />
       </section>
 
+      <section className="contact-whatsapp" id="whatsapp" aria-labelledby="whatsapp-title">
+        <h2 id="whatsapp-title">Chat on WhatsApp</h2>
+        <p>The fastest way to reach me. Your first message is already written, just press send.</p>
+        <div className="contact-whatsapp-row">
+          <BookCall />
+          <span className="contact-whatsapp-number">{SITE.whatsappDisplay}</span>
+        </div>
+      </section>
+
       <section className="contact-form" id="project-form" aria-labelledby="project-form-title">
-        <h2 id="project-form-title">Send your project details</h2>
+        <h2 id="project-form-title">Or send your project details</h2>
         <p>Takes a minute. I&apos;ll reply by email within 24 hours.</p>
         <LeadForm source="form" />
       </section>
 
-      <section className="contact-grid" id="book">
-        <div className="contact-book">
-          <h2>Book a free call</h2>
-          {SITE.bookingUrl ? (
-            <iframe
-              src={`${SITE.bookingUrl}?embed_type=Inline&hide_gdpr_banner=1&background_color=0f1420&text_color=f1f5f9&primary_color=2dd4bf`}
-              title="Book a call with Hamza Tariq"
-              className="contact-embed"
-              loading="lazy"
-            />
-          ) : (
-            <OwnerTodo what="Add the Calendly link (CALENDLY_URL env variable). Until then visitors book by email or WhatsApp.">
-              <p className="contact-fallback">
-                Online booking is coming soon. Send me a message by email or WhatsApp and I&apos;ll set up a time
-                that suits you.
-              </p>
-            </OwnerTodo>
-          )}
-        </div>
-
-        <div className="contact-ways">
-          <a href={`mailto:${SITE.email}?subject=${encodeURIComponent("Project enquiry")}`} className="svc-card svc-link">
-            <h3>Email</h3>
-            <p>{SITE.email}</p>
-            <span>Send an email →</span>
-          </a>
-          <a href={SITE.social.whatsapp} target="_blank" rel="noreferrer" className="svc-card svc-link">
-            <h3>WhatsApp</h3>
-            <p>+92 305 4122637</p>
-            <span>Start a chat →</span>
-          </a>
-        </div>
+      <section className="contact-ways" id="email" aria-label="Email">
+        <a href={`mailto:${SITE.email}?subject=${encodeURIComponent("Project enquiry")}`} className="svc-card svc-link">
+          <h3>Email</h3>
+          <p>{SITE.email}</p>
+          <span>Send an email →</span>
+        </a>
       </section>
 
       <section className="svc-section">

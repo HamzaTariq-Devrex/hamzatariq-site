@@ -12,7 +12,7 @@ const EVENTS = [
   { name: "lead_submitted", label: "Leads submitted" },
   { name: "tool_used", label: "Tools used" },
   { name: "audit_run", label: "SEO audits run" },
-  { name: "booking_clicked", label: "Booking clicks" },
+  { name: "whatsapp_clicked", label: "WhatsApp clicks" },
   { name: "cv_downloaded", label: "CV downloads" },
   { name: "audit_cta_click", label: "Audit CTA clicks" },
 ] as const;

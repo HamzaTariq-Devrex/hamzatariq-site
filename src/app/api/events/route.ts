@@ -6,7 +6,7 @@ export const runtime = "nodejs";
 
 // Browser events stored for the /admin overview (see src/lib/analytics.ts). Only these names and
 // values are accepted, so the table can't be filled with arbitrary data.
-const NAMES = ["tool_used", "booking_clicked", "cv_downloaded", "audit_cta_click"];
+const NAMES = ["tool_used", "whatsapp_clicked", "cv_downloaded", "audit_cta_click"];
 const CTA_LOCATIONS: readonly string[] = AUDIT_CTA_LOCATIONS;
 const TOOL_SLUGS = TOOLS.map((t) => t.slug);
 const PAGE = /^\/[a-z0-9\-/]{0,100}$/i;
