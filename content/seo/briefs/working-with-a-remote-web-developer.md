@@ -35,7 +35,7 @@ Learn. A business owner (often in the US, UK, Europe or the Middle East) is thin
 
 ## Our angle
 
-The view from the other side of the call: a developer based in Pakistan who works with clients abroad explains how he runs remote projects (payments by Payoneer or bank transfer, 50/50 terms, progress reviews, accounts in the client's name, handover), and what an owner should demand from any remote developer.
+The view from the other side of the call: a developer based in Pakistan who works with clients abroad explains how he runs remote projects (payments by Payoneer or bank transfer, 50/50 terms, progress reviews, ownership and handover agreed in writing), and what an owner should demand from any remote developer.
 
 ## Unique additions
 

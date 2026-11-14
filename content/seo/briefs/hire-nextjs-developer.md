@@ -35,7 +35,7 @@ Hire. Someone needs a Next.js developer now and wants to know what to look for, 
 - Freelancer or agency for a Next.js site?
 - Do I need a Next.js developer or a React developer?
 - How do I check a Next.js portfolio if I'm not technical?
-- Who should own the code, domain and accounts?
+- How should you agree on code and account ownership?
 - What payment terms are normal for freelance web projects?
 
 ## Our angle
