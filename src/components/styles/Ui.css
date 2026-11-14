@@ -967,3 +967,9 @@
     display: none !important;
   }
 }
+
+/* Visible rotating words come from data-word (see WordRotate.tsx), keeping the H1 text clean. */
+.word-rotate-sizer::before,
+.word-rotate-word::before {
+  content: attr(data-word);
+}

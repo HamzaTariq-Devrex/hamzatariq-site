@@ -61,7 +61,7 @@ if (!["full", "skip-if-blocked"].includes(externalMode)) {
   process.exit(1);
 }
 const BLOCKED_STATUS = new Set([403, 407, 429]);
-const TRUSTED_DOMAINS = ["developers.google.com", "web.dev", "nextjs.org", "react.dev", "supabase.com", "vercel.com", "ai.google.dev", "developer.mozilla.org"];
+const TRUSTED_DOMAINS = ["developers.google.com", "web.dev", "nextjs.org", "react.dev", "supabase.com", "vercel.com", "ai.google.dev", "developer.mozilla.org", "wordpress.org", "intercom.com"];
 const asJson = args.includes("--json");
 const only = args.filter((a) => !a.startsWith("--")).map((a) => a.replace(/\.mdx$/, "").split(/[\\/]/).pop());
 

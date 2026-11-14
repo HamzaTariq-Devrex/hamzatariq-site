@@ -16,7 +16,7 @@ Use `/schedule` in Claude Code (cloud routine on this repo) or any cron that run
 **Restricted network (cloud sandbox).** Scheduled runs may have no access to outside sites. Two things are built for that:
 
 - **Fonts:** all three fonts (Bricolage Grotesque, Geist, Instrument Serif) are self-hosted from `@fontsource` npm packages (`next/font/local`), so `npm run build` never needs the network.
-- **Outside links:** scheduled runs use `npm run content:check -- --external=skip-if-blocked <slugs>`. A link the network blocks (no connection, or 403/407/429 from a proxy) passes as "not verified" when it's on a trusted domain (developers.google.com, web.dev, nextjs.org, react.dev, supabase.com, vercel.com, ai.google.dev, developer.mozilla.org) and fails otherwise. Links that do answer are checked normally, so a real 404 still fails. Local runs keep the full check (`npm run content:check`).
+- **Outside links:** scheduled runs use `npm run content:check -- --external=skip-if-blocked <slugs>`. A link the network blocks (no connection, or 403/407/429 from a proxy) passes as "not verified" when it's on a trusted domain (developers.google.com, web.dev, nextjs.org, react.dev, supabase.com, vercel.com, ai.google.dev, developer.mozilla.org, wordpress.org, intercom.com) and fails otherwise. Links that do answer are checked normally, so a real 404 still fails. Local runs keep the full check (`npm run content:check`).
 
 So in new posts, link outside sources on the trusted domains. A link elsewhere can't be checked from the sandbox and fails the run.
 

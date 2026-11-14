@@ -7,6 +7,12 @@ const nextConfig: NextConfig = {
   distDir: process.env.NODE_ENV === "development" ? ".next-dev" : ".next",
   // No `experimental.inlineCss`: it put every stylesheet into the HTML twice (a <style> tag plus the
   // RSC payload, ~100 KB each) and into every prefetch, which cost more on mobile than the CSS request.
+  // Content is read from the file system at request time too (hourly sitemap revalidation, scheduled
+  // posts). Without this, Vercel's file tracing left out content/solutions, so the live sitemap
+  // listed no industry pages.
+  outputFileTracingIncludes: {
+    "/**": ["./content/**/*"],
+  },
   images: {
     formats: ["image/avif", "image/webp"],
     remotePatterns: [
