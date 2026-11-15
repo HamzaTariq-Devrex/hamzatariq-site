@@ -380,7 +380,8 @@
       ],
       "angle": "Every question comes with the answer a good developer gives and the answer that should worry you, using my own terms (50/50 payment, 2 revision rounds, 30 days of fixes) as the worked example.",
       "status": "queued",
-      "publishedSlug": null
+      "publishedSlug": null,
+      "blockedBy": "TODO(owner): keyword is too long for a 60-character title with the suffix; shorten the keyword or drop the topic (OWNER_TODO.md)"
     },
     {
       "keyword": "next.js seo checklist",
