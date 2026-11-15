@@ -164,17 +164,5 @@ export const draftFollowUp = (p: Prospect, step: 1 | 2, firstSubject: string, re
   return { subject, body, source: "template" };
 };
 
-/** Adds the footer (business line + unsubscribe link). Plain text is the main part of every email. */
+/** Adds the footer (business line, optional postal address, unsubscribe link). Emails are plain text only. */
 export const withFooter = (body: string, unsubscribeLink: string) => `${body}\n\n--\n${footerLines().join("\n")}\nUnsubscribe: ${unsubscribeLink}`;
-
-const esc = (t: string) => t.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
-
-/** Minimal HTML version: the same text, links clickable, footer small and grey. */
-export const toHtml = (body: string, unsubscribeLink: string) => {
-  const linkify = (t: string) => esc(t).replace(/https?:\/\/[^\s<]+/g, (u) => `<a href="${u}">${u}</a>`);
-  const paras = body
-    .split(/\n{2,}/)
-    .map((para) => `<p style="margin:0 0 14px">${linkify(para).replace(/\n/g, "<br>")}</p>`)
-    .join("");
-  return `<!doctype html><html><body style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.55;color:#111">${paras}<p style="margin:24px 0 0;font-size:12px;color:#777">${footerLines().map(esc).join("<br>")}<br><a href="${unsubscribeLink}" style="color:#777">Unsubscribe</a></p></body></html>`;
-};

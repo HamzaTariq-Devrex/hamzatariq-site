@@ -2,7 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 import { getOwner } from "@/lib/supabase/server";
-import { MANUAL_PROSPECT_STATUSES, type ProspectStatus } from "@/lib/admin/labels";
+import { MANUAL_PROSPECT_STATUSES, PROSPECT_STATUSES, type ProspectStatus } from "@/lib/admin/labels";
+import { PAGE_SIZE } from "@/lib/admin/data";
+import type { ProspectRow } from "@/components/admin/outreach/prospect-shared";
 import { COUNTRIES, ox, type Country } from "@/lib/outreach/db";
 import { isBusinessType } from "@/lib/outreach/osm";
 import { discoverAll, draftNew, tick } from "@/lib/outreach/pipeline";
@@ -198,4 +200,24 @@ export async function redraft(id: string): Promise<Result> {
   } catch (e) {
     return fail(e);
   }
+}
+/** Columns the list and the side panel show (plus the latest audit for the report link). */
+const PROSPECT_COLUMNS =
+  "id, name, business_type, city, country, timezone, website, phone, email, email_source, status, skip_reason, audit_score, lead_score, notes, lead_id, last_contacted_at, created_at, audits:prospect_audits(report_id, score, final_url, created_at, expires_at)";
+
+/** One page of prospects (best leads first), filtered by status and search in Postgres. */
+export async function listProspects(status: string, search: string, offset: number, id?: string): Promise<{ rows: ProspectRow[]; total: number }> {
+  const owner = await getOwner();
+  if (!owner) return { rows: [], total: 0 };
+  let q = owner.supabase.from("prospects").select(PROSPECT_COLUMNS, { count: "exact" });
+  if (id) q = q.eq("id", id);
+  if (status !== "all" && (PROSPECT_STATUSES as readonly string[]).includes(status)) q = q.eq("status", status);
+  const term = search.trim().replace(/[%_,()*\\"]/g, " ").trim().slice(0, 100);
+  if (term) q = q.or(["name", "city", "email", "website"].map((c) => `${c}.ilike.%${term}%`).join(","));
+  const { data, count } = await q
+    .order("lead_score", { ascending: false, nullsFirst: false })
+    .order("created_at", { ascending: false })
+    .range(Math.max(0, offset), Math.max(0, offset) + PAGE_SIZE - 1)
+    .overrideTypes<ProspectRow[]>();
+  return { rows: data ?? [], total: count ?? 0 };
 }

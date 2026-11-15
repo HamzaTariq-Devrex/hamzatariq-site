@@ -570,6 +570,24 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      app_admin_chat_sessions: {
+        Args: { p_limit: number; p_offset: number; p_secret: string }
+        Returns: Json
+      }
+      app_admin_chats: {
+        Args: {
+          p_days: number
+          p_off_topic: string
+          p_secret: string
+          p_small_talk: string
+        }
+        Returns: Json
+      }
+      app_admin_overview: { Args: { p_secret: string }; Returns: Json }
+      app_admin_prospect_stats: {
+        Args: { p_days: number; p_secret: string }
+        Returns: Json
+      }
       app_audit_recent_count: {
         Args: { p_ip_hash: string; p_minutes?: number; p_secret: string }
         Returns: number

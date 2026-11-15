@@ -1,26 +1,22 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
+import dynamic from "next/dynamic";
 import { SITE } from "@/lib/site";
 import type { Database } from "@/lib/supabase/database.types";
-import {
-  SERVICE_GROUPS,
-  SOURCES,
-  SOURCE_LABELS,
-  STATUSES,
-  STATUS_LABELS,
-  formatDate,
-  pktDay,
-  serviceLabel,
-  serviceOf,
-} from "@/lib/admin/labels";
+import { SERVICE_GROUPS, SOURCES, SOURCE_LABELS, STATUSES, STATUS_LABELS, formatDate, pktDay, serviceLabel } from "@/lib/admin/labels";
+import { exportLeads, getLead, listLeads, type LeadFilters } from "@/app/admin/(dashboard)/actions";
 import { EmptyState, StatusBadge } from "./ui";
-import LeadPanel from "./LeadPanel";
+
+// The side panel (and its transcript) loads only when a lead is opened.
+const LeadPanel = dynamic(() => import("./LeadPanel"));
 
 export type Lead = Database["public"]["Tables"]["leads"]["Row"] & {
   /** The SEO audit an "seo-audit" lead asked for. */
   audit?: { final_url: string | null; score: number } | null;
 };
+/** The columns the table shows. */
+export type LeadRow = Pick<Lead, "id" | "name" | "email" | "project_type" | "budget" | "source" | "status" | "created_at"> & { audit?: Lead["audit"] };
 
 const csvCell = (value: string | null) => `"${(value ?? "").replace(/"/g, '""')}"`;
 
@@ -49,62 +45,78 @@ const toCsv = (rows: Lead[]) => {
   return [head.map(csvCell).join(","), ...lines].join("\r\n");
 };
 
-const LeadsBrowser = ({ leads, initialLeadId }: { leads: Lead[]; initialLeadId: string | null }) => {
-  const [query, setQuery] = useState("");
-  const [status, setStatus] = useState("");
-  const [service, setService] = useState("");
-  const [source, setSource] = useState("");
-  const [from, setFrom] = useState("");
-  const [to, setTo] = useState("");
-  const [newestFirst, setNewestFirst] = useState(true);
-  const [selectedId, setSelectedId] = useState<string | null>(initialLeadId);
+const EMPTY: LeadFilters = { q: "", status: "", service: "", source: "", from: "", to: "", newestFirst: true };
 
-  // Keep ?lead= in the address bar so a lead can be linked (e.g. from the notification email).
+/** Leads, 50 per page; filters and search run in Postgres. */
+const LeadsBrowser = ({ initial, initialLeadId }: { initial: { rows: LeadRow[]; total: number }; initialLeadId: string | null }) => {
+  const [filters, setFilters] = useState<LeadFilters>(EMPTY);
+  const [rows, setRows] = useState(initial.rows);
+  const [total, setTotal] = useState(initial.total);
+  const [error, setError] = useState("");
+  const [loading, start] = useTransition();
+  const [exporting, setExporting] = useState(false);
+  const [selectedId, setSelectedId] = useState<string | null>(initialLeadId);
+  const [selected, setSelected] = useState<Lead | null>(null);
+  const first = useRef(true);
+  const set = (patch: Partial<LeadFilters>) => setFilters((f) => ({ ...f, ...patch }));
+
+  // Reload page 1 when a filter changes (search waits for a short pause in typing).
+  useEffect(() => {
+    if (first.current) {
+      first.current = false;
+      return;
+    }
+    const t = setTimeout(
+      () =>
+        start(async () => {
+          const res = await listLeads(filters, 0);
+          setError(res.error ?? "");
+          setRows(res.rows);
+          setTotal(res.total);
+        }),
+      300,
+    );
+    return () => clearTimeout(t);
+  }, [filters]);
+
+  const loadMore = () =>
+    start(async () => {
+      const res = await listLeads(filters, rows.length);
+      setError(res.error ?? "");
+      setRows((r) => [...r, ...res.rows.filter((x) => !r.some((y) => y.id === x.id))]);
+      setTotal(res.total);
+    });
+
+  // Keep ?lead= in the address bar so a lead can be linked (e.g. from the notification email),
+  // and load the full lead for the panel only when one is opened.
   useEffect(() => {
     const url = new URL(window.location.href);
     if (selectedId) url.searchParams.set("lead", selectedId);
     else url.searchParams.delete("lead");
     window.history.replaceState(null, "", url);
+    setSelected(null);
+    if (selectedId) getLead(selectedId).then(setSelected);
   }, [selectedId]);
 
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    const rows = leads.filter((l) => {
-      if (status && l.status !== status) return false;
-      if (service && serviceOf(l.project_type) !== service) return false;
-      if (source && l.source !== source) return false;
-      const day = pktDay(l.created_at);
-      if (from && day < from) return false;
-      if (to && day > to) return false;
-      if (!q) return true;
-      return [l.name, l.email, l.phone, l.message, l.notes, l.project_type].some((v) => v?.toLowerCase().includes(q));
-    });
-    return newestFirst ? rows : [...rows].reverse();
-  }, [leads, query, status, service, source, from, to, newestFirst]);
+  const filtersOn = !!(filters.q || filters.status || filters.service || filters.source || filters.from || filters.to);
 
-  const filtersOn = !!(query || status || service || source || from || to);
-  const clear = () => {
-    setQuery("");
-    setStatus("");
-    setService("");
-    setSource("");
-    setFrom("");
-    setTo("");
+  const exportCsv = async () => {
+    setExporting(true);
+    try {
+      const all = await exportLeads(filters);
+      // BOM so Excel reads names with accents correctly.
+      const blob = new Blob(["﻿" + toCsv(all)], { type: "text/csv;charset=utf-8" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = `leads-${pktDay(new Date())}.csv`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    } finally {
+      setExporting(false);
+    }
   };
 
-  const exportCsv = () => {
-    // BOM so Excel reads names with accents correctly.
-    const blob = new Blob(["﻿" + toCsv(filtered)], { type: "text/csv;charset=utf-8" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = `leads-${pktDay(new Date())}.csv`;
-    a.click();
-    URL.revokeObjectURL(a.href);
-  };
-
-  const selected = leads.find((l) => l.id === selectedId) ?? null;
-
-  if (!leads.length) {
+  if (!initial.total && !filtersOn) {
     return (
       <div className="adm-card">
         <EmptyState icon="leads" title="No leads yet" text="When someone sends their details through the chat or the contact form, they'll show up here with their message and chat.">
@@ -124,10 +136,10 @@ const LeadsBrowser = ({ leads, initialLeadId }: { leads: Lead[]; initialLeadId: 
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
             <path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM21 21l-4.3-4.3" />
           </svg>
-          <input type="search" placeholder="Search name, email, message or notes" value={query} onChange={(e) => setQuery(e.target.value)} />
+          <input type="search" placeholder="Search name, email, message or notes" value={filters.q} onChange={(e) => set({ q: e.target.value })} />
         </label>
         <div className="adm-filters">
-          <select value={status} onChange={(e) => setStatus(e.target.value)} aria-label="Filter by status">
+          <select value={filters.status} onChange={(e) => set({ status: e.target.value })} aria-label="Filter by status">
             <option value="">All statuses</option>
             {STATUSES.map((s) => (
               <option key={s} value={s}>
@@ -135,7 +147,7 @@ const LeadsBrowser = ({ leads, initialLeadId }: { leads: Lead[]; initialLeadId: 
               </option>
             ))}
           </select>
-          <select value={service} onChange={(e) => setService(e.target.value)} aria-label="Filter by service">
+          <select value={filters.service} onChange={(e) => set({ service: e.target.value })} aria-label="Filter by service">
             <option value="">All services</option>
             {SERVICE_GROUPS.map((s) => (
               <option key={s.key} value={s.key}>
@@ -143,7 +155,7 @@ const LeadsBrowser = ({ leads, initialLeadId }: { leads: Lead[]; initialLeadId: 
               </option>
             ))}
           </select>
-          <select value={source} onChange={(e) => setSource(e.target.value)} aria-label="Filter by source">
+          <select value={filters.source} onChange={(e) => set({ source: e.target.value })} aria-label="Filter by source">
             <option value="">All sources</option>
             {SOURCES.map((s) => (
               <option key={s} value={s}>
@@ -153,32 +165,37 @@ const LeadsBrowser = ({ leads, initialLeadId }: { leads: Lead[]; initialLeadId: 
           </select>
           <label className="adm-date">
             <span>From</span>
-            <input type="date" value={from} max={to || undefined} onChange={(e) => setFrom(e.target.value)} />
+            <input type="date" value={filters.from} max={filters.to || undefined} onChange={(e) => set({ from: e.target.value })} />
           </label>
           <label className="adm-date">
             <span>To</span>
-            <input type="date" value={to} min={from || undefined} onChange={(e) => setTo(e.target.value)} />
+            <input type="date" value={filters.to} min={filters.from || undefined} onChange={(e) => set({ to: e.target.value })} />
           </label>
         </div>
         <div className="adm-toolbar-end">
-          <span className="adm-count">
-            {filtered.length} of {leads.length}
+          <span className="adm-count" aria-live="polite">
+            {loading ? "Loading…" : `${rows.length} of ${total}`}
           </span>
           {filtersOn && (
-            <button type="button" className="adm-link-btn" onClick={clear}>
+            <button type="button" className="adm-link-btn" onClick={() => setFilters(EMPTY)}>
               Clear filters
             </button>
           )}
-          <button type="button" className="adm-btn" onClick={exportCsv} disabled={!filtered.length}>
+          <button type="button" className="adm-btn" onClick={exportCsv} disabled={!total || exporting}>
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M12 3v12M7 10l5 5 5-5M5 21h14" />
             </svg>
-            Export CSV
+            {exporting ? "Exporting…" : "Export CSV"}
           </button>
         </div>
       </div>
+      {error && (
+        <p className="adm-error" role="alert">
+          {error}
+        </p>
+      )}
 
-      {filtered.length ? (
+      {rows.length ? (
         <div className="adm-table-wrap">
           <table className="adm-table">
             <thead>
@@ -189,16 +206,16 @@ const LeadsBrowser = ({ leads, initialLeadId }: { leads: Lead[]; initialLeadId: 
                 <th scope="col">Budget</th>
                 <th scope="col">Source</th>
                 <th scope="col">Status</th>
-                <th scope="col" aria-sort={newestFirst ? "descending" : "ascending"}>
-                  <button type="button" className="adm-sort" onClick={() => setNewestFirst((v) => !v)}>
-                    Date <span aria-hidden="true">{newestFirst ? "↓" : "↑"}</span>
-                    <span className="sr-only">{newestFirst ? "newest first, click for oldest first" : "oldest first, click for newest first"}</span>
+                <th scope="col" aria-sort={filters.newestFirst ? "descending" : "ascending"}>
+                  <button type="button" className="adm-sort" onClick={() => set({ newestFirst: !filters.newestFirst })}>
+                    Date <span aria-hidden="true">{filters.newestFirst ? "↓" : "↑"}</span>
+                    <span className="sr-only">{filters.newestFirst ? "newest first, click for oldest first" : "oldest first, click for newest first"}</span>
                   </button>
                 </th>
               </tr>
             </thead>
             <tbody>
-              {filtered.map((l) => (
+              {rows.map((l) => (
                 <tr key={l.id} className={l.id === selectedId ? "is-selected" : ""} onClick={() => setSelectedId(l.id)}>
                   <td data-label="Name">
                     <button type="button" className="adm-row-btn" onClick={() => setSelectedId(l.id)}>
@@ -230,18 +247,25 @@ const LeadsBrowser = ({ leads, initialLeadId }: { leads: Lead[]; initialLeadId: 
               ))}
             </tbody>
           </table>
+          {rows.length < total && (
+            <div className="adm-more">
+              <button type="button" className="adm-btn" onClick={loadMore} disabled={loading}>
+                {loading ? "Loading…" : `Load more (${total - rows.length} left)`}
+              </button>
+            </div>
+          )}
         </div>
       ) : (
         <div className="adm-card">
-          <EmptyState icon="search" title="No leads match" text="Try another search or remove a filter.">
-            <button type="button" className="adm-btn" onClick={clear}>
+          <EmptyState icon="search" title={loading ? "Loading…" : "No leads match"} text="Try another search or remove a filter.">
+            <button type="button" className="adm-btn" onClick={() => setFilters(EMPTY)}>
               Clear filters
             </button>
           </EmptyState>
         </div>
       )}
 
-      {selected && <LeadPanel key={selected.id} lead={selected} onClose={() => setSelectedId(null)} />}
+      {selectedId && selected && <LeadPanel key={selected.id} lead={selected} onClose={() => setSelectedId(null)} />}
     </>
   );
 };

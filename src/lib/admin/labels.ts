@@ -46,6 +46,9 @@ export const DAY_MS = 24 * 60 * 60 * 1000;
 /** "2026-10-27" for the Pakistan calendar day of a date. */
 export const pktDay = (date: Date | string) => new Date(new Date(date).getTime() + PKT_OFFSET_MS).toISOString().slice(0, 10);
 
+/** Start of a Pakistan calendar day ("2026-10-27"), as a UTC timestamp. */
+export const pktDayStart = (day: string) => Date.parse(`${day}T00:00:00Z`) - PKT_OFFSET_MS;
+
 /** Start of today in Pakistan time, as a UTC timestamp. */
 export const pktStartOfToday = (now = Date.now()) => {
   const shifted = new Date(now + PKT_OFFSET_MS);

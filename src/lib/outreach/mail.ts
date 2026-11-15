@@ -4,7 +4,7 @@ import { randomUUID } from "node:crypto";
 import nodemailer from "nodemailer";
 import { ImapFlow, type MessageStructureObject } from "imapflow";
 import { SITE } from "@/lib/site";
-import { toHtml, unsubscribeUrl, withFooter } from "./compose";
+import { unsubscribeUrl, withFooter } from "./compose";
 
 const env = () => {
   const host = process.env.OUTREACH_SMTP_HOST;
@@ -47,8 +47,8 @@ export const sendOutreach = async (m: Outgoing) => {
       from: e.from,
       to: m.to,
       subject: m.subject,
+      // Plain text only (owner, 2026-11-16): reads like a personal email and lands in Primary, not Promotions.
       text: withFooter(m.body, unsub),
-      html: toHtml(m.body, unsub),
       messageId,
       ...(m.threadId ? { inReplyTo: m.threadId, references: [m.threadId] } : {}),
       headers: {

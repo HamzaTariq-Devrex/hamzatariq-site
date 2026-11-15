@@ -15,7 +15,8 @@ export async function middleware(request: NextRequest) {
       },
     },
   });
-  await supabase.auth.getUser();
+  // Refreshes an expired session; the JWT itself is verified locally (ES256), no auth round trip.
+  await supabase.auth.getClaims();
   return response;
 }
 

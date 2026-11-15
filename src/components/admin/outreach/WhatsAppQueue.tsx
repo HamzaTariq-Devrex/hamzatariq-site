@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { updateProspectStatus } from "@/app/admin/(dashboard)/prospects/actions";
 import { whatsappLink } from "@/lib/outreach/whatsapp";
-import { latestAudit, messageFor, typeLabel, type ProspectRow } from "./ProspectsBrowser";
+import { latestAudit, messageFor, typeLabel, type ProspectRow } from "./prospect-shared";
 
 /**
  * Businesses with a phone but no public email. Nothing is sent automatically: "Open WhatsApp"

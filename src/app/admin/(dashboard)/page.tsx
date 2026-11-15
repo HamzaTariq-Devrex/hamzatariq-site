@@ -1,10 +1,16 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
-import { getOwner } from "@/lib/supabase/server";
-import { DAY_MS, SERVICE_GROUPS, SOURCES, SOURCE_LABELS, formatDate, pktDay, pktStartOfToday, serviceLabel, serviceOf } from "@/lib/admin/labels";
-import DailyBars from "@/components/admin/DailyBars";
+import { SERVICE_GROUPS, SOURCES, SOURCE_LABELS, formatDate, serviceLabel, serviceOf } from "@/lib/admin/labels";
+import { getOverview } from "@/lib/admin/data";
 import { BarList, Change, EmptyState, PageHead, StatCard, StatusBadge } from "@/components/admin/ui";
+import { SkeletonCard, SkeletonStats } from "@/components/admin/Skeleton";
+import RefreshButton from "@/components/admin/RefreshButton";
 import { TOOLS } from "@/data/tools";
+
+// The chart is the only client-side code on this page: load it separately.
+const DailyBars = dynamic(() => import("@/components/admin/DailyBars"));
 
 // Site events (src/lib/analytics.ts): written by the server (chat, leads, audits) and by /api/events.
 const EVENTS = [
@@ -16,114 +22,70 @@ const EVENTS = [
   { name: "cv_downloaded", label: "CV downloads" },
   { name: "audit_cta_click", label: "Audit CTA clicks" },
 ] as const;
+const CTA_LABELS: Record<string, string> = { nav: "Navbar", home: "Home page", blog: "Blog posts", service: "Service pages", solution: "Industry pages" };
 
 export const metadata: Metadata = { title: "Overview" };
 
-const between = (iso: string, from: number, to: number) => {
-  const t = new Date(iso).getTime();
-  return t >= from && t < to;
-};
+const pct = (won: number, all: number) => (all ? (won / all) * 100 : 0);
 
-export default async function OverviewPage() {
-  const { supabase } = (await getOwner())!; // the layout redirects when signed out
-  const now = Date.now();
-  const today = pktStartOfToday(now);
-  const tomorrow = today + DAY_MS;
+/** Stat cards: first on screen. All numbers come from one cached SQL call (app_admin_overview). */
+async function Stats() {
+  const o = await getOverview();
+  return (
+    <section className="adm-stats" aria-label="Key numbers">
+      <StatCard label="Total leads" value={String(o.leads_total)}>
+        <Change current={o.leads_30} previous={o.leads_prev30} label="last 30 days vs the 30 before" />
+      </StatCard>
+      <StatCard label="New this week" value={String(o.week)}>
+        <Change current={o.week} previous={o.prev_week} label="vs previous 7 days" />
+      </StatCard>
+      <StatCard label="Conversion rate" value={`${Math.round(pct(o.won_total, o.leads_total))}%`}>
+        {o.leads_30 && o.leads_prev30 ? (
+          <Change current={pct(o.won_30, o.leads_30)} previous={pct(o.won_prev30, o.leads_prev30)} unit="pts" label="last 30 days vs the 30 before" />
+        ) : (
+          <Change current={0} previous={null} label="Won leads out of all leads" />
+        )}
+      </StatCard>
+      <StatCard label="Chats today" value={String(o.chats_today)}>
+        <Change current={o.chats_today} previous={o.chats_yesterday} label="vs yesterday" />
+      </StatCard>
+      <StatCard label="Chats this week" value={String(o.chats_week)}>
+        <Change current={o.chats_week} previous={o.chats_prev_week} label="vs previous 7 days" />
+      </StatCard>
+    </section>
+  );
+}
 
-  const since30 = new Date(tomorrow - 30 * DAY_MS).toISOString();
-  const [{ data: leadRows }, { data: sessionRows }, { data: eventRows }, { data: prospectRows }, { data: outreachRows }] = await Promise.all([
-    supabase.from("leads").select("id, name, project_type, source, status, created_at").order("created_at", { ascending: false }).limit(5000),
-    supabase.from("chat_sessions").select("created_at").gte("created_at", new Date(today - 13 * DAY_MS).toISOString()).limit(10000),
-    supabase
-      .from("events")
-      .select("name, data, created_at")
-      .in("name", EVENTS.map((e) => e.name))
-      .gte("created_at", new Date(tomorrow - 60 * DAY_MS).toISOString())
-      .limit(50000),
-    // Outreach (owner-only tables; empty before the outreach migration).
-    supabase.from("prospects").select("created_at").gte("created_at", since30).limit(20000),
-    supabase.from("outreach_messages").select("direction, kind, status, sent_at, created_at").gte("created_at", since30).limit(20000),
-  ]);
-  const leads = leadRows ?? [];
-  const sessions = sessionRows ?? [];
-  const events = eventRows ?? [];
-
-  // Periods: the last 7 / 30 days (including today) against the 7 / 30 days before them.
-  const inDays = (rows: { created_at: string }[], from: number, to: number) => rows.filter((r) => between(r.created_at, from, to)).length;
-  const last30 = leads.filter((l) => between(l.created_at, tomorrow - 30 * DAY_MS, tomorrow));
-  const prev30 = leads.filter((l) => between(l.created_at, tomorrow - 60 * DAY_MS, tomorrow - 30 * DAY_MS));
-  const conversion = (rows: { status: string }[]) => (rows.length ? (rows.filter((r) => r.status === "won").length / rows.length) * 100 : 0);
-  const week = inDays(leads, tomorrow - 7 * DAY_MS, tomorrow);
-  const prevWeek = inDays(leads, tomorrow - 14 * DAY_MS, tomorrow - 7 * DAY_MS);
-  const chatsToday = inDays(sessions, today, tomorrow);
-  const chatsYesterday = inDays(sessions, today - DAY_MS, today);
-  const chatsWeek = inDays(sessions, tomorrow - 7 * DAY_MS, tomorrow);
-  const chatsPrevWeek = inDays(sessions, tomorrow - 14 * DAY_MS, tomorrow - 7 * DAY_MS);
-
-  const perDay = new Map<string, number>();
-  for (const l of last30) perDay.set(pktDay(l.created_at), (perDay.get(pktDay(l.created_at)) ?? 0) + 1);
-  const days = Array.from({ length: 30 }, (_, i) => {
-    const day = pktDay(new Date(today - (29 - i) * DAY_MS + DAY_MS / 2));
-    return { day, count: perDay.get(day) ?? 0 };
-  });
-
-  const eventsIn = (from: number, to: number) => events.filter((e) => between(e.created_at, from, to));
-  const events30 = eventsIn(tomorrow - 30 * DAY_MS, tomorrow);
-  const eventsPrev30 = eventsIn(tomorrow - 60 * DAY_MS, tomorrow - 30 * DAY_MS);
-  const count = (rows: typeof events, name: string) => rows.filter((e) => e.name === name).length;
-  const toolOf = (e: (typeof events)[number]) => (e.data as { tool?: string } | null)?.tool ?? "";
-  const byTool = TOOLS.map((t) => ({ label: t.name, value: events30.filter((e) => e.name === "tool_used" && toolOf(e) === t.slug).length }));
+async function Details() {
+  const o = await getOverview();
+  const byTool = TOOLS.map((t) => ({ label: t.name, value: o.tools[t.slug] ?? 0 }));
   const toolTotal = byTool.reduce((s, t) => s + t.value, 0);
-  const CTA_LABELS: Record<string, string> = { nav: "Navbar", home: "Home page", blog: "Blog posts", service: "Service pages", solution: "Industry pages" };
-  const ctaOf = (e: (typeof events)[number]) => (e.data as { location?: string } | null)?.location ?? "";
-  const byCta = Object.entries(CTA_LABELS).map(([key, label]) => ({ label, value: events30.filter((e) => e.name === "audit_cta_click" && ctaOf(e) === key).length }));
+  const byCta = Object.entries(CTA_LABELS).map(([key, label]) => ({ label, value: o.cta[key] ?? 0 }));
   const ctaTotal = byCta.reduce((s, t) => s + t.value, 0);
-
-  const ox = outreachRows ?? [];
+  const bySource = SOURCES.map((s) => ({ label: SOURCE_LABELS[s], value: o.by_source[s] ?? 0 }));
+  const byService = SERVICE_GROUPS.map((g) => ({
+    label: g.label,
+    value: o.by_project_type.filter((p) => serviceOf(p.project_type) === g.key).reduce((s, p) => s + p.count, 0),
+  }));
   const outreach = [
-    { label: "Businesses found", value: (prospectRows ?? []).length },
-    { label: "Emails sent", value: ox.filter((m) => m.direction === "out" && m.status === "sent").length },
-    { label: "Replies", value: ox.filter((m) => m.direction === "in" && m.kind === "reply").length },
-    { label: "Bounces", value: ox.filter((m) => m.direction === "in" && m.kind === "bounce").length },
-    { label: "Unsubscribes", value: ox.filter((m) => m.direction === "in" && m.kind === "unsubscribe").length },
+    { label: "Businesses found", value: o.outreach.found },
+    { label: "Emails sent", value: o.outreach.sent },
+    { label: "Replies", value: o.outreach.replies },
+    { label: "Bounces", value: o.outreach.bounces },
+    { label: "Unsubscribes", value: o.outreach.unsubscribes },
   ];
 
-  const bySource = SOURCES.map((s) => ({ label: SOURCE_LABELS[s], value: leads.filter((l) => l.source === s).length }));
-  const byService = SERVICE_GROUPS.map((g) => ({ label: g.label, value: leads.filter((l) => serviceOf(l.project_type) === g.key).length }));
-
   return (
-    <main className="adm-page">
-      <PageHead title="Overview" text={`Leads and chats on hamzatariq.site · ${formatDate(new Date(now).toISOString(), false)}`} />
-
-      <section className="adm-stats" aria-label="Key numbers">
-        <StatCard label="Total leads" value={String(leads.length)}>
-          <Change current={last30.length} previous={prev30.length} label="last 30 days vs the 30 before" />
-        </StatCard>
-        <StatCard label="New this week" value={String(week)}>
-          <Change current={week} previous={prevWeek} label="vs previous 7 days" />
-        </StatCard>
-        <StatCard label="Conversion rate" value={`${Math.round(conversion(leads))}%`}>
-          {last30.length && prev30.length ? (
-            <Change current={conversion(last30)} previous={conversion(prev30)} unit="pts" label="last 30 days vs the 30 before" />
-          ) : (
-            <Change current={0} previous={null} label="Won leads out of all leads" />
-          )}
-        </StatCard>
-        <StatCard label="Chats today" value={String(chatsToday)}>
-          <Change current={chatsToday} previous={chatsYesterday} label="vs yesterday" />
-        </StatCard>
-        <StatCard label="Chats this week" value={String(chatsWeek)}>
-          <Change current={chatsWeek} previous={chatsPrevWeek} label="vs previous 7 days" />
-        </StatCard>
-      </section>
-
+    <>
       <section className="adm-card adm-span-2">
         <div className="adm-card-head">
           <h2>Leads per day</h2>
-          <span>Last 30 days · {last30.length} lead{last30.length === 1 ? "" : "s"}</span>
+          <span>
+            Last 30 days · {o.leads_30} lead{o.leads_30 === 1 ? "" : "s"}
+          </span>
         </div>
-        {last30.length ? (
-          <DailyBars days={days} />
+        {o.leads_30 ? (
+          <DailyBars days={o.per_day} />
         ) : (
           <EmptyState icon="chart" title="No leads in the last 30 days" text="New leads from the chat and the contact form will show up here day by day." compact />
         )}
@@ -138,8 +100,8 @@ export default async function OverviewPage() {
           {EVENTS.map((e) => (
             <div key={e.name} className="adm-event">
               <span>{e.label}</span>
-              <strong>{count(events30, e.name)}</strong>
-              <Change current={count(events30, e.name)} previous={count(eventsPrev30, e.name)} label="" />
+              <strong>{o.events[e.name]?.cur ?? 0}</strong>
+              <Change current={o.events[e.name]?.cur ?? 0} previous={o.events[e.name]?.prev ?? 0} label="" />
             </div>
           ))}
         </div>
@@ -165,10 +127,10 @@ export default async function OverviewPage() {
           </span>
         </div>
         <div className="adm-events">
-          {outreach.map((o) => (
-            <div key={o.label} className="adm-event">
-              <span>{o.label}</span>
-              <strong>{o.value}</strong>
+          {outreach.map((x) => (
+            <div key={x.label} className="adm-event">
+              <span>{x.label}</span>
+              <strong>{x.value}</strong>
             </div>
           ))}
         </div>
@@ -180,8 +142,8 @@ export default async function OverviewPage() {
             <h2>Leads by source</h2>
             <span>All time</span>
           </div>
-          {leads.length ? (
-            <BarList rows={bySource} total={leads.length} />
+          {o.leads_total ? (
+            <BarList rows={bySource} total={o.leads_total} />
           ) : (
             <EmptyState icon="chart" title="Nothing to compare yet" text="You'll see whether leads come from the chatbot, the contact form or tools." compact />
           )}
@@ -191,8 +153,8 @@ export default async function OverviewPage() {
             <h2>Leads by service</h2>
             <span>All time</span>
           </div>
-          {leads.length ? (
-            <BarList rows={byService} total={leads.length} />
+          {o.leads_total ? (
+            <BarList rows={byService} total={o.leads_total} />
           ) : (
             <EmptyState icon="chart" title="Nothing to compare yet" text="Websites, dashboards, AI chatbots or SEO: which one people ask for most." compact />
           )}
@@ -202,11 +164,11 @@ export default async function OverviewPage() {
       <section className="adm-card">
         <div className="adm-card-head">
           <h2>Latest leads</h2>
-          {leads.length > 0 && <Link href="/admin/leads">View all →</Link>}
+          {o.latest.length > 0 && <Link href="/admin/leads">View all →</Link>}
         </div>
-        {leads.length ? (
+        {o.latest.length ? (
           <ul className="adm-latest">
-            {leads.slice(0, 5).map((l) => (
+            {o.latest.map((l) => (
               <li key={l.id}>
                 <Link href={`/admin/leads?lead=${l.id}`}>
                   <span className="adm-latest-main">
@@ -231,6 +193,22 @@ export default async function OverviewPage() {
           </EmptyState>
         )}
       </section>
+    </>
+  );
+}
+
+export default function OverviewPage() {
+  return (
+    <main className="adm-page">
+      <PageHead title="Overview" text={`Leads and chats on hamzatariq.site · ${formatDate(new Date().toISOString(), false)}`}>
+        <RefreshButton />
+      </PageHead>
+      <Suspense fallback={<SkeletonStats />}>
+        <Stats />
+      </Suspense>
+      <Suspense fallback={<SkeletonCard rows={8} />}>
+        <Details />
+      </Suspense>
     </main>
   );
 }
