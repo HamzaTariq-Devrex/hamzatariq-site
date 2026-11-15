@@ -15,7 +15,7 @@ async function run(req: Request) {
   const param = new URL(req.url).searchParams.get("phases");
   const phases = param ? (param.split(",").filter((p) => (PHASES as readonly string[]).includes(p)) as Phase[]) : [...PHASES];
   try {
-    return json(await tick(phases, 55_000));
+    return json(await tick(phases, 50_000));
   } catch (e) {
     return json({ error: (e as Error).message }, 500);
   }

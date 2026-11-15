@@ -7,7 +7,7 @@ import { SITE } from "@/lib/site";
 import { rpcClient, serverSecret } from "@/lib/supabase/server";
 import { sendOwnerAlert } from "@/lib/leads/email";
 import { ox, type Prospect, type State } from "./db";
-import { discover } from "./osm";
+import { discover, setOsmDeadline } from "./osm";
 import { qualify } from "./qualify";
 import { draftCheckBack, draftDay3, draftDay7, draftEmail1, draftHotReply, postalAddress, prospectFindings, reportUrl, subjectFor } from "./compose";
 import { classifyReply, type ReplyClass } from "./classify";
@@ -54,16 +54,21 @@ export const discoverAll = async (onlySearch?: string, deadline = Date.now() + 5
     ? state.searches.filter((s) => s.id === onlySearch)
     : rotation(state).filter((s) => !s.last_run_at || Date.now() - Date.parse(s.last_run_at) > 20 * 3_600_000);
   const results: { search: string; added: number; error?: string }[] = [];
-  for (const s of searches) {
-    // An Overpass call can take up to ~30 seconds on a busy day.
-    if (budget <= 0 || deadline - Date.now() < 30_000) break;
-    try {
-      const added = await discover(s, Math.min(budget, PER_SEARCH));
-      budget -= added;
-      results.push({ search: `${s.business_type}, ${s.city}`, added });
-    } catch (e) {
-      results.push({ search: `${s.business_type}, ${s.city}`, added: 0, error: (e as Error).message });
+  // Every OpenStreetMap request in this run stops at the deadline, so a busy server can't outlast the function.
+  setOsmDeadline(deadline);
+  try {
+    for (const s of searches) {
+      if (budget <= 0 || deadline - Date.now() < 15_000) break;
+      try {
+        const added = await discover(s, Math.min(budget, PER_SEARCH));
+        budget -= added;
+        results.push({ search: `${s.business_type}, ${s.city}`, added });
+      } catch (e) {
+        results.push({ search: `${s.business_type}, ${s.city}`, added: 0, error: (e as Error).message });
+      }
     }
+  } finally {
+    setOsmDeadline(Number.POSITIVE_INFINITY);
   }
   return results;
 };
@@ -282,7 +287,7 @@ export const tick = async (phases: Phase[] = [...PHASES], budgetMs = 50_000) => 
   // Replies, bounces and "no"s are handled before anything is sent.
   if (phases.includes("imap")) {
     try {
-      report.inbox = await checkInbox(state);
+      report.inbox = await Promise.race([checkInbox(state), new Promise<string>((r) => setTimeout(() => r("inbox check took over 20 s; it continues next tick"), 20_000))]);
     } catch (e) {
       report.inbox = `error: ${(e as Error).message}`;
     }
@@ -302,16 +307,17 @@ export const tick = async (phases: Phase[] = [...PHASES], budgetMs = 50_000) => 
   }
   if (phases.includes("audit")) {
     const done: string[] = [];
-    // One outreach audit takes up to ~25 seconds (PageSpeed is capped at 15 s), so it only starts with time left.
-    while (left() > 27_000) {
+    // One outreach audit can take ~34 seconds (page, PageSpeed capped at 15 s, contact page, MX), so it only starts with time left.
+    while (left() > 36_000) {
       const [p] = await ox.toAudit(1);
       if (!p) break;
       done.push(`${p.name}: ${await qualify(p as Prospect)}`);
     }
     report.audits = done;
   }
+  // Templates are instant; a Gemini draft can take up to 2 x 25 s, so one per tick with time left.
   if (phases.includes("draft") && left() > 12_000) {
-    report.drafts = await draftNew(state, left() > 30_000 ? 3 : 1);
+    if (left() > 30_000) report.drafts = await draftNew(state, 1);
     if (left() > 8_000) report.followups = await draftFollowUps(state, 5);
     if (left() > 5_000) report.checkbacks = await draftCheckBacks(state, 5);
   }

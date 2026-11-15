@@ -11,11 +11,17 @@ import { BUSINESS_TYPES, isBusinessType, type BusinessType } from "./osm-types";
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 let lastRequest = 0;
 /** Fetch from an OSM service, never more than one request per second from this process. */
+/** Hard deadline for OSM requests in the current run (set by discoverAll), so a busy server can't outlast the function. */
+let deadlineAt = Number.POSITIVE_INFINITY;
+export const setOsmDeadline = (at: number) => (deadlineAt = at);
+
 const osmFetch = async (url: string, init: RequestInit = {}) => {
+  const remaining = deadlineAt - Date.now();
+  if (remaining < 3000) throw new Error("No time left for OpenStreetMap in this run.");
   const wait = lastRequest + 1100 - Date.now();
   if (wait > 0) await sleep(wait);
   lastRequest = Date.now();
-  const res = await fetch(url, { ...init, headers: { "User-Agent": USER_AGENT, Accept: "application/json", ...(init.headers ?? {}) }, signal: AbortSignal.timeout(75000) });
+  const res = await fetch(url, { ...init, headers: { "User-Agent": USER_AGENT, Accept: "application/json", ...(init.headers ?? {}) }, signal: AbortSignal.timeout(Math.min(75000, remaining)) });
   if (!res.ok) throw new Error(`${new URL(url).hostname} answered ${res.status}`);
   return res.json();
 };
@@ -60,6 +66,7 @@ export const findBusinesses = async (type: BusinessType, place: Place): Promise<
   let data: { elements: { type: string; id: number; lat?: number; lon?: number; center?: { lat: number; lon: number }; tags?: Record<string, string> }[] } | null = null;
   let lastError: unknown = null;
   for (const endpoint of OVERPASS_ENDPOINTS) {
+    if (deadlineAt - Date.now() < 5000) break;
     try {
       data = await osmFetch(endpoint, {
         method: "POST",

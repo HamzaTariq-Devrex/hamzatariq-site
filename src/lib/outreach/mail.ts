@@ -59,7 +59,7 @@ export const checkLogin = async () => {
   const transport = nodemailer.createTransport({ host: e.host, port: e.port, secure: e.port === 465, auth: { user: e.user, pass: e.pass } });
   const smtp = await transport.verify().then(() => "ok", (err: Error) => err.message);
   transport.close();
-  const client = new ImapFlow({ host: e.imapHost, port: 993, secure: true, auth: { user: e.user, pass: e.pass }, logger: false });
+  const client = new ImapFlow({ host: e.imapHost, port: 993, secure: true, auth: { user: e.user, pass: e.pass }, logger: false, connectionTimeout: 10_000, greetingTimeout: 8_000, socketTimeout: 20_000 });
   const imap = await client.connect().then(() => "ok", (err: Error) => err.message);
   await client.logout().catch(() => {});
   return { smtp, imap };
@@ -99,7 +99,7 @@ const textPart = (node: MessageStructureObject | undefined): string | null => {
  */
 export const readInbox = async (lastUid: number | null, since: Date) => {
   const e = env();
-  const client = new ImapFlow({ host: e.imapHost, port: 993, secure: true, auth: { user: e.user, pass: e.pass }, logger: false });
+  const client = new ImapFlow({ host: e.imapHost, port: 993, secure: true, auth: { user: e.user, pass: e.pass }, logger: false, connectionTimeout: 10_000, greetingTimeout: 8_000, socketTimeout: 20_000 });
   await client.connect();
   const lock = await client.getMailboxLock("INBOX");
   const out: Incoming[] = [];
