@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useEffect } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { signOut } from "@/app/admin/(dashboard)/actions";
 
 const LINKS = [
@@ -35,6 +36,12 @@ const Icon = ({ children }: { children: React.ReactNode }) => (
 
 const AdminNav = ({ email }: { email: string }) => {
   const pathname = usePathname();
+  const router = useRouter();
+  // Prefetch every admin page (its code and loading skeleton) as soon as the sidebar is on screen,
+  // so the first click is as instant as the next ones.
+  useEffect(() => {
+    LINKS.forEach((l) => router.prefetch(l.href));
+  }, [router]);
   return (
     <aside className="adm-nav">
       <a href="/" className="adm-brand">
