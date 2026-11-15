@@ -1,6 +1,6 @@
 {
   "framework": "nextjs",
-  "regions": ["bom1"],
+  "regions": ["syd1"],
   "crons": [
     { "path": "/api/cron/publish", "schedule": "5 19 * * *" },
     { "path": "/api/outreach/discover", "schedule": "0 5 * * *" }
