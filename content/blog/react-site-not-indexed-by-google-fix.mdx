@@ -1,0 +1,144 @@
+---
+title: "React Site Not Indexed by Google? Fix It in 6 Steps"
+seoTitle: "React Site Not Indexed by Google? Fix It"
+description: "React site not indexed by Google? Fix it by matching your Search Console status to its React cause, then follow 6 steps and request indexing at the right time."
+keyword: "react site not indexed by google fix"
+category: react-nextjs-seo
+cluster: react-seo
+role: supporting
+intent: fix
+funnel: consideration
+secondary: ["crawled currently not indexed react", "google not indexing react pages", "discovered not indexed fix", "request indexing google search console"]
+trust: "I've shipped 40+ live production websites in React and Next.js, I set up Search Console, sitemaps and IndexNow for clients through my React and Next.js SEO service, and I built the free SEO audit tool that checks status codes, noindex tags, canonicals and sitemaps the way a crawler does."
+tags: [react, seo, indexing, search console, next.js]
+published: 2026-11-15
+howto:
+  name: "Fix a React site that Google isn't indexing"
+  steps:
+    - name: "Find the status in the Page indexing report"
+      text: "Open Search Console, go to Indexing, then Pages, and note which reason under Why pages aren't indexed lists your missing URLs."
+    - name: "Inspect one affected URL"
+      text: "Paste the URL into URL Inspection, run Test live URL and open View tested page to see the HTML Google actually received."
+    - name: "Fix the cause that matches the status"
+      text: "Empty HTML needs server rendering, duplicates need one canonical per page, soft errors need a real not-found status, and orphan pages need real links."
+    - name: "Clean the sitemap"
+      text: "List only live, indexable, canonical URLs in sitemap.xml and resubmit it under Sitemaps in Search Console."
+    - name: "Validate the fix and request indexing"
+      text: "Click Validate fix on the status in the Page indexing report, and request indexing for your most important URLs in URL Inspection."
+    - name: "Watch the report"
+      text: "Check the Page indexing report again over the next weeks and confirm the affected count is going down before changing anything else."
+faq:
+  - q: "Does Request indexing in Google Search Console fix a page that isn't indexed?"
+    a: "Only if the cause is already fixed. It asks Google to crawl the URL again sooner; it doesn't override a quality or rendering problem. Request it after the fix is live, for a handful of key pages, and use the sitemap for the rest."
+  - q: "Can Google index a React site at all?"
+    a: "Yes. Google can run JavaScript, but it crawls first and renders later, and anything that fails in that second step leaves an empty or thin page. A React site that sends real HTML for every URL avoids the problem entirely."
+  - q: "Why does my React site show up for its name but not for anything else?"
+    a: "Usually Google has indexed the home page and little else, or every page shares one title and description. Check the Page indexing report for inner pages and view the page source of a few URLs to see if their titles differ."
+  - q: "How much does it cost to fix indexing on a React site?"
+    a: "With me, an SEO audit with a prioritized fix list starts at $150 and takes 2–3 days, a technical SEO setup for React or Next.js starts at $500, and a React (Vite/CRA) to Next.js migration starts at $800."
+  - q: "Should I delete pages that Google won't index?"
+    a: "Not right away. First check whether they are real pages with their own content. Junk URLs from a broken router should send a not-found status or redirect, but real product or service pages need the cause fixed, not deletion."
+---
+
+The quickest **react site not indexed by google fix** is to open Search Console, find the exact reason Google gives under "Why pages aren't indexed", and fix the React cause behind that reason. Most of the time it's one of four things: the HTML Google receives is empty, every page shares one title, unknown URLs answer as if they were real pages, or the pages have no real links pointing at them.
+
+Find your status in this table, then follow the six steps below it.
+
+| Search Console status | Usual React cause | Fix |
+| --- | --- | --- |
+| Crawled – currently not indexed | Empty app shell or thin HTML, same title on every URL | Server-render or pre-render each page with its own title and text |
+| Discovered – currently not indexed | No sitemap, menu links built with click handlers instead of real links | Real `<a href>` links and a complete sitemap |
+| Duplicate without user-selected canonical | One shared canonical, or www and non-www both live | A canonical tag per page and one redirect to the main host |
+| Soft `404` | The SPA answers every unknown URL with the same page and status `200` | Send a real not-found status for missing pages |
+| Excluded by 'noindex' tag | A noindex left over from a staging build | Remove it from the robots meta tag and the X-Robots-Tag header |
+| Page with redirect, Not found (`404`) | Old URLs still listed in the sitemap | List only live, final URLs |
+
+## React site not indexed by Google: the fix in 6 steps
+
+You can do all of this from Search Console, without touching code. The code changes come in step 3, and that's where a developer may be needed.
+
+1. **Find the status.** Open Search Console, go to Indexing, then Pages. Under "Why pages aren't indexed", click each reason and note which of your important URLs sit there. Ignore reasons that only list URLs you don't care about.
+2. **Inspect one affected URL.** Paste it into URL Inspection, click "Test live URL", then "View tested page". The HTML tab shows what Google actually got. If your headings and text aren't in it, Google sees an empty page.
+3. **Fix the cause for that status.** Use the table above. The rendering fix is the big one; the others are small changes to routing, tags or links.
+4. **Clean the sitemap.** Your `sitemap.xml` should list every page you want indexed and nothing else: no redirects, no missing pages, no URLs with noindex. Resubmit it under Sitemaps.
+5. **Validate and request indexing.** Click "Validate fix" on the status in the Page indexing report. Then request indexing for your few most important URLs in URL Inspection.
+6. **Watch the report.** Check the same report over the next weeks. If the count of affected pages goes down, leave it alone. If it doesn't move, go back to step 2 with another URL.
+
+Google explains the rendering side in its [JavaScript SEO basics](https://developers.google.com/search/docs/crawling-indexing/javascript/javascript-seo-basics) guide, including the soft error problem that single-page apps cause.
+
+## Why does Google say crawled but not indexed?
+
+"Crawled – currently not indexed" means Google downloaded the page and decided not to keep it, for now. On a normal site that's often a content quality call. On a React site, the cause is usually technical: Google kept nothing because there was almost nothing to keep.
+
+A standard React app built with Vite or Create React App sends the same small HTML file for every URL: an empty `<div id="root">` and a script. Google puts that page in a queue to run the JavaScript later. If the script fails, an API call times out or the content loads after a delay, Google indexes the thin version. When it sees ten URLs with the same title and the same empty body, it treats them as copies of one page.
+
+If you see Crawled – currently not indexed, React rendering is the usual suspect. Check it in two ways:
+
+- **View page source** (right-click, not Inspect) on an affected page and search for a sentence you can see on screen. If it's missing, the content only exists after JavaScript runs.
+- **Compare the browser tab titles** of three different pages. If they match, Google gets the same title for all of them.
+
+The fix is to send real HTML for every URL, built on the server or at build time, with each page's own title, description and text in it. My [React SEO guide for React and Next.js sites](/blog/react-seo-guide) covers the rendering options and the metadata setup in detail.
+
+## Why are my React pages discovered but not indexed?
+
+"Discovered – currently not indexed" is a different problem. Google knows the URL exists (from your sitemap or a link) but hasn't crawled it yet. It's a crawling queue problem, not a quality problem, so the discovered not indexed fix is about links and signals, not rendering.
+
+Three React habits cause it:
+
+- **Links that aren't links.** Menus and product cards that navigate with an `onClick` handler instead of an `<a href>` give Google nothing to follow. React Router's `<Link>` and the Next.js `<Link>` both render real anchor tags; a `div` with a click handler doesn't.
+- **Pages only reachable through search or filters.** If a product page is only reachable by typing in a search box, Google finds it through the sitemap alone and gives it low priority.
+- **A router that invents URLs.** Filters that write odd placeholder addresses into the URL create thousands of near-empty pages. Google spends its time on those and leaves your real pages waiting.
+
+So link every important page from at least one other page with a normal link, keep filter URLs out of the sitemap, and make sure the sitemap is complete. For a new site, some pages will sit in this status for a while even when everything is right; give it time before changing things.
+
+## What do soft `404` and duplicate statuses mean on a React site?
+
+These two statuses come from the way a single-page app answers requests, and the top guides on this topic mostly skip them.
+
+**Soft `404`.** In a SPA, the server sends the same HTML shell for every address, including ones that don't exist. React then shows a "Page not found" message, but the server already said status `200` (OK). Google sees a page that says "not found" while claiming to be fine, and flags it. Worse, it can flag thin real pages the same way. The fix is that missing pages must send a real not-found status from the server. In Next.js that's built in: calling `notFound()` or adding a not-found file sends the right status. In a plain Vite or CRA app, you need server or hosting rules for it.
+
+**Duplicate without user-selected canonical.** This shows up when Google finds the same content at several addresses and you haven't told it which one is the main one. In React sites the usual causes are:
+
+- one canonical tag in `index.html` that points every page to the home page;
+- both `www` and non-`www` versions answering, or the same page with and without a trailing slash;
+- tracking parameters in links creating extra copies.
+
+Give every page its own canonical tag in the HTML the server sends, and redirect the other hosts to one main address with a `301`.
+
+<FromMyWork title="What my audit tool checks before a page can be indexed">
+When I built the [free SEO audit tool](/tools/free-seo-audit), I gave it a group of crawl checks that line up with the statuses above. It fetches the raw HTML the way a crawler does, without running JavaScript, and checks that the page answers with status `200`, that there is no noindex in the robots meta tag or the X-Robots-Tag header, that a canonical tag is there, that robots.txt and the sitemap exist, and whether the content is in the HTML at all. On a client-rendered React site, that last check comes back red with "empty app shell".
+
+When a client hires me through my [React and Next.js SEO service](/services/react-nextjs-seo), the last step is the same every time: I submit the sitemap, set up IndexNow and Search Console, and check that the pages are being indexed. Running the audit first tells me which of the statuses in this post I should expect to see.
+</FromMyWork>
+
+## How long does Google take to index a new page?
+
+Google doesn't give a fixed time. Its own page on [asking Google to recrawl your URLs](https://developers.google.com/search/docs/crawling-indexing/ask-google-to-recrawl) says crawling can take anywhere from a few days to a few weeks, and that requesting it again doesn't make it faster.
+
+What that means in practice:
+
+- **Request indexing in Google Search Console** for a handful of key pages after a fix is live. It puts those URLs in the crawl queue; it doesn't promise indexing, and there's a daily limit.
+- **Resubmit the sitemap** for everything else. That's how Google finds the rest of a site.
+- **Validate fix** on a status starts Google's own recheck of every URL in it. It can stay "Started" for a long time; that's normal.
+
+Pages that were blocked by a rendering problem usually need a recrawl before anything changes, so judge the fix by the Page indexing report over weeks, not by a `site:` search the next morning. Being indexed is also not the same as ranking; for that side, see [why a React website is not ranking on Google](/blog/react-website-not-ranking-on-google).
+
+## When is moving to Next.js worth it for indexing?
+
+It depends on which status you have, and how many pages it covers.
+
+If only a few pages are affected by noindex, a bad canonical or sitemap errors, patch them. Those are small fixes in any React app. Google not indexing React pages across the whole site, with "Crawled – currently not indexed" or soft errors everywhere, points at the rendering itself, and patching that in a client-rendered app means adding a pre-render service or a hand-built server on top.
+
+<MyTake>
+For a business site that needs search traffic, I recommend fixing the rendering once rather than working around it. Moving a Vite or CRA site to Next.js keeps your React components and design, and it fixes the empty HTML, the shared titles, the canonical tags and the not-found status in one go, because Next.js does each of them by default. Patching with react-helmet and a pre-render service is cheaper at the start, but you keep maintaining two versions of every page. If your app is behind a login and has no public pages to rank, don't bother: indexing doesn't matter there.
+</MyTake>
+
+What it costs with me:
+
+| Work | From | Time |
+| --- | --- | --- |
+| SEO audit (report + prioritized fix list) | $150 | 2–3 days |
+| Technical SEO setup for React / Next.js | $500 | Quoted after a free call |
+| React (Vite/CRA) to Next.js migration for SEO | $800 | Quoted after a free call |
+
+The audit is a good first step if you're not sure which status is the real problem. It works with any developer, and you can [hire me for the fixes](/hire) or hand the list to your own team.

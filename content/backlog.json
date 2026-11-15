@@ -173,8 +173,9 @@
         "how long does google take to index a new page?"
       ],
       "angle": "Maps each Search Console status to the React cause behind it (empty HTML, duplicate titles, missing sitemap) and the exact fix, with the Search Console steps I used on this site.",
-      "status": "queued",
-      "publishedSlug": null
+      "status": "published",
+      "publishedSlug": "react-site-not-indexed-by-google-fix",
+      "published": "2026-11-15"
     },
     {
       "keyword": "ai chatbot for small business",
