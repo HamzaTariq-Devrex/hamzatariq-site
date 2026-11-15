@@ -3,7 +3,6 @@
 import { randomUUID } from "node:crypto";
 import nodemailer from "nodemailer";
 import { ImapFlow, type MessageStructureObject } from "imapflow";
-import { SITE } from "@/lib/site";
 import { unsubscribeUrl, withFooter } from "./compose";
 
 const env = () => {
@@ -22,9 +21,6 @@ const env = () => {
 };
 
 export const outreachAddress = () => env().user.toLowerCase();
-
-/** One-click unsubscribe endpoint for the List-Unsubscribe header (RFC 8058). */
-export const oneClickUrl = (token: string) => `${SITE.url}/api/outreach/unsubscribe/${token}`;
 
 export type Outgoing = {
   to: string;
@@ -51,10 +47,9 @@ export const sendOutreach = async (m: Outgoing) => {
       text: withFooter(m.body, unsub),
       messageId,
       ...(m.threadId ? { inReplyTo: m.threadId, references: [m.threadId] } : {}),
-      headers: {
-        "List-Unsubscribe": `<${oneClickUrl(m.unsubscribeToken)}>, <mailto:${e.user}?subject=unsubscribe>`,
-        "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
-      },
+      // No List-Unsubscribe headers (owner, 2026-11-16): under 30 emails a day they aren't required,
+      // and they make Gmail file the email as automated (Updates). The one-click unsubscribe link
+      // stays in the footer of every email, and "unsubscribe" replies are still handled over IMAP.
     });
   } finally {
     transport.close();
