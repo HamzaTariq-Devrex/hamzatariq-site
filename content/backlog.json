@@ -429,8 +429,9 @@
         "what are the hidden costs of an online store?"
       ],
       "angle": "A line-by-line table from my real prices (store from $1,000, full app from $2,000, extra pages $50, CMS +$150) and what a cheaper quote usually leaves out.",
-      "status": "queued",
-      "publishedSlug": null
+      "status": "published",
+      "publishedSlug": "ecommerce-website-cost-breakdown",
+      "published": "2026-11-15"
     },
     {
       "keyword": "replace spreadsheets with a web app",
