@@ -209,6 +209,7 @@ export type Database = {
           status: string
           step: number | null
           subject: string
+          variant: string | null
         }
         Insert: {
           approved_at?: string | null
@@ -225,6 +226,7 @@ export type Database = {
           status?: string
           step?: number | null
           subject: string
+          variant?: string | null
         }
         Update: {
           approved_at?: string | null
@@ -241,6 +243,7 @@ export type Database = {
           status?: string
           step?: number | null
           subject?: string
+          variant?: string | null
         }
         Relationships: [
           {
@@ -306,6 +309,7 @@ export type Database = {
           next_send_at: string | null
           pause_reason: string | null
           paused: boolean
+          resumed_at: string | null
           started_at: string | null
           updated_at: string
         }
@@ -317,6 +321,7 @@ export type Database = {
           next_send_at?: string | null
           pause_reason?: string | null
           paused?: boolean
+          resumed_at?: string | null
           started_at?: string | null
           updated_at?: string
         }
@@ -328,6 +333,7 @@ export type Database = {
           next_send_at?: string | null
           pause_reason?: string | null
           paused?: boolean
+          resumed_at?: string | null
           started_at?: string | null
           updated_at?: string
         }
@@ -388,16 +394,20 @@ export type Database = {
           email: string | null
           email_source: string | null
           id: string
+          instagram: string | null
           last_contacted_at: string | null
           lead_id: string | null
           lead_score: number | null
           name: string
+          next_followup_at: string | null
           notes: string | null
           osm_id: string
           osm_tags: Json
           phone: string | null
+          reply_class: string | null
           search_id: string | null
           skip_reason: string | null
+          snooze_until: string | null
           status: string
           timezone: string
           unsubscribe_token: string
@@ -414,16 +424,20 @@ export type Database = {
           email?: string | null
           email_source?: string | null
           id?: string
+          instagram?: string | null
           last_contacted_at?: string | null
           lead_id?: string | null
           lead_score?: number | null
           name: string
+          next_followup_at?: string | null
           notes?: string | null
           osm_id: string
           osm_tags?: Json
           phone?: string | null
+          reply_class?: string | null
           search_id?: string | null
           skip_reason?: string | null
+          snooze_until?: string | null
           status?: string
           timezone: string
           unsubscribe_token?: string
@@ -440,16 +454,20 @@ export type Database = {
           email?: string | null
           email_source?: string | null
           id?: string
+          instagram?: string | null
           last_contacted_at?: string | null
           lead_id?: string | null
           lead_score?: number | null
           name?: string
+          next_followup_at?: string | null
           notes?: string | null
           osm_id?: string
           osm_tags?: Json
           phone?: string | null
+          reply_class?: string | null
           search_id?: string | null
           skip_reason?: string | null
+          snooze_until?: string | null
           status?: string
           timezone?: string
           unsubscribe_token?: string
@@ -583,6 +601,7 @@ export type Database = {
         }
         Returns: Json
       }
+      app_admin_outreach_stats: { Args: { p_secret: string }; Returns: Json }
       app_admin_overview: { Args: { p_secret: string }; Returns: Json }
       app_admin_prospect_stats: {
         Args: { p_days: number; p_secret: string }
@@ -704,6 +723,10 @@ export type Database = {
         Args: { p_id: string; p_secret: string }
         Returns: string
       }
+      app_ox_domain_emailed: {
+        Args: { p_email: string; p_exclude: string; p_secret: string }
+        Returns: boolean
+      }
       app_ox_is_suppressed: {
         Args: { p_email: string; p_exclude?: string; p_secret: string }
         Returns: boolean
@@ -713,6 +736,10 @@ export type Database = {
         Returns: Json
       }
       app_ox_message_for_test: {
+        Args: { p_id: string; p_secret: string }
+        Returns: Json
+      }
+      app_ox_prospect: {
         Args: { p_id: string; p_secret: string }
         Returns: Json
       }

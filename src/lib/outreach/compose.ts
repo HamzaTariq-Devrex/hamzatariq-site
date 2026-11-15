@@ -1,120 +1,207 @@
-// Outreach emails. The first email is written by Gemini, grounded ONLY in that business's audit and
-// content/owner/profile.md, then checked (subject under 50 characters, 70–110 words, the business
-// name, no number that isn't in the facts, no links of its own). If the check fails twice, a fixed
-// template built from the same audit is used. Follow-ups are short fixed templates in the same thread.
+// Outreach emails (owner's playbook, 2026-11-16). Plain text only, no tracking, no HTML.
+//
+// Email 1 (day 0): "Hi {Business} team," + who I am + the ONE most important real problem from that
+// prospect's audit, told as what it costs them (no technical words) + one niche proof line only when
+// there's a real match (word for word from content/testimonials.json or a real project) + one CTA +
+// a plain opt-out line + signature. No links at all. 60-90 words. Gemini writes the middle part from
+// the audit; a check rejects any draft with a link, a technical word, more than one question or the
+// wrong length, and asks for a rewrite; after that a fixed template from the same findings is used.
+// Day 3 (40-60 words): one more real finding + the /report link (the only link). Day 7 (25-40
+// words): polite close. Replies to hot replies and the 60-day "not now" check-back are templates too.
 import fs from "node:fs";
 import path from "node:path";
 import { ThinkingLevel } from "@google/genai";
 import { CHAT_MODEL, gemini } from "@/lib/assistant/gemini";
 import { SITE } from "@/lib/site";
-import type { AuditResult, Check } from "@/lib/audit/types";
-import { BUSINESS_TYPES, isBusinessType } from "./osm";
+import { getTestimonial } from "@/lib/testimonials";
+import { PROJECTS } from "@/data/projects";
+import type { AuditResult } from "@/lib/audit/types";
+import { groupOf, nounFor, type NicheGroup } from "./osm-types";
+import { findings, type Finding } from "./problems";
 import type { Prospect, ProspectAudit } from "./db";
 
-export const SIGNATURE = ["Hamza Tariq", "Web developer, Devrex Digital", SITE.url];
-export const FOOTER_LINE = "Hamza Tariq · Devrex Digital · Pakistan";
-/** Postal address for the footer (OUTREACH_POSTAL_ADDRESS). US businesses are only emailed once it is set (CAN-SPAM). */
+export const SIGNATURE = "Hamza Tariq\nFounder, Devrex Digital · hamzatariq.site";
+export const OPT_OUT = "Not interested? Just reply 'no' and I won't email again.";
+/** Postal address (OUTREACH_POSTAL_ADDRESS). US businesses are only emailed once it is set (CAN-SPAM). */
 export const postalAddress = () => process.env.OUTREACH_POSTAL_ADDRESS?.trim() || "";
-const footerLines = () => [FOOTER_LINE, ...(postalAddress() ? [postalAddress()] : [])];
 
 export const reportUrl = (reportId: string) => `${SITE.url}/report/${reportId}`;
-export const unsubscribeUrl = (token: string) => `${SITE.url}/unsubscribe/${token}`;
 
-const words = (s: string) => s.split(/\s+/).filter(Boolean).length;
-const typeLabel = (t: string) => (isBusinessType(t) ? BUSINESS_TYPES[t].label.toLowerCase() : "business");
+export const words = (s: string) => s.split(/\s+/).filter(Boolean).length;
 
-/** The 1–2 most important problems: failed checks first, then warnings, heaviest first. */
-export const topProblems = (audit: AuditResult | null, max = 2): Check[] =>
-  (audit?.checks ?? [])
-    .filter((c) => c.status === "fail" || c.status === "warn")
-    .sort((a, b) => (a.status === b.status ? b.weight - a.weight : a.status === "fail" ? -1 : 1))
-    .slice(0, max);
+// ---------- Proof lines: real reviews (word for word) or real projects only ----------
+
+const PROOF: Partial<Record<NicheGroup, { review?: string; sentence?: string; project?: string; line?: string; who?: string }>> = {
+  jewellery: { review: "nagina-house-of-jewels", sentence: "Their team is amazing. Very accommodating and very professional.", who: "a jewellery brand we built a website for" },
+  clinic: { review: "dr-humza", sentence: "The effort and passion you put into your work truly shows", who: "whose physiotherapy clinic we built a website for" },
+  fashion: { review: "attire", sentence: "The website offers a perfect balance of style and efficiency.", who: "a womenswear label we built a website for" },
+  ecommerce: { review: "auraluxe-bags", sentence: "Thank you for bringing our vision to life.", who: "a handmade bag brand we built a store for" },
+  education: { project: "ascendant-consulting", line: "My team also built the website for Ascendant Consulting, a UK study-abroad consultancy." },
+};
+
+/** One proof line when the niche has a real match, else null. Quotes are checked against the source. */
+export const proofLine = (businessType: string): string | null => {
+  const g = groupOf(businessType);
+  const p = g ? PROOF[g] : undefined;
+  if (!p) return null;
+  if (p.review && p.sentence) {
+    const t = getTestimonial(p.review);
+    if (!t || !t.quote.includes(p.sentence)) return null; // never paraphrase a review
+    // An excerpt that stops mid-review ends with an ellipsis; the words themselves are never changed.
+    return `${t.brand}, ${p.who}, said: "${p.sentence}${/[.!?]$/.test(p.sentence) ? "" : "…"}"`;
+  }
+  if (p.project && p.line && PROJECTS.some((x) => x.slug === p.project)) return p.line;
+  return null;
+};
+
+/** A real related project for the report page (same niche first, else the flagship store). */
+export const relatedProject = (businessType: string) => {
+  const g = groupOf(businessType);
+  const slug =
+    g === "jewellery" ? "nagina-jewels" : g === "fashion" ? "dulhahouse" : g === "ecommerce" ? "auraluxebags" : g === "education" ? "ascendant-consulting" : g === "hotel" ? "the-trekkerz-pakistan" : "dulhahouse";
+  return PROJECTS.find((p) => p.slug === slug) ?? PROJECTS[0];
+};
+
+// ---------- Subjects: 2-4 lowercase words, A/B per niche ----------
+
+const shortName = (name: string, maxWords: number) =>
+  name
+    .toLowerCase()
+    .replace(/['’]/g, "")
+    .replace(/&amp;|&/g, " ")
+    .replace(/\b(ltd|limited|llp|plc|inc|co)\b\.?/g, " ")
+    .replace(/[^\p{L}\p{N} ]+/gu, " ")
+    .trim()
+    .split(/\s+/)
+    .slice(0, maxWords)
+    .join(" ");
+
+const B_SUBJECT: Record<NicheGroup, string> = {
+  jewellery: "online",
+  fashion: "online shop",
+  clinic: "new patients",
+  restaurant: "on phones",
+  salon: "new clients",
+  realestate: "enquiries",
+  gym: "new members",
+  law: "new clients",
+  accounting: "new clients",
+  hotel: "direct bookings",
+  auto: "on google",
+  home: "on google",
+  education: "new students",
+  ecommerce: "online shop",
+};
+
+/** Variant A or B, 50/50 by prospect id (stable). */
+export const variantFor = (prospectId: string): "A" | "B" => (parseInt(prospectId.replace(/-/g, "").slice(-2), 16) % 2 === 0 ? "A" : "B");
+
+export const subjectFor = (p: Pick<Prospect, "name" | "business_type">, variant: "A" | "B") => {
+  const g = groupOf(p.business_type) ?? "ecommerce";
+  const suffix = variant === "A" ? "website" : B_SUBJECT[g];
+  // 2-4 lowercase words in total: as much of the name as fits next to the suffix.
+  const s = `${shortName(p.name, Math.max(1, 4 - words(suffix)))} ${suffix}`.trim();
+  return s.split(/\s+/).slice(0, 4).join(" ");
+};
+
+// ---------- Checks ----------
+
+const BANNED =
+  /\b(h1|h2|heading tags?|meta|metadata|lcp|largest contentful|schema|ssl|tls|https?|core web vitals|seo|search engine optimi[sz]ation|lighthouse|pagespeed|viewport|canonical|sitemap|robots|crawl\w*|index(ing|ed)?|structured data|open graph|javascript|html|css|alt text|markup|plugin|render\w*|server|cms|wordpress|wix|squarespace|score)\b/i;
+const LINK = /https?:\/\/|www\.|\b[a-z0-9-]+\.(com|co\.uk|org\.uk|uk|org|net|io|ae|ca|com\.au|au|site|shop|store|online|biz|info)\b/i;
+
+/** Problems with an email 1 draft (empty = OK). The plain "hamzatariq.site" in the signature is allowed. */
+export const checkEmail1 = (body: string, subject: string, facts: string) => {
+  const problems: string[] = [];
+  const text = body.replaceAll("hamzatariq.site", "");
+  if (LINK.test(text)) problems.push("it contains a link or web address (email 1 must have no links)");
+  const banned = text.match(BANNED);
+  if (banned) problems.push(`it uses the technical word "${banned[0]}"`);
+  // The fixed opt-out line ("Not interested? ...") is not a question to the reader; the CTA is the one question.
+  if ((body.replace(OPT_OUT, "").match(/\?/g) ?? []).length > 1) problems.push("it asks more than one question");
+  const n = words(body);
+  if (n > 90 || n < 60) problems.push(`it is ${n} words (must be 60-90)`);
+  if (/\bhi there\b/i.test(body)) problems.push('it says "Hi there"');
+  const allowed = new Set(facts.match(/\d+(?:[.,]\d+)?/g) ?? []);
+  const nums = (text.match(/\d+(?:[.,]\d+)?/g) ?? []).filter((x) => !allowed.has(x));
+  if (nums.length) problems.push(`it uses numbers that aren't in the facts: ${nums.join(", ")}`);
+  if (subject !== subject.toLowerCase() || words(subject) < 2 || words(subject) > 4) problems.push("the subject must be 2-4 lowercase words");
+  return problems;
+};
 
 let profileCache: string | null = null;
 const ownerProfile = () => {
   if (profileCache !== null) return profileCache;
   try {
-    profileCache = fs.readFileSync(path.join(process.cwd(), "content/owner/profile.md"), "utf8").slice(0, 6000);
+    profileCache = fs.readFileSync(path.join(process.cwd(), "content/owner/profile.md"), "utf8").slice(0, 5000);
   } catch {
     profileCache = "";
   }
   return profileCache;
 };
 
-export type Draft = { subject: string; body: string; source: "gemini" | "template" };
+export type Draft = { subject: string; body: string; variant: "A" | "B" | null; source: "gemini" | "template" };
 
-/** Body + report link + signature: the part that is counted (70–110 words). The footer is added at send time. */
-const assemble = (body: string, reportLink: string) => [body.trim(), `Your free report (no sign-up): ${reportLink}`, SIGNATURE.join("\n")].join("\n\n");
+const lead = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+const ctx = (p: Prospect) => ({ noun: nounFor(p.business_type, p.osm_tags), city: p.city });
+export const prospectFindings = (p: Prospect, audit: AuditResult | null) => findings(audit, ctx(p));
 
-/** Every number in the text must appear in the facts (no invented figures). */
-const unsupportedNumbers = (text: string, facts: string) => {
-  const allowed = new Set(facts.match(/\d+(?:[.,]\d+)?/g) ?? []);
-  // Links (the report id) are added by the code, not written by the model.
-  return (text.replace(/https?:\/\/\S+/g, "").match(/\d+(?:[.,]\d+)?/g) ?? []).filter((n) => !allowed.has(n));
+/** The CTA never promises more fixes than the audit really found. */
+const cta = (f: Finding[]) => {
+  if (f[0]?.id === "no-website") return "Want me to send you a few ideas for a simple website?";
+  const n = f.length;
+  return n >= 3 ? "Want me to send you the 3 quick fixes I found?" : n === 2 ? "Want me to send you the 2 quick fixes I found?" : "Want me to send you the quick fix I found?";
 };
 
-export const validate = (d: { subject: string; body: string }, name: string, facts: string) => {
-  const problems: string[] = [];
-  if (d.subject.length >= 50) problems.push(`subject is ${d.subject.length} characters (must be under 50)`);
-  const n = words(d.body);
-  if (n < 70 || n > 110) problems.push(`email is ${n} words (must be 70-110 including the report line and signature)`);
-  const key = name.toLowerCase().replace(/['’]/g, "");
-  if (!d.body.toLowerCase().replace(/['’]/g, "").includes(key)) problems.push(`the business name "${name}" is missing`);
-  const bad = unsupportedNumbers(`${d.subject} ${d.body}`, facts);
-  if (bad.length) problems.push(`numbers not in the facts: ${bad.join(", ")}`);
-  if (/https?:\/\//.test(d.body.split("Your free report")[0])) problems.push("the body must not contain links");
-  return problems;
+const assemble1 = (p: Prospect, middle: string, f: Finding[], withProof = true) =>
+  [`Hi ${p.name} team,`, middle.trim(), withProof ? proofLine(p.business_type) : null, cta(f), OPT_OUT, SIGNATURE].filter(Boolean).join("\n\n");
+
+/** Template email 1 from the same real findings (also the fallback when Gemini's draft fails the check). */
+const templateMiddle = (p: Prospect, f: Finding[]) => {
+  const first = f[0];
+  const parts = [
+    "I'm Hamza, a web developer.",
+    first.id === "no-website" ? `${lead(first.cost)}.` : `I had a look at ${p.name} online and noticed that ${first.cost}.`,
+  ];
+  return parts.join(" ");
 };
 
-const lower1 = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
-
-/** Deterministic first email from the same audit facts. */
-export const templateFirst = (p: Prospect, audit: AuditResult | null, reportLink: string): Draft => {
-  const problems = topProblems(audit);
-  const body = audit
-    ? [
-        "Hi there,",
-        `I came across ${p.name} and ran a quick SEO check on your website. ${problems.length > 1 ? "Two things stood out" : "One thing stood out"}: ${problems
-          .map((c) => lower1(c.detail).replace(/\.$/, ""))
-          .join("; and ")}.`,
-        `${problems.length > 1 ? "Both are" : "It's"} fixable, and ${problems.length > 1 ? "they affect" : "it affects"} how easily people find ${p.name} on Google. I put the full results in a free report for you.`,
-        "Would a short fix plan be useful? Happy to send one over.",
-      ].join("\n\n")
-    : [
-        "Hi there,",
-        `I found ${p.name} on OpenStreetMap, but I couldn't see a website listed for your ${typeLabel(p.business_type)}.`,
-        "A simple, fast site helps people who search for you on Google find your hours, location and contact details, and get in touch.",
-        "I put a short note together for you in a free report. Would it be useful if I sent a few ideas for a first site?",
-      ].join("\n\n");
-  const subject = (audit ? `Quick SEO check for ${p.name}` : `A website for ${p.name}?`).slice(0, 49);
-  return { subject, body: assemble(body, reportLink), source: "template" };
-};
-
-/** First email: Gemini, checked, with up to one retry; template otherwise. */
-export const draftFirst = async (p: Prospect, auditRow: ProspectAudit | null): Promise<Draft> => {
+export const draftEmail1 = async (p: Prospect, auditRow: ProspectAudit | null): Promise<Draft & { findings: Finding[] }> => {
   const audit = auditRow?.result ?? null;
-  const link = reportUrl(auditRow!.report_id);
-  const problems = topProblems(audit);
-  const facts = [
-    `Business: ${p.name} (${typeLabel(p.business_type)}${p.city ? `, ${p.city}` : ""})`,
-    audit
-      ? `Website: ${audit.finalUrl}\nAudit score: ${audit.score}/100\nProblems found:\n${problems.map((c) => `- ${c.label}: ${c.detail}${c.fix ? ` Fix: ${c.fix}` : ""}`).join("\n")}`
-      : "Website: none listed on OpenStreetMap (say only that you couldn't see one listed; never claim they have no website).",
-  ].join("\n");
-  const fallback = templateFirst(p, audit, link);
+  const f = prospectFindings(p, audit);
+  const variant = variantFor(p.id);
+  const subject = subjectFor(p, variant);
+  if (!f.length) throw new Error("No real finding to write about.");
+  const fixed = assemble1(p, "", f);
+  const budget = { min: Math.max(15, 62 - words(fixed)), max: Math.max(20, 88 - words(fixed)) };
+  const facts = [`${p.name}`, p.city ?? "", ...f.map((x) => x.cost), String(Math.min(3, f.length))].join("\n");
+  // Template candidates from the same findings, in order of preference. Email 1 names one problem
+  // only, so a short one is padded with what Hamza does (never a second problem), and a long one
+  // drops the optional proof line. The first candidate that passes the check is the fallback.
+  const pad = " I help small businesses turn their websites into a steady source of enquiries.";
+  const fallback = [
+    assemble1(p, templateMiddle(p, f), f),
+    assemble1(p, templateMiddle(p, f) + pad, f),
+    assemble1(p, templateMiddle(p, f), f, false),
+    assemble1(p, templateMiddle(p, f) + pad, f, false),
+  ].find((b) => !checkEmail1(b, subject, facts).length);
+  const noDraft = () => {
+    if (!fallback) throw new Error("Email 1 could not meet the rules (60-90 words, no links, no technical words).");
+    return { subject, body: fallback, variant, source: "template" as const, findings: f };
+  };
   const ai = gemini();
-  if (!ai) return fallback;
+  if (!ai) return noDraft();
 
-  const system = `You write one short, personal cold email from Hamza Tariq, a web developer, to a small business he found on OpenStreetMap.
-Use ONLY these facts and Hamza's profile below. Never invent results, clients, numbers, prices, guarantees or anything about the business beyond the facts.
-Rules:
-- Write the subject (under 50 characters, no clickbait, no emojis) and the body only. Do NOT add a signature, links or the report line: they are added after your text.
-- Body: 50 to 80 words, plain friendly English, start with "Hi there,". Mention the business by its exact name "${p.name}". Explain 1 or 2 of the problems in plain words a shop owner understands, and why it matters for being found on Google.
-- Say you put the full results in a free report for them. End with one soft question: if they have a website, whether a short fix plan would be useful; if no website is listed, whether a few ideas for a first site would be useful. No pressure, no "I hope this finds you well".
-- Don't use any number unless it appears in the facts. Don't mention AI, OpenStreetMap tags or scores out of context.
-Answer as JSON: {"subject": "...", "body": "..."}
+  const system = `You write the middle of a short cold email from Hamza Tariq, founder of Devrex Digital, a small web studio, to a small business.
+Write ONLY the middle part: ${budget.min}-${budget.max} words, plain friendly English, 1 to 3 sentences.
+- Start by saying who Hamza is in a few words (a web developer who helps small businesses).
+- Then explain this ONE problem from their website, in plain words, as what it costs them: "${f[0].cost}".
+- You may rephrase it, but keep its meaning and any number exactly as given. Do not add other problems.
+- No greeting, no sign-off, no question, no links, no web addresses, no technical words (no SEO, H1, meta, schema, SSL, speed scores, etc.).
+- Never invent anything: no results, clients, prices, guarantees or claims about their business beyond the facts.
+Answer as JSON: {"middle": "..."}
 
-HAMZA'S PROFILE
+HAMZA'S PROFILE (background only)
 ${ownerProfile()}`;
 
   let feedback = "";
@@ -122,47 +209,87 @@ ${ownerProfile()}`;
     try {
       const res = await ai.models.generateContent({
         model: CHAT_MODEL,
-        contents: [{ role: "user", parts: [{ text: `FACTS\n${facts}${feedback}` }] }],
+        contents: [{ role: "user", parts: [{ text: `Business: ${p.name} (${ctx(p).noun}${p.city ? `, ${p.city}` : ""})${feedback}` }] }],
         config: {
           systemInstruction: system,
-          temperature: 0.7,
-          maxOutputTokens: 600,
+          temperature: 0.6,
+          maxOutputTokens: 400,
           responseMimeType: "application/json",
           thinkingConfig: { thinkingLevel: ThinkingLevel.MINIMAL },
           abortSignal: AbortSignal.timeout(25000),
         },
       });
-      const out = JSON.parse(res.text ?? "{}") as { subject?: string; body?: string };
-      if (!out.subject || !out.body) throw new Error("empty");
-      const draft = { subject: out.subject.trim().replace(/^subject:\s*/i, ""), body: assemble(out.body, link) };
-      const problemsFound = validate(draft, p.name, `${facts}\n${ownerProfile()}`);
-      if (!problemsFound.length) return { ...draft, source: "gemini" };
-      feedback = `\n\nYour last draft broke these rules, fix them: ${problemsFound.join("; ")}.`;
+      const out = JSON.parse(res.text ?? "{}") as { middle?: string };
+      if (!out.middle) throw new Error("empty");
+      const body = assemble1(p, out.middle, f);
+      const problems = checkEmail1(body, subject, facts);
+      if (!problems.length) return { subject, body, variant, source: "gemini", findings: f };
+      feedback = `\n\nYour last draft was rejected because ${problems.join("; ")}. Rewrite it.`;
     } catch {
       break;
     }
   }
-  return fallback;
+  // Never returns a draft that fails the check: the caller skips the prospect instead.
+  return noDraft();
 };
 
-/** Follow-ups (same thread, "Re:" subject): short, fixed, factual. */
-export const draftFollowUp = (p: Prospect, step: 1 | 2, firstSubject: string, reportLink: string, problem: Check | null): Draft => {
-  const subject = /^re:/i.test(firstSubject) ? firstSubject : `Re: ${firstSubject}`;
-  const body =
-    step === 1
-      ? [
-          "Hi again,",
-          `Just checking you saw my note about ${p.name}'s website. The free report is here if it's useful: ${reportLink}`,
-          "If it's not a priority right now, no problem at all.",
-          "Hamza",
-        ].join("\n\n")
-      : [
-          "Hi,",
-          `Last note from me. If you'd ever like help with ${problem ? lower1(problem.label) : "the website"} for ${p.name}, just reply to this email and I'll take a look.`,
-          "Thanks,\nHamza",
-        ].join("\n\n");
-  return { subject, body, source: "template" };
+/** Day 3 (40-60 words): one more real finding in plain words + the report link (the only link). */
+export const draftDay3 = (p: Prospect, firstSubject: string, reportLink: string, f: Finding[]): Draft => {
+  const next = f[1];
+  const body = [
+    `Hi ${p.name} team,`,
+    next ? `One more thing I noticed: ${next.cost}.` : `Following up on my note about ${p.name}: ${f[0]?.cost ?? "your website could bring you more enquiries"}.`,
+    `I put what I found in a short, plain-English report for you here: ${reportLink}`,
+    OPT_OUT,
+    "Hamza",
+  ].join("\n\n");
+  return { subject: reSubject(firstSubject), body, variant: null, source: "template" };
 };
 
-/** Adds the footer (business line, optional postal address, unsubscribe link). Emails are plain text only. */
-export const withFooter = (body: string, unsubscribeLink: string) => `${body}\n\n--\n${footerLines().join("\n")}\nUnsubscribe: ${unsubscribeLink}`;
+/** Day 7 (25-40 words): polite close. */
+export const draftDay7 = (p: Prospect, firstSubject: string): Draft => ({
+  subject: reSubject(firstSubject),
+  body: [`Hi ${p.name} team,`, "I haven't heard back, so I'll assume now isn't the right time and stop emailing. Should I close your file?", "Thanks for reading either way.", "Hamza"].join("\n\n"),
+  variant: null,
+  source: "template",
+});
+
+/** Reply to an interested reply or a question: Hamza edits and approves it. Report link + WhatsApp. */
+export const draftHotReply = (p: Prospect, firstSubject: string, reportLink: string | null): Draft => ({
+  subject: reSubject(firstSubject),
+  body: [
+    `Hi ${p.name} team,`,
+    "Thanks for getting back to me.",
+    reportLink ? `Here's the short report with what I found and how to fix it: ${reportLink}` : "",
+    `If it's easier to talk it through, message me on WhatsApp: ${SITE.whatsappDisplay}`,
+    SIGNATURE,
+  ]
+    .filter(Boolean)
+    .join("\n\n"),
+  variant: null,
+  source: "template",
+});
+
+/** "Not now" replies: one check-back 60 days later. */
+export const draftCheckBack = (p: Prospect, firstSubject: string, f: Finding[]): Draft => ({
+  subject: reSubject(firstSubject),
+  body: [
+    `Hi ${p.name} team,`,
+    "You mentioned the timing wasn't right when I wrote a while ago, so I'm checking back once.",
+    cta(f),
+    OPT_OUT,
+    "Hamza",
+  ].join("\n\n"),
+  variant: null,
+  source: "template",
+});
+
+const reSubject = (s: string) => (/^re:/i.test(s) ? s : `Re: ${s}`);
+
+/** WhatsApp / Instagram message (2-3 lines): one real problem, one question, no links. */
+export const manualMessage = (p: Pick<Prospect, "name" | "business_type" | "osm_tags" | "city">, audit: AuditResult | null) => {
+  const f = findings(audit, { noun: nounFor(p.business_type, p.osm_tags ?? {}), city: p.city });
+  if (!f.length) return `Hi ${p.name} team, I'm Hamza, a web developer who helps small businesses get more enquiries online. Would a few ideas for your website be useful?`;
+  const problem = f[0].id === "no-website" ? `${lead(f[0].cost)}.` : `I had a look at your website and noticed ${f[0].cost}.`;
+  return `Hi ${p.name} team, I'm Hamza, a web developer.\n${problem}\n${cta(f)}`;
+};

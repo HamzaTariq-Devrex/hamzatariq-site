@@ -3,7 +3,6 @@
 import { randomUUID } from "node:crypto";
 import nodemailer from "nodemailer";
 import { ImapFlow, type MessageStructureObject } from "imapflow";
-import { unsubscribeUrl, withFooter } from "./compose";
 
 const env = () => {
   const host = process.env.OUTREACH_SMTP_HOST;
@@ -25,9 +24,8 @@ export const outreachAddress = () => env().user.toLowerCase();
 export type Outgoing = {
   to: string;
   subject: string;
-  /** Body without the footer; the footer and unsubscribe link are added here. */
+  /** The complete plain-text email (signature and opt-out line included). */
   body: string;
-  unsubscribeToken: string;
   /** Message-ID of the first email, for follow-ups in the same thread. */
   threadId?: string | null;
 };
@@ -37,19 +35,17 @@ export const sendOutreach = async (m: Outgoing) => {
   const e = env();
   const transport = nodemailer.createTransport({ host: e.host, port: e.port, secure: e.port === 465, auth: { user: e.user, pass: e.pass } });
   const messageId = `<${randomUUID()}@hamzatariq.site>`;
-  const unsub = unsubscribeUrl(m.unsubscribeToken);
   try {
     await transport.sendMail({
       from: e.from,
       to: m.to,
       subject: m.subject,
-      // Plain text only (owner, 2026-11-16): reads like a personal email and lands in Primary, not Promotions.
-      text: withFooter(m.body, unsub),
+      // Plain text only: no HTML, images, tracking pixel or open tracking (owner, 2026-11-16).
+      text: m.body,
       messageId,
       ...(m.threadId ? { inReplyTo: m.threadId, references: [m.threadId] } : {}),
-      // No List-Unsubscribe headers (owner, 2026-11-16): under 30 emails a day they aren't required,
-      // and they make Gmail file the email as automated (Updates). The one-click unsubscribe link
-      // stays in the footer of every email, and "unsubscribe" replies are still handled over IMAP.
+      // No List-Unsubscribe headers (owner, 2026-11-16): under 30 emails a day they aren't required.
+      // Every email ends with "Not interested? Just reply 'no'", and those replies are handled over IMAP.
     });
   } finally {
     transport.close();

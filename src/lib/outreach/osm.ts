@@ -116,7 +116,24 @@ export const emailOf = (tags: Record<string, string>) => {
   const e = firstTag(tags, ["email", "contact:email"])?.replace(/^mailto:/i, "").toLowerCase() ?? null;
   return e && /^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(e) ? e : null;
 };
-export const phoneOf = (tags: Record<string, string>) => firstTag(tags, ["phone", "contact:phone", "contact:mobile", "mobile"]);
+export const phoneOf = (tags: Record<string, string>) => firstTag(tags, ["phone", "contact:phone", "contact:mobile", "mobile", "contact:whatsapp"]);
+
+/** Instagram profile URL from an OSM tag or a link, or null. */
+export const instagramOf = (tags: Record<string, string>) => {
+  const raw = firstTag(tags, ["contact:instagram", "instagram"]);
+  return raw ? normalizeInstagram(raw) : null;
+};
+export const normalizeInstagram = (raw: string) => {
+  const handle = raw.trim().replace(/^@/, "").replace(/^https?:\/\/(www\.)?instagram\.com\//i, "").split(/[/?#]/)[0];
+  return /^[a-z0-9._]{2,30}$/i.test(handle) && !["p", "reel", "explore", "accounts", "stories"].includes(handle.toLowerCase()) ? `https://www.instagram.com/${handle}/` : null;
+};
+
+/** Chains, franchises, big brands, government, schools and hospitals are never prospects. */
+export const isBigOrganisation = (tags: Record<string, string>, name: string) =>
+  !!(tags.brand || tags["brand:wikidata"] || tags["operator:wikidata"] || tags["brand:wikipedia"]) ||
+  ["government", "public", "national", "regional", "municipal"].includes((tags["operator:type"] ?? "").toLowerCase()) ||
+  ["hospital", "school", "college", "university", "kindergarten"].includes(tags.amenity ?? "") ||
+  /\b(nhs|council|borough|government|ministry|university|college|hospital|primary school|secondary school|academy trust|police)\b/i.test(name);
 
 export const domainOf = (url: string | null) => {
   if (!url) return null;
@@ -134,9 +151,14 @@ export const discover = async (search: Search, budget: number) => {
   const place = await findCity(search.city, search.country);
   const timezone = timezoneFor(search.country, place.lat, place.lon);
   const businesses = await findBusinesses(search.business_type, place);
+  // Chains: the same name three or more times in one city.
+  const key = (n: string) => n.toLowerCase().trim();
+  const nameCount = new Map<string, number>();
+  for (const b of businesses) nameCount.set(key(b.name), (nameCount.get(key(b.name)) ?? 0) + 1);
   let added = 0;
   for (const b of businesses) {
     if (added >= budget) break;
+    if (isBigOrganisation(b.tags, b.name) || (nameCount.get(key(b.name)) ?? 0) >= 3) continue;
     const website = websiteOf(b.tags);
     const id = await ox.addProspect({
       search_id: search.id,
@@ -150,6 +172,7 @@ export const discover = async (search: Search, budget: number) => {
       domain: domainOf(website),
       phone: phoneOf(b.tags),
       email: emailOf(b.tags),
+      instagram: instagramOf(b.tags),
       osm_tags: b.tags,
     });
     if (id) added++;

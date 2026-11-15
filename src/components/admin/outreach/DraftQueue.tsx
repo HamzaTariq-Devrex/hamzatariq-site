@@ -10,10 +10,11 @@ export type Draft = {
   subject: string;
   body: string;
   created_at: string;
+  variant?: string | null;
   prospect: { id: string; name: string; email: string | null; city: string | null; business_type: string; audit_score: number | null; lead_score: number | null } | null;
 };
 
-const STEP = ["First email", "Follow-up 1", "Follow-up 2"];
+const STEP = ["Email 1", "Day 3 follow-up", "Day 7 last email", "Reply to their reply", "60-day check-back"];
 const words = (s: string) => s.split(/\s+/).filter(Boolean).length;
 
 const DraftCard = ({ d, onDone }: { d: Draft; onDone: (msg: { error: boolean; text: string } | null) => void }) => {
@@ -37,6 +38,7 @@ const DraftCard = ({ d, onDone }: { d: Draft; onDone: (msg: { error: boolean; te
           <span className="adm-muted">
             {" "}
             · {d.prospect?.email} · {STEP[d.step ?? 0]}
+            {d.variant ? ` · subject ${d.variant}` : ""}
             {d.prospect?.audit_score != null ? ` · audit ${d.prospect.audit_score}` : ""}
             {d.prospect?.lead_score != null ? ` · lead ${d.prospect.lead_score}` : ""}
           </span>
@@ -59,7 +61,7 @@ const DraftCard = ({ d, onDone }: { d: Draft; onDone: (msg: { error: boolean; te
           ) : (
             <pre className="ox-email">{d.body}</pre>
           )}
-          <p className="adm-muted">Footer added when sent: &quot;Hamza Tariq · Devrex Digital · Pakistan&quot; and a one-click unsubscribe link.</p>
+          <p className="adm-muted">Sent exactly as shown, as plain text. {words(body)} words.</p>
           <div className="adm-actions">
             {editing ? (
               <button type="button" className="adm-btn is-primary" disabled={pending} onClick={() => run(() => saveDraft(d.id, subject, body), () => setEditing(false))}>
@@ -113,14 +115,14 @@ const DraftQueue = ({ drafts, approveFirst }: { drafts: Draft[]; approveFirst: b
             className="adm-btn is-primary"
             disabled={pending}
             onClick={() =>
-              window.confirm(`Approve all ${drafts.length} emails? They go out over the next days within the daily limit, 9:00–17:00 in each business's time zone.`) &&
+              window.confirm(`Approve the ${drafts.length} emails on this page? They go out over the next days within the daily limit, 9:00–17:00 on weekdays in each business's time zone.`) &&
               start(async () => {
                 const res = await approveDrafts(drafts.map((d) => d.id));
                 done(res.error ? { error: true, text: res.error } : { error: false, text: res.info ?? "Approved." });
               })
             }
           >
-            Approve all {drafts.length}
+            Approve all on this page ({drafts.length})
           </button>
         )}
       </div>

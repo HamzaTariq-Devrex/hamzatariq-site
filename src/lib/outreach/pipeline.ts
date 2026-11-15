@@ -9,7 +9,8 @@ import { sendOwnerAlert } from "@/lib/leads/email";
 import { ox, type Prospect, type State } from "./db";
 import { discover } from "./osm";
 import { qualify } from "./qualify";
-import { draftFirst, draftFollowUp, postalAddress, reportUrl, topProblems } from "./compose";
+import { draftCheckBack, draftDay3, draftDay7, draftEmail1, draftHotReply, postalAddress, prospectFindings, reportUrl, subjectFor } from "./compose";
+import { classifyReply, type ReplyClass } from "./classify";
 import { readInbox, sendOutreach } from "./mail";
 
 /** Discovery is separate from sending: up to 150 new businesses a day across all saved searches. */
@@ -33,7 +34,8 @@ export const inSendingWindow = (timezone: string, now = new Date()) => {
   return !["Sat", "Sun"].includes(day) && hour >= 9 && hour < 17;
 };
 
-const randomGapMs = () => (3 + Math.random() * 5) * 60_000;
+/** Random gap between two emails: 4 to 11 minutes. */
+const randomGapMs = () => (4 + Math.random() * 7) * 60_000;
 
 /** Searches in rotation order: never run first, then the one that ran longest ago. */
 const rotation = (state: State) =>
@@ -65,13 +67,16 @@ export const discoverAll = async (onlySearch?: string, deadline = Date.now() + 5
   }
   return results;
 };
-/** Pauses outreach on more than 3% bounces or any complaint in the last 7 days, and emails Hamza once. */
+/**
+ * Auto-pause: more than 3% bounces in the last 50 emails, or any spam complaint (both counted since
+ * outreach was last resumed). Emails Hamza why.
+ */
 const safetyCheck = async (state: State) => {
   if (state.settings.paused) return state.settings.pause_reason ?? "paused";
-  const rate = state.sent_7d ? state.bounces_7d / state.sent_7d : 0;
+  const rate = state.last50_sent ? state.last50_bounces / state.last50_sent : 0;
   let reason: string | null = null;
-  if (state.complaints_7d > 0) reason = `Spam complaint in the last 7 days (${state.complaints_7d}).`;
-  else if (state.bounces_7d > 0 && rate > 0.03) reason = `Bounce rate ${(rate * 100).toFixed(1)}% in the last 7 days (${state.bounces_7d} of ${state.sent_7d}).`;
+  if (state.complaints_7d > 0) reason = `Spam complaint received (${state.complaints_7d}).`;
+  else if (state.last50_bounces > 0 && rate > 0.03) reason = `Bounce rate ${(rate * 100).toFixed(1)}% over the last ${state.last50_sent} emails (${state.last50_bounces} bounced).`;
   if (!reason) return null;
   await ox.set({ paused: true, pause_reason: `Auto-paused: ${reason}` });
   await sendOwnerAlert("Outreach auto-paused", [`Outreach was paused automatically. ${reason}`, `Check the list and resume in ${SITE.url}/admin/prospects when it's fixed.`]).catch((e) =>
@@ -80,15 +85,15 @@ const safetyCheck = async (state: State) => {
   return reason;
 };
 
-/** Creates a lead from a reply and tells Hamza. */
-const replyToLead = async (p: { id: string; name: string; email: string }, text: string, subject: string) => {
+/** Creates a lead from a hot reply, drafts Hamza's answer (approve-first) and emails him the thread. */
+const handleHotReply = async (p: Prospect, cls: ReplyClass, text: string, subject: string) => {
   const db = rpcClient();
   let leadId: string | null = null;
   if (db) {
     const { data, error } = await db.rpc("app_create_lead", {
       p_secret: serverSecret(),
       p_name: p.name.slice(0, 120),
-      p_email: p.email,
+      p_email: p.email!,
       p_project_type: "",
       p_budget: "",
       p_message: (text || `(Reply: ${subject})`).slice(0, 4000),
@@ -100,45 +105,84 @@ const replyToLead = async (p: { id: string; name: string; email: string }, text:
     else leadId = data;
   }
   if (leadId) await ox.updateProspect(p.id, { lead_id: leadId });
+  const thread = await ox.thread(p.id);
+  const first = thread.find((m) => m.direction === "out" && m.step === 0);
+  const audit = await ox.latestAudit(p.id);
+  const d = draftHotReply(p, first?.subject ?? subject, audit?.report_id && audit.result ? reportUrl(audit.report_id) : null);
+  await ox.addMessage({ prospect_id: p.id, step: 3, status: "draft", subject: d.subject, body: d.body, in_reply_to: first?.message_id ?? null });
+  const transcript = thread.map((m) => `--- ${m.direction === "out" ? "You" : p.name} (${m.kind}, ${m.sent_at ?? m.created_at})\n${m.body}`).join("\n\n");
   await sendOwnerAlert(
-    `Outreach reply: ${p.name}`,
-    [`${p.name} (${p.email}) replied to your outreach email.`, text || `Subject: ${subject}`, `Lead: ${SITE.url}/admin/leads${leadId ? `?lead=${leadId}` : ""}`, `Prospect: ${SITE.url}/admin/prospects?p=${p.id}`],
-    p.email,
+    `Hot reply (${cls === "question" ? "question" : "interested"}): ${p.name}`,
+    [
+      `${p.name} (${p.email}) replied to your outreach email. A reply draft with the report link and your WhatsApp is waiting for approval.`,
+      `Approve it: ${SITE.url}/admin/prospects?tab=hot`,
+      `Lead: ${SITE.url}/admin/leads${leadId ? `?lead=${leadId}` : ""}`,
+      `Thread:\n\n${transcript}`,
+    ],
+    p.email!,
   ).catch((e) => console.error("outreach alert:", (e as Error).message));
 };
 
-/** Hourly: replies, bounces, unsubscribes and complaints stop the sequence at once. */
+/**
+ * Inbox check (every tick): bounces, complaints and unsubscribe requests stop and suppress at once;
+ * replies are classified: interested/question → hot (lead + reply draft + email to Hamza),
+ * no → suppressed forever, not now → one check-back in 60 days, out of office → sequence +7 days.
+ */
 export const checkInbox = async (state: State) => {
   const since = new Date(Math.min(Date.now() - DAY, state.settings.started_at ? Date.parse(state.settings.started_at) : Date.now()));
   const { messages, maxUid } = await readInbox(state.settings.last_imap_uid, since);
   const sent = await ox.sentIds();
   const byId = new Map(sent.map((s) => [s.message_id, s]));
   const byEmail = new Map(sent.map((s) => [s.email, s]));
-  const summary = { checked: messages.length, replies: 0, bounces: 0, unsubscribes: 0, complaints: 0 };
+  const summary: Record<string, number> = { checked: messages.length };
+  const count = (k: string) => (summary[k] = (summary[k] ?? 0) + 1);
   for (const m of messages) {
     const match = m.refs.map((r) => byId.get(r)).find(Boolean) ?? (m.failed ? byEmail.get(m.failed) : undefined) ?? byEmail.get(m.from);
     if (!match || m.kind === "other") continue;
     const log = (kind: string, body: string) =>
       ox.addMessage({ prospect_id: match.prospect_id, direction: "in", kind, status: "received", subject: m.subject.slice(0, 200) || "(no subject)", body: body || "(empty)", message_id: null });
     if (m.kind === "bounce") {
-      summary.bounces++;
+      count("bounces");
       await log("bounce", `Bounced: ${m.failed ?? match.email}`);
       await ox.stop(match.email, "bounced", match.prospect_id);
-    } else if (m.kind === "complaint") {
-      summary.complaints++;
+      await ox.updateProspect(match.prospect_id, { reply_class: "bounce" });
+      continue;
+    }
+    if (m.kind === "complaint") {
+      count("complaints");
       await log("complaint", "Spam complaint (feedback report).");
       await ox.stop(match.email, "complaint", match.prospect_id);
-    } else if (m.kind === "unsubscribe") {
-      summary.unsubscribes++;
+      continue;
+    }
+    if (m.kind === "unsubscribe") {
+      count("no");
       await log("unsubscribe", "Asked to unsubscribe by email.");
       await ox.stop(match.email, "unsubscribed", match.prospect_id);
-    } else if (m.kind === "auto-reply") {
-      await log("auto-reply", m.text || "Automatic reply (out of office). The sequence continues.");
-    } else {
-      summary.replies++;
-      await log("reply", m.text);
+      await ox.updateProspect(match.prospect_id, { reply_class: "no" });
+      continue;
+    }
+    const cls: ReplyClass = m.kind === "auto-reply" ? "out_of_office" : await classifyReply(m.text, m.subject);
+    count(cls);
+    if (cls === "out_of_office") {
+      await log("auto-reply", m.text || "Automatic reply (out of office).");
+      await ox.updateProspect(match.prospect_id, { reply_class: "out_of_office", snooze_until: new Date(Date.now() + 7 * DAY).toISOString() });
+      continue;
+    }
+    await log("reply", m.text);
+    if (cls === "no") {
+      await ox.stop(match.email, "unsubscribed", match.prospect_id);
+      await ox.updateProspect(match.prospect_id, { reply_class: "no" });
+    } else if (cls === "not_now") {
       await ox.stop(match.email, "replied", match.prospect_id);
-      await replyToLead({ id: match.prospect_id, name: match.name, email: match.email }, m.text, m.subject);
+      await ox.updateProspect(match.prospect_id, { reply_class: "not_now", next_followup_at: new Date(Date.now() + 60 * DAY).toISOString() });
+    } else if (cls === "bounce") {
+      await ox.stop(match.email, "bounced", match.prospect_id);
+      await ox.updateProspect(match.prospect_id, { reply_class: "bounce" });
+    } else {
+      await ox.stop(match.email, "replied", match.prospect_id);
+      await ox.updateProspect(match.prospect_id, { reply_class: cls });
+      const p = await ox.prospect(match.prospect_id);
+      if (p) await handleHotReply(p, cls, m.text, m.subject);
     }
   }
   await ox.set({ last_imap_at: new Date().toISOString(), last_imap_uid: maxUid || state.settings.last_imap_uid });
@@ -152,20 +196,26 @@ export const sendNext = async (state: State, now = new Date()) => {
   const cap = dailyCap(state.settings.started_at, now.getTime());
   if (state.sent_24h >= cap) return `daily cap reached (${state.sent_24h}/${cap})`;
   const queue = await ox.approved(100);
-  // US businesses wait until a postal address is in the footer (CAN-SPAM).
+  // US businesses wait until a postal address is set (CAN-SPAM).
   const usAllowed = !!postalAddress();
-  const next = queue.find((q) => q.prospect.email && (usAllowed || q.prospect.country !== "US") && inSendingWindow(q.prospect.timezone, now) && (q.message.step === 0 || q.thread?.message_id));
+  const next = queue.find(
+    (q) => q.prospect.email && (usAllowed || q.prospect.country !== "US") && inSendingWindow(q.prospect.timezone, now) && (q.message.step === 0 || q.thread?.message_id),
+  );
   if (!next) return queue.length ? "no recipient inside 9:00-17:00 Mon-Fri right now" : "nothing approved";
   const p = next.prospect;
-  if (await ox.isSuppressed(p.email!, p.id)) {
-    await ox.updateMessage(next.message.id, { status: "cancelled", error: "Suppressed or already contacted" });
-    return "skipped a suppressed address";
+  // Suppression list before every send; never two businesses at the same email domain.
+  const blocked =
+    (await ox.isSuppressed(p.email!, p.id)) ? "Suppressed or already contacted" : next.message.step === 0 && (await ox.domainEmailed(p.email!, p.id)) ? "Someone at this email domain was already emailed" : null;
+  if (blocked) {
+    await ox.updateMessage(next.message.id, { status: "cancelled", error: blocked });
+    return `skipped: ${blocked}`;
   }
   try {
-    const messageId = await sendOutreach({ to: p.email!, subject: next.message.subject, body: next.message.body, unsubscribeToken: p.unsubscribe_token, threadId: next.thread?.message_id });
+    const messageId = await sendOutreach({ to: p.email!, subject: next.message.subject, body: next.message.body, threadId: next.message.step === 0 ? null : next.thread?.message_id });
     const at = now.toISOString();
-    await ox.updateMessage(next.message.id, { status: "sent", message_id: messageId, sent_at: at, in_reply_to: next.thread?.message_id ?? null });
-    await ox.updateProspect(p.id, { status: "emailed", last_contacted_at: at });
+    await ox.updateMessage(next.message.id, { status: "sent", message_id: messageId, sent_at: at, in_reply_to: next.message.step === 0 ? null : (next.thread?.message_id ?? null) });
+    if ((next.message.step ?? 0) <= 2) await ox.updateProspect(p.id, { status: "emailed", last_contacted_at: at });
+    else await ox.updateProspect(p.id, { last_contacted_at: at });
     await ox.set({ next_send_at: new Date(now.getTime() + randomGapMs()).toISOString(), ...(state.settings.started_at ? {} : { started_at: at }) });
     return `sent step ${next.message.step} to ${p.name}`;
   } catch (e) {
@@ -175,28 +225,46 @@ export const sendNext = async (state: State, now = new Date()) => {
   }
 };
 
-/** First-email drafts for audited prospects (approved straight away when approve-first is off). */
+const status = (state: State) => (state.settings.approve_first ? { status: "draft", approved_at: null } : { status: "approved", approved_at: new Date().toISOString() });
+
+/** Email 1 drafts for audited prospects, highest lead score first (approve-first keeps them as drafts). */
 export const draftNew = async (state: State, limit: number, onlyProspect?: string) => {
   const list = onlyProspect ? (await ox.toDraft(500)).filter((p) => p.id === onlyProspect) : await ox.toDraft(limit);
+  let made = 0;
   for (const p of list) {
     if (!p.audit) continue;
-    const d = await draftFirst(p, p.audit);
-    const approved = !state.settings.approve_first;
-    await ox.addMessage({ prospect_id: p.id, step: 0, status: approved ? "approved" : "draft", approved_at: approved ? new Date().toISOString() : null, subject: d.subject, body: d.body });
+    try {
+      const d = await draftEmail1(p, p.audit);
+      await ox.addMessage({ prospect_id: p.id, step: 0, ...status(state), subject: d.subject, body: d.body, variant: d.variant });
+      made++;
+    } catch (e) {
+      await ox.updateProspect(p.id, { status: "skipped", skip_reason: (e as Error).message.slice(0, 200) });
+    }
   }
-  return list.length;
+  return made;
 };
 
-/** Follow-up 1 after 4 days and follow-up 2 after 8 days, in the same thread; then the sequence ends. */
+/** Day 3 and day 7 in the same thread; then the sequence ends. */
 export const draftFollowUps = async (state: State, limit: number) => {
   const due = await ox.followups(limit);
   for (const f of due) {
     const step = f.next_step as 1 | 2;
-    const audit = f.audit;
-    const link = audit ? reportUrl(audit.report_id) : SITE.url;
-    const d = draftFollowUp(f.prospect, step, f.first.subject, link, topProblems(audit?.result ?? null, 1)[0] ?? null);
-    const approved = !state.settings.approve_first;
-    await ox.addMessage({ prospect_id: f.prospect.id, step, status: approved ? "approved" : "draft", approved_at: approved ? new Date().toISOString() : null, subject: d.subject, body: d.body, in_reply_to: f.first.message_id });
+    const d =
+      step === 1
+        ? draftDay3(f.prospect, f.first.subject, f.audit ? reportUrl(f.audit.report_id) : SITE.url, prospectFindings(f.prospect, f.audit?.result ?? null))
+        : draftDay7(f.prospect, f.first.subject);
+    await ox.addMessage({ prospect_id: f.prospect.id, step, ...status(state), subject: d.subject, body: d.body, in_reply_to: f.first.message_id });
+  }
+  return due.length;
+};
+
+/** "Not now" replies: one check-back 60 days later. */
+export const draftCheckBacks = async (state: State, limit: number) => {
+  const due = await ox.checkbacks(limit);
+  for (const c of due) {
+    const audit = await ox.latestAudit(c.prospect.id);
+    const d = draftCheckBack(c.prospect, c.first?.subject ?? subjectFor(c.prospect, "A"), prospectFindings(c.prospect, audit?.result ?? null));
+    await ox.addMessage({ prospect_id: c.prospect.id, step: 4, ...status(state), subject: d.subject, body: d.body, in_reply_to: c.first?.message_id ?? null });
   }
   return due.length;
 };
@@ -204,14 +272,15 @@ export const draftFollowUps = async (state: State, limit: number) => {
 export const PHASES = ["imap", "send", "draft", "audit"] as const;
 export type Phase = (typeof PHASES)[number];
 
-/** One scheduler tick. `phases` limits what runs (local tests use it to never send). */
+/** One scheduler tick. `phases` limits what runs (local tests leave out "send"). */
 export const tick = async (phases: Phase[] = [...PHASES], budgetMs = 50_000) => {
   const start = Date.now();
   const left = () => budgetMs - (Date.now() - start);
   const report: Record<string, unknown> = {};
   let state = await ox.state();
 
-  if (phases.includes("imap") && (!state.settings.last_imap_at || Date.now() - Date.parse(state.settings.last_imap_at) > 55 * 60_000)) {
+  // Replies, bounces and "no"s are handled before anything is sent.
+  if (phases.includes("imap")) {
     try {
       report.inbox = await checkInbox(state);
     } catch (e) {
@@ -244,6 +313,7 @@ export const tick = async (phases: Phase[] = [...PHASES], budgetMs = 50_000) => 
   if (phases.includes("draft") && left() > 12_000) {
     report.drafts = await draftNew(state, left() > 30_000 ? 3 : 1);
     if (left() > 8_000) report.followups = await draftFollowUps(state, 5);
+    if (left() > 5_000) report.checkbacks = await draftCheckBacks(state, 5);
   }
   report.ms = Date.now() - start;
   return report;

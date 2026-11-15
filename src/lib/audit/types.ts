@@ -32,6 +32,8 @@ export type PageSpeed = {
   lab: Metric[];
   /** Real-user Core Web Vitals from the Chrome UX Report, when Google has enough data. */
   field: Metric[];
+  /** Lighthouse's final mobile screenshot (data URI), outreach audits only. */
+  screenshot?: string;
 };
 
 export type AuditResult = {
@@ -43,6 +45,15 @@ export type AuditResult = {
   pagespeed: PageSpeed | null;
   /** Why PageSpeed is missing, when it is. */
   pagespeedNote?: string;
+  /** Outreach only: what the home page offers visitors (set by src/lib/outreach/qualify.ts). */
+  extras?: AuditExtras;
+};
+
+export type AuditExtras = {
+  /** A call, WhatsApp, email, contact-page or booking link on the home page. */
+  hasContactButton: boolean;
+  hasWhatsapp: boolean;
+  instagram: string | null;
 };
 
 export type AuditResponse = { id: string | null; cached: boolean; result: AuditResult };

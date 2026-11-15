@@ -49,6 +49,10 @@ export type Prospect = {
   audit_score: number | null;
   lead_score: number | null;
   unsubscribe_token: string;
+  instagram?: string | null;
+  reply_class?: string | null;
+  snooze_until?: string | null;
+  next_followup_at?: string | null;
 };
 
 export type ProspectAudit = { id: string; report_id: string; url: string; final_url: string | null; score: number | null; result: AuditResult | null; expires_at: string };
@@ -63,6 +67,8 @@ export type Message = {
   message_id: string | null;
 };
 
+export type ThreadItem = { direction: string; kind: string; step: number | null; status: string; subject: string; body: string; message_id: string | null; sent_at: string | null; created_at: string };
+
 export type State = {
   settings: Settings;
   searches: Search[];
@@ -70,6 +76,9 @@ export type State = {
   sent_7d: number;
   bounces_7d: number;
   complaints_7d: number;
+  /** Bounce guard: the last 50 emails since outreach was last resumed. */
+  last50_sent: number;
+  last50_bounces: number;
   found_24h: number;
 };
 
@@ -104,6 +113,14 @@ export const ox = {
   followups: (limit: number) => call<{ prospect: Prospect; first: Message; next_step: number; audit: ProspectAudit | null }[]>("app_ox_list", { p_kind: "followups", p_limit: limit }),
   approved: (limit: number) =>
     call<{ message: Message; prospect: Prospect; thread: { message_id: string; subject: string } | null }[]>("app_ox_list", { p_kind: "approved", p_limit: limit }),
+  checkbacks: (limit: number) => call<{ prospect: Prospect; first: Message | null }[]>("app_ox_list", { p_kind: "checkbacks", p_limit: limit }),
+  domainEmailed: (email: string, exclude: string) => call<boolean>("app_ox_domain_emailed", { p_email: email, p_exclude: exclude }),
+  /** One prospect with its latest audit and email thread (sent and received messages). */
+  detail: (id: string) =>
+    call<{ prospect: Prospect; audit: ProspectAudit | null; thread: ThreadItem[] } | null>("app_ox_prospect", { p_id: id }),
+  prospect: async (id: string) => (await ox.detail(id))?.prospect ?? null,
+  latestAudit: async (id: string) => (await ox.detail(id))?.audit ?? null,
+  thread: async (id: string) => (await ox.detail(id))?.thread ?? [],
   sentIds: () => call<{ message_id: string; prospect_id: string; email: string; name: string }[]>("app_ox_list", { p_kind: "sent_ids", p_limit: 0 }),
   updateProspect: (id: string, patch: Record<string, unknown>) => call<void>("app_ox_update_prospect", { p_id: id, p_patch: json(patch) }),
   saveAudit: (prospect: string, url: string, finalUrl: string | null, score: number | null, result: unknown) =>

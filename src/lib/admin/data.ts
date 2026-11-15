@@ -58,3 +58,17 @@ export const getProspectStats = (days: number) => call<ProspectStats>("app_admin
 
 /** Rows per page in admin lists ("Load more" fetches the next page). */
 export const PAGE_SIZE = 50;
+
+export type OutreachStats = {
+  sent: number;
+  prospects_emailed: number;
+  replies: number;
+  positive: number;
+  bounces: number;
+  suppressed: number;
+  by_niche: { key: string; sent: number; replies: number; positive: number }[];
+  by_variant: { key: string; sent: number; replies: number; positive: number }[];
+  tabs: { ready: number; sent: number; hot: number; whatsapp: number; suppressed: number };
+};
+/** Outreach totals, per niche and per subject variant, plus the tab counts (one SQL call). */
+export const getOutreachStats = () => call<OutreachStats>("app_admin_outreach_stats");

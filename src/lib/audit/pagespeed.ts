@@ -4,7 +4,7 @@ import type { CheckStatus, Metric, PageSpeed } from "./types";
 
 const ENDPOINT = "https://www.googleapis.com/pagespeedonline/v5/runPagespeed";
 
-type LhAudit = { displayValue?: string; score?: number | null };
+type LhAudit = { displayValue?: string; score?: number | null; details?: { data?: string } };
 type FieldMetric = { percentile?: number; category?: "FAST" | "AVERAGE" | "SLOW" };
 type PsiResponse = {
   lighthouseResult?: { categories?: { performance?: { score?: number | null } }; audits?: Record<string, LhAudit> };
@@ -32,7 +32,8 @@ const FIELD: [string, string, (p: number) => string][] = [
 
 export class PageSpeedError extends Error {}
 
-export const runPageSpeed = async (url: string, timeoutMs = 40000): Promise<PageSpeed> => {
+/** `screenshot`: keep Lighthouse's final mobile screenshot (a small JPEG data URI) for outreach reports. */
+export const runPageSpeed = async (url: string, timeoutMs = 40000, opts: { screenshot?: boolean } = {}): Promise<PageSpeed> => {
   const params = new URLSearchParams({ url, strategy: "mobile", category: "performance" });
   const key = process.env.PAGESPEED_API_KEY?.trim();
   if (key) params.set("key", key);
@@ -53,7 +54,9 @@ export const runPageSpeed = async (url: string, timeoutMs = 40000): Promise<Page
   const audits = data.lighthouseResult.audits ?? {};
   const perf = data.lighthouseResult.categories?.performance?.score;
   const metrics = data.loadingExperience?.origin_fallback ? {} : (data.loadingExperience?.metrics ?? {});
+  const shot = audits["final-screenshot"]?.details?.data;
   return {
+    ...(opts.screenshot && typeof shot === "string" && shot.startsWith("data:image/") && shot.length < 400_000 ? { screenshot: shot } : {}),
     performance: perf == null ? null : Math.round(perf * 100),
     lab: LAB.filter(([id]) => audits[id]?.displayValue).map(([id, label]): Metric => ({
       label,

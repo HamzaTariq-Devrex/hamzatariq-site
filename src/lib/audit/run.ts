@@ -65,8 +65,8 @@ const robotsCheck = (robots: FetchResult | null): { check: Check; sitemaps: stri
 };
 
 /** `onPage` receives the fetched home page (outreach reuses its HTML instead of fetching it again). */
-export const runAudit = async (start: URL, onPage?: (page: FetchResult) => void, opts: { pagespeedTimeoutMs?: number } = {}): Promise<AuditResult> => {
-  const speed: Promise<{ data: PageSpeed | null; note?: string }> = runPageSpeed(start.toString(), opts.pagespeedTimeoutMs)
+export const runAudit = async (start: URL, onPage?: (page: FetchResult) => void, opts: { pagespeedTimeoutMs?: number; screenshot?: boolean } = {}): Promise<AuditResult> => {
+  const speed: Promise<{ data: PageSpeed | null; note?: string }> = runPageSpeed(start.toString(), opts.pagespeedTimeoutMs, { screenshot: opts.screenshot })
     .then((data) => ({ data }))
     .catch((e) => ({ data: null, note: e instanceof PageSpeedError ? e.message : "Google PageSpeed could not test this page, so speed is not part of this score." }));
 

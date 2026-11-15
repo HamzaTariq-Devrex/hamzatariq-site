@@ -25,7 +25,8 @@ export async function setPaused(paused: boolean): Promise<Result> {
   if (!owner) return fail("Not allowed.");
   const { error } = await owner.supabase
     .from("outreach_settings")
-    .update({ paused, pause_reason: paused ? "Paused by hand" : null, updated_at: new Date().toISOString() })
+    // Resuming starts a fresh window for the bounce guard (last 50 emails) and complaint check.
+    .update({ paused, pause_reason: paused ? "Paused by hand" : null, updated_at: new Date().toISOString(), ...(paused ? {} : { resumed_at: new Date().toISOString() }) })
     .eq("id", 1);
   return error ? fail(error.message) : done();
 }
