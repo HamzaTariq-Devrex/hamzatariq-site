@@ -1397,3 +1397,394 @@
     overflow-wrap: anywhere;
   }
 }
+
+/* ---------- Outreach (/admin/prospects) ---------- */
+.ox-controls {
+  display: grid;
+  gap: 18px;
+}
+
+.ox-controls.is-paused {
+  border-color: rgb(var(--bad-rgb, 239 68 68) / 0.45);
+}
+
+.ox-switches {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px 28px;
+}
+
+.ox-switch-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.ox-switch-row p {
+  margin: 4px 0 0;
+  font-size: 13px;
+}
+
+.ox-switch {
+  position: relative;
+  flex: none;
+  width: 48px;
+  height: 28px;
+  border-radius: 999px;
+  border: 1px solid rgb(var(--ink-rgb) / 0.2);
+  background: rgb(var(--ink-rgb) / 0.08);
+  cursor: pointer;
+  transition: background 0.2s var(--adm-ease, ease);
+}
+
+.ox-switch::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--page-text);
+  transition: transform 0.2s var(--adm-ease, ease);
+}
+
+.ox-switch.is-on {
+  background: var(--adm-teal);
+  border-color: transparent;
+}
+
+.ox-switch.is-on::after {
+  transform: translateX(20px);
+  background: #fff;
+}
+
+.ox-switch:disabled {
+  opacity: 0.5;
+}
+
+.ox-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.ox-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  margin: 0;
+}
+
+.ox-facts div {
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--adm-line);
+}
+
+.ox-facts dt {
+  font-size: 12px;
+  color: var(--page-muted);
+}
+
+.ox-facts dd {
+  margin: 4px 0 0;
+  font-weight: 600;
+}
+
+.ox-search-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  align-items: end;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.ox-search-form .adm-btn {
+  grid-column: 1 / -1;
+  justify-self: start;
+}
+
+.ox-search-form select,
+.ox-search-form .adm-field select {
+  max-width: none;
+  width: 100%;
+}
+
+/* Text inputs and textareas in admin fields (the base styles only cover selects). */
+.adm-field input,
+.adm-field textarea,
+.ox-filter {
+  min-height: 42px;
+  padding: 0 12px;
+  border-radius: 12px;
+  border: 1px solid rgb(var(--ink-rgb) / 0.12);
+  background: rgb(var(--ink-rgb) / 0.03);
+  color: var(--page-text);
+  font: inherit;
+  font-size: 15px;
+  letter-spacing: normal;
+  text-transform: none;
+  color-scheme: dark;
+}
+
+.adm-field textarea {
+  padding: 10px 12px;
+  line-height: 1.55;
+  resize: vertical;
+}
+
+.adm-field input:focus,
+.adm-field textarea:focus,
+.ox-filter:focus {
+  outline: none;
+  border-color: var(--adm-teal);
+}
+
+input.adm-search {
+  color: var(--page-text);
+  font: inherit;
+  font-size: 15px;
+}
+
+input.adm-search:focus {
+  outline: none;
+  border-color: var(--adm-teal);
+}
+
+.ox-searches {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ox-searches li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--adm-line);
+}
+
+.ox-searches li.is-off {
+  opacity: 0.55;
+}
+
+.ox-searches li > div:first-child {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.ox-searches .adm-muted {
+  font-size: 12.5px;
+}
+
+.ox-search-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.adm-link-btn.is-danger,
+.adm-btn.is-danger {
+  color: #f87171;
+}
+
+.ox-drafts {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ox-draft {
+  border: 1px solid var(--adm-line);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.ox-draft-head {
+  display: grid;
+  gap: 4px;
+  width: 100%;
+  padding: 12px 14px;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ox-draft-head:hover {
+  background: rgb(var(--ink-rgb) / 0.03);
+}
+
+.ox-draft-head .adm-muted {
+  font-size: 12.5px;
+  overflow-wrap: anywhere;
+}
+
+.ox-draft-subject {
+  font-size: 13.5px;
+  color: var(--page-muted);
+}
+
+.ox-draft-body {
+  display: grid;
+  gap: 12px;
+  padding: 0 14px 14px;
+}
+
+.ox-email {
+  margin: 0;
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: rgb(var(--ink-rgb) / 0.04);
+  border: 1px solid var(--adm-line);
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.ox-thread-title {
+  margin: 22px 0 10px;
+  font-size: 15px;
+}
+
+.ox-thread {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ox-thread li.is-in .ox-email {
+  border-color: rgb(var(--accent-rgb) / 0.4);
+}
+
+.ox-thread-meta {
+  margin: 0 0 4px;
+  font-size: 12px;
+  color: var(--page-muted);
+  text-transform: capitalize;
+}
+
+.ox-thread-subject {
+  margin: 0 0 6px;
+  font-weight: 600;
+}
+
+.ox-status.is-skipped,
+.ox-status.is-found,
+.ox-status.is-audited {
+  color: var(--page-muted);
+  background: rgb(var(--ink-rgb) / 0.05);
+  border-color: rgb(var(--ink-rgb) / 0.14);
+}
+
+.ox-status.is-emailed,
+.ox-status.is-call {
+  color: #60a5fa;
+  background: rgba(96, 165, 250, 0.1);
+  border-color: rgba(96, 165, 250, 0.3);
+}
+
+.ox-status.is-unsubscribed,
+.ox-status.is-bounced {
+  color: #f87171;
+  background: rgba(248, 113, 113, 0.1);
+  border-color: rgba(248, 113, 113, 0.3);
+}
+
+.ox-stats td,
+.ox-stats th {
+  text-align: right;
+}
+
+.ox-stats td:first-child,
+.ox-stats th:first-child {
+  text-align: left;
+}
+
+@media (max-width: 760px) {
+  .ox-search-form {
+    grid-template-columns: 1fr;
+  }
+}
+
+.ox-row {
+  display: grid;
+  gap: 2px;
+  text-align: left;
+}
+
+.ox-row .adm-muted {
+  font-size: 12.5px;
+  overflow-wrap: anywhere;
+}
+
+.ox-wa {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ox-wa li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px 20px;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid var(--adm-line);
+}
+
+.ox-wa-main {
+  display: grid;
+  gap: 4px;
+  flex: 1 1 380px;
+  min-width: 0;
+}
+
+.ox-wa-main .adm-muted {
+  font-size: 12.5px;
+  overflow-wrap: anywhere;
+}
+
+.ox-wa-text {
+  margin: 6px 0 0;
+  font-size: 13.5px;
+  color: var(--page-muted);
+  overflow-wrap: anywhere;
+}
+
+.ox-wa-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.ox-status.is-whatsapp,
+.ox-status.is-messaged {
+  color: #22c55e;
+  background: rgba(34, 197, 94, 0.1);
+  border-color: rgba(34, 197, 94, 0.3);
+}

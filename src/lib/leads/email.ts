@@ -29,6 +29,17 @@ const send = async (payload: { from: string; to: string; reply_to: string; subje
   }
 };
 
+/** Plain alert to Hamza (outreach replies, auto-pause). Reply-to goes to `replyTo` when given. */
+export const sendOwnerAlert = (subject: string, lines: string[], replyTo: string = NOTIFY_TO) =>
+  send({
+    from: `Hamza's outreach <${FROM}>`,
+    to: NOTIFY_TO,
+    reply_to: replyTo,
+    subject,
+    html: layout(lines.map((l) => `<p style="margin:0 0 12px;white-space:pre-wrap">${escape(l).replace(/https?:\/\/[^\s<]+/g, (u) => `<a href="${u}" style="color:#d4380d">${u}</a>`)}</p>`).join("")),
+    text: lines.join("\n\n"),
+  });
+
 /** Notification to Hamza. Reply-to is the visitor, so answering the email reaches them directly. */
 export const sendOwnerNotification = (lead: LeadInput, id: string, audit: AuditResult | null = null) => {
   const rows: [string, string][] = [

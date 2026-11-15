@@ -30,7 +30,8 @@ export default async function OverviewPage() {
   const today = pktStartOfToday(now);
   const tomorrow = today + DAY_MS;
 
-  const [{ data: leadRows }, { data: sessionRows }, { data: eventRows }] = await Promise.all([
+  const since30 = new Date(tomorrow - 30 * DAY_MS).toISOString();
+  const [{ data: leadRows }, { data: sessionRows }, { data: eventRows }, { data: prospectRows }, { data: outreachRows }] = await Promise.all([
     supabase.from("leads").select("id, name, project_type, source, status, created_at").order("created_at", { ascending: false }).limit(5000),
     supabase.from("chat_sessions").select("created_at").gte("created_at", new Date(today - 13 * DAY_MS).toISOString()).limit(10000),
     supabase
@@ -39,6 +40,9 @@ export default async function OverviewPage() {
       .in("name", EVENTS.map((e) => e.name))
       .gte("created_at", new Date(tomorrow - 60 * DAY_MS).toISOString())
       .limit(50000),
+    // Outreach (owner-only tables; empty before the outreach migration).
+    supabase.from("prospects").select("created_at").gte("created_at", since30).limit(20000),
+    supabase.from("outreach_messages").select("direction, kind, status, sent_at, created_at").gte("created_at", since30).limit(20000),
   ]);
   const leads = leadRows ?? [];
   const sessions = sessionRows ?? [];
@@ -74,6 +78,15 @@ export default async function OverviewPage() {
   const ctaOf = (e: (typeof events)[number]) => (e.data as { location?: string } | null)?.location ?? "";
   const byCta = Object.entries(CTA_LABELS).map(([key, label]) => ({ label, value: events30.filter((e) => e.name === "audit_cta_click" && ctaOf(e) === key).length }));
   const ctaTotal = byCta.reduce((s, t) => s + t.value, 0);
+
+  const ox = outreachRows ?? [];
+  const outreach = [
+    { label: "Businesses found", value: (prospectRows ?? []).length },
+    { label: "Emails sent", value: ox.filter((m) => m.direction === "out" && m.status === "sent").length },
+    { label: "Replies", value: ox.filter((m) => m.direction === "in" && m.kind === "reply").length },
+    { label: "Bounces", value: ox.filter((m) => m.direction === "in" && m.kind === "bounce").length },
+    { label: "Unsubscribes", value: ox.filter((m) => m.direction === "in" && m.kind === "unsubscribe").length },
+  ];
 
   const bySource = SOURCES.map((s) => ({ label: SOURCE_LABELS[s], value: leads.filter((l) => l.source === s).length }));
   const byService = SERVICE_GROUPS.map((g) => ({ label: g.label, value: leads.filter((l) => serviceOf(l.project_type) === g.key).length }));
@@ -142,6 +155,23 @@ export default async function OverviewPage() {
             <BarList rows={byCta} total={ctaTotal} />
           </div>
         )}
+      </section>
+
+      <section className="adm-card">
+        <div className="adm-card-head">
+          <h2>Outreach</h2>
+          <span>
+            Last 30 days · <Link href="/admin/prospects">Open prospects</Link>
+          </span>
+        </div>
+        <div className="adm-events">
+          {outreach.map((o) => (
+            <div key={o.label} className="adm-event">
+              <span>{o.label}</span>
+              <strong>{o.value}</strong>
+            </div>
+          ))}
+        </div>
       </section>
 
       <div className="adm-grid-2">

@@ -64,12 +64,14 @@ const robotsCheck = (robots: FetchResult | null): { check: Check; sitemaps: stri
   };
 };
 
-export const runAudit = async (start: URL): Promise<AuditResult> => {
-  const speed: Promise<{ data: PageSpeed | null; note?: string }> = runPageSpeed(start.toString())
+/** `onPage` receives the fetched home page (outreach reuses its HTML instead of fetching it again). */
+export const runAudit = async (start: URL, onPage?: (page: FetchResult) => void, opts: { pagespeedTimeoutMs?: number } = {}): Promise<AuditResult> => {
+  const speed: Promise<{ data: PageSpeed | null; note?: string }> = runPageSpeed(start.toString(), opts.pagespeedTimeoutMs)
     .then((data) => ({ data }))
     .catch((e) => ({ data: null, note: e instanceof PageSpeedError ? e.message : "Google PageSpeed could not test this page, so speed is not part of this score." }));
 
   const page = await safeFetch(start);
+  onPage?.(page);
   const finalUrl = new URL(page.url);
   const origin = finalUrl.origin;
   const isHtml = /html/i.test(page.headers["content-type"] ?? "text/html") || /<html/i.test(page.body.slice(0, 2000));

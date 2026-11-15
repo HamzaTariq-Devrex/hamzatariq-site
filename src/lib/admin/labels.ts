@@ -4,10 +4,11 @@ export const STATUSES = ["new", "replied", "won", "lost"] as const;
 export type LeadStatus = (typeof STATUSES)[number];
 export const STATUS_LABELS: Record<LeadStatus, string> = { new: "New", replied: "Replied", won: "Won", lost: "Lost" };
 
-export const SOURCES = ["chatbot", "form", "seo-audit", "website-cost-calculator", "chatbot-roi-calculator", "tool", "page"] as const;
+export const SOURCES = ["chatbot", "form", "seo-audit", "website-cost-calculator", "chatbot-roi-calculator", "outreach", "tool", "page"] as const;
 export const SOURCE_LABELS: Record<string, string> = { chatbot: "Chatbot", form: "Contact form", "seo-audit": "SEO audit",
   "website-cost-calculator": "Cost calculator",
   "chatbot-roi-calculator": "Chatbot ROI",
+  outreach: "Outreach",
   tool: "Tools", page: "Page" };
 
 export const SERVICE_GROUPS = [
@@ -59,3 +60,24 @@ export const formatDate = (date: string, withTime = true) =>
     ...(withTime ? { hour: "2-digit", minute: "2-digit" } : {}),
     timeZone: "Asia/Karachi",
   }).format(new Date(date));
+
+// ---------- Outreach (/admin/prospects) ----------
+
+export const PROSPECT_STATUSES = ["found", "audited", "skipped", "whatsapp", "messaged", "emailed", "replied", "call", "won", "lost", "unsubscribed", "bounced"] as const;
+export type ProspectStatus = (typeof PROSPECT_STATUSES)[number];
+export const PROSPECT_STATUS_LABELS: Record<ProspectStatus, string> = {
+  found: "New",
+  audited: "Audited",
+  skipped: "Skipped",
+  whatsapp: "WhatsApp queue",
+  messaged: "WhatsApp sent",
+  emailed: "Emailed",
+  replied: "Replied",
+  call: "Call",
+  won: "Won",
+  lost: "Lost",
+  unsubscribed: "Unsubscribed",
+  bounced: "Bounced",
+};
+/** Statuses the owner can set by hand (the rest come from the pipeline). */
+export const MANUAL_PROSPECT_STATUSES: ProspectStatus[] = ["found", "whatsapp", "messaged", "emailed", "replied", "call", "won", "lost", "unsubscribed"];

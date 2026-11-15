@@ -175,6 +175,304 @@ export type Database = {
           },
         ]
       }
+      outreach_cache: {
+        Row: {
+          created_at: string
+          key: string
+          value: Json
+        }
+        Insert: {
+          created_at?: string
+          key: string
+          value: Json
+        }
+        Update: {
+          created_at?: string
+          key?: string
+          value?: Json
+        }
+        Relationships: []
+      }
+      outreach_messages: {
+        Row: {
+          approved_at: string | null
+          body: string
+          created_at: string
+          direction: string
+          error: string | null
+          id: string
+          in_reply_to: string | null
+          kind: string
+          message_id: string | null
+          prospect_id: string
+          sent_at: string | null
+          status: string
+          step: number | null
+          subject: string
+        }
+        Insert: {
+          approved_at?: string | null
+          body: string
+          created_at?: string
+          direction?: string
+          error?: string | null
+          id?: string
+          in_reply_to?: string | null
+          kind?: string
+          message_id?: string | null
+          prospect_id: string
+          sent_at?: string | null
+          status?: string
+          step?: number | null
+          subject: string
+        }
+        Update: {
+          approved_at?: string | null
+          body?: string
+          created_at?: string
+          direction?: string
+          error?: string | null
+          id?: string
+          in_reply_to?: string | null
+          kind?: string
+          message_id?: string | null
+          prospect_id?: string
+          sent_at?: string | null
+          status?: string
+          step?: number | null
+          subject?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "outreach_messages_prospect_id_fkey"
+            columns: ["prospect_id"]
+            isOneToOne: false
+            referencedRelation: "prospects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      outreach_searches: {
+        Row: {
+          active: boolean
+          business_type: string
+          city: string
+          country: string
+          created_at: string
+          id: string
+          last_found: number
+          last_run_at: string | null
+          lat: number | null
+          lon: number | null
+          osm_area: number | null
+          timezone: string | null
+        }
+        Insert: {
+          active?: boolean
+          business_type: string
+          city: string
+          country: string
+          created_at?: string
+          id?: string
+          last_found?: number
+          last_run_at?: string | null
+          lat?: number | null
+          lon?: number | null
+          osm_area?: number | null
+          timezone?: string | null
+        }
+        Update: {
+          active?: boolean
+          business_type?: string
+          city?: string
+          country?: string
+          created_at?: string
+          id?: string
+          last_found?: number
+          last_run_at?: string | null
+          lat?: number | null
+          lon?: number | null
+          osm_area?: number | null
+          timezone?: string | null
+        }
+        Relationships: []
+      }
+      outreach_settings: {
+        Row: {
+          approve_first: boolean
+          id: number
+          last_imap_at: string | null
+          last_imap_uid: number | null
+          next_send_at: string | null
+          pause_reason: string | null
+          paused: boolean
+          started_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          approve_first?: boolean
+          id?: number
+          last_imap_at?: string | null
+          last_imap_uid?: number | null
+          next_send_at?: string | null
+          pause_reason?: string | null
+          paused?: boolean
+          started_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approve_first?: boolean
+          id?: number
+          last_imap_at?: string | null
+          last_imap_uid?: number | null
+          next_send_at?: string | null
+          pause_reason?: string | null
+          paused?: boolean
+          started_at?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      prospect_audits: {
+        Row: {
+          created_at: string
+          expires_at: string
+          final_url: string | null
+          id: string
+          prospect_id: string
+          report_id: string
+          result: Json | null
+          score: number | null
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string
+          final_url?: string | null
+          id?: string
+          prospect_id: string
+          report_id?: string
+          result?: Json | null
+          score?: number | null
+          url: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          final_url?: string | null
+          id?: string
+          prospect_id?: string
+          report_id?: string
+          result?: Json | null
+          score?: number | null
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prospect_audits_prospect_id_fkey"
+            columns: ["prospect_id"]
+            isOneToOne: false
+            referencedRelation: "prospects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prospects: {
+        Row: {
+          audit_score: number | null
+          business_type: string
+          city: string | null
+          country: string
+          created_at: string
+          domain: string | null
+          email: string | null
+          email_source: string | null
+          id: string
+          last_contacted_at: string | null
+          lead_id: string | null
+          lead_score: number | null
+          name: string
+          notes: string | null
+          osm_id: string
+          osm_tags: Json
+          phone: string | null
+          search_id: string | null
+          skip_reason: string | null
+          status: string
+          timezone: string
+          unsubscribe_token: string
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          audit_score?: number | null
+          business_type: string
+          city?: string | null
+          country: string
+          created_at?: string
+          domain?: string | null
+          email?: string | null
+          email_source?: string | null
+          id?: string
+          last_contacted_at?: string | null
+          lead_id?: string | null
+          lead_score?: number | null
+          name: string
+          notes?: string | null
+          osm_id: string
+          osm_tags?: Json
+          phone?: string | null
+          search_id?: string | null
+          skip_reason?: string | null
+          status?: string
+          timezone: string
+          unsubscribe_token?: string
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          audit_score?: number | null
+          business_type?: string
+          city?: string | null
+          country?: string
+          created_at?: string
+          domain?: string | null
+          email?: string | null
+          email_source?: string | null
+          id?: string
+          last_contacted_at?: string | null
+          lead_id?: string | null
+          lead_score?: number | null
+          name?: string
+          notes?: string | null
+          osm_id?: string
+          osm_tags?: Json
+          phone?: string | null
+          search_id?: string | null
+          skip_reason?: string | null
+          status?: string
+          timezone?: string
+          unsubscribe_token?: string
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prospects_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prospects_search_id_fkey"
+            columns: ["search_id"]
+            isOneToOne: false
+            referencedRelation: "outreach_searches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       seo_audits: {
         Row: {
           created_at: string
@@ -237,6 +535,35 @@ export type Database = {
           url?: string
         }
         Relationships: []
+      }
+      suppression_list: {
+        Row: {
+          created_at: string
+          email: string
+          prospect_id: string | null
+          reason: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          prospect_id?: string | null
+          reason: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          prospect_id?: string | null
+          reason?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suppression_list_prospect_id_fkey"
+            columns: ["prospect_id"]
+            isOneToOne: false
+            referencedRelation: "prospects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
@@ -338,6 +665,84 @@ export type Database = {
           title: string
           url: string
         }[]
+      }
+      app_ox_add_message: {
+        Args: { p_row: Json; p_secret: string }
+        Returns: string
+      }
+      app_ox_add_prospect: {
+        Args: { p_row: Json; p_secret: string }
+        Returns: string
+      }
+      app_ox_cache_get: {
+        Args: { p_hours: number; p_key: string; p_secret: string }
+        Returns: Json
+      }
+      app_ox_cache_put: {
+        Args: { p_key: string; p_secret: string; p_value: Json }
+        Returns: undefined
+      }
+      app_ox_delete_draft: {
+        Args: { p_id: string; p_secret: string }
+        Returns: string
+      }
+      app_ox_is_suppressed: {
+        Args: { p_email: string; p_exclude?: string; p_secret: string }
+        Returns: boolean
+      }
+      app_ox_list: {
+        Args: { p_kind: string; p_limit?: number; p_secret: string }
+        Returns: Json
+      }
+      app_ox_message_for_test: {
+        Args: { p_id: string; p_secret: string }
+        Returns: Json
+      }
+      app_ox_report: {
+        Args: { p_report: string; p_secret: string }
+        Returns: Json
+      }
+      app_ox_save_audit: {
+        Args: {
+          p_final_url: string
+          p_prospect: string
+          p_result: Json
+          p_score: number
+          p_secret: string
+          p_url: string
+        }
+        Returns: string
+      }
+      app_ox_search: { Args: { p_id: string; p_secret: string }; Returns: Json }
+      app_ox_search_ran: {
+        Args: { p_id: string; p_patch: Json; p_secret: string }
+        Returns: undefined
+      }
+      app_ox_set: {
+        Args: { p_patch: Json; p_secret: string }
+        Returns: undefined
+      }
+      app_ox_state: { Args: { p_secret: string }; Returns: Json }
+      app_ox_stop: {
+        Args: {
+          p_email: string
+          p_prospect?: string
+          p_reason: string
+          p_secret: string
+        }
+        Returns: undefined
+      }
+      app_ox_unsubscribe: {
+        Args: { p_confirm: boolean; p_secret: string; p_token: string }
+        Returns: Json
+      }
+      app_ox_update_message: {
+        Args: { p_id: string; p_patch: Json; p_secret: string }
+        Returns: undefined
+      }
+      app_ox_update_prospect: {
+        Args: { p_id: string; p_patch: Json; p_secret: string }
+        Returns: undefined
       }
       app_prune_chunks: {
         Args: { p_keep_urls: string[]; p_secret: string }
