@@ -328,8 +328,9 @@
         "what makes a dashboard more expensive?"
       ],
       "angle": "My real prices (dashboard from $1,200 in 2–4 weeks, web app from $2,500 in 4–8 weeks) and the features that move the price.",
-      "status": "queued",
-      "publishedSlug": null
+      "status": "published",
+      "publishedSlug": "how-much-does-a-custom-dashboard-cost",
+      "published": "2026-11-15"
     },
     {
       "keyword": "custom web app for small business",
