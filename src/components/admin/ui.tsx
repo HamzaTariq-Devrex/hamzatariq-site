@@ -50,7 +50,8 @@ export const EmptyState = ({
 );
 
 /** "+12%" / "−5%" / "New" / "No change" compared with the previous period. */
-export const Change = ({ current, previous, unit = "%", label }: { current: number; previous: number | null; unit?: "%" | "pts"; label: string }) => {
+/** `invert`: a fall is good news (search position), so it is coloured like a rise. */
+export const Change = ({ current, previous, unit = "%", label, invert = false }: { current: number; previous: number | null; unit?: "%" | "pts"; label: string; invert?: boolean }) => {
   if (previous === null) return <span className="adm-change">{label}</span>;
   let text: string;
   let tone: "up" | "down" | "flat";
@@ -67,7 +68,7 @@ export const Change = ({ current, previous, unit = "%", label }: { current: numb
     text = pct === 0 ? "No change" : `${pct > 0 ? "+" : "−"}${Math.abs(pct)}%`;
   }
   return (
-    <span className={`adm-change is-${tone}`}>
+    <span className={`adm-change is-${invert && tone !== "flat" ? (tone === "up" ? "down" : "up") : tone}`}>
       <span aria-hidden="true">{tone === "up" ? "↑" : tone === "down" ? "↓" : "→"}</span> {text} <small>{label}</small>
     </span>
   );

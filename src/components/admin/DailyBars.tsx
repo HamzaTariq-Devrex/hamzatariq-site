@@ -12,8 +12,10 @@ const niceMax = (n: number) => (n <= 4 ? 4 : n <= 6 ? 6 : n <= 10 ? 10 : Math.ce
 const short = (day: string) =>
   new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", timeZone: "UTC" }).format(new Date(`${day}T00:00:00Z`));
 
-/** Leads per day, one bar per day. Hover or focus a day for its exact count. */
-const DailyBars = ({ days }: { days: Day[] }) => {
+/** One bar per day (leads by default). Hover or focus a day for its exact count. */
+const DailyBars = ({ days, unit = ["lead", "leads"] }: { days: Day[]; unit?: [string, string] }) => {
+  const label = (n: number) => `${n} ${n === 1 ? unit[0] : unit[1]}`;
+  const title = `${unit[1][0].toUpperCase()}${unit[1].slice(1)} per day`;
   const wrapRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(0);
   const [active, setActive] = useState<number | null>(null);
@@ -41,7 +43,7 @@ const DailyBars = ({ days }: { days: Day[] }) => {
   return (
     <div className="adm-chart" ref={wrapRef}>
       {width > 0 && (
-        <svg width={width} height={H} role="img" aria-label={`Leads per day for the last ${days.length} days`} onMouseLeave={() => setActive(null)}>
+        <svg width={width} height={H} role="img" aria-label={`${title} for the last ${days.length} days`} onMouseLeave={() => setActive(null)}>
           {[0, max / 2, max].map((t) => (
             <g key={t}>
               <line x1={PAD.left} x2={width - PAD.right} y1={y(t)} y2={y(t)} className="adm-chart-grid" />
@@ -72,7 +74,7 @@ const DailyBars = ({ days }: { days: Day[] }) => {
                   height={plotH}
                   fill="transparent"
                   tabIndex={0}
-                  aria-label={`${short(d.day)}: ${d.count} lead${d.count === 1 ? "" : "s"}`}
+                  aria-label={`${short(d.day)}: ${label(d.count)}`}
                   onMouseEnter={() => setActive(i)}
                   onFocus={() => setActive(i)}
                   onBlur={() => setActive(null)}
@@ -95,13 +97,13 @@ const DailyBars = ({ days }: { days: Day[] }) => {
           role="status"
         >
           <span className="adm-tooltip-value">
-            <strong>{hovered.count}</strong> lead{hovered.count === 1 ? "" : "s"}
+            <strong>{hovered.count}</strong> {hovered.count === 1 ? unit[0] : unit[1]}
           </span>
           <span>{short(hovered.day)}</span>
         </div>
       )}
       <table className="sr-only">
-        <caption>Leads per day</caption>
+        <caption>{title}</caption>
         <tbody>
           {days.map((d) => (
             <tr key={d.day}>

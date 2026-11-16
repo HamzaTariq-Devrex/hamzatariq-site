@@ -75,7 +75,7 @@ For `"job": "expand-pillar"` (a pillar that exists as a shorter post):
 ## Monthly
 
 1. Pull `main` as above.
-2. `node scripts/autopilot/monthly.mjs` (previous month) gives: posts published, blog posts at positions 8–20 (`refresh`), each post's queries and the ones it doesn't answer yet (`perPost[].unanswered`), low-CTR posts (`lowCtr`), queries where posts compete (`cannibalization`), top pages and queries, and leads per source.
+2. `node scripts/autopilot/monthly.mjs` (previous month) gives the SEO Command Center's month (`seoCenter`, see `docs/SEO_AUTOPILOT.md`) and: posts published, blog posts at positions 8–20 (`refresh`), each post's queries and the ones it doesn't answer yet (`perPost[].unanswered`), low-CTR posts (`lowCtr`), queries where posts compete (`cannibalization`), top pages and queries, and leads per source.
 3. **Improve** up to 5 posts, in this order of value:
    - **Competing posts** (`cannibalization`): decide which post should own the query. Make the other one link to it with the query as anchor text and move its overlapping section there; if two posts are near-duplicates, merge them into the stronger one and add a permanent redirect in `next.config.ts` (that file needs a normal reviewed commit, not an autopilot one: open a PR).
    - **Missing questions** (`perPost[].unanswered`, and `refresh` posts first): answer each real query clearly in a new H2 or FAQ item, and add it to the brief's "Questions to answer".
@@ -105,6 +105,9 @@ For `"job": "expand-pillar"` (a pillar that exists as a shorter post):
 
 ## Search Console (<range>)
 Top pages and top queries tables.
+
+## SEO Command Center
+From `seoCenter` (only these numbers): Google clicks/impressions vs the month before, Bing, index status, issues open and resolved, fixes done by the SEO autopilot with their before → after (28 days each, `fixes_measured`), fixes waiting for approval, new keyword ideas, Core Web Vitals per template.
 
 ## Leads by source
 | Source | Leads |

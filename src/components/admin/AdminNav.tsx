@@ -22,6 +22,11 @@ const LINKS = [
     icon: <path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z" />,
   },
   {
+    href: "/admin/seo",
+    label: "SEO",
+    icon: <path d="M3 3v18h18M7 15l4-4 3 3 6-6M20 8V4h-4" />,
+  },
+  {
     href: "/admin/chats",
     label: "Chats",
     icon: <path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z" />,

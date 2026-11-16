@@ -5,6 +5,9 @@
 //                  brief don't answer yet (add them as an H2 or FAQ item)
 //   lowCtr         posts with many impressions and few clicks (rewrite the title and description)
 //   cannibalization queries where 2+ posts get impressions (merge, refresh or re-link them)
+//   seoCenter      SEO Command Center data for the month (/admin/seo): Google and Bing totals vs the
+//                  month before, index status, open/resolved issues, fixes done with their
+//                  before -> after numbers, fixes waiting for approval, new keyword ideas, CWV
 //
 //   node scripts/autopilot/monthly.mjs            data for the previous calendar month (JSON on stdout)
 //   node scripts/autopilot/monthly.mjs 2026-11    a given month
@@ -41,7 +44,7 @@ const from = `${month}-01T00:00:00+05:00`;
 const to = `${m === 12 ? y + 1 : y}-${String(m === 12 ? 1 : m + 1).padStart(2, "0")}-01T00:00:00+05:00`;
 
 const posts = readPosts();
-const report = { month, posts: { published: posts.filter((p) => p.published?.startsWith(month)).map((p) => p.slug), total: posts.length }, refresh: [], lowCtr: [], perPost: [], cannibalization: [], topQueries: [], topPages: [], leads: [], errors: [] };
+const report = { month, seoCenter: null, posts: { published: posts.filter((p) => p.published?.startsWith(month)).map((p) => p.slug), total: posts.length }, refresh: [], lowCtr: [], perPost: [], cannibalization: [], topQueries: [], topPages: [], leads: [], errors: [] };
 
 try {
   const pages = await gscQuery({ dimensions: ["page"], days: 28, rowLimit: 500 });
@@ -86,6 +89,11 @@ try {
   report.topQueries = queries.rows.slice(0, 20).map((r) => ({ query: r.keys[0], clicks: r.clicks, impressions: r.impressions, position: Math.round(r.position * 10) / 10 }));
 } catch (error) {
   report.errors.push(`Search Console: ${error.message}`);
+}
+try {
+  report.seoCenter = await rpc("app_seo_monthly", { p_from: from.slice(0, 10), p_to: to.slice(0, 10) });
+} catch (error) {
+  report.errors.push(`SEO Command Center: ${error.message}`);
 }
 try {
   report.leads = await rpc("app_leads_by_source", { p_from: from, p_to: to });

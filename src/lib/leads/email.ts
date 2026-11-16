@@ -30,9 +30,9 @@ const send = async (payload: { from: string; to: string; reply_to: string; subje
 };
 
 /** Plain alert to Hamza (outreach replies, auto-pause). Reply-to goes to `replyTo` when given. */
-export const sendOwnerAlert = (subject: string, lines: string[], replyTo: string = NOTIFY_TO) =>
+export const sendOwnerAlert = (subject: string, lines: string[], replyTo: string = NOTIFY_TO, fromName = "Hamza's outreach") =>
   send({
-    from: `Hamza's outreach <${FROM}>`,
+    from: `${fromName} <${FROM}>`,
     to: NOTIFY_TO,
     reply_to: replyTo,
     subject,
