@@ -2,6 +2,8 @@
 .pv {
   --pv-accent: var(--accent);
   --pv-accent-rgb: var(--accent-rgb);
+  /* Accent as text: the light violet shade (the violet fill is too dark for small text). */
+  --pv-text: var(--accent-hi);
   position: relative;
   z-index: 1;
   min-height: 100vh;
@@ -13,10 +15,12 @@
 .pv[data-tone="blue"] {
   --pv-accent: var(--accent-2);
   --pv-accent-rgb: var(--accent-2-rgb);
+  --pv-text: var(--accent-2);
 }
 .pv[data-tone="cyan"] {
   --pv-accent: var(--accent-3);
   --pv-accent-rgb: var(--accent-3-rgb);
+  --pv-text: var(--accent-3);
 }
 
 .pv-label {
@@ -129,7 +133,7 @@
 }
 .pv-card h2 {
   margin: 0 0 10px;
-  color: var(--pv-accent);
+  color: var(--pv-text);
   font-size: 0.8125rem;
   font-weight: 600;
   letter-spacing: 0.1em;
