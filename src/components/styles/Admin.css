@@ -2116,3 +2116,17 @@ a.ox-row {
   border-radius: 10px;
   background: rgb(var(--accent-rgb) / 0.08);
 }
+
+.seo-urls {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-left: 22px;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+  user-select: text;
+}
+
+.seo-urls code {
+  color: var(--page-text);
+}

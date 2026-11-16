@@ -7,6 +7,8 @@ import { formatDate } from "@/lib/admin/labels";
 import { BarList, Change, EmptyState, PageHead, StatCard } from "@/components/admin/ui";
 import { SkeletonCard, SkeletonStats } from "@/components/admin/Skeleton";
 import { FixButtons, KeywordButtons, SyncButton } from "@/components/admin/seo/SeoActions";
+import CopyUrls from "@/components/admin/seo/CopyUrls";
+import { orderForIndexing } from "@/lib/seo-center/indexing";
 import { TEMPLATE_LABELS, type Template } from "@/lib/seo-center/config";
 import {
   getSeoOverview,
@@ -117,6 +119,54 @@ const PageLink = ({ path }: { path: string | null }) =>
     <span className="adm-muted">–</span>
   );
 
+// ---------------------------------------------------------------- Not indexed (for "Request indexing")
+
+/** Sitemap pages Google hasn't indexed (last URL Inspection), most important first. */
+const unindexed = async () => {
+  const { data, error } = await (await ownerDb())
+    .from("seo_pages")
+    .select("path, coverage_state")
+    .eq("in_sitemap", true)
+    .not("inspected_at", "is", null)
+    .neq("index_verdict", "PASS");
+  if (error) throw new Error(error.message);
+  const state = new Map(((data ?? []) as { path: string; coverage_state: string | null }[]).map((r) => [r.path, r.coverage_state]));
+  return orderForIndexing([...state.keys()]).map((r) => ({ ...r, state: state.get(r.path) ?? "Not indexed" }));
+};
+
+async function Unindexed() {
+  let rows;
+  try {
+    rows = await unindexed();
+  } catch (e) {
+    return <Failed what="unindexed pages" message={(e as Error).message} />;
+  }
+  if (!rows.length) return null;
+  const urls = rows.map((r) => r.url);
+  return (
+    <section className="adm-card">
+      <div className="adm-card-head">
+        <h2>Request indexing</h2>
+        <span className="seo-actions">
+          <CopyUrls urls={urls.slice(0, 10)} label="Copy top 10" />
+          <CopyUrls urls={urls} />
+        </span>
+      </div>
+      <p className="adm-muted seo-small">
+        Most important first: pillar posts, industry pages, tools, then the rest. Paste each URL into Search Console&apos;s URL Inspection and click &quot;Request indexing&quot; (about 10 a day). A page leaves this list after the next
+        weekly inspection finds it indexed.
+      </p>
+      <ol className="seo-urls">
+        {rows.map((r) => (
+          <li key={r.path}>
+            <code>{r.url}</code> <small className="adm-muted">{r.group} · {r.state}</small>
+          </li>
+        ))}
+      </ol>
+    </section>
+  );
+}
+
 // ---------------------------------------------------------------- Overview
 
 async function Overview() {
@@ -131,6 +181,7 @@ async function Overview() {
   const issues = (o.issues.error ?? 0) + (o.issues.warning ?? 0) + (o.issues.notice ?? 0);
   const oppTotal = Object.values(o.opportunities).reduce((a, b) => a + b, 0);
   const fixTotal = Object.values(o.fixes).reduce((a, b) => a + b, 0);
+  const notIndexed = await unindexed().catch(() => []);
   return (
     <>
       {!s.gsc_synced_at && (
@@ -192,6 +243,12 @@ async function Overview() {
               URL Inspection · {o.inspected}/{o.pages} checked
             </span>
           </div>
+          {notIndexed.length > 0 && (
+            <p className="seo-actions seo-small">
+              <CopyUrls urls={notIndexed.map((r) => r.url)} />
+              <Link href="?tab=opportunities&kind=not_indexed">See the list →</Link>
+            </p>
+          )}
           {o.pages ? <BarList rows={Object.entries(o.index).sort((a, b) => b[1] - a[1]).map(([label, value]) => ({ label, value }))} total={o.pages} /> : <EmptyState icon="search" title="No pages yet" text="The first sync reads the sitemap." compact />}
         </section>
         <section className="adm-card">
@@ -369,6 +426,7 @@ async function Opportunities({ sp }: { sp: Search }) {
   return (
     <>
       <Filters tab="opportunities" name="kind" value={kind} options={OPP_KINDS} />
+      {kind === "not_indexed" && page === 0 && <Unindexed />}
       <section className="adm-card">
         <p className="adm-muted seo-small">{help} Recomputed daily from the last 28 days of Search Console data.</p>
         {rows.length ? (
