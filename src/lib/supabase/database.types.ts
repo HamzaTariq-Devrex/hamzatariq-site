@@ -604,6 +604,456 @@ export type Database = {
         }
         Relationships: []
       }
+      seo_cwv: {
+        Row: {
+          day: string
+          field_category: string | null
+          field_cls: number | null
+          field_inp_ms: number | null
+          field_lcp_ms: number | null
+          field_source: string | null
+          lab_cls: number | null
+          lab_lcp_ms: number | null
+          lab_tbt_ms: number | null
+          performance: number | null
+          template: string
+          url: string
+        }
+        Insert: {
+          day: string
+          field_category?: string | null
+          field_cls?: number | null
+          field_inp_ms?: number | null
+          field_lcp_ms?: number | null
+          field_source?: string | null
+          lab_cls?: number | null
+          lab_lcp_ms?: number | null
+          lab_tbt_ms?: number | null
+          performance?: number | null
+          template: string
+          url: string
+        }
+        Update: {
+          day?: string
+          field_category?: string | null
+          field_cls?: number | null
+          field_inp_ms?: number | null
+          field_lcp_ms?: number | null
+          field_source?: string | null
+          lab_cls?: number | null
+          lab_lcp_ms?: number | null
+          lab_tbt_ms?: number | null
+          performance?: number | null
+          template?: string
+          url?: string
+        }
+        Relationships: []
+      }
+      seo_fixes: {
+        Row: {
+          after: Json | null
+          approved_at: string | null
+          attempts: number
+          baseline: Json | null
+          change: string
+          commit: string | null
+          created_at: string
+          data: Json
+          done_at: string | null
+          id: string
+          key: string
+          note: string | null
+          page: string | null
+          reason: string
+          risk: string
+          status: string
+          title: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          after?: Json | null
+          approved_at?: string | null
+          attempts?: number
+          baseline?: Json | null
+          change: string
+          commit?: string | null
+          created_at?: string
+          data?: Json
+          done_at?: string | null
+          id?: string
+          key: string
+          note?: string | null
+          page?: string | null
+          reason: string
+          risk: string
+          status: string
+          title: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          after?: Json | null
+          approved_at?: string | null
+          attempts?: number
+          baseline?: Json | null
+          change?: string
+          commit?: string | null
+          created_at?: string
+          data?: Json
+          done_at?: string | null
+          id?: string
+          key?: string
+          note?: string | null
+          page?: string | null
+          reason?: string
+          risk?: string
+          status?: string
+          title?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      seo_issues: {
+        Row: {
+          detail: string
+          first_seen: string
+          fix_key: string | null
+          last_seen: string
+          path: string
+          resolved_at: string | null
+          severity: string
+          type: string
+        }
+        Insert: {
+          detail: string
+          first_seen?: string
+          fix_key?: string | null
+          last_seen?: string
+          path: string
+          resolved_at?: string | null
+          severity: string
+          type: string
+        }
+        Update: {
+          detail?: string
+          first_seen?: string
+          fix_key?: string | null
+          last_seen?: string
+          path?: string
+          resolved_at?: string | null
+          severity?: string
+          type?: string
+        }
+        Relationships: []
+      }
+      seo_keywords: {
+        Row: {
+          clicks: number
+          cluster: string | null
+          data: Json
+          first_seen: string
+          has_page: boolean
+          impressions: number
+          intent: string | null
+          keyword: string
+          page: string | null
+          position: number | null
+          sources: string[]
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          clicks?: number
+          cluster?: string | null
+          data?: Json
+          first_seen?: string
+          has_page?: boolean
+          impressions?: number
+          intent?: string | null
+          keyword: string
+          page?: string | null
+          position?: number | null
+          sources?: string[]
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          clicks?: number
+          cluster?: string | null
+          data?: Json
+          first_seen?: string
+          has_page?: boolean
+          impressions?: number
+          intent?: string | null
+          keyword?: string
+          page?: string | null
+          position?: number | null
+          sources?: string[]
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      seo_links: {
+        Row: {
+          checked_at: string | null
+          error: string | null
+          fail_count: number
+          found_on: string[]
+          status: number | null
+          url: string
+        }
+        Insert: {
+          checked_at?: string | null
+          error?: string | null
+          fail_count?: number
+          found_on?: string[]
+          status?: number | null
+          url: string
+        }
+        Update: {
+          checked_at?: string | null
+          error?: string | null
+          fail_count?: number
+          found_on?: string[]
+          status?: number | null
+          url?: string
+        }
+        Relationships: []
+      }
+      seo_opportunities: {
+        Row: {
+          computed_at: string
+          data: Json
+          fix_key: string | null
+          id: number
+          kind: string
+          page: string | null
+          query: string | null
+          score: number
+        }
+        Insert: {
+          computed_at?: string
+          data?: Json
+          fix_key?: string | null
+          id?: never
+          kind: string
+          page?: string | null
+          query?: string | null
+          score?: number
+        }
+        Update: {
+          computed_at?: string
+          data?: Json
+          fix_key?: string | null
+          id?: never
+          kind?: string
+          page?: string | null
+          query?: string | null
+          score?: number
+        }
+        Relationships: []
+      }
+      seo_pages: {
+        Row: {
+          canonical: string | null
+          coverage_state: string | null
+          crawled_at: string | null
+          description: string | null
+          external_links: string[]
+          google_canonical: string | null
+          h1_count: number | null
+          has_jsonld: boolean | null
+          has_og: boolean | null
+          images_missing_alt: number | null
+          in_sitemap: boolean
+          index_verdict: string | null
+          indexing_state: string | null
+          inspected_at: string | null
+          last_google_crawl: string | null
+          links_out: string[]
+          noindex: boolean | null
+          page_fetch_state: string | null
+          path: string
+          redirect_to: string | null
+          response_ms: number | null
+          robots_state: string | null
+          status: number | null
+          template: string
+          title: string | null
+          words: number | null
+        }
+        Insert: {
+          canonical?: string | null
+          coverage_state?: string | null
+          crawled_at?: string | null
+          description?: string | null
+          external_links?: string[]
+          google_canonical?: string | null
+          h1_count?: number | null
+          has_jsonld?: boolean | null
+          has_og?: boolean | null
+          images_missing_alt?: number | null
+          in_sitemap?: boolean
+          index_verdict?: string | null
+          indexing_state?: string | null
+          inspected_at?: string | null
+          last_google_crawl?: string | null
+          links_out?: string[]
+          noindex?: boolean | null
+          page_fetch_state?: string | null
+          path: string
+          redirect_to?: string | null
+          response_ms?: number | null
+          robots_state?: string | null
+          status?: number | null
+          template: string
+          title?: string | null
+          words?: number | null
+        }
+        Update: {
+          canonical?: string | null
+          coverage_state?: string | null
+          crawled_at?: string | null
+          description?: string | null
+          external_links?: string[]
+          google_canonical?: string | null
+          h1_count?: number | null
+          has_jsonld?: boolean | null
+          has_og?: boolean | null
+          images_missing_alt?: number | null
+          in_sitemap?: boolean
+          index_verdict?: string | null
+          indexing_state?: string | null
+          inspected_at?: string | null
+          last_google_crawl?: string | null
+          links_out?: string[]
+          noindex?: boolean | null
+          page_fetch_state?: string | null
+          path?: string
+          redirect_to?: string | null
+          response_ms?: number | null
+          robots_state?: string | null
+          status?: number | null
+          template?: string
+          title?: string | null
+          words?: number | null
+        }
+        Relationships: []
+      }
+      seo_search: {
+        Row: {
+          clicks: number
+          day: string
+          engine: string
+          impressions: number
+          page: string
+          position: number | null
+          query: string
+        }
+        Insert: {
+          clicks?: number
+          day: string
+          engine: string
+          impressions?: number
+          page?: string
+          position?: number | null
+          query?: string
+        }
+        Update: {
+          clicks?: number
+          day?: string
+          engine?: string
+          impressions?: number
+          page?: string
+          position?: number | null
+          query?: string
+        }
+        Relationships: []
+      }
+      seo_sitemaps: {
+        Row: {
+          errors: number | null
+          indexed: number | null
+          is_pending: boolean | null
+          last_downloaded: string | null
+          last_submitted: string | null
+          path: string
+          submitted: number | null
+          synced_at: string
+          warnings: number | null
+        }
+        Insert: {
+          errors?: number | null
+          indexed?: number | null
+          is_pending?: boolean | null
+          last_downloaded?: string | null
+          last_submitted?: string | null
+          path: string
+          submitted?: number | null
+          synced_at?: string
+          warnings?: number | null
+        }
+        Update: {
+          errors?: number | null
+          indexed?: number | null
+          is_pending?: boolean | null
+          last_downloaded?: string | null
+          last_submitted?: string | null
+          path?: string
+          submitted?: number | null
+          synced_at?: string
+          warnings?: number | null
+        }
+        Relationships: []
+      }
+      seo_state: {
+        Row: {
+          analysed_at: string | null
+          bing_synced_at: string | null
+          crawl_list_at: string | null
+          cwv_synced_at: string | null
+          gsc_backfill_before: string | null
+          gsc_backfill_done: boolean
+          gsc_synced_at: string | null
+          id: number
+          last_run: Json | null
+          last_run_at: string | null
+          sitemaps_synced_at: string | null
+          weekly_sent_on: string | null
+        }
+        Insert: {
+          analysed_at?: string | null
+          bing_synced_at?: string | null
+          crawl_list_at?: string | null
+          cwv_synced_at?: string | null
+          gsc_backfill_before?: string | null
+          gsc_backfill_done?: boolean
+          gsc_synced_at?: string | null
+          id?: number
+          last_run?: Json | null
+          last_run_at?: string | null
+          sitemaps_synced_at?: string | null
+          weekly_sent_on?: string | null
+        }
+        Update: {
+          analysed_at?: string | null
+          bing_synced_at?: string | null
+          crawl_list_at?: string | null
+          cwv_synced_at?: string | null
+          gsc_backfill_before?: string | null
+          gsc_backfill_done?: boolean
+          gsc_synced_at?: string | null
+          id?: number
+          last_run?: Json | null
+          last_run_at?: string | null
+          sitemaps_synced_at?: string | null
+          weekly_sent_on?: string | null
+        }
+        Relationships: []
+      }
       site_chunks: {
         Row: {
           chunk_index: number
@@ -688,6 +1138,27 @@ export type Database = {
       app_admin_overview: { Args: { p_secret: string }; Returns: Json }
       app_admin_prospect_stats: {
         Args: { p_days: number; p_secret: string }
+        Returns: Json
+      }
+      app_admin_seo_overview: { Args: { p_secret: string }; Returns: Json }
+      app_admin_seo_pages: {
+        Args: {
+          p_limit: number
+          p_offset: number
+          p_search: string
+          p_secret: string
+          p_sort: string
+        }
+        Returns: Json
+      }
+      app_admin_seo_queries: {
+        Args: {
+          p_limit: number
+          p_offset: number
+          p_search: string
+          p_secret: string
+          p_sort: string
+        }
         Returns: Json
       }
       app_audit_recent_count: {
@@ -938,6 +1409,195 @@ export type Database = {
         }
         Returns: string
       }
+      app_seo_add_fixes: {
+        Args: { p_rows: Json; p_secret: string }
+        Returns: number
+      }
+      app_seo_agg: {
+        Args: {
+          p_engine: string
+          p_from: string
+          p_kind: string
+          p_secret: string
+          p_to: string
+        }
+        Returns: Json
+      }
+      app_seo_all_links: {
+        Args: { p_secret: string }
+        Returns: {
+          checked_at: string | null
+          error: string | null
+          fail_count: number
+          found_on: string[]
+          status: number | null
+          url: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "seo_links"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      app_seo_all_pages: {
+        Args: { p_secret: string }
+        Returns: {
+          canonical: string | null
+          coverage_state: string | null
+          crawled_at: string | null
+          description: string | null
+          external_links: string[]
+          google_canonical: string | null
+          h1_count: number | null
+          has_jsonld: boolean | null
+          has_og: boolean | null
+          images_missing_alt: number | null
+          in_sitemap: boolean
+          index_verdict: string | null
+          indexing_state: string | null
+          inspected_at: string | null
+          last_google_crawl: string | null
+          links_out: string[]
+          noindex: boolean | null
+          page_fetch_state: string | null
+          path: string
+          redirect_to: string | null
+          response_ms: number | null
+          robots_state: string | null
+          status: number | null
+          template: string
+          title: string | null
+          words: number | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "seo_pages"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      app_seo_cwv_latest: {
+        Args: { p_secret: string }
+        Returns: {
+          day: string
+          field_category: string | null
+          field_cls: number | null
+          field_inp_ms: number | null
+          field_lcp_ms: number | null
+          field_source: string | null
+          lab_cls: number | null
+          lab_lcp_ms: number | null
+          lab_tbt_ms: number | null
+          performance: number | null
+          template: string
+          url: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "seo_cwv"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      app_seo_cwv_measured_today: {
+        Args: { p_secret: string }
+        Returns: string[]
+      }
+      app_seo_fix_decide: {
+        Args: { p_decision: string; p_id: string; p_secret: string }
+        Returns: undefined
+      }
+      app_seo_fix_mark: {
+        Args: {
+          p_commit: string
+          p_id: string
+          p_note: string
+          p_secret: string
+          p_status: string
+        }
+        Returns: Json
+      }
+      app_seo_fix_queue: {
+        Args: { p_limit: number; p_secret: string }
+        Returns: Json
+      }
+      app_seo_keyword_decide: {
+        Args: { p_decision: string; p_keyword: string; p_secret: string }
+        Returns: undefined
+      }
+      app_seo_latest_day: {
+        Args: { p_engine: string; p_secret: string }
+        Returns: string
+      }
+      app_seo_links_due: {
+        Args: { p_limit: number; p_secret: string }
+        Returns: string[]
+      }
+      app_seo_monthly: {
+        Args: { p_from: string; p_secret: string; p_to: string }
+        Returns: Json
+      }
+      app_seo_pages_due: {
+        Args: {
+          p_kind: string
+          p_limit: number
+          p_older_than_hours: number
+          p_secret: string
+        }
+        Returns: string[]
+      }
+      app_seo_register_links: {
+        Args: { p_rows: Json; p_secret: string }
+        Returns: undefined
+      }
+      app_seo_replace_issues: {
+        Args: { p_rows: Json; p_secret: string }
+        Returns: undefined
+      }
+      app_seo_replace_opportunities: {
+        Args: { p_rows: Json; p_secret: string }
+        Returns: undefined
+      }
+      app_seo_save_crawl: {
+        Args: { p_rows: Json; p_secret: string }
+        Returns: undefined
+      }
+      app_seo_save_cwv: {
+        Args: { p_row: Json; p_secret: string }
+        Returns: undefined
+      }
+      app_seo_save_inspection: {
+        Args: { p_rows: Json; p_secret: string }
+        Returns: undefined
+      }
+      app_seo_save_links: {
+        Args: { p_rows: Json; p_secret: string }
+        Returns: undefined
+      }
+      app_seo_save_sitemaps: {
+        Args: { p_rows: Json; p_secret: string }
+        Returns: undefined
+      }
+      app_seo_set_sitemap_paths: {
+        Args: { p_rows: Json; p_secret: string }
+        Returns: undefined
+      }
+      app_seo_set_state: {
+        Args: { p_patch: Json; p_secret: string }
+        Returns: undefined
+      }
+      app_seo_state: { Args: { p_secret: string }; Returns: Json }
+      app_seo_track_fixes: { Args: { p_secret: string }; Returns: number }
+      app_seo_upsert_keywords: {
+        Args: { p_rows: Json; p_secret: string }
+        Returns: undefined
+      }
+      app_seo_upsert_search: {
+        Args: { p_rows: Json; p_secret: string }
+        Returns: number
+      }
+      app_seo_weekly: { Args: { p_secret: string }; Returns: Json }
       app_top_questions: {
         Args: { p_days?: number; p_limit?: number; p_secret: string }
         Returns: {

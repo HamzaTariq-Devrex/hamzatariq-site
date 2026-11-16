@@ -39,3 +39,7 @@ next-env.d.ts
 
 # Supabase CLI local state
 supabase/.temp
+
+# Search Console service-account key (goes into GSC_SERVICE_ACCOUNT_JSON, never committed)
+gsc-key.json
+*-key.json

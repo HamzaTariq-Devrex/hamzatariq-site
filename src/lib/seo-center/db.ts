@@ -70,7 +70,7 @@ export type CwvRow = {
   field_source: string | null;
 };
 
-export type LinkRow ={ url: string; status: number | null; error: string | null; checked_at: string | null; found_on: string[] };
+export type LinkRow ={ url: string; status: number | null; error: string | null; checked_at: string | null; found_on: string[]; fail_count: number };
 export type AggRow = { page: string; query: string; clicks: number; impressions: number; position: number | null };
 
 export type SearchRow = { engine: "google" | "bing"; day: string; page: string; query: string; clicks: number; impressions: number; position: number | null };

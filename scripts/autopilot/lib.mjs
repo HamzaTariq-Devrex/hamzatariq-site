@@ -143,7 +143,7 @@ const gscToken = async () => {
 
 /** Search Analytics rows for the last `days` days (ending 3 days ago, when GSC data is complete). */
 export const gscQuery = async ({ dimensions, days = 28, rowLimit = 250 }) => {
-  const site = process.env.GSC_SITE_URL || "sc-domain:hamzatariq.site";
+  const site = process.env.GSC_SITE_URL || "https://hamzatariq.site/";
   const end = addDays(todayPkt(), -3);
   const start = addDays(end, -days + 1);
   const token = await gscToken();

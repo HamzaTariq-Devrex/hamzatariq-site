@@ -28,7 +28,7 @@ So in new posts, link outside sources on the trusted domains. A link elsewhere c
 | --- | --- | --- |
 | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVER_SECRET` | Assistant top questions, leads per source, SEO audit stats | Yes (already in `.env.local`) |
 | `GSC_SERVICE_ACCOUNT_JSON` | Search Console queries and positions (service account JSON, raw or base64) | Optional (not set up yet: refills use the assistant's questions only, monthly runs skip the Search Console parts) |
-| `GSC_SITE_URL` | Search Console property, default `sc-domain:hamzatariq.site` | Optional |
+| `GSC_SITE_URL` | Search Console property, default `https://hamzatariq.site/` (URL-prefix property) | Optional |
 
 Search Console setup: create a service account in Google Cloud, enable the "Google Search Console API", download its JSON key, and add the service account email as a user (Restricted is enough) on the hamzatariq.site property.
 

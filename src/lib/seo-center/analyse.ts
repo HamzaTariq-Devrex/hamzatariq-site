@@ -18,8 +18,9 @@ const fileNote = (path: string) => (contentFileOf(path) ? ` (${contentFileOf(pat
 
 /** Status codes that usually mean "bots not welcome", not "page gone". Not counted as broken. */
 const BOT_BLOCK = new Set([401, 403, 405, 429, 999]);
-const isBroken = (status: number | null, error: string | null) =>
-  status != null ? status >= 400 && !BOT_BLOCK.has(status) : !!error && /doesn't exist|refused|certificate/i.test(error);
+/** Broken only after failing on two separate checks (one failure can be a network hiccup). */
+const isBroken = (l: LinkRow) =>
+  l.fail_count >= 2 && (l.status != null ? l.status >= 400 && !BOT_BLOCK.has(l.status) : !!l.error && /doesn't exist|refused|certificate/i.test(l.error));
 
 export const crawlIssues = (pages: PageRow[], links: LinkRow[], cwv: CwvRow[]) => {
   const live = pages.filter((p) => p.in_sitemap && p.crawled_at);
@@ -165,7 +166,7 @@ export const crawlIssues = (pages: PageRow[], links: LinkRow[], cwv: CwvRow[]) =
     for (const to of p.links_out) {
       const st = statusOf.get(to);
       const l = linkStatus.get(`${SITE_ORIGIN}${to}`);
-      if ((st != null && (st === 0 || st >= 400)) || (st == null && l && isBroken(l.status, l.error))) broken.push(to);
+      if ((st != null && (st === 0 || st >= 400)) || (st == null && l && isBroken(l))) broken.push(to);
     }
     if (broken.length)
       add(p.path, "broken-link", "error", `Links to missing page(s): ${broken.join(", ")}.`, {
@@ -178,7 +179,7 @@ export const crawlIssues = (pages: PageRow[], links: LinkRow[], cwv: CwvRow[]) =
       });
     const badOut = p.external_links.filter((u) => {
       const l = linkStatus.get(u);
-      return l && isBroken(l.status, l.error);
+      return l && isBroken(l);
     });
     if (badOut.length)
       add(p.path, "broken-outside-link", "warning", `Outside link(s) not working: ${badOut.join(", ")}.`, {
@@ -332,7 +333,8 @@ export const searchOpportunities = (d: SearchData, pages: PageRow[]) => {
     const state = p.coverage_state ?? p.index_verdict ?? "Unknown";
     const soft = /crawled - currently not indexed|discovered - currently not indexed|unknown to google/i.test(state);
     let key: string | null = null;
-    if (!young) {
+    const unknown = /unknown to google/i.test(state);
+    if (!young && !(unknown && !isSafePage(p.path))) {
       key = isSafePage(p.path) && soft
         ? addFix({ key: `index:${p.path}`, type: "internal-links", risk: "safe", page: p.path, title: `Get ${p.path} indexed`, change: `Add descriptive links to it from 2–3 related older posts, and refresh the post (answer the brief's questions better, add information gain, set updated: to today)${fileNote(p.path)}.`, reason: `URL Inspection: "${state}" (checked ${p.inspected_at?.slice(0, 10)}).`, data: { state } })
         : addFix({ key: `index:${p.path}`, type: "index", risk: "risky", page: p.path, title: `Not indexed: ${p.path}`, change: `Google says "${state}". Find the cause (robots, noindex, canonical, redirect, sitemap or thin content) and fix it.`, reason: `URL Inspection: "${state}", robots ${p.robots_state ?? "n/a"}, fetch ${p.page_fetch_state ?? "n/a"}, Google canonical ${p.google_canonical ?? "n/a"} (checked ${p.inspected_at?.slice(0, 10)}).`, data: { state, robots: p.robots_state, fetch: p.page_fetch_state, googleCanonical: p.google_canonical } });
@@ -366,6 +368,7 @@ export const keywordIdeas = (d: SearchData | null, bingRelated: { seed: string; 
     const k = keyword.toLowerCase().replace(/\s+/g, " ").trim();
     if (!k || BRAND.test(k) || OFF_LIMITS.test(k) || words(k).length < 2 || k.length > 120) return;
     const target = targetFor(k);
+    if (target?.target.kind === "project") return; // a client's own name: navigational, not a topic
     const planned = plannedFor(k);
     const cur = ideas.get(k) ?? {
       keyword: k,

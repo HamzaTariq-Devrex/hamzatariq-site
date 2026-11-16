@@ -6,7 +6,7 @@ import { SITE } from "@/lib/site";
 export const SITE_ORIGIN = SITE.url;
 
 /** Search Console property (domain property by default). */
-export const gscSite = () => process.env.GSC_SITE_URL?.trim() || "sc-domain:hamzatariq.site";
+export const gscSite = () => process.env.GSC_SITE_URL?.trim() || "https://hamzatariq.site/";
 
 export const RULES = {
   /** <title> length (CLAUDE.md: titles under 60 characters). */

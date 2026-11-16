@@ -6,6 +6,7 @@ import { join } from "node:path";
 import matter from "gray-matter";
 import { SERVICES } from "@/data/services";
 import { TOOLS } from "@/data/tools";
+import { PROJECTS } from "@/data/projects";
 import { getSolutions } from "@/lib/solutions";
 import { CLUSTERS } from "@/lib/blog";
 import backlog from "../../../content/backlog.json";
@@ -36,7 +37,7 @@ export const overlap = (query: string, phrase: string) => {
 
 export type Target = {
   path: string;
-  kind: "post" | "service" | "solution" | "tool";
+  kind: "post" | "service" | "solution" | "tool" | "project";
   keyword: string;
   /** Main keyword, secondary keywords, H2/H3 headings and FAQ questions. */
   phrases: string[];
@@ -70,6 +71,8 @@ export const siteTargets = (): Target[] => {
   }
   for (const s of SERVICES) list.push({ path: `/services/${s.slug}`, kind: "service", keyword: s.keyword, phrases: [s.keyword, s.name, ...s.faqs.map((f) => f.q)], cluster: CLUSTERS.find((c) => c.servicePage === `/services/${s.slug}`)?.id ?? null });
   for (const s of getSolutions()) list.push({ path: `/solutions/${s.slug}`, kind: "solution", keyword: s.keyword, phrases: [s.keyword, s.title, ...s.faq.map((f) => f.q)], cluster: null });
+  // Client project pages answer searches for the client's own name (navigational queries).
+  for (const p of PROJECTS) list.push({ path: `/work/${p.slug}`, kind: "project", keyword: p.title, phrases: [p.title, p.domain ?? ""].filter(Boolean), cluster: null });
   for (const t of TOOLS) list.push({ path: t.href, kind: "tool", keyword: t.keyword, phrases: [t.keyword, t.name], cluster: null });
   cached = list;
   return list;

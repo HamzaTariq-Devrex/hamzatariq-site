@@ -33,8 +33,15 @@ const main = async () => {
     for (const to of p.links_out) if (!inSitemap.has(to)) urls.add(`${SITE_ORIGIN}${to}`);
     for (const u of p.external_links) urls.add(u);
   }
+  const failed = (c: { status: number | null }) => c.status == null || c.status >= 400;
   const checked = await pool([...urls], 8, Date.now() + 5 * 60_000, checkLink);
-  const links: LinkRow[] = checked.map((c) => ({ ...c, checked_at: now, found_on: [] }));
+  // Re-check failures once after a pause: a link is broken only when it fails twice.
+  await new Promise((r) => setTimeout(r, 5000));
+  const again = new Map((await pool(checked.filter(failed).map((c) => c.url), 4, Date.now() + 2 * 60_000, checkLink)).map((c) => [c.url, c]));
+  const links: LinkRow[] = checked.map((c) => {
+    const second = again.get(c.url);
+    return { ...(second ?? c), checked_at: now, found_on: [], fail_count: failed(c) ? (second && failed(second) ? 2 : 0) : 0 };
+  });
   const { issues, fixes } = crawlIssues(pages, links, []);
   if (process.env.JSON === "1") {
     console.log(JSON.stringify({ pages: pages.length, links: links.length, issues, fixes }, null, 2));
