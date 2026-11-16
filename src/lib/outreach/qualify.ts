@@ -11,7 +11,7 @@ import { ox, type Prospect } from "./db";
 import { CHAIN_LOCATIONS, isBigOrganisation, isStoreLocatorPage, instagramOf, normalizeInstagram } from "./osm";
 import { waitingForAddress } from "./address";
 import { findings, mobileSeconds } from "./problems";
-import { nounFor } from "./osm-types";
+import { nounFor, takesBookings } from "./osm-types";
 
 export const MAX_AUDIT_SCORE = 85;
 
@@ -190,7 +190,7 @@ export const qualify = async (p: Prospect): Promise<string> => {
   const instagram = extras?.instagram ?? osmInstagram;
   const phone = p.phone ?? extras?.phone ?? null;
   // Nothing real to say: no finding we can name in plain words.
-  if (!findings(audit, { noun: nounFor(p.business_type, p.osm_tags), city: p.city }).length) {
+  if (!findings(audit, { noun: nounFor(p.business_type, p.osm_tags), city: p.city, bookings: takesBookings(p.business_type) }).length) {
     await ox.updateProspect(p.id, { audit_score: audit.score });
     return skip(p, "No clear problem to mention").then(() => "skipped");
   }

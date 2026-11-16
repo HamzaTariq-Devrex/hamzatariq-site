@@ -26,7 +26,7 @@ export const mobileSeconds = (a: AuditResult | null) => {
   return Number.isFinite(s) ? Math.round(s * 10) / 10 : null;
 };
 
-export const findings = (a: AuditResult | null, ctx: { noun: string; city: string | null }): Finding[] => {
+export const findings = (a: AuditResult | null, ctx: { noun: string; city: string | null; bookings?: boolean }): Finding[] => {
   const where = ctx.city ? ` in ${ctx.city}` : "";
   const article = /^[aeiou]/i.test(ctx.noun) ? "an" : "a";
   if (!a) {
@@ -64,9 +64,14 @@ export const findings = (a: AuditResult | null, ctx: { noun: string; city: strin
     out.push({
       id: "no-contact",
       rank: 2,
-      cost: "there's no quick way to call, WhatsApp or book from your homepage, so visitors who are ready to get in touch have to hunt for it",
+      // "book" only for niches that take bookings; shops and offices get call or WhatsApp.
+      cost: ctx.bookings
+        ? "there's no quick way to call, WhatsApp or book from your homepage, so visitors who are ready to get in touch have to hunt for it"
+        : "there's no quick way to call or WhatsApp you from your homepage, so visitors who are ready to get in touch have to hunt for it",
       title: "No quick way to get in touch",
-      fix: "Add a clear call, WhatsApp or booking button at the top of the homepage, visible without scrolling on a phone.",
+      fix: ctx.bookings
+        ? "Add a clear call, WhatsApp or booking button at the top of the homepage, visible without scrolling on a phone."
+        : "Add a clear call or WhatsApp button at the top of the homepage, visible without scrolling on a phone.",
     });
   }
   if (bad(check(a, "title"))) {

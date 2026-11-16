@@ -68,6 +68,10 @@ export const BUSINESS_TYPES = {
 export type BusinessType = keyof typeof BUSINESS_TYPES;
 export const isBusinessType = (v: string): v is BusinessType => v in BUSINESS_TYPES;
 
+/** Niches whose customers book (owner, 2026-11-16): only these hear "book" in the contact finding. */
+const BOOKING_GROUPS = new Set(["clinic", "salon", "restaurant", "gym", "hotel", "education", "home"]);
+export const takesBookings = (type: string) => isBusinessType(type) && BOOKING_GROUPS.has(BUSINESS_TYPES[type].group);
+
 /** The word for this business in an email, using its own OSM tag where that's more precise. */
 export const nounFor = (type: string, tags: Record<string, string> = {}) => {
   if (tags.craft) return { plumber: "plumber", electrician: "electrician", hvac: "heating engineer", carpenter: "carpenter", painter: "painter and decorator", roofer: "roofer" }[tags.craft] ?? "tradesperson";

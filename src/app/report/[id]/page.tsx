@@ -10,7 +10,7 @@ import { IMAGE_BASE } from "@/data/projects";
 import { ox } from "@/lib/outreach/db";
 import { relatedProject } from "@/lib/outreach/compose";
 import { findings } from "@/lib/outreach/problems";
-import { nounFor } from "@/lib/outreach/osm-types";
+import { nounFor, takesBookings } from "@/lib/outreach/osm-types";
 import { formatDate } from "@/lib/admin/labels";
 import "@/components/styles/Audit.css";
 
@@ -58,7 +58,7 @@ export default async function ReportPage({ params }: { params: Promise<{ id: str
   }
 
   const result = r.result;
-  const top = findings(result, { noun: nounFor(r.business_type), city: r.city }).slice(0, 3);
+  const top = findings(result, { noun: nounFor(r.business_type), city: r.city, bookings: takesBookings(r.business_type) }).slice(0, 3);
   const project = relatedProject(r.business_type);
   const shot = result?.pagespeed?.screenshot;
 

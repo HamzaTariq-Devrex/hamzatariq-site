@@ -16,7 +16,7 @@ import { SITE } from "@/lib/site";
 import { getTestimonial } from "@/lib/testimonials";
 import { PROJECTS } from "@/data/projects";
 import type { AuditResult } from "@/lib/audit/types";
-import { groupOf, nounFor, type NicheGroup } from "./osm-types";
+import { groupOf, nounFor, takesBookings, type NicheGroup } from "./osm-types";
 import { findings, type Finding } from "./problems";
 import type { Prospect, ProspectAudit } from "./db";
 
@@ -110,8 +110,10 @@ const BANNED =
 const LINK = /https?:\/\/|www\.|\b[a-z0-9-]+\.(com|co\.uk|org\.uk|uk|org|net|io|ae|ca|com\.au|au|site|shop|store|online|biz|info)\b/i;
 
 /** Problems with an email 1 draft (empty = OK). The plain "hamzatariq.site" in the signature is allowed. */
-export const checkEmail1 = (body: string, subject: string, facts: string) => {
+export const checkEmail1 = (body: string, subject: string, facts: string, bookings = true) => {
   const problems: string[] = [];
+  // Shops and offices don't take bookings: "book" only for booking niches (owner, 2026-11-16).
+  if (!bookings && /\bbook(s|ed|ing|ings)?\b/i.test(body)) problems.push('it mentions booking, but this business does not take bookings (say "call or WhatsApp")');
   const text = body.replaceAll("hamzatariq.site", "");
   if (LINK.test(text)) problems.push("it contains a link or web address (email 1 must have no links)");
   const banned = text.match(BANNED);
@@ -142,7 +144,7 @@ const ownerProfile = () => {
 export type Draft = { subject: string; body: string; variant: "A" | "B" | null; source: "gemini" | "template" };
 
 const lead = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
-const ctx = (p: Prospect) => ({ noun: nounFor(p.business_type, p.osm_tags), city: p.city });
+const ctx = (p: Pick<Prospect, "business_type" | "osm_tags" | "city">) => ({ noun: nounFor(p.business_type, p.osm_tags ?? {}), city: p.city, bookings: takesBookings(p.business_type) });
 export const prospectFindings = (p: Prospect, audit: AuditResult | null) => findings(audit, ctx(p));
 
 /** The CTA never promises more fixes than the audit really found. */
@@ -183,7 +185,7 @@ export const draftEmail1 = async (p: Prospect, auditRow: ProspectAudit | null): 
     assemble1(p, templateMiddle(p, f) + pad, f),
     assemble1(p, templateMiddle(p, f), f, false),
     assemble1(p, templateMiddle(p, f) + pad, f, false),
-  ].find((b) => !checkEmail1(b, subject, facts).length);
+  ].find((b) => !checkEmail1(b, subject, facts, takesBookings(p.business_type)).length);
   const noDraft = () => {
     if (!fallback) throw new Error("Email 1 could not meet the rules (60-90 words, no links, no technical words).");
     return { subject, body: fallback, variant, source: "template" as const, findings: f };
@@ -221,7 +223,7 @@ ${ownerProfile()}`;
       const out = JSON.parse(res.text ?? "{}") as { middle?: string };
       if (!out.middle) throw new Error("empty");
       const body = assemble1(p, out.middle, f);
-      const problems = checkEmail1(body, subject, facts);
+      const problems = checkEmail1(body, subject, facts, takesBookings(p.business_type));
       if (!problems.length) return { subject, body, variant, source: "gemini", findings: f };
       feedback = `\n\nYour last draft was rejected because ${problems.join("; ")}. Rewrite it.`;
     } catch {
@@ -287,7 +289,7 @@ const reSubject = (s: string) => (/^re:/i.test(s) ? s : `Re: ${s}`);
 
 /** WhatsApp / Instagram message (2-3 lines): one real problem, one question, no links. */
 export const manualMessage = (p: Pick<Prospect, "name" | "business_type" | "osm_tags" | "city">, audit: AuditResult | null) => {
-  const f = findings(audit, { noun: nounFor(p.business_type, p.osm_tags ?? {}), city: p.city });
+  const f = findings(audit, ctx(p));
   if (!f.length) return `Hi ${p.name} team, I'm Hamza, a web developer who helps small businesses get more enquiries online. Would a few ideas for your website be useful?`;
   const problem = f[0].id === "no-website" ? `${lead(f[0].cost)}.` : `I had a look at your website and noticed ${f[0].cost}.`;
   return `Hi ${p.name} team, I'm Hamza, a web developer.\n${problem}\n${cta(f)}`;
