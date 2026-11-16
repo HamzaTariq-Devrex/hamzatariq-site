@@ -10,7 +10,7 @@ import type { AuditExtras, AuditResult } from "@/lib/audit/types";
 import { ox, type Prospect } from "./db";
 import { CHAIN_LOCATIONS, domainOf, isBigOrganisation, isStoreLocatorPage, instagramOf, normalizeInstagram } from "./osm";
 import { verifyNoWebsite } from "./site-check";
-import type { Flags } from "./checks";
+import { COMPANY_PAGE, type Flags } from "./checks";
 import { waitingForAddress } from "./address";
 import { findings, mobileSeconds } from "./problems";
 import { nounFor, takesBookings } from "./osm-types";
@@ -223,6 +223,7 @@ export const qualify = async (p: Prospect): Promise<string> => {
   // Audit confidence notes for the automatic checks.
   const flags: Flags = {};
   if (page && visibleTextLength(page.body) < 300) flags.jsPage = true;
+  if (page && COMPANY_PAGE.test(parse(page.body, { comment: false }).textContent)) flags.companyOnSite = true;
   const from = domainOf(p.website);
   const to = domainOf(audit.finalUrl);
   if (from && to && from !== to && !to.endsWith(`.${from}`) && !from.endsWith(`.${to}`)) flags.redirectOther = to;

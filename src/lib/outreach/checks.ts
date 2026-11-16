@@ -25,7 +25,20 @@ export type Flags = {
   jsPage?: boolean;
   /** The website redirects to a different domain (a parent brand, a directory, social media). */
   redirectOther?: string;
+  /** The website shows company signs (Ltd/Limited/LLP/PLC, "Registered in England", a company number). */
+  companyOnSite?: boolean;
 };
+
+/**
+ * UK sole traders (owner, 2026-11-16): PECR treats sole traders and partnerships like individuals,
+ * so cold email needs their prior consent. Typical one-person trades in the UK without a company
+ * sign in the name or on the website are held in "Needs a look" (and expire) instead of sent.
+ */
+const ONE_PERSON_TRADES = new Set(["plumber", "electrician", "barber", "cleaning", "roofer", "home-services"]);
+export const COMPANY_NAME = /\b(ltd|limited|llp|plc|l\.t\.d)\b\.?/i;
+export const COMPANY_PAGE = /\b(ltd|limited|llp|plc)\b|registered in (england|scotland|wales|northern ireland)|company (no\.?|number|reg(istration)?( no\.?| number)?)\s*:?\s*\d/i;
+export const looksLikeUkSoleTrader = (p: Pick<Prospect, "country" | "business_type" | "name" | "flags">) =>
+  p.country === "GB" && ONE_PERSON_TRADES.has(p.business_type) && !COMPANY_NAME.test(p.name) && !(p.flags as Flags | undefined)?.companyOnSite;
 
 const CHAIN_WORDS = /\b(group|holdings|international|franchise|worldwide|global|nationwide|national|express|outlet|superstore|megastore)\b/i;
 
@@ -79,6 +92,7 @@ export const autoCheck = async (p: Prospect, audit: AuditResult | null, f: Findi
   }
   if (flags.redirectOther) return { kind: "review", reason: `Low audit confidence: the website redirects to ${flags.redirectOther}` };
   if (flags.jsPage && f[0].id === "no-contact") return { kind: "review", reason: "Low audit confidence: the page is built with JavaScript, so the contact-button check may be wrong" };
+  if (looksLikeUkSoleTrader(p)) return { kind: "review", reason: "Possible UK sole trader (no Ltd/Limited in the name or on the site): needs prior consent under PECR" };
   const odd = oddName(p.name);
   if (odd) return { kind: "review", reason: `Odd business name (${odd})` };
   if ((await ox.nameCount(p.name)) >= CHAIN_LOCATIONS - 1) return { kind: "review", reason: "Possible chain: the same name at another location" };

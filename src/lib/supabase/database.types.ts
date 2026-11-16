@@ -193,6 +193,42 @@ export type Database = {
         }
         Relationships: []
       }
+      outreach_coverage: {
+        Row: {
+          attempts: number
+          business_type: string
+          city: string
+          country: string
+          done_at: string | null
+          error: string | null
+          found: number
+          region: string
+          updated_at: string
+        }
+        Insert: {
+          attempts?: number
+          business_type: string
+          city: string
+          country: string
+          done_at?: string | null
+          error?: string | null
+          found?: number
+          region: string
+          updated_at?: string
+        }
+        Update: {
+          attempts?: number
+          business_type?: string
+          city?: string
+          country?: string
+          done_at?: string | null
+          error?: string | null
+          found?: number
+          region?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       outreach_messages: {
         Row: {
           approved_at: string | null
@@ -205,6 +241,7 @@ export type Database = {
           kind: string
           message_id: string | null
           prospect_id: string
+          review_reason: string | null
           sent_at: string | null
           status: string
           step: number | null
@@ -222,6 +259,7 @@ export type Database = {
           kind?: string
           message_id?: string | null
           prospect_id: string
+          review_reason?: string | null
           sent_at?: string | null
           status?: string
           step?: number | null
@@ -239,6 +277,7 @@ export type Database = {
           kind?: string
           message_id?: string | null
           prospect_id?: string
+          review_reason?: string | null
           sent_at?: string | null
           status?: string
           step?: number | null
@@ -386,6 +425,35 @@ export type Database = {
           },
         ]
       }
+      prospect_previews: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          prospect_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          prospect_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          prospect_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prospect_previews_prospect_id_fkey"
+            columns: ["prospect_id"]
+            isOneToOne: true
+            referencedRelation: "prospects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       prospects: {
         Row: {
           audit_score: number | null
@@ -396,6 +464,7 @@ export type Database = {
           domain: string | null
           email: string | null
           email_source: string | null
+          flags: Json
           id: string
           instagram: string | null
           last_contacted_at: string | null
@@ -407,6 +476,9 @@ export type Database = {
           osm_id: string
           osm_tags: Json
           phone: string | null
+          preview_id: string | null
+          qualified_at: string | null
+          region: string | null
           reply_class: string | null
           search_id: string | null
           skip_reason: string | null
@@ -426,6 +498,7 @@ export type Database = {
           domain?: string | null
           email?: string | null
           email_source?: string | null
+          flags?: Json
           id?: string
           instagram?: string | null
           last_contacted_at?: string | null
@@ -437,6 +510,9 @@ export type Database = {
           osm_id: string
           osm_tags?: Json
           phone?: string | null
+          preview_id?: string | null
+          qualified_at?: string | null
+          region?: string | null
           reply_class?: string | null
           search_id?: string | null
           skip_reason?: string | null
@@ -456,6 +532,7 @@ export type Database = {
           domain?: string | null
           email?: string | null
           email_source?: string | null
+          flags?: Json
           id?: string
           instagram?: string | null
           last_contacted_at?: string | null
@@ -467,6 +544,9 @@ export type Database = {
           osm_id?: string
           osm_tags?: Json
           phone?: string | null
+          preview_id?: string | null
+          qualified_at?: string | null
+          region?: string | null
           reply_class?: string | null
           search_id?: string | null
           skip_reason?: string | null
@@ -722,7 +802,24 @@ export type Database = {
         Args: { p_key: string; p_secret: string; p_value: Json }
         Returns: undefined
       }
+      app_ox_coverage: { Args: { p_secret: string }; Returns: Json }
+      app_ox_coverage_mark: {
+        Args: {
+          p_city: string
+          p_country: string
+          p_error: string
+          p_found: number
+          p_region: string
+          p_secret: string
+          p_type: string
+        }
+        Returns: undefined
+      }
       app_ox_cron_status: { Args: { p_secret: string }; Returns: Json }
+      app_ox_daily_summary: {
+        Args: { p_from: string; p_secret: string; p_to: string }
+        Returns: Json
+      }
       app_ox_delete_draft: {
         Args: { p_id: string; p_secret: string }
         Returns: string
@@ -731,6 +828,7 @@ export type Database = {
         Args: { p_email: string; p_exclude: string; p_secret: string }
         Returns: boolean
       }
+      app_ox_expire_reviews: { Args: { p_secret: string }; Returns: number }
       app_ox_is_suppressed: {
         Args: { p_email: string; p_exclude?: string; p_secret: string }
         Returns: boolean
@@ -746,6 +844,15 @@ export type Database = {
       app_ox_name_count: {
         Args: { p_name: string; p_secret: string }
         Returns: number
+      }
+      app_ox_niche_stats: { Args: { p_secret: string }; Returns: Json }
+      app_ox_preview: {
+        Args: { p_id: string; p_secret: string }
+        Returns: Json
+      }
+      app_ox_preview_create: {
+        Args: { p_prospect: string; p_secret: string }
+        Returns: string
       }
       app_ox_prospect: {
         Args: { p_id: string; p_secret: string }
