@@ -8,7 +8,8 @@ import { runAudit } from "@/lib/audit/run";
 import { AuditFetchError, normalizeUrl, safeFetch, type FetchResult } from "@/lib/audit/safe-fetch";
 import type { AuditExtras, AuditResult } from "@/lib/audit/types";
 import { ox, type Prospect } from "./db";
-import { isBigOrganisation, instagramOf, normalizeInstagram } from "./osm";
+import { CHAIN_LOCATIONS, isBigOrganisation, isStoreLocatorPage, instagramOf, normalizeInstagram } from "./osm";
+import { waitingForAddress } from "./address";
 import { findings, mobileSeconds } from "./problems";
 import { nounFor } from "./osm-types";
 
@@ -144,8 +145,14 @@ const skip = (p: Prospect, reason: string) => ox.updateProspect(p.id, { status: 
 /** Runs the whole qualification for one prospect and stores the outcome. */
 export const qualify = async (p: Prospect): Promise<string> => {
   // Chains, franchises, big brands, government, schools and hospitals: never.
+  // US and Canada wait (kept, not skipped) until a postal address is set (CAN-SPAM / CASL).
+  if (waitingForAddress(p.country)) {
+    await ox.updateProspect(p.id, { status: "waiting", skip_reason: "Waiting for a postal address (CAN-SPAM / CASL)" });
+    return "waiting for address";
+  }
   if (isBigOrganisation(p.osm_tags, p.name)) return skip(p, "Chain, brand or public body").then(() => "skipped");
-  if (p.country === "US") return skip(p, "US paused until a postal address is set").then(() => "skipped");
+  if (isStoreLocatorPage(p.website)) return skip(p, "Store-locator page of a bigger site").then(() => "skipped");
+  if ((await ox.nameCount(p.name)) >= CHAIN_LOCATIONS) return skip(p, `Same name at ${CHAIN_LOCATIONS}+ locations (chain)`).then(() => "skipped");
   const osmInstagram = instagramOf(p.osm_tags);
 
   if (!p.website) {

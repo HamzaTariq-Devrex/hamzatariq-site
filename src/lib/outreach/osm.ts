@@ -2,6 +2,7 @@
 // inside it that have a website, phone or email tag. Both services ask for an identifying
 // User-Agent, at most 1 request per second and caching, so every response is cached in Supabase.
 import { ox, type Country, type Search } from "./db";
+import { waitingForAddress } from "./address";
 
 export const USER_AGENT = "HamzaTariqOutreach/1.0 (+https://hamzatariq.site)";
 
@@ -135,13 +136,45 @@ export const normalizeInstagram = (raw: string) => {
   return /^[a-z0-9._]{2,30}$/i.test(handle) && !["p", "reel", "explore", "accounts", "stories"].includes(handle.toLowerCase()) ? `https://www.instagram.com/${handle}/` : null;
 };
 
-/** Chains, franchises, big brands, government, schools and hospitals are never prospects. */
+const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "");
+
+/** An operator tag naming a different (bigger) company than the place itself. */
+const runByOther = (tags: Record<string, string>, name: string) => {
+  const op = norm(tags.operator ?? "");
+  const n = norm(name);
+  return !!op && op.length > 2 && !n.includes(op.slice(0, 6)) && !op.includes(n.slice(0, 6));
+};
+
+/**
+ * Chains, franchises, big brands, government, schools and hospitals are never prospects: any brand,
+ * brand:wikidata or wikidata tag (a place notable enough for Wikidata is a known brand), an operator
+ * that is another company or has a Wikidata entry, public operators, and public-body names.
+ */
 export const isBigOrganisation = (tags: Record<string, string>, name: string) =>
-  !!(tags.brand || tags["brand:wikidata"] || tags["operator:wikidata"] || tags["brand:wikipedia"]) ||
+  !!(tags.brand || tags["brand:wikidata"] || tags["brand:wikipedia"] || tags.wikidata || tags.wikipedia || tags["operator:wikidata"]) ||
+  runByOther(tags, name) ||
   ["government", "public", "national", "regional", "municipal"].includes((tags["operator:type"] ?? "").toLowerCase()) ||
   ["hospital", "school", "college", "university", "kindergarten"].includes(tags.amenity ?? "") ||
   /\b(nhs|council|borough|government|ministry|university|college|hospital|primary school|secondary school|academy trust|police)\b/i.test(name);
 
+/** A website that is a store-locator / branch page of a bigger domain, not the business's own site. */
+export const isStoreLocatorPage = (url: string | null) => {
+  if (!url) return false;
+  try {
+    const u = new URL(url);
+    const path = `${u.pathname.replace(/\/+$/, "")}/`.toLowerCase();
+    return (
+      /\/(stores?|store-?locator|store-?finder|find-?(a|us|your)-?(store|shop|branch)|locations?|branch(es)?|our-?(shops|stores|branches|locations)|boutiques?|retailers?|stockists?|brand-directory|directory|showrooms?)\//.test(path) ||
+      /\/visit-[^/]+\//.test(path) ||
+      /[?&](id_?store|store_?id|location_?id|branch_?id|storeid)=/i.test(u.search)
+    );
+  } catch {
+    return false;
+  }
+};
+
+/** Names at this many locations across all saved searches are treated as a chain. */
+export const CHAIN_LOCATIONS = 3;
 export const domainOf = (url: string | null) => {
   if (!url) return null;
   try {
@@ -153,8 +186,8 @@ export const domainOf = (url: string | null) => {
 
 /** Discovery for one saved search: adds up to `budget` new businesses, returns how many. */
 export const discover = async (search: Search, budget: number) => {
-  // No US until a postal address is in the footer (CAN-SPAM).
-  if (!isBusinessType(search.business_type) || budget <= 0 || search.country === "US") return 0;
+  // No US or Canada until a postal address is set (CAN-SPAM / CASL).
+  if (!isBusinessType(search.business_type) || budget <= 0 || waitingForAddress(search.country)) return 0;
   const place = await findCity(search.city, search.country);
   const timezone = timezoneFor(search.country, place.lat, place.lon);
   const businesses = await findBusinesses(search.business_type, place);
@@ -165,8 +198,11 @@ export const discover = async (search: Search, budget: number) => {
   let added = 0;
   for (const b of businesses) {
     if (added >= budget) break;
-    if (isBigOrganisation(b.tags, b.name) || (nameCount.get(key(b.name)) ?? 0) >= 3) continue;
+    if (isBigOrganisation(b.tags, b.name) || (nameCount.get(key(b.name)) ?? 0) >= CHAIN_LOCATIONS) continue;
     const website = websiteOf(b.tags);
+    if (isStoreLocatorPage(website)) continue;
+    // The same name already found in other searches: with this one it would be 3+ locations.
+    if ((await ox.nameCount(b.name)) >= CHAIN_LOCATIONS - 1) continue;
     const id = await ox.addProspect({
       search_id: search.id,
       osm_id: b.osmId,

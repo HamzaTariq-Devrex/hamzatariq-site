@@ -1,13 +1,9 @@
-# Outreach scheduler (free on a public repo): Vercel Hobby crons run at most once a day, so this
-# calls the protected tick endpoint every 5 minutes. Each tick: hourly inbox check (replies,
-# bounces, unsubscribes), auto-pause, at most ONE email (Mon-Fri 9-17 in the recipient's time
-# zone, 3-8 minute gaps, daily cap), one site audit, drafts and follow-ups.
-# GitHub may delay scheduled runs; the endpoint's own rules decide what happens.
+# Manual outreach tick. The schedule now runs in Supabase (pg_cron + pg_net every 5 minutes, bearer
+# secret in Vault; migration 20261116190000), which is on time where GitHub's cron was often delayed.
+# Kept for "Run workflow" by hand; no schedule here, so two ticks never race on a send.
 name: Outreach tick
 
 on:
-  schedule:
-    - cron: "*/5 * * * *"
   workflow_dispatch:
 
 concurrency:

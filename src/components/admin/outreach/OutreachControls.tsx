@@ -6,7 +6,9 @@ import { formatDate } from "@/lib/admin/labels";
 import { processNow, setApproveFirst, setPaused } from "@/app/admin/(dashboard)/prospects/actions";
 
 type Props = {
-  settings: { paused: boolean; pauseReason: string | null; approveFirst: boolean; startedAt: string | null; nextSendAt: string | null; lastImapAt: string | null };
+  settings: { paused: boolean; pauseReason: string | null; approveFirst: boolean; startedAt: string | null; nextSendAt: string | null; lastImapAt: string | null; lastTickAt: string | null };
+  /** pg_cron job active with its Vault secret; null when unknown. */
+  scheduler: boolean | null;
   sent24h: number;
   cap: number;
 };
@@ -14,7 +16,7 @@ type Props = {
 const weekOf = (startedAt: string | null) => (startedAt ? Math.floor((Date.now() - Date.parse(startedAt)) / (7 * 86_400_000)) + 1 : null);
 
 /** Global pause switch, approve-first switch and today's sending numbers. */
-const OutreachControls = ({ settings, sent24h, cap }: Props) => {
+const OutreachControls = ({ settings, sent24h, cap, scheduler }: Props) => {
   const router = useRouter();
   const [pending, start] = useTransition();
   const [message, setMessage] = useState<{ error: boolean; text: string } | null>(null);
@@ -65,6 +67,13 @@ const OutreachControls = ({ settings, sent24h, cap }: Props) => {
         <div>
           <dt>Next send</dt>
           <dd>{settings.nextSendAt && Date.parse(settings.nextSendAt) > Date.now() ? formatDate(settings.nextSendAt) : "When approved and in hours"}</dd>
+        </div>
+        <div>
+          <dt>Last tick</dt>
+          <dd>
+            {settings.lastTickAt ? formatDate(settings.lastTickAt) : "Not yet"}
+            {scheduler === false && <span className="adm-error"> · scheduler not set up</span>}
+          </dd>
         </div>
         <div>
           <dt>Inbox checked</dt>

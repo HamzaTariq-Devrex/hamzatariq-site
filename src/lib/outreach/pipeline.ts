@@ -9,8 +9,9 @@ import { sendOwnerAlert } from "@/lib/leads/email";
 import { ox, type Prospect, type State } from "./db";
 import { discover, setOsmDeadline } from "./osm";
 import { qualify } from "./qualify";
-import { draftCheckBack, draftDay3, draftDay7, draftEmail1, draftHotReply, postalAddress, prospectFindings, reportUrl, subjectFor } from "./compose";
+import { draftCheckBack, draftDay3, draftDay7, draftEmail1, draftHotReply, prospectFindings, reportUrl, subjectFor } from "./compose";
 import { classifyReply, type ReplyClass } from "./classify";
+import { postalAddress, waitingForAddress, withAddress } from "./address";
 import { readInbox, sendOutreach } from "./mail";
 
 /** Discovery is separate from sending: up to 150 new businesses a day across all saved searches. */
@@ -40,7 +41,7 @@ const randomGapMs = () => (4 + Math.random() * 7) * 60_000;
 /** Searches in rotation order: never run first, then the one that ran longest ago. */
 const rotation = (state: State) =>
   state.searches
-    .filter((s) => s.country !== "US")
+    .filter((s) => !waitingForAddress(s.country))
     .sort((a, b) => (a.last_run_at ? Date.parse(a.last_run_at) : 0) - (b.last_run_at ? Date.parse(b.last_run_at) : 0));
 
 /**
@@ -114,7 +115,7 @@ const handleHotReply = async (p: Prospect, cls: ReplyClass, text: string, subjec
   const first = thread.find((m) => m.direction === "out" && m.step === 0);
   const audit = await ox.latestAudit(p.id);
   const d = draftHotReply(p, first?.subject ?? subject, audit?.report_id && audit.result ? reportUrl(audit.report_id) : null);
-  await ox.addMessage({ prospect_id: p.id, step: 3, status: "draft", subject: d.subject, body: d.body, in_reply_to: first?.message_id ?? null });
+  await ox.addMessage({ prospect_id: p.id, step: 3, status: "draft", subject: d.subject, body: withAddress(p.country, d.body), in_reply_to: first?.message_id ?? null });
   const transcript = thread.map((m) => `--- ${m.direction === "out" ? "You" : p.name} (${m.kind}, ${m.sent_at ?? m.created_at})\n${m.body}`).join("\n\n");
   await sendOwnerAlert(
     `Hot reply (${cls === "question" ? "question" : "interested"}): ${p.name}`,
@@ -202,9 +203,9 @@ export const sendNext = async (state: State, now = new Date()) => {
   if (state.sent_24h >= cap) return `daily cap reached (${state.sent_24h}/${cap})`;
   const queue = await ox.approved(100);
   // US businesses wait until a postal address is set (CAN-SPAM).
-  const usAllowed = !!postalAddress();
+  // US and Canada wait until a postal address is set (CAN-SPAM / CASL).
   const next = queue.find(
-    (q) => q.prospect.email && (usAllowed || q.prospect.country !== "US") && inSendingWindow(q.prospect.timezone, now) && (q.message.step === 0 || q.thread?.message_id),
+    (q) => q.prospect.email && !waitingForAddress(q.prospect.country) && inSendingWindow(q.prospect.timezone, now) && (q.message.step === 0 || q.thread?.message_id),
   );
   if (!next) return queue.length ? "no recipient inside 9:00-17:00 Mon-Fri right now" : "nothing approved";
   const p = next.prospect;
@@ -216,7 +217,7 @@ export const sendNext = async (state: State, now = new Date()) => {
     return `skipped: ${blocked}`;
   }
   try {
-    const messageId = await sendOutreach({ to: p.email!, subject: next.message.subject, body: next.message.body, threadId: next.message.step === 0 ? null : next.thread?.message_id });
+    const messageId = await sendOutreach({ to: p.email!, subject: next.message.subject, body: withAddress(p.country, next.message.body), threadId: next.message.step === 0 ? null : next.thread?.message_id });
     const at = now.toISOString();
     await ox.updateMessage(next.message.id, { status: "sent", message_id: messageId, sent_at: at, in_reply_to: next.message.step === 0 ? null : (next.thread?.message_id ?? null) });
     if ((next.message.step ?? 0) <= 2) await ox.updateProspect(p.id, { status: "emailed", last_contacted_at: at });
@@ -240,7 +241,7 @@ export const draftNew = async (state: State, limit: number, onlyProspect?: strin
     if (!p.audit) continue;
     try {
       const d = await draftEmail1(p, p.audit);
-      await ox.addMessage({ prospect_id: p.id, step: 0, ...status(state), subject: d.subject, body: d.body, variant: d.variant });
+      await ox.addMessage({ prospect_id: p.id, step: 0, ...status(state), subject: d.subject, body: withAddress(p.country, d.body), variant: d.variant });
       made++;
     } catch (e) {
       await ox.updateProspect(p.id, { status: "skipped", skip_reason: (e as Error).message.slice(0, 200) });
@@ -258,7 +259,7 @@ export const draftFollowUps = async (state: State, limit: number) => {
       step === 1
         ? draftDay3(f.prospect, f.first.subject, f.audit ? reportUrl(f.audit.report_id) : SITE.url, prospectFindings(f.prospect, f.audit?.result ?? null))
         : draftDay7(f.prospect, f.first.subject);
-    await ox.addMessage({ prospect_id: f.prospect.id, step, ...status(state), subject: d.subject, body: d.body, in_reply_to: f.first.message_id });
+    await ox.addMessage({ prospect_id: f.prospect.id, step, ...status(state), subject: d.subject, body: withAddress(f.prospect.country, d.body), in_reply_to: f.first.message_id });
   }
   return due.length;
 };
@@ -269,7 +270,7 @@ export const draftCheckBacks = async (state: State, limit: number) => {
   for (const c of due) {
     const audit = await ox.latestAudit(c.prospect.id);
     const d = draftCheckBack(c.prospect, c.first?.subject ?? subjectFor(c.prospect, "A"), prospectFindings(c.prospect, audit?.result ?? null));
-    await ox.addMessage({ prospect_id: c.prospect.id, step: 4, ...status(state), subject: d.subject, body: d.body, in_reply_to: c.first?.message_id ?? null });
+    await ox.addMessage({ prospect_id: c.prospect.id, step: 4, ...status(state), subject: d.subject, body: withAddress(c.prospect.country, d.body), in_reply_to: c.first?.message_id ?? null });
   }
   return due.length;
 };
@@ -282,6 +283,10 @@ export const tick = async (phases: Phase[] = [...PHASES], budgetMs = 50_000) => 
   const start = Date.now();
   const left = () => budgetMs - (Date.now() - start);
   const report: Record<string, unknown> = {};
+  // "Last tick" in /admin/prospects shows the scheduler is running.
+  await ox.set({ last_tick_at: new Date().toISOString() });
+  // Address now set: US/Canadian prospects that were waiting go back through qualification.
+  if (postalAddress()) report.released = await ox.releaseWaiting();
   let state = await ox.state();
 
   // Replies, bounces and "no"s are handled before anything is sent.

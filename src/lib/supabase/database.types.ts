@@ -306,6 +306,7 @@ export type Database = {
           id: number
           last_imap_at: string | null
           last_imap_uid: number | null
+          last_tick_at: string | null
           next_send_at: string | null
           pause_reason: string | null
           paused: boolean
@@ -318,6 +319,7 @@ export type Database = {
           id?: number
           last_imap_at?: string | null
           last_imap_uid?: number | null
+          last_tick_at?: string | null
           next_send_at?: string | null
           pause_reason?: string | null
           paused?: boolean
@@ -330,6 +332,7 @@ export type Database = {
           id?: number
           last_imap_at?: string | null
           last_imap_uid?: number | null
+          last_tick_at?: string | null
           next_send_at?: string | null
           pause_reason?: string | null
           paused?: boolean
@@ -719,6 +722,7 @@ export type Database = {
         Args: { p_key: string; p_secret: string; p_value: Json }
         Returns: undefined
       }
+      app_ox_cron_status: { Args: { p_secret: string }; Returns: Json }
       app_ox_delete_draft: {
         Args: { p_id: string; p_secret: string }
         Returns: string
@@ -739,10 +743,16 @@ export type Database = {
         Args: { p_id: string; p_secret: string }
         Returns: Json
       }
+      app_ox_name_count: {
+        Args: { p_name: string; p_secret: string }
+        Returns: number
+      }
       app_ox_prospect: {
         Args: { p_id: string; p_secret: string }
         Returns: Json
       }
+      app_ox_recheck_list: { Args: { p_secret: string }; Returns: Json }
+      app_ox_release_waiting: { Args: { p_secret: string }; Returns: number }
       app_ox_report: {
         Args: { p_report: string; p_secret: string }
         Returns: Json
@@ -765,6 +775,14 @@ export type Database = {
       }
       app_ox_set: {
         Args: { p_patch: Json; p_secret: string }
+        Returns: undefined
+      }
+      app_ox_set_cron_secret: {
+        Args: { p_secret: string; p_value: string }
+        Returns: undefined
+      }
+      app_ox_skip: {
+        Args: { p_id: string; p_reason: string; p_secret: string }
         Returns: undefined
       }
       app_ox_state: { Args: { p_secret: string }; Returns: Json }

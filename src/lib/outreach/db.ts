@@ -15,6 +15,7 @@ export type Settings = {
   next_send_at: string | null;
   last_imap_at: string | null;
   last_imap_uid: number | null;
+  last_tick_at?: string | null;
 };
 
 export type Search = {
@@ -121,6 +122,12 @@ export const ox = {
   prospect: async (id: string) => (await ox.detail(id))?.prospect ?? null,
   latestAudit: async (id: string) => (await ox.detail(id))?.audit ?? null,
   thread: async (id: string) => (await ox.detail(id))?.thread ?? [],
+  nameCount: (name: string) => call<number>("app_ox_name_count", { p_name: name }),
+  skip: (id: string, reason: string) => call<void>("app_ox_skip", { p_id: id, p_reason: reason }),
+  recheckList: () => call<{ id: string; name: string; website: string | null; osm_tags: Record<string, string>; status: string; name_count: number }[]>("app_ox_recheck_list", {}),
+  releaseWaiting: () => call<number>("app_ox_release_waiting", {}),
+  setCronSecret: (value: string) => call<void>("app_ox_set_cron_secret", { p_value: value }),
+  cronStatus: () => call<{ secret_set: boolean; job: { schedule: string; active: boolean } | null }>("app_ox_cron_status", {}),
   sentIds: () => call<{ message_id: string; prospect_id: string; email: string; name: string }[]>("app_ox_list", { p_kind: "sent_ids", p_limit: 0 }),
   updateProspect: (id: string, patch: Record<string, unknown>) => call<void>("app_ox_update_prospect", { p_id: id, p_patch: json(patch) }),
   saveAudit: (prospect: string, url: string, finalUrl: string | null, score: number | null, result: unknown) =>

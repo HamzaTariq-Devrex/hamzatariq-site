@@ -14,6 +14,7 @@ import ProspectsBrowser from "@/components/admin/outreach/ProspectsBrowser";
 import WhatsAppQueue, { type QueueItem } from "@/components/admin/outreach/WhatsAppQueue";
 import { typeLabel } from "@/components/admin/outreach/prospect-shared";
 import { dailyCap } from "@/lib/outreach/pipeline";
+import { ox } from "@/lib/outreach/db";
 import { manualMessage } from "@/lib/outreach/compose";
 import type { AuditResult } from "@/lib/audit/types";
 import { listProspects } from "./actions";
@@ -37,7 +38,7 @@ const DRAFT_COLUMNS = "id, step, subject, body, created_at, variant, prospect:pr
 const stats = cache(() => getOutreachStats());
 const dayStats = cache(() => getProspectStats(DAYS));
 const db = async () => (await getOwner())!.supabase; // the layout redirects when signed out
-const settings = cache(async () => (await db()).from("outreach_settings").select("paused, pause_reason, approve_first, started_at, next_send_at, last_imap_at").eq("id", 1).single());
+const settings = cache(async () => (await db()).from("outreach_settings").select("paused, pause_reason, approve_first, started_at, next_send_at, last_imap_at, last_tick_at").eq("id", 1).single());
 
 const Failed = ({ what, message }: { what: string; message: string }) => (
   <p className="adm-error" role="alert">
@@ -57,11 +58,12 @@ const Pager = ({ tab, page, total }: { tab: Tab; page: number; total: number }) 
   ) : null;
 
 async function Controls() {
-  const [{ data: s, error }, st] = await Promise.all([settings(), dayStats()]);
+  const [{ data: s, error }, st, cron] = await Promise.all([settings(), dayStats(), ox.cronStatus().catch(() => null)]);
   if (error || !s) return <Failed what="outreach settings" message={error?.message ?? "missing"} />;
   return (
     <OutreachControls
-      settings={{ paused: s.paused, pauseReason: s.pause_reason, approveFirst: s.approve_first, startedAt: s.started_at, nextSendAt: s.next_send_at, lastImapAt: s.last_imap_at }}
+      settings={{ paused: s.paused, pauseReason: s.pause_reason, approveFirst: s.approve_first, startedAt: s.started_at, nextSendAt: s.next_send_at, lastImapAt: s.last_imap_at, lastTickAt: s.last_tick_at }}
+      scheduler={cron ? cron.secret_set && !!cron.job?.active : null}
       sent24h={st.sent_24h}
       cap={dailyCap(s.started_at)}
     />

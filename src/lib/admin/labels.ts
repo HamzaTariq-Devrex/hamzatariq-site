@@ -66,12 +66,13 @@ export const formatDate = (date: string, withTime = true) =>
 
 // ---------- Outreach (/admin/prospects) ----------
 
-export const PROSPECT_STATUSES = ["found", "audited", "skipped", "whatsapp", "messaged", "emailed", "replied", "call", "won", "lost", "unsubscribed", "bounced"] as const;
+export const PROSPECT_STATUSES = ["found", "audited", "skipped", "waiting", "whatsapp", "messaged", "emailed", "replied", "call", "won", "lost", "unsubscribed", "bounced"] as const;
 export type ProspectStatus = (typeof PROSPECT_STATUSES)[number];
 export const PROSPECT_STATUS_LABELS: Record<ProspectStatus, string> = {
   found: "New",
   audited: "Audited",
   skipped: "Skipped",
+  waiting: "Waiting (US/CA address)",
   whatsapp: "WhatsApp queue",
   messaged: "WhatsApp sent",
   emailed: "Emailed",

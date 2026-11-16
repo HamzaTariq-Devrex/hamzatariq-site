@@ -22,8 +22,7 @@ import type { Prospect, ProspectAudit } from "./db";
 
 export const SIGNATURE = "Hamza Tariq\nFounder, Devrex Digital · hamzatariq.site";
 export const OPT_OUT = "Not interested? Just reply 'no' and I won't email again.";
-/** Postal address (OUTREACH_POSTAL_ADDRESS). US businesses are only emailed once it is set (CAN-SPAM). */
-export const postalAddress = () => process.env.OUTREACH_POSTAL_ADDRESS?.trim() || "";
+export { postalAddress, withAddress } from "./address";
 
 export const reportUrl = (reportId: string) => `${SITE.url}/report/${reportId}`;
 

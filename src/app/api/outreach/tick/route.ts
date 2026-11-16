@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 /**
- * Outreach scheduler tick (GitHub Actions every 5 minutes, see .github/workflows/outreach-tick.yml):
+ * Outreach scheduler tick (Supabase pg_cron every 5 minutes, migration 20261116190000):
  * hourly inbox check, auto-pause, at most one email, one audit, drafts and follow-ups.
  * `?phases=audit,draft` limits what runs (local tests leave out "send").
  */
