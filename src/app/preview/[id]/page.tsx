@@ -1,14 +1,16 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { SITE } from "@/lib/site";
-import { ox, type Preview } from "@/lib/outreach/db";
-import { groupOf, nounFor, type NicheGroup } from "@/lib/outreach/osm-types";
+import { ox } from "@/lib/outreach/db";
+import { groupOf, nounFor } from "@/lib/outreach/osm-types";
+import { EXAMPLES, addressLine, directionsUrl, hoursRows, telUrl, templateFor, whatsappUrl, type Example } from "@/lib/outreach/preview-templates";
 import "@/components/styles/Preview.css";
 
-// Homepage concept for a business with no website (owner, 2026-11-16). Only their public details
-// from OpenStreetMap: name, niche, address, phone, opening hours. No invented reviews, prices,
-// awards, photos of people or claims; no form that collects data; the only button is "Call".
-// Private: noindex, not in the sitemap, an unguessable id, clearly labelled, expires after 30 days.
+// Homepage concept for a business with no website (owner, 2026-11-16). A premium one-page design
+// per niche family, filled only with public OpenStreetMap facts (name, niche, address, phone,
+// opening hours, WhatsApp when listed). Everything else is an "Example section" with empty cards.
+// No invented reviews, prices, services, awards, photos of people or claims; no forms; no site
+// header or name of ours (only the concept label and the small footer). Private: noindex, not in
+// the sitemap, an unguessable id, expires after 30 days.
 export const dynamic = "force-dynamic";
 
 const ID = /^[a-f0-9]{24}$/;
@@ -18,66 +20,106 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const { id } = await params;
   const p = await load(id);
   return {
-    title: p ? `Homepage concept for ${p.name}` : "Homepage concept",
-    description: "A homepage concept made by Devrex Digital from public details. Not the business's official website.",
+    // Absolute: no "| Hamza Tariq" suffix, no site name in the tab.
+    title: { absolute: p ? `${p.name} · homepage concept` : "Homepage concept" },
+    description: "A homepage concept made from public details. Not the business's official website.",
+    applicationName: "Homepage concept",
+    authors: [{ name: "Devrex Digital" }],
+    creator: "Devrex Digital",
     robots: { index: false, follow: false, nocache: true },
     alternates: { canonical: `/preview/${id}` },
   };
 }
 
-/** Placeholder blocks per niche: where their real content would go (labelled, never invented). */
-const SLOTS: Record<NicheGroup, [string, string, string]> = {
-  jewellery: ["Your collections", "Photos of your pieces", "Your story"],
-  fashion: ["Your latest collection", "Photos of your shop", "Sizes and styles"],
-  ecommerce: ["Your products", "Photos of your shop", "Delivery and returns"],
-  clinic: ["Your treatments", "Your team", "How to book a visit"],
-  restaurant: ["Your menu", "Photos of your food", "Your story"],
-  salon: ["Your services and prices", "Photos of your work", "How to book"],
-  realestate: ["Your listings", "Areas you cover", "How to reach you"],
-  gym: ["Classes and timetable", "Membership options", "Photos of your space"],
-  law: ["Your services", "Who you help", "How to reach you"],
-  accounting: ["Your services", "Who you help", "How to reach you"],
-  hotel: ["Your rooms", "Photos of your place", "Getting here"],
-  auto: ["Your services", "Photos of the garage", "How to reach you"],
-  home: ["Your services", "Areas you cover", "Photos of your work"],
-  education: ["Your courses", "Your timetable", "How to enrol"],
-  delivery: ["Your services", "Areas you cover", "How to send a parcel"],
-};
-
-const TONE: Partial<Record<NicheGroup, string>> = { clinic: "cyan", hotel: "cyan", restaurant: "blue", home: "blue", auto: "blue", delivery: "blue" };
-
-const DAY: Record<string, string> = { Mo: "Mon", Tu: "Tue", We: "Wed", Th: "Thu", Fr: "Fri", Sa: "Sat", Su: "Sun", PH: "Public holidays" };
-
-/** OpenStreetMap opening_hours ("Mo-Fr 09:00-17:30; Sa 10:00-16:00") as readable lines. */
-const hoursLines = (raw: string | undefined) => {
-  if (!raw) return [];
-  if (raw.trim() === "24/7") return ["Open 24 hours, every day"];
-  return raw
-    .split(";")
-    .map((r) => r.trim())
-    .filter(Boolean)
-    .slice(0, 8)
-    .map((r) => r.replace(/\b(Mo|Tu|We|Th|Fr|Sa|Su|PH)\b/g, (d) => DAY[d]).replace(/\boff\b/i, "closed").replace(/,/g, ", "));
-};
-
-const address = (p: Preview) => {
-  const t = p.tags;
-  const street = [t["addr:housenumber"], t["addr:street"]].filter(Boolean).join(" ");
-  return [street, t["addr:suburb"], t["addr:city"] ?? p.city, t["addr:postcode"]].filter(Boolean).join(", ");
-};
-
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
-/** "Find us, check our opening hours and call us in one tap." from the details we really have. */
+/** "Visit us, check our opening hours and call us in one tap." from the facts we really have. */
 const lead = (parts: (string | false | null | "")[]) => {
   const p = parts.filter(Boolean) as string[];
-  if (!p.length) return "Everything about us, in one place.";
-  const text = p.length === 1 ? p[0] : `${p.slice(0, -1).join(", ")} and ${p[p.length - 1]}`;
-  return `${cap(text)}.`;
+  if (!p.length) return "Everything you need to find us, in one place.";
+  return `${cap(p.length === 1 ? p[0] : `${p.slice(0, -1).join(", ")} and ${p[p.length - 1]}`)}.`;
 };
 
-export default async function PreviewPage({ params }: { params: Promise<{ id: string }> }) {
+const Icon = ({ name }: { name: "phone" | "pin" | "clock" | "chat" | "arrow" }) => {
+  const d = {
+    phone: "M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z",
+    pin: "M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z",
+    clock: "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 10.4 3.2 1.9-.8 1.3L11 13V7h2z",
+    chat: "M12 2a10 10 0 0 0-8.7 15l-1.3 5 5.1-1.3A10 10 0 1 0 12 2zm5 13.6c-.2.6-1.2 1.2-1.7 1.2-.4 0-1 .2-3.3-.7a11 11 0 0 1-4.4-3.9c-.3-.5-1-1.5-1-2.8s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 1.9c.1.2.1.4 0 .5l-.3.5-.4.4c-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.3 2.4 1.5.3.1.5.1.6-.1l.9-1c.2-.3.4-.2.6-.1l1.8.9c.3.1.5.2.5.3.1.2.1.7-.1 1.3z",
+    arrow: "M13 5l7 7-7 7-1.4-1.4 4.6-4.6H4v-2h12.2l-4.6-4.6z",
+  }[name];
+  return (
+    <svg className="pv-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d={d} fill="currentColor" />
+    </svg>
+  );
+};
+
+const ExampleSection = ({ ex, i }: { ex: Example; i: number }) => (
+  <section className={`pv-ex is-${ex.kind}${i % 2 ? " is-alt" : ""}`} aria-label={`Example section: ${ex.title}`}>
+    <div className="pv-wrap">
+      <h2 className="pv-h2">
+        <span className="pv-ex-tag">Example section:</span> {ex.title}
+      </h2>
+      {ex.kind === "cards" && (
+        <div className="pv-cards">
+          {ex.items.map((t, n) => (
+            <figure key={n} className="pv-frame">
+              <span className="pv-frame-art" aria-hidden="true" />
+              <figcaption>{t}</figcaption>
+            </figure>
+          ))}
+        </div>
+      )}
+      {ex.kind === "list" && (
+        <ul className="pv-list">
+          {ex.items.map((t, n) => (
+            <li key={n}>
+              <span>{t}</span>
+              <span className="pv-leader" aria-hidden="true" />
+            </li>
+          ))}
+        </ul>
+      )}
+      {ex.kind === "text" && (
+        <div className="pv-textblock">
+          <p>{ex.items[0]}</p>
+          <span className="pv-bar" aria-hidden="true" />
+          <span className="pv-bar is-short" aria-hidden="true" />
+        </div>
+      )}
+      {ex.kind === "people" && (
+        <div className="pv-people">
+          {ex.items.map((t, n) => (
+            <figure key={n}>
+              <span className="pv-avatar" aria-hidden="true" />
+              <figcaption>{t}</figcaption>
+            </figure>
+          ))}
+        </div>
+      )}
+      {ex.kind === "week" && (
+        <div className="pv-week">
+          <div className="pv-week-grid" aria-hidden="true">
+            {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d) => (
+              <div key={d}>
+                <strong>{d}</strong>
+                <span />
+                <span />
+              </div>
+            ))}
+          </div>
+          <p className="pv-muted">{ex.items[0]}</p>
+        </div>
+      )}
+    </div>
+  </section>
+);
+
+export default async function PreviewPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ t?: string }> }) {
   const { id } = await params;
+  // Local and preview builds only: ?t=<template> shows the same facts in another template (design checks).
+  const forced = process.env.VERCEL_ENV !== "production" ? (await searchParams).t : undefined;
   const p = await load(id);
   if (!p) notFound();
 
@@ -89,89 +131,143 @@ export default async function PreviewPage({ params }: { params: Promise<{ id: st
 
   if (p.expired) {
     return (
-      <div className="pv">
+      <div className="pv" data-t="generic">
         {label}
         <main className="pv-expired">
-          <h1>This homepage concept has expired</h1>
-          <p>Concepts are kept for 30 days.</p>
+          <h1 className="pv-h2">This homepage concept has expired</h1>
+          <p className="pv-muted">Concepts are kept for 30 days.</p>
         </main>
       </div>
     );
   }
 
-  const group = groupOf(p.business_type) ?? "ecommerce";
+  const t = forced && forced in EXAMPLES ? (forced as keyof typeof EXAMPLES) : templateFor(groupOf(p.business_type));
   const noun = cap(nounFor(p.business_type, p.tags));
-  const where = address(p);
-  const hours = hoursLines(p.tags.opening_hours);
-  const tel = p.phone ? `tel:${p.phone.replace(/[^\d+]/g, "")}` : null;
-  const call = tel ? (
-    <a className="pv-call" href={tel}>
-      Call {p.phone}
-    </a>
-  ) : null;
+  const where = addressLine(p.tags, p.city);
+  const hours = hoursRows(p.tags.opening_hours);
+  const tel = telUrl(p.phone);
+  const wa = whatsappUrl(p.tags, p.country);
+  const maps = where || p.city ? directionsUrl(p.name, where, p.city) : null;
+  const expires = new Date(p.expires_at).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
 
   return (
-    <div className="pv" data-tone={TONE[group] ?? "violet"}>
+    <div className="pv" data-t={t}>
       {label}
-      <header className="pv-top">
-        <span className="pv-brand">{p.name}</span>
-        {call}
+      <header className="pv-nav">
+        <div className="pv-wrap pv-nav-in">
+          <span className="pv-wordmark">{p.name}</span>
+          {tel && (
+            <a className="pv-btn is-small" href={tel}>
+              <Icon name="phone" /> Call
+            </a>
+          )}
+        </div>
       </header>
+
       <main>
         <section className="pv-hero">
-          <span className="pv-eyebrow">
-            {noun}
-            {p.city ? ` · ${p.city}` : ""}
-          </span>
-          <h1>{p.name}</h1>
-          <p className="pv-lead">{lead([where && "find us", hours.length > 0 && "check our opening hours", tel && "call us in one tap"])}</p>
-          {call}
+          <div className="pv-art" aria-hidden="true">
+            <span className="pv-art-a" />
+            <span className="pv-art-b" />
+            <span className="pv-art-c" />
+          </div>
+          <div className="pv-wrap pv-hero-in">
+            <p className="pv-eyebrow">
+              {noun}
+              {p.city ? ` in ${p.city}` : ""}
+            </p>
+            <h1 className="pv-h1">{p.name}</h1>
+            <p className="pv-lead">{lead([where && "visit us", hours.length > 0 && "check our opening hours", tel && "call us in one tap"])}</p>
+            <div className="pv-actions">
+              {tel && (
+                <a className="pv-btn" href={tel}>
+                  <Icon name="phone" /> Call {p.phone}
+                </a>
+              )}
+              {maps && (
+                <a className="pv-btn is-ghost" href={maps} target="_blank" rel="noopener noreferrer">
+                  <Icon name="pin" /> Get directions
+                </a>
+              )}
+              {wa && (
+                <a className="pv-btn is-ghost" href={wa} target="_blank" rel="noopener noreferrer">
+                  <Icon name="chat" /> WhatsApp
+                </a>
+              )}
+            </div>
+          </div>
         </section>
 
-        <section className="pv-info" aria-label="Details">
-          {where && (
-            <div className="pv-card">
-              <h2>Find us</h2>
-              <p>{where}</p>
-            </div>
-          )}
-          {hours.length > 0 && (
-            <div className="pv-card">
-              <h2>Opening hours</h2>
-              <ul>
-                {hours.map((h) => (
-                  <li key={h}>{h}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-          {p.phone && (
-            <div className="pv-card">
-              <h2>Call us</h2>
-              <p>{p.phone}</p>
-            </div>
-          )}
-        </section>
+        {EXAMPLES[t].map((ex, i) => (
+          <ExampleSection key={ex.title} ex={ex} i={i} />
+        ))}
 
-        <section className="pv-slots" aria-label="Space for your own content">
-          <h2>Space for your own content</h2>
-          <p className="pv-muted">In the real site, these hold your own photos and words.</p>
-          <div className="pv-slot-grid">
-            {SLOTS[group].map((s) => (
-              <div key={s} className="pv-slot">
-                <strong>{s}</strong>
-                <span>goes here</span>
-              </div>
-            ))}
+        <section className="pv-visit" aria-label="Visit">
+          <div className="pv-wrap pv-visit-in">
+            <div className="pv-map" aria-hidden="true">
+              <span className="pv-map-pin">
+                <Icon name="pin" />
+              </span>
+            </div>
+            <div className="pv-visit-text">
+              <h2 className="pv-h2">Visit {p.name}</h2>
+              {where && (
+                <p className="pv-fact">
+                  <Icon name="pin" /> {where}
+                </p>
+              )}
+              {p.phone && (
+                <p className="pv-fact">
+                  <Icon name="phone" /> {p.phone}
+                </p>
+              )}
+              {hours.length > 0 && (
+                <div className="pv-hours">
+                  <p className="pv-fact">
+                    <Icon name="clock" /> Opening hours
+                  </p>
+                  <table>
+                    <tbody>
+                      {hours.map(([d, h], n) => (
+                        <tr key={n}>
+                          <th scope="row">{d}</th>
+                          <td>{h}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+              {maps && (
+                <a className="pv-link" href={maps} target="_blank" rel="noopener noreferrer">
+                  Get directions <Icon name="arrow" />
+                </a>
+              )}
+            </div>
           </div>
         </section>
       </main>
+
       <footer className="pv-foot">
         <p>
-          Concept by Devrex Digital ({new URL(SITE.url).host}), made only from public OpenStreetMap details. Available until{" "}
-          {new Date(p.expires_at).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}.
+          Homepage concept by Devrex Digital, made only from public OpenStreetMap details. Not the official website of {p.name}. Available until {expires}.
         </p>
       </footer>
+
+      {(tel || wa) && (
+        <div className="pv-sticky">
+          {tel && (
+            <a className="pv-btn" href={tel}>
+              <Icon name="phone" /> Call
+            </a>
+          )}
+          {wa && (
+            <a className="pv-btn is-ghost" href={wa} target="_blank" rel="noopener noreferrer">
+              <Icon name="chat" /> WhatsApp
+            </a>
+          )}
+        </div>
+      )}
     </div>
   );
 }
