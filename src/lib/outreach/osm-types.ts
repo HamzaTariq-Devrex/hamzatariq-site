@@ -15,7 +15,8 @@ export type NicheGroup =
   | "auto"
   | "home"
   | "education"
-  | "ecommerce";
+  | "ecommerce"
+  | "delivery";
 
 type TypeDef = {
   label: string;
@@ -23,6 +24,8 @@ type TypeDef = {
   noun: string;
   group: NicheGroup;
   tags: readonly (readonly [string, string])[];
+  /** Overrides the group's "takes bookings" default (e.g. bakeries are food shops, not restaurants). */
+  bookings?: boolean;
 };
 
 /** Business types for saved searches: small and medium businesses only (no schools, hospitals or government). */
@@ -56,8 +59,15 @@ export const BUSINESS_TYPES = {
     label: "Home services",
     noun: "tradesperson",
     group: "home",
-    tags: [["craft", "plumber"], ["craft", "electrician"], ["craft", "hvac"], ["craft", "carpenter"], ["craft", "painter"], ["craft", "roofer"]],
+    tags: [["craft", "hvac"], ["craft", "carpenter"], ["craft", "painter"]],
   },
+  roofer: { label: "Roofer", noun: "roofer", group: "home", tags: [["craft", "roofer"]] },
+  plumber: { label: "Plumber", noun: "plumber", group: "home", tags: [["craft", "plumber"]] },
+  electrician: { label: "Electrician", noun: "electrician", group: "home", tags: [["craft", "electrician"]] },
+  cleaning: { label: "Cleaning company", noun: "cleaning company", group: "home", tags: [["craft", "cleaning"], ["office", "cleaning"], ["shop", "dry_cleaning"]] },
+  courier: { label: "Delivery / courier", noun: "courier", group: "delivery", tags: [["office", "courier"], ["shop", "courier"], ["amenity", "courier"]] },
+  bakery: { label: "Bakery", noun: "bakery", group: "restaurant", tags: [["shop", "bakery"], ["shop", "pastry"]], bookings: false },
+  barber: { label: "Barber", noun: "barber", group: "salon", tags: [["shop", "barber"]] },
   tutoring: {
     label: "Education and tutoring",
     noun: "tutor",
@@ -70,11 +80,16 @@ export const isBusinessType = (v: string): v is BusinessType => v in BUSINESS_TY
 
 /** Niches whose customers book (owner, 2026-11-16): only these hear "book" in the contact finding. */
 const BOOKING_GROUPS = new Set(["clinic", "salon", "restaurant", "gym", "hotel", "education", "home"]);
-export const takesBookings = (type: string) => isBusinessType(type) && BOOKING_GROUPS.has(BUSINESS_TYPES[type].group);
+export const takesBookings = (type: string) => {
+  if (!isBusinessType(type)) return false;
+  const t: TypeDef = BUSINESS_TYPES[type];
+  return t.bookings ?? BOOKING_GROUPS.has(t.group);
+};
 
 /** The word for this business in an email, using its own OSM tag where that's more precise. */
 export const nounFor = (type: string, tags: Record<string, string> = {}) => {
-  if (tags.craft) return { plumber: "plumber", electrician: "electrician", hvac: "heating engineer", carpenter: "carpenter", painter: "painter and decorator", roofer: "roofer" }[tags.craft] ?? "tradesperson";
+  if (tags.craft) return { plumber: "plumber", electrician: "electrician", hvac: "heating engineer", carpenter: "carpenter", painter: "painter and decorator", roofer: "roofer", cleaning: "cleaning company" }[tags.craft] ?? "tradesperson";
+  if (tags.shop === "dry_cleaning") return "dry cleaner";
   if (tags.tourism === "hotel") return "hotel";
   if (tags.tourism === "guest_house") return "guesthouse";
   if (tags.amenity === "driving_school") return "driving school";
@@ -85,10 +100,4 @@ export const nounFor = (type: string, tags: Record<string, string> = {}) => {
 };
 export const groupOf = (type: string): NicheGroup | null => (isBusinessType(type) ? BUSINESS_TYPES[type].group : null);
 
-/** Countries searches can target. US is off until a postal address is set (CAN-SPAM). */
-export const SEARCH_COUNTRIES = [
-  ["GB", "United Kingdom"],
-  ["AE", "United Arab Emirates"],
-  ["CA", "Canada"],
-  ["AU", "Australia"],
-] as const;
+

@@ -15,6 +15,7 @@ import { CHAT_MODEL, gemini } from "@/lib/assistant/gemini";
 import { SITE } from "@/lib/site";
 import { getTestimonial } from "@/lib/testimonials";
 import { PROJECTS } from "@/data/projects";
+import { SERVICES } from "@/data/services";
 import type { AuditResult } from "@/lib/audit/types";
 import { groupOf, nounFor, takesBookings, type NicheGroup } from "./osm-types";
 import { findings, type Finding } from "./problems";
@@ -25,6 +26,7 @@ export const OPT_OUT = "Not interested? Just reply 'no' and I won't email again.
 export { postalAddress, withAddress } from "./address";
 
 export const reportUrl = (reportId: string) => `${SITE.url}/report/${reportId}`;
+export const previewUrl = (previewId: string) => `${SITE.url}/preview/${previewId}`;
 
 export const words = (s: string) => s.split(/\s+/).filter(Boolean).length;
 
@@ -90,6 +92,7 @@ const B_SUBJECT: Record<NicheGroup, string> = {
   home: "on google",
   education: "new students",
   ecommerce: "online shop",
+  delivery: "new customers",
 };
 
 /** Variant A or B, 50/50 by prospect id (stable). */
@@ -149,7 +152,8 @@ export const prospectFindings = (p: Prospect, audit: AuditResult | null) => find
 
 /** The CTA never promises more fixes than the audit really found. */
 const cta = (f: Finding[]) => {
-  if (f[0]?.id === "no-website") return "Want me to send you a few ideas for a simple website?";
+  // No website: email 1 says a homepage idea was made for them (owner's wording, 2026-11-16).
+  if (f[0]?.id === "no-website") return "Want me to send it?";
   const n = f.length;
   return n >= 3 ? "Want me to send you the 3 quick fixes I found?" : n === 2 ? "Want me to send you the 2 quick fixes I found?" : "Want me to send you the quick fix I found?";
 };
@@ -167,12 +171,33 @@ const templateMiddle = (p: Prospect, f: Finding[]) => {
   return parts.join(" ");
 };
 
+/**
+ * No website (verified, homepage concept built): fixed template, no Gemini. "I couldn't find a
+ * website for {business}, so I made a quick free homepage idea for you. Want me to send it?"
+ * The /preview link is never in email 1; it goes in the reply to a "yes" or in the day-3 email.
+ */
+const noWebsiteEmail1 = (p: Prospect, f: Finding[], subject: string, variant: "A" | "B") => {
+  const intro = "I'm Hamza, a web developer who helps small businesses get more customers online.";
+  const core = `I couldn't find a website for ${p.name}, so I made a quick free homepage idea for you.`;
+  const pad = " It only uses your public details, like your address, phone number and opening hours.";
+  const facts = [p.name, p.city ?? ""].join("\n");
+  const body = [
+    assemble1(p, `${intro} ${core}`, f),
+    assemble1(p, `${intro} ${core}${pad}`, f),
+    assemble1(p, `${intro} ${core}`, f, false),
+    assemble1(p, `${intro} ${core}${pad}`, f, false),
+  ].find((b) => !checkEmail1(b, subject, facts, takesBookings(p.business_type)).length);
+  if (!body) throw new Error("Email 1 could not meet the rules (60-90 words, no links, no technical words).");
+  return { subject, body, variant, source: "template" as const, findings: f };
+};
+
 export const draftEmail1 = async (p: Prospect, auditRow: ProspectAudit | null): Promise<Draft & { findings: Finding[] }> => {
   const audit = auditRow?.result ?? null;
   const f = prospectFindings(p, audit);
   const variant = variantFor(p.id);
   const subject = subjectFor(p, variant);
   if (!f.length) throw new Error("No real finding to write about.");
+  if (f[0].id === "no-website") return noWebsiteEmail1(p, f, subject, variant);
   const fixed = assemble1(p, "", f);
   const budget = { min: Math.max(15, 62 - words(fixed)), max: Math.max(20, 88 - words(fixed)) };
   const facts = [`${p.name}`, p.city ?? "", ...f.map((x) => x.cost), String(Math.min(3, f.length))].join("\n");
@@ -236,6 +261,21 @@ ${ownerProfile()}`;
 
 /** Day 3 (40-60 words): one more real finding in plain words + the report link (the only link). */
 export const draftDay3 = (p: Prospect, firstSubject: string, reportLink: string, f: Finding[]): Draft => {
+  // No website: the homepage concept link instead of a report.
+  if (f[0]?.id === "no-website" && p.preview_id) {
+    return {
+      subject: reSubject(firstSubject),
+      body: [
+        `Hi ${p.name} team,`,
+        `Here's the free homepage idea I made for ${p.name}, using only your public details: ${previewUrl(p.preview_id)}`,
+        "It's yours to keep, with no obligation. If you'd like a real site like it, just reply.",
+        OPT_OUT,
+        "Hamza",
+      ].join("\n\n"),
+      variant: null,
+      source: "template",
+    };
+  }
   const next = f[1];
   const body = [
     `Hi ${p.name} team,`,
@@ -255,18 +295,52 @@ export const draftDay7 = (p: Prospect, firstSubject: string): Draft => ({
   source: "template",
 });
 
-/** Reply to an interested reply or a question: Hamza edits and approves it. Report link + WhatsApp. */
-export const draftHotReply = (p: Prospect, firstSubject: string, reportLink: string | null): Draft => ({
+const whatsappLine = `If it's easier to talk it through, message me on WhatsApp: ${SITE.social.whatsapp}`;
+
+/**
+ * Automatic answer to "yes / send it / interested" (owner, 2026-11-16): the (up to) 3 real fixes in
+ * plain words + the /report or /preview link + WhatsApp, in the same thread.
+ */
+export const replyInterested = (p: Prospect, firstSubject: string, f: Finding[], reportLink: string | null): Draft => {
+  const noSite = f[0]?.id === "no-website";
+  const lines = noSite
+    ? [
+        p.preview_id
+          ? `Here's the homepage idea I made for ${p.name}: ${previewUrl(p.preview_id)}`
+          : `I'll put together a homepage idea for ${p.name} and send it over.`,
+        "It only uses your public details (name, address, phone and opening hours), so you can see how a simple site could look. The real one would have your own photos, services and wording.",
+      ]
+    : [
+        `Here ${f.length === 1 ? "is the fix" : `are the ${Math.min(3, f.length)} fixes`} I found, in plain words:`,
+        f
+          .slice(0, 3)
+          .map((x, i) => `${i + 1}. ${x.title}: ${x.fix}`)
+          .join("\n"),
+        reportLink ? `The full report: ${reportLink}` : "",
+      ];
+  return {
+    subject: reSubject(firstSubject),
+    body: [`Hi ${p.name} team,`, "Thanks for getting back to me.", ...lines, whatsappLine, SIGNATURE].filter(Boolean).join("\n\n"),
+    variant: null,
+    source: "template",
+  };
+};
+
+/** Starting prices, only from src/data/services.ts. */
+export const priceLines = () =>
+  SERVICES.flatMap((s) => s.pricing.map((t) => `- ${t.name}: from $${t.price.toLocaleString("en-US")}${t.unit ?? ""}`)).join("\n");
+
+/** Automatic answer to a price question: real starting prices + WhatsApp, nothing else. */
+export const replyPrice = (p: Prospect, firstSubject: string): Draft => ({
   subject: reSubject(firstSubject),
   body: [
     `Hi ${p.name} team,`,
-    "Thanks for getting back to me.",
-    reportLink ? `Here's the short report with what I found and how to fix it: ${reportLink}` : "",
-    `If it's easier to talk it through, message me on WhatsApp: ${SITE.whatsappDisplay}`,
+    "Thanks for asking. These are my starting prices:",
+    priceLines(),
+    "The final price depends on the features you need.",
+    whatsappLine,
     SIGNATURE,
-  ]
-    .filter(Boolean)
-    .join("\n\n"),
+  ].join("\n\n"),
   variant: null,
   source: "template",
 });
@@ -277,7 +351,7 @@ export const draftCheckBack = (p: Prospect, firstSubject: string, f: Finding[]):
   body: [
     `Hi ${p.name} team,`,
     "You mentioned the timing wasn't right when I wrote a while ago, so I'm checking back once.",
-    cta(f),
+    f[0]?.id === "no-website" ? `Want me to send you the free homepage idea I made for ${p.name}?` : cta(f),
     OPT_OUT,
     "Hamza",
   ].join("\n\n"),

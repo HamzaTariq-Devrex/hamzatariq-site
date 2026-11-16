@@ -2,13 +2,15 @@
 // reads the site's own home page and contact/about page for a publicly listed email (mailto links
 // or text), its phone/WhatsApp and Instagram links, checks the email domain has a mail server (MX),
 // applies the skip rules and scores the lead. No guessed addresses, no third-party lookups.
-import { promises as dns } from "node:dns";
+import { hasMailServer } from "./mx";
 import { parse } from "node-html-parser";
 import { runAudit } from "@/lib/audit/run";
 import { AuditFetchError, normalizeUrl, safeFetch, type FetchResult } from "@/lib/audit/safe-fetch";
 import type { AuditExtras, AuditResult } from "@/lib/audit/types";
 import { ox, type Prospect } from "./db";
-import { CHAIN_LOCATIONS, isBigOrganisation, isStoreLocatorPage, instagramOf, normalizeInstagram } from "./osm";
+import { CHAIN_LOCATIONS, domainOf, isBigOrganisation, isStoreLocatorPage, instagramOf, normalizeInstagram } from "./osm";
+import { verifyNoWebsite } from "./site-check";
+import type { Flags } from "./checks";
 import { waitingForAddress } from "./address";
 import { findings, mobileSeconds } from "./problems";
 import { nounFor, takesBookings } from "./osm-types";
@@ -107,16 +109,13 @@ export const homeExtras = (home: FetchResult): AuditExtras & { phone: string | n
   return { hasContactButton, hasWhatsapp, instagram, phone };
 };
 
-/** True when the email's domain has a mail server (MX). A typo or dead domain is dropped. */
-export const hasMailServer = async (email: string) => {
-  const domain = email.split("@")[1];
-  if (!domain) return false;
-  try {
-    const mx = await dns.resolveMx(domain);
-    return mx.some((r) => r.exchange && r.exchange !== ".");
-  } catch {
-    return false;
-  }
+export { hasMailServer } from "./mx";
+
+/** Characters of visible text in the raw HTML (scripts and styles removed). */
+const visibleTextLength = (html: string) => {
+  const root = parse(html, { comment: false });
+  for (const n of root.querySelectorAll("script, style, noscript, template")) n.remove();
+  return (root.querySelector("body") ?? root).textContent.replace(/\s+/g, " ").trim().length;
 };
 
 /**
@@ -159,7 +158,16 @@ export const qualify = async (p: Prospect): Promise<string> => {
     const email = p.email && (await hasMailServer(p.email)) ? p.email : null;
     if (email && (await ox.isSuppressed(email, p.id))) return skip(p, "Suppressed or already contacted").then(() => "skipped");
     if (!email && !p.phone && !osmInstagram) return skip(p, "No website, email, phone or Instagram").then(() => "skipped");
+    // "No website" is verified: none of the likely domains (name.com, name.co.uk, ...) is theirs.
+    const check = await verifyNoWebsite(p.name, p.country);
+    if (check.result === "found" && check.url) {
+      await ox.updateProspect(p.id, { website: check.url, domain: domainOf(check.url) });
+      return qualify({ ...p, website: check.url, domain: domainOf(check.url) });
+    }
+    const flags: Flags = { noSite: check.result === "none" ? "verified" : "uncertain" };
     await ox.saveAudit(p.id, "", null, null, null);
+    // A one-page homepage concept from their public OSM details (/preview/<id>, 30 days).
+    await ox.createPreview(p.id);
     // No email: Hamza messages them himself on WhatsApp or Instagram.
     await ox.updateProspect(p.id, {
       status: email ? "audited" : "whatsapp",
@@ -167,8 +175,10 @@ export const qualify = async (p: Prospect): Promise<string> => {
       instagram: osmInstagram,
       skip_reason: null,
       lead_score: leadScore(p, null),
+      flags,
+      ...(email ? { qualified_at: new Date().toISOString() } : {}),
     });
-    return email ? "audited (no website)" : "WhatsApp/Instagram queue (no website)";
+    return email ? `audited (no website, ${flags.noSite})` : "WhatsApp/Instagram queue (no website)";
   }
 
   let home: FetchResult | null = null;
@@ -210,15 +220,21 @@ export const qualify = async (p: Prospect): Promise<string> => {
 
   await ox.saveAudit(p.id, audit.url, audit.finalUrl, audit.score, audit);
   const score = leadScore({ ...p, phone }, audit);
+  // Audit confidence notes for the automatic checks.
+  const flags: Flags = {};
+  if (page && visibleTextLength(page.body) < 300) flags.jsPage = true;
+  const from = domainOf(p.website);
+  const to = domainOf(audit.finalUrl);
+  if (from && to && from !== to && !to.endsWith(`.${from}`) && !from.endsWith(`.${to}`)) flags.redirectOther = to;
   if (!email) {
     if (!phone && !instagram) {
       await ox.updateProspect(p.id, { audit_score: audit.score });
       return skip(p, "No public email, phone or Instagram").then(() => "skipped");
     }
     // Phone or Instagram but no public email: the manual WhatsApp/Instagram queue.
-    await ox.updateProspect(p.id, { status: "whatsapp", skip_reason: null, phone, instagram, audit_score: audit.score, lead_score: score, email: "" });
+    await ox.updateProspect(p.id, { status: "whatsapp", skip_reason: null, phone, instagram, audit_score: audit.score, lead_score: score, email: "", flags });
     return `WhatsApp/Instagram queue (${audit.score})`;
   }
-  await ox.updateProspect(p.id, { status: "audited", email, email_source: source, phone, instagram, audit_score: audit.score, lead_score: score });
+  await ox.updateProspect(p.id, { status: "audited", email, email_source: source, phone, instagram, audit_score: audit.score, lead_score: score, flags, qualified_at: new Date().toISOString() });
   return `audited (${audit.score})`;
 };

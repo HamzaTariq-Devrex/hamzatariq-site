@@ -10,7 +10,8 @@ import Logo from "./Logo";
  * not delayed). `PRELOADER_SCRIPT` runs in <head> and adds `pre-skip` to <html> on later page loads
  * in the same session; reduced motion skips it too.
  */
-export const PRELOADER_SCRIPT = `try{if(sessionStorage.getItem("pre"))document.documentElement.classList.add("pre-skip");else sessionStorage.setItem("pre","1")}catch(e){}`;
+// Homepage concepts (/preview/<id>) belong to the business, so they never show the preloader.
+export const PRELOADER_SCRIPT = `try{if(location.pathname.indexOf("/preview/")===0||sessionStorage.getItem("pre"))document.documentElement.classList.add("pre-skip");else sessionStorage.setItem("pre","1")}catch(e){}`;
 
 const Preloader = () => (
   <div className="preloader" aria-hidden="true">

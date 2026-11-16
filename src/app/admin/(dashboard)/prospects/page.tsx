@@ -8,13 +8,14 @@ import { PageHead } from "@/components/admin/ui";
 import { SkeletonCard } from "@/components/admin/Skeleton";
 import OutreachControls from "@/components/admin/outreach/OutreachControls";
 import OutreachStats from "@/components/admin/outreach/OutreachStats";
-import SearchManager from "@/components/admin/outreach/SearchManager";
+import Coverage from "@/components/admin/outreach/Coverage";
 import DraftQueue, { type Draft } from "@/components/admin/outreach/DraftQueue";
 import ProspectsBrowser from "@/components/admin/outreach/ProspectsBrowser";
 import WhatsAppQueue, { type QueueItem } from "@/components/admin/outreach/WhatsAppQueue";
 import { typeLabel } from "@/components/admin/outreach/prospect-shared";
 import { dailyCap } from "@/lib/outreach/pipeline";
-import { ox } from "@/lib/outreach/db";
+import { ox, type CoverageRow } from "@/lib/outreach/db";
+import { DAILY_TARGET_PER_NICHE, progress } from "@/lib/outreach/coverage";
 import { manualMessage } from "@/lib/outreach/compose";
 import type { AuditResult } from "@/lib/audit/types";
 import { listProspects } from "./actions";
@@ -23,7 +24,8 @@ export const metadata: Metadata = { title: "Prospects" };
 
 const DAYS = 14;
 const TABS = [
-  ["ready", "Ready to approve"],
+  ["ready", "Needs a look"],
+  ["coverage", "Coverage"],
   ["sent", "Sent"],
   ["hot", "Hot replies"],
   ["whatsapp", "WhatsApp queue"],
@@ -32,13 +34,13 @@ const TABS = [
 ] as const;
 type Tab = (typeof TABS)[number][0];
 const STEP = ["Email 1", "Day 3", "Day 7", "Reply", "Check-back"];
-const DRAFT_COLUMNS = "id, step, subject, body, created_at, variant, prospect:prospects(id, name, email, city, business_type, audit_score, lead_score)";
+const DRAFT_COLUMNS = "id, step, subject, body, created_at, variant, review_reason, prospect:prospects(id, name, email, city, business_type, audit_score, lead_score)";
 
 // Each section loads on its own and streams in; shared calls run once per request.
 const stats = cache(() => getOutreachStats());
 const dayStats = cache(() => getProspectStats(DAYS));
 const db = async () => (await getOwner())!.supabase; // the layout redirects when signed out
-const settings = cache(async () => (await db()).from("outreach_settings").select("paused, pause_reason, approve_first, started_at, next_send_at, last_imap_at, last_tick_at").eq("id", 1).single());
+const settings = cache(async () => (await db()).from("outreach_settings").select("paused, pause_reason, started_at, next_send_at, last_imap_at, last_tick_at").eq("id", 1).single());
 
 const Failed = ({ what, message }: { what: string; message: string }) => (
   <p className="adm-error" role="alert">
@@ -58,14 +60,14 @@ const Pager = ({ tab, page, total }: { tab: Tab; page: number; total: number }) 
   ) : null;
 
 async function Controls() {
-  const [{ data: s, error }, st, cron] = await Promise.all([settings(), dayStats(), ox.cronStatus().catch(() => null)]);
+  const [{ data: s, error }, st, cron, health] = await Promise.all([settings(), dayStats(), ox.cronStatus().catch(() => null), ox.state().catch(() => undefined)]);
   if (error || !s) return <Failed what="outreach settings" message={error?.message ?? "missing"} />;
   return (
     <OutreachControls
-      settings={{ paused: s.paused, pauseReason: s.pause_reason, approveFirst: s.approve_first, startedAt: s.started_at, nextSendAt: s.next_send_at, lastImapAt: s.last_imap_at, lastTickAt: s.last_tick_at }}
+      settings={{ paused: s.paused, pauseReason: s.pause_reason, startedAt: s.started_at, nextSendAt: s.next_send_at, lastImapAt: s.last_imap_at, lastTickAt: s.last_tick_at }}
       scheduler={cron ? cron.secret_set && !!cron.job?.active : null}
       sent24h={st.sent_24h}
-      cap={dailyCap(s.started_at)}
+      cap={dailyCap(s.started_at, health)}
     />
   );
 }
@@ -76,7 +78,7 @@ async function Numbers() {
 
 async function Tabs({ active }: { active: Tab }) {
   const s = await stats();
-  const count: Record<Tab, number | null> = { ready: s.tabs.ready, sent: s.tabs.sent, hot: s.tabs.hot, whatsapp: s.tabs.whatsapp, suppressed: s.tabs.suppressed, all: null };
+  const count: Record<Tab, number | null> = { ready: s.tabs.ready, coverage: null, sent: s.tabs.sent, hot: s.tabs.hot, whatsapp: s.tabs.whatsapp, suppressed: s.tabs.suppressed, all: null };
   return (
     <nav className="ox-tabs" aria-label="Outreach">
       {TABS.map(([key, label]) => (
@@ -90,22 +92,17 @@ async function Tabs({ active }: { active: Tab }) {
 }
 
 async function Ready({ page }: { page: number }) {
-  const supabase = await db();
-  const [{ data, error, count }, { data: s }] = await Promise.all([
-    supabase
-      .from("outreach_messages")
-      .select(DRAFT_COLUMNS, { count: "exact" })
-      .eq("status", "draft")
-      .eq("direction", "out")
-      .order("step", { ascending: false })
-      .order("created_at")
-      .range(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE - 1),
-    settings(),
-  ]);
+  const { data, error, count } = await (await db())
+    .from("outreach_messages")
+    .select(DRAFT_COLUMNS, { count: "exact" })
+    .eq("status", "review")
+    .eq("direction", "out")
+    .order("created_at")
+    .range(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE - 1);
   if (error) return <Failed what="drafts" message={error.message} />;
   return (
     <>
-      <DraftQueue drafts={(data ?? []) as unknown as Draft[]} approveFirst={s?.approve_first ?? true} />
+      <DraftQueue drafts={(data ?? []) as unknown as Draft[]} />
       <Pager tab="ready" page={page} total={count ?? 0} />
     </>
   );
@@ -170,25 +167,20 @@ async function Sent({ page }: { page: number }) {
 
 async function Hot() {
   const supabase = await db();
-  const [{ data: people, error }, { data: drafts }, { data: s }] = await Promise.all([
-    supabase
-      .from("prospects")
-      .select("id, name, email, phone, business_type, city, reply_class, updated_at, lead_id")
-      .in("reply_class", ["interested", "question"])
-      .not("status", "in", "(won,lost)")
-      .order("updated_at", { ascending: false })
-      .limit(PAGE_SIZE),
-    supabase.from("outreach_messages").select(DRAFT_COLUMNS).eq("status", "draft").eq("direction", "out").eq("step", 3).order("created_at").limit(PAGE_SIZE),
-    settings(),
-  ]);
+  const { data: people, error } = await supabase
+    .from("prospects")
+    .select("id, name, email, phone, business_type, city, reply_class, updated_at, lead_id")
+    .in("reply_class", ["interested", "price", "question"])
+    .not("status", "in", "(won,lost)")
+    .order("updated_at", { ascending: false })
+    .limit(PAGE_SIZE);
   if (error) return <Failed what="hot replies" message={error.message} />;
   return (
     <>
-      <DraftQueue drafts={(drafts ?? []) as unknown as Draft[]} approveFirst={s?.approve_first ?? true} />
       <section className="adm-card">
         <div className="adm-card-head">
           <h2>People who replied</h2>
-          <span className="adm-muted">Interested or asked a question</span>
+          <span className="adm-muted">HOT = needs you; the others were answered automatically</span>
         </div>
         {people?.length ? (
           <ul className="ox-searches">
@@ -197,7 +189,7 @@ async function Hot() {
                 <div>
                   <strong>{p.name}</strong>
                   <span className="adm-muted">
-                    {p.reply_class === "question" ? "Asked a question" : "Interested"} · {p.email}
+                    {p.reply_class === "question" ? "HOT: needs your answer" : p.reply_class === "price" ? "Asked about price (prices sent)" : "Said yes (fixes sent)"} · {p.email}
                     {p.phone ? ` · ${p.phone}` : ""} · {formatDate(p.updated_at)}
                   </span>
                 </div>
@@ -209,7 +201,7 @@ async function Hot() {
             ))}
           </ul>
         ) : (
-          <p className="adm-muted">No hot replies yet. Interested replies and questions appear here, with a reply draft for you to approve.</p>
+          <p className="adm-muted">No replies yet. A "yes" gets the fixes and a price question gets the starting prices automatically; anything else lands here as HOT and in your inbox.</p>
         )}
       </section>
     </>
@@ -278,18 +270,11 @@ async function Suppressed({ page }: { page: number }) {
 }
 
 async function All({ openId }: { openId: string | null }) {
-  const [{ data: searches, error }, st, first, ds] = await Promise.all([
-    (await db()).from("outreach_searches").select("id, business_type, city, country, active, timezone, last_run_at, last_found").order("created_at"),
-    stats(),
-    listProspects("all", "", 0),
-    dayStats(),
-  ]);
-  if (error) return <Failed what="saved searches" message={error.message} />;
+  const [st, first, ds] = await Promise.all([stats(), listProspects("all", "", 0), dayStats()]);
   return (
     <>
       <ProspectsBrowser initial={first.rows} total={first.total} counts={{ ...ds.by_status, all: ds.total }} initialId={openId} />
-      <div className="adm-grid-2">
-        <SearchManager searches={searches ?? []} />
+      <div>
         <section className="adm-card">
           <div className="adm-card-head">
             <h2>Last {DAYS} days</h2>
@@ -327,13 +312,25 @@ async function All({ openId }: { openId: string | null }) {
   );
 }
 
+async function CoverageTab() {
+  // One server call each (the page is owner-only; the layout checks the session).
+  let rows: CoverageRow[];
+  let today: Record<string, { q: number; backlog: number }>;
+  try {
+    [rows, today] = await Promise.all([ox.coverage(), ox.nicheStats()]);
+  } catch (e) {
+    return <Failed what="coverage" message={(e as Error).message} />;
+  }
+  return <Coverage p={progress(rows)} today={today} target={DAILY_TARGET_PER_NICHE} />;
+}
+
 export default async function ProspectsPage({ searchParams }: { searchParams: Promise<{ tab?: string; page?: string; p?: string }> }) {
   const sp = await searchParams;
   const tab: Tab = sp.p ? "all" : ((TABS.find(([k]) => k === sp.tab)?.[0] ?? "ready") as Tab);
   const page = Math.max(0, Number.parseInt(sp.page ?? "0", 10) || 0);
   return (
     <main className="adm-page">
-      <PageHead title="Prospects" text="Small businesses found on OpenStreetMap, audited and emailed from your outreach Gmail. Nothing is sent until you approve it." />
+      <PageHead title="Prospects" text="Small businesses found on OpenStreetMap, area by area, audited and emailed from your outreach Gmail on autopilot. Only uncertain emails wait for you in Needs a look." />
       <Suspense fallback={<SkeletonCard rows={3} title={false} />}>
         <Controls />
       </Suspense>
@@ -345,6 +342,7 @@ export default async function ProspectsPage({ searchParams }: { searchParams: Pr
       </Suspense>
       <Suspense key={`${tab}-${page}`} fallback={<SkeletonCard rows={8} />}>
         {tab === "ready" && <Ready page={page} />}
+        {tab === "coverage" && <CoverageTab />}
         {tab === "sent" && <Sent page={page} />}
         {tab === "hot" && <Hot />}
         {tab === "whatsapp" && <Queue />}

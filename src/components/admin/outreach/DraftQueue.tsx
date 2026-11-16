@@ -11,6 +11,8 @@ export type Draft = {
   body: string;
   created_at: string;
   variant?: string | null;
+  /** Why the automatic checks held it back ("Needs a look"). */
+  review_reason?: string | null;
   prospect: { id: string; name: string; email: string | null; city: string | null; business_type: string; audit_score: number | null; lead_score: number | null } | null;
 };
 
@@ -43,7 +45,7 @@ const DraftCard = ({ d, onDone }: { d: Draft; onDone: (msg: { error: boolean; te
             {d.prospect?.lead_score != null ? ` · lead ${d.prospect.lead_score}` : ""}
           </span>
         </span>
-        <span className="ox-draft-subject">{d.subject}</span>
+        <span className="ox-draft-subject">{d.review_reason ?? d.subject}</span>
       </button>
       {open && (
         <div className="ox-draft-body">
@@ -61,7 +63,8 @@ const DraftCard = ({ d, onDone }: { d: Draft; onDone: (msg: { error: boolean; te
           ) : (
             <pre className="ox-email">{d.body}</pre>
           )}
-          <p className="adm-muted">Sent exactly as shown, as plain text. {words(body)} words.</p>
+          {d.review_reason && <p className="adm-error">Held back: {d.review_reason}</p>}
+          <p className="adm-muted">Subject: {d.subject} · sent exactly as shown, as plain text. {words(body)} words.</p>
           <div className="adm-actions">
             {editing ? (
               <button type="button" className="adm-btn is-primary" disabled={pending} onClick={() => run(() => saveDraft(d.id, subject, body), () => setEditing(false))}>
@@ -76,7 +79,7 @@ const DraftCard = ({ d, onDone }: { d: Draft; onDone: (msg: { error: boolean; te
               Send test to me
             </button>
             <button type="button" className="adm-btn" disabled={pending} onClick={() => run(() => approveDrafts([d.id]))}>
-              Approve this one
+              Send it
             </button>
             {(d.step ?? 0) === 0 && (
               <button type="button" className="adm-btn" disabled={pending} onClick={() => run(() => redraft(d.id))}>
@@ -93,10 +96,12 @@ const DraftCard = ({ d, onDone }: { d: Draft; onDone: (msg: { error: boolean; te
   );
 };
 
-/** Today's batch: drafts waiting for approval (approve-first mode). */
-const DraftQueue = ({ drafts, approveFirst }: { drafts: Draft[]; approveFirst: boolean }) => {
+/**
+ * "Needs a look": drafts the automatic checks weren't sure about. Send it, edit, redraft or discard;
+ * anything left here expires after 7 days. Nothing else needs approval.
+ */
+const DraftQueue = ({ drafts }: { drafts: Draft[] }) => {
   const router = useRouter();
-  const [pending, start] = useTransition();
   const [message, setMessage] = useState<{ error: boolean; text: string } | null>(null);
   const done = (m: { error: boolean; text: string } | null) => {
     setMessage(m);
@@ -107,24 +112,9 @@ const DraftQueue = ({ drafts, approveFirst }: { drafts: Draft[]; approveFirst: b
     <section className="adm-card ox-queue">
       <div className="adm-card-head">
         <h2>
-          Waiting for approval <span className="adm-count">{drafts.length}</span>
+          Needs a look <span className="adm-count">{drafts.length}</span>
         </h2>
-        {drafts.length > 0 && (
-          <button
-            type="button"
-            className="adm-btn is-primary"
-            disabled={pending}
-            onClick={() =>
-              window.confirm(`Approve the ${drafts.length} emails on this page? They go out over the next days within the daily limit, 9:00–17:00 on weekdays in each business's time zone.`) &&
-              start(async () => {
-                const res = await approveDrafts(drafts.map((d) => d.id));
-                done(res.error ? { error: true, text: res.error } : { error: false, text: res.info ?? "Approved." });
-              })
-            }
-          >
-            Approve all on this page ({drafts.length})
-          </button>
-        )}
+        <span className="adm-muted">Expires after 7 days if nobody looks</span>
       </div>
       {message && (
         <p className={message.error ? "adm-error" : "adm-saved"} role="status">
@@ -138,7 +128,7 @@ const DraftQueue = ({ drafts, approveFirst }: { drafts: Draft[]; approveFirst: b
           ))}
         </ul>
       ) : (
-        <p className="adm-muted">{approveFirst ? "No drafts waiting. New ones appear here after each day's audits." : "Approve-first is off: new drafts are sent automatically."}</p>
+        <p className="adm-muted">Nothing to check. Emails that pass every automatic check are sent on their own.</p>
       )}
     </section>
   );

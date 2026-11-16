@@ -6,7 +6,7 @@
 // jewellery one it also sends the day-3 follow-up in the same thread.
 import { SITE } from "../src/lib/site";
 import { ox, type Prospect, type ProspectAudit } from "../src/lib/outreach/db";
-import { discoverAll } from "../src/lib/outreach/pipeline";
+import { discoverRun } from "../src/lib/outreach/coverage";
 import { qualify } from "../src/lib/outreach/qualify";
 import { checkEmail1, draftDay3, draftEmail1, prospectFindings, reportUrl, words } from "../src/lib/outreach/compose";
 import { sendOutreach } from "../src/lib/outreach/mail";
@@ -43,12 +43,10 @@ for (const n of NICHES.filter((x) => !process.env.ONLY || x.type === process.env
   console.log(`\n== ${n.type}`);
   let pick = await auditedWithSite(n.type);
   if (!pick) {
-    const state = await ox.state();
-    for (const city of n.cities) {
-      const s = state.searches.find((x) => x.business_type === n.type && x.city === city);
-      if (!s) continue;
-      console.log(`  discovering ${n.type}, ${city}…`);
-      console.log("  ", JSON.stringify(await discoverAll(s.id, Date.now() + 120_000)));
+    // The next coverage cells for this niche (UK first).
+    for (let round = 0; round < n.cities.length; round++) {
+      console.log(`  discovering ${n.type}…`);
+      console.log("  ", JSON.stringify(await discoverRun(Date.now() + 120_000, n.type)));
       pick = await auditedWithSite(n.type);
       if (pick) break;
     }

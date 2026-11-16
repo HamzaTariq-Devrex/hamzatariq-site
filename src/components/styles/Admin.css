@@ -1910,3 +1910,21 @@ a.ox-row {
   color: inherit;
   text-decoration: none;
 }
+
+/* Coverage progress bars (/admin/prospects, Coverage tab) */
+.ox-bar {
+  display: inline-block;
+  width: 64px;
+  height: 6px;
+  margin-right: 6px;
+  vertical-align: middle;
+  border-radius: 999px;
+  background: rgb(var(--ink-rgb) / 0.1);
+  overflow: hidden;
+}
+.ox-bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #0d9488;
+}

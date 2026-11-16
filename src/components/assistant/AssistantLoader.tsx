@@ -33,7 +33,8 @@ const AssistantLoader = () => {
     return () => clearTimeout(t);
   }, []);
 
-  if (!ready || pathname.startsWith("/admin")) return null;
+  // Not on /admin, and not on homepage concepts (/preview): those must have no form that collects data.
+  if (!ready || pathname.startsWith("/admin") || pathname.startsWith("/preview")) return null;
   return <ChatWidget startOpen={openNow} />;
 };
 

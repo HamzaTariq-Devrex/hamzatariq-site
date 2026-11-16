@@ -3,10 +3,10 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { formatDate } from "@/lib/admin/labels";
-import { processNow, setApproveFirst, setPaused } from "@/app/admin/(dashboard)/prospects/actions";
+import { processNow, setPaused } from "@/app/admin/(dashboard)/prospects/actions";
 
 type Props = {
-  settings: { paused: boolean; pauseReason: string | null; approveFirst: boolean; startedAt: string | null; nextSendAt: string | null; lastImapAt: string | null; lastTickAt: string | null };
+  settings: { paused: boolean; pauseReason: string | null; startedAt: string | null; nextSendAt: string | null; lastImapAt: string | null; lastTickAt: string | null };
   /** pg_cron job active with its Vault secret; null when unknown. */
   scheduler: boolean | null;
   sent24h: number;
@@ -45,12 +45,9 @@ const OutreachControls = ({ settings, sent24h, cap, scheduler }: Props) => {
         </div>
         <div className="ox-switch-row">
           <div>
-            <strong>Approve first</strong>
-            <p className="adm-muted">{settings.approveFirst ? "You approve each day's drafts before anything is sent." : "Fully automatic: new drafts are sent without approval."}</p>
+            <strong>Autopilot</strong>
+            <p className="adm-muted">Emails that pass every automatic check are sent on their own. Uncertain ones wait in &ldquo;Needs a look&rdquo; for 7 days. You get a summary every morning at 9:00 PKT.</p>
           </div>
-          <button type="button" role="switch" aria-checked={settings.approveFirst} className={`ox-switch${settings.approveFirst ? " is-on" : ""}`} disabled={pending} onClick={() => run(() => setApproveFirst(!settings.approveFirst))}>
-            <span className="ox-sr">Approve first</span>
-          </button>
         </div>
       </div>
       <dl className="ox-facts">
@@ -62,7 +59,7 @@ const OutreachControls = ({ settings, sent24h, cap, scheduler }: Props) => {
         </div>
         <div>
           <dt>Ramp</dt>
-          <dd>{week ? `Week ${week}` : "Not started"}</dd>
+          <dd>{week ? `Week ${week}${week >= 4 ? (cap >= 40 ? " · 40/day (healthy)" : " · 30/day (bounces or complaints)") : ""}` : "Not started"}</dd>
         </div>
         <div>
           <dt>Next send</dt>

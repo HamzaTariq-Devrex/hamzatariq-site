@@ -1,30 +1,41 @@
-// The outreach jobs.
-// - discoverAll(): daily (Vercel Cron), continued by the tick — saved searches → new prospects,
-//   max 150 per day, rotating: the searches that ran longest ago go first.
-// - tick(): every few minutes (GitHub Actions) — hourly inbox check, safety checks, at most ONE email
-//   per tick, drafts, follow-ups and one audit, inside a time budget.
+// The outreach jobs (autopilot, owner 2026-11-16). One tick every 5 minutes (Supabase pg_cron):
+// - inbox: bounces, complaints and "no" suppress at once; "yes" and price questions get an automatic
+//   reply in the same thread; anything else is a HOT alert to Hamza, with no reply.
+// - auto-pause (bounces over 3% of the last 50, or any spam complaint) and the on/off switch.
+// - send: replies first; then at most one email per tick, Mon-Fri 9:00-17:00 in the recipient's
+//   time zone, 4-11 minute gaps, the daily limit, and a fair share across niches and countries.
+// - coverage: niches below today's target search their next cell (src/lib/outreach/coverage.ts).
+// - audits, then drafts. Every email-1 draft goes through the automatic checks (checks.ts): sent,
+//   "Needs a look" (expires after 7 days), or rejected.
+// - the daily summary email at 9:00 PKT.
 import { SITE } from "@/lib/site";
 import { rpcClient, serverSecret } from "@/lib/supabase/server";
 import { sendOwnerAlert } from "@/lib/leads/email";
 import { ox, type Prospect, type State } from "./db";
-import { discover, setOsmDeadline } from "./osm";
 import { qualify } from "./qualify";
-import { draftCheckBack, draftDay3, draftDay7, draftEmail1, draftHotReply, prospectFindings, reportUrl, subjectFor } from "./compose";
+import { checkEmail1, draftCheckBack, draftDay3, draftDay7, draftEmail1, prospectFindings, replyInterested, replyPrice, reportUrl, subjectFor } from "./compose";
 import { classifyReply, type ReplyClass } from "./classify";
 import { postalAddress, waitingForAddress, withAddress } from "./address";
 import { readInbox, sendOutreach } from "./mail";
+import { autoCheck, hardChecks } from "./checks";
+import { discoverRun, MAX_NEW_PER_DAY, progress } from "./coverage";
+import { takesBookings } from "./osm-types";
 
-/** Discovery is separate from sending: up to 150 new businesses a day across all saved searches. */
-export const MAX_NEW_PER_DAY = 150;
-/** Per search per run, so one big city doesn't use the whole day's budget. */
-const PER_SEARCH = 25;
+export { MAX_NEW_PER_DAY };
 const DAY = 86_400_000;
 
-/** Gmail-safe ramp: 15/day in week 1, 20/day in week 2, then 30/day. */
-export const dailyCap = (startedAt: string | null, now = Date.now()) => {
+/**
+ * One free Gmail account: 15/day in week 1, 20 in week 2, 30 in week 3, then 40 only while the
+ * bounce rate stays under 2% (last 50 emails) with no spam complaint; otherwise 30.
+ */
+export const dailyCap = (startedAt: string | null, health?: { last50_sent: number; last50_bounces: number; complaints_7d: number }, now = Date.now()) => {
   if (!startedAt) return 15;
   const days = (now - Date.parse(startedAt)) / DAY;
-  return days < 7 ? 15 : days < 14 ? 20 : 30;
+  if (days < 7) return 15;
+  if (days < 14) return 20;
+  if (days < 21) return 30;
+  const healthy = !!health && health.complaints_7d === 0 && (health.last50_sent ? health.last50_bounces / health.last50_sent : 0) < 0.02;
+  return healthy ? 40 : 30;
 };
 
 /** Monday–Friday, 9:00–17:00 in the recipient's time zone. */
@@ -38,45 +49,7 @@ export const inSendingWindow = (timezone: string, now = new Date()) => {
 /** Random gap between two emails: 4 to 11 minutes. */
 const randomGapMs = () => (4 + Math.random() * 7) * 60_000;
 
-/** Searches in rotation order: never run first, then the one that ran longest ago. */
-const rotation = (state: State) =>
-  state.searches
-    .filter((s) => !waitingForAddress(s.country))
-    .sort((a, b) => (a.last_run_at ? Date.parse(a.last_run_at) : 0) - (b.last_run_at ? Date.parse(b.last_run_at) : 0));
-
-/**
- * Runs saved searches in rotation until today's budget (150) is used or time runs out. A search
- * that ran in the last 20 hours waits for the next day, so every search gets its turn.
- */
-export const discoverAll = async (onlySearch?: string, deadline = Date.now() + 50_000) => {
-  const state = await ox.state();
-  let budget = Math.max(0, MAX_NEW_PER_DAY - state.found_24h);
-  const searches = onlySearch
-    ? state.searches.filter((s) => s.id === onlySearch)
-    : rotation(state).filter((s) => !s.last_run_at || Date.now() - Date.parse(s.last_run_at) > 20 * 3_600_000);
-  const results: { search: string; added: number; error?: string }[] = [];
-  // Every OpenStreetMap request in this run stops at the deadline, so a busy server can't outlast the function.
-  setOsmDeadline(deadline);
-  try {
-    for (const s of searches) {
-      if (budget <= 0 || deadline - Date.now() < 15_000) break;
-      try {
-        const added = await discover(s, Math.min(budget, PER_SEARCH));
-        budget -= added;
-        results.push({ search: `${s.business_type}, ${s.city}`, added });
-      } catch (e) {
-        results.push({ search: `${s.business_type}, ${s.city}`, added: 0, error: (e as Error).message });
-      }
-    }
-  } finally {
-    setOsmDeadline(Number.POSITIVE_INFINITY);
-  }
-  return results;
-};
-/**
- * Auto-pause: more than 3% bounces in the last 50 emails, or any spam complaint (both counted since
- * outreach was last resumed). Emails Hamza why.
- */
+/** Auto-pause: more than 3% bounces in the last 50 emails, or any spam complaint (since the last resume). */
 const safetyCheck = async (state: State) => {
   if (state.settings.paused) return state.settings.pause_reason ?? "paused";
   const rate = state.last50_sent ? state.last50_bounces / state.last50_sent : 0;
@@ -91,37 +64,58 @@ const safetyCheck = async (state: State) => {
   return reason;
 };
 
-/** Creates a lead from a hot reply, drafts Hamza's answer (approve-first) and emails him the thread. */
-const handleHotReply = async (p: Prospect, cls: ReplyClass, text: string, subject: string) => {
+const createLead = async (p: Prospect, text: string, subject: string) => {
   const db = rpcClient();
-  let leadId: string | null = null;
-  if (db) {
-    const { data, error } = await db.rpc("app_create_lead", {
-      p_secret: serverSecret(),
-      p_name: p.name.slice(0, 120),
-      p_email: p.email!,
-      p_project_type: "",
-      p_budget: "",
-      p_message: (text || `(Reply: ${subject})`).slice(0, 4000),
-      p_source: "outreach",
-      p_page: "/admin/prospects",
-      p_session: null as unknown as string,
-    });
-    if (error) console.error("outreach lead:", error.message);
-    else leadId = data;
-  }
+  if (!db) return null;
+  const { data, error } = await db.rpc("app_create_lead", {
+    p_secret: serverSecret(),
+    p_name: p.name.slice(0, 120),
+    p_email: p.email!,
+    p_project_type: "",
+    p_budget: "",
+    p_message: (text || `(Reply: ${subject})`).slice(0, 4000),
+    p_source: "outreach",
+    p_page: "/admin/prospects",
+    p_session: null as unknown as string,
+  });
+  if (error) console.error("outreach lead:", error.message);
+  return error ? null : data;
+};
+
+/**
+ * A positive reply: always a lead. "yes" → the fixes + report/preview link + WhatsApp, sent
+ * automatically in the same thread. Price → real starting prices + WhatsApp. Anything else → no
+ * reply; Hamza gets a HOT email with the thread right away.
+ */
+const handleReply = async (p: Prospect, cls: ReplyClass, text: string, subject: string) => {
+  const leadId = await createLead(p, text, subject);
   if (leadId) await ox.updateProspect(p.id, { lead_id: leadId });
   const thread = await ox.thread(p.id);
   const first = thread.find((m) => m.direction === "out" && m.step === 0);
-  const audit = await ox.latestAudit(p.id);
-  const d = draftHotReply(p, first?.subject ?? subject, audit?.report_id && audit.result ? reportUrl(audit.report_id) : null);
-  await ox.addMessage({ prospect_id: p.id, step: 3, status: "draft", subject: d.subject, body: withAddress(p.country, d.body), in_reply_to: first?.message_id ?? null });
-  const transcript = thread.map((m) => `--- ${m.direction === "out" ? "You" : p.name} (${m.kind}, ${m.sent_at ?? m.created_at})\n${m.body}`).join("\n\n");
+  const firstSubject = first?.subject ?? subject;
+  if (cls === "interested" || cls === "price") {
+    const audit = await ox.latestAudit(p.id);
+    const d =
+      cls === "price"
+        ? replyPrice(p, firstSubject)
+        : replyInterested(p, firstSubject, prospectFindings(p, audit?.result ?? null), audit?.report_id && audit.result ? reportUrl(audit.report_id) : null);
+    await ox.addMessage({
+      prospect_id: p.id,
+      step: 3,
+      status: "approved",
+      approved_at: new Date().toISOString(),
+      subject: d.subject,
+      body: withAddress(p.country, d.body),
+      in_reply_to: first?.message_id ?? null,
+    });
+    return;
+  }
+  const transcript = [...thread.map((m) => `--- ${m.direction === "out" ? "You" : p.name} (${m.kind}, ${m.sent_at ?? m.created_at})\n${m.body}`), `--- ${p.name} (reply, now)\n${text}`].join("\n\n");
   await sendOwnerAlert(
-    `Hot reply (${cls === "question" ? "question" : "interested"}): ${p.name}`,
+    `HOT: ${p.name} replied and needs you`,
     [
-      `${p.name} (${p.email}) replied to your outreach email. A reply draft with the report link and your WhatsApp is waiting for approval.`,
-      `Approve it: ${SITE.url}/admin/prospects?tab=hot`,
+      `${p.name} (${p.email}${p.phone ? `, ${p.phone}` : ""}) replied to your outreach email with something only you can answer. Nothing was sent automatically.`,
+      `Reply from your outreach Gmail (same thread), or message them on WhatsApp.`,
       `Lead: ${SITE.url}/admin/leads${leadId ? `?lead=${leadId}` : ""}`,
       `Thread:\n\n${transcript}`,
     ],
@@ -129,11 +123,7 @@ const handleHotReply = async (p: Prospect, cls: ReplyClass, text: string, subjec
   ).catch((e) => console.error("outreach alert:", (e as Error).message));
 };
 
-/**
- * Inbox check (every tick): bounces, complaints and unsubscribe requests stop and suppress at once;
- * replies are classified: interested/question → hot (lead + reply draft + email to Hamza),
- * no → suppressed forever, not now → one check-back in 60 days, out of office → sequence +7 days.
- */
+/** Inbox check: bounces, complaints and "no" stop and suppress at once; replies are classified. */
 export const checkInbox = async (state: State) => {
   const since = new Date(Math.min(Date.now() - DAY, state.settings.started_at ? Date.parse(state.settings.started_at) : Date.now()));
   const { messages, maxUid } = await readInbox(state.settings.last_imap_uid, since);
@@ -188,60 +178,98 @@ export const checkInbox = async (state: State) => {
       await ox.stop(match.email, "replied", match.prospect_id);
       await ox.updateProspect(match.prospect_id, { reply_class: cls });
       const p = await ox.prospect(match.prospect_id);
-      if (p) await handleHotReply(p, cls, m.text, m.subject);
+      if (p) await handleReply(p, cls, m.text, m.subject);
     }
   }
   await ox.set({ last_imap_at: new Date().toISOString(), last_imap_uid: maxUid || state.settings.last_imap_uid });
   return summary;
 };
 
-/** Sends at most one approved email, if every rule allows it right now. */
+type QueueItem = Awaited<ReturnType<typeof ox.approved>>[number];
+
+const deliver = async (next: QueueItem, now: Date) => {
+  const p = next.prospect;
+  const step = next.message.step ?? 0;
+  const messageId = await sendOutreach({ to: p.email!, subject: next.message.subject, body: withAddress(p.country, next.message.body), threadId: step === 0 ? null : next.thread?.message_id });
+  const at = now.toISOString();
+  await ox.updateMessage(next.message.id, { status: "sent", message_id: messageId, sent_at: at, in_reply_to: step === 0 ? null : (next.thread?.message_id ?? null) });
+  if (step <= 2) await ox.updateProspect(p.id, { status: "emailed", last_contacted_at: at });
+  else await ox.updateProspect(p.id, { last_contacted_at: at });
+  return `sent step ${step} to ${p.name}`;
+};
+
+/**
+ * Replies to people who wrote back go out at once (any hour, outside the gap and the daily limit).
+ * Then at most one sequence email, if every rule allows it right now.
+ */
 export const sendNext = async (state: State, now = new Date()) => {
   if (state.settings.paused) return "paused";
-  if (state.settings.next_send_at && Date.parse(state.settings.next_send_at) > now.getTime()) return `waiting until ${state.settings.next_send_at}`;
-  const cap = dailyCap(state.settings.started_at, now.getTime());
-  if (state.sent_24h >= cap) return `daily cap reached (${state.sent_24h}/${cap})`;
-  const queue = await ox.approved(100);
-  // US businesses wait until a postal address is set (CAN-SPAM).
-  // US and Canada wait until a postal address is set (CAN-SPAM / CASL).
+  const queue = await ox.approved(300);
+  const out: string[] = [];
+  for (const r of queue.filter((q) => (q.message.step ?? 0) >= 3 && q.prospect.email && q.thread?.message_id).slice(0, 3)) {
+    try {
+      out.push(await deliver(r, now));
+    } catch (e) {
+      await ox.updateMessage(r.message.id, { status: "failed", error: (e as Error).message.slice(0, 400) });
+      out.push(`reply failed: ${(e as Error).message}`);
+    }
+  }
+  if (state.settings.next_send_at && Date.parse(state.settings.next_send_at) > now.getTime()) return [...out, `waiting until ${state.settings.next_send_at}`].join("; ");
+  const cap = dailyCap(state.settings.started_at, state, now.getTime());
+  if (state.sent_24h >= cap) return [...out, `daily limit reached (${state.sent_24h}/${cap})`].join("; ");
+  // The queue is ordered by fewest sends in the last 24 h per niche, then per country (fair share).
   const next = queue.find(
-    (q) => q.prospect.email && !waitingForAddress(q.prospect.country) && inSendingWindow(q.prospect.timezone, now) && (q.message.step === 0 || q.thread?.message_id),
+    (q) => (q.message.step ?? 0) <= 2 && q.prospect.email && !waitingForAddress(q.prospect.country) && inSendingWindow(q.prospect.timezone, now) && (q.message.step === 0 || q.thread?.message_id),
   );
-  if (!next) return queue.length ? "no recipient inside 9:00-17:00 Mon-Fri right now" : "nothing approved";
+  if (!next) return [...out, queue.length ? "no recipient inside 9:00-17:00 Mon-Fri right now" : "nothing queued"].join("; ");
   const p = next.prospect;
-  // Suppression list before every send; never two businesses at the same email domain.
-  const blocked =
-    (await ox.isSuppressed(p.email!, p.id)) ? "Suppressed or already contacted" : next.message.step === 0 && (await ox.domainEmailed(p.email!, p.id)) ? "Someone at this email domain was already emailed" : null;
+  // Hard rules again, right before sending: chain/brand, MX, suppression, address; one company domain once.
+  const blocked = (await hardChecks(p)) ?? (next.message.step === 0 && (await ox.domainEmailed(p.email!, p.id)) ? "Someone at this email domain was already emailed" : null);
   if (blocked) {
     await ox.updateMessage(next.message.id, { status: "cancelled", error: blocked });
-    return `skipped: ${blocked}`;
+    if (next.message.step === 0) await ox.updateProspect(p.id, { status: "skipped", skip_reason: blocked });
+    return [...out, `skipped: ${blocked}`].join("; ");
   }
   try {
-    const messageId = await sendOutreach({ to: p.email!, subject: next.message.subject, body: withAddress(p.country, next.message.body), threadId: next.message.step === 0 ? null : next.thread?.message_id });
-    const at = now.toISOString();
-    await ox.updateMessage(next.message.id, { status: "sent", message_id: messageId, sent_at: at, in_reply_to: next.message.step === 0 ? null : (next.thread?.message_id ?? null) });
-    if ((next.message.step ?? 0) <= 2) await ox.updateProspect(p.id, { status: "emailed", last_contacted_at: at });
-    else await ox.updateProspect(p.id, { last_contacted_at: at });
-    await ox.set({ next_send_at: new Date(now.getTime() + randomGapMs()).toISOString(), ...(state.settings.started_at ? {} : { started_at: at }) });
-    return `sent step ${next.message.step} to ${p.name}`;
+    out.push(await deliver(next, now));
+    await ox.set({ next_send_at: new Date(now.getTime() + randomGapMs()).toISOString(), ...(state.settings.started_at ? {} : { started_at: now.toISOString() }) });
   } catch (e) {
     await ox.updateMessage(next.message.id, { status: "failed", error: (e as Error).message.slice(0, 400) });
     await ox.set({ next_send_at: new Date(now.getTime() + randomGapMs()).toISOString() });
-    return `failed: ${(e as Error).message}`;
+    out.push(`failed: ${(e as Error).message}`);
   }
+  return out.join("; ");
 };
 
-const status = (state: State) => (state.settings.approve_first ? { status: "draft", approved_at: null } : { status: "approved", approved_at: new Date().toISOString() });
+const approved = () => ({ status: "approved", approved_at: new Date().toISOString() });
 
-/** Email 1 drafts for audited prospects, highest lead score first (approve-first keeps them as drafts). */
-export const draftNew = async (state: State, limit: number, onlyProspect?: string) => {
+/**
+ * Email 1 for audited prospects, best leads first. Each draft goes through the automatic checks:
+ * ok → queued, uncertain → "Needs a look", broken rule → the business is skipped.
+ * `onlyProspect` redrafts one business; `forReview` keeps the new draft in "Needs a look".
+ */
+export const draftNew = async (_state: State, limit: number, onlyProspect?: string, forReview?: string) => {
   const list = onlyProspect ? (await ox.toDraft(500)).filter((p) => p.id === onlyProspect) : await ox.toDraft(limit);
   let made = 0;
   for (const p of list) {
-    if (!p.audit) continue;
+    if (!p.audit) continue; // no audit row yet: never treated as "no website"
     try {
       const d = await draftEmail1(p, p.audit);
-      await ox.addMessage({ prospect_id: p.id, step: 0, ...status(state), subject: d.subject, body: withAddress(p.country, d.body), variant: d.variant });
+      const facts = [p.name, p.city ?? "", ...d.findings.map((x) => x.cost), String(Math.min(3, d.findings.length))].join("\n");
+      const verdict = await autoCheck(p, p.audit?.result ?? null, d.findings, d.body, checkEmail1(d.body, d.subject, facts, takesBookings(p.business_type)));
+      if (verdict.kind === "reject") {
+        await ox.updateProspect(p.id, { status: "skipped", skip_reason: verdict.reason.slice(0, 200) });
+        continue;
+      }
+      const review = verdict.kind === "review" ? verdict.reason : forReview;
+      await ox.addMessage({
+        prospect_id: p.id,
+        step: 0,
+        ...(review ? { status: "review", review_reason: review } : approved()),
+        subject: d.subject,
+        body: withAddress(p.country, d.body),
+        variant: d.variant,
+      });
       made++;
     } catch (e) {
       await ox.updateProspect(p.id, { status: "skipped", skip_reason: (e as Error).message.slice(0, 200) });
@@ -250,29 +278,75 @@ export const draftNew = async (state: State, limit: number, onlyProspect?: strin
   return made;
 };
 
-/** Day 3 and day 7 in the same thread; then the sequence ends. */
-export const draftFollowUps = async (state: State, limit: number) => {
+/** Day 3 and day 7 in the same thread (templates, queued automatically); then the sequence ends. */
+export const draftFollowUps = async (limit: number) => {
   const due = await ox.followups(limit);
   for (const f of due) {
     const step = f.next_step as 1 | 2;
     const d =
       step === 1
-        ? draftDay3(f.prospect, f.first.subject, f.audit ? reportUrl(f.audit.report_id) : SITE.url, prospectFindings(f.prospect, f.audit?.result ?? null))
+        ? draftDay3(f.prospect, f.first.subject, f.audit?.report_id && f.audit.result ? reportUrl(f.audit.report_id) : SITE.url, prospectFindings(f.prospect, f.audit?.result ?? null))
         : draftDay7(f.prospect, f.first.subject);
-    await ox.addMessage({ prospect_id: f.prospect.id, step, ...status(state), subject: d.subject, body: withAddress(f.prospect.country, d.body), in_reply_to: f.first.message_id });
+    await ox.addMessage({ prospect_id: f.prospect.id, step, ...approved(), subject: d.subject, body: withAddress(f.prospect.country, d.body), in_reply_to: f.first.message_id });
   }
   return due.length;
 };
 
 /** "Not now" replies: one check-back 60 days later. */
-export const draftCheckBacks = async (state: State, limit: number) => {
+export const draftCheckBacks = async (limit: number) => {
   const due = await ox.checkbacks(limit);
   for (const c of due) {
     const audit = await ox.latestAudit(c.prospect.id);
     const d = draftCheckBack(c.prospect, c.first?.subject ?? subjectFor(c.prospect, "A"), prospectFindings(c.prospect, audit?.result ?? null));
-    await ox.addMessage({ prospect_id: c.prospect.id, step: 4, ...status(state), subject: d.subject, body: withAddress(c.prospect.country, d.body), in_reply_to: c.first?.message_id ?? null });
+    await ox.addMessage({ prospect_id: c.prospect.id, step: 4, ...approved(), subject: d.subject, body: withAddress(c.prospect.country, d.body), in_reply_to: c.first?.message_id ?? null });
   }
   return due.length;
+};
+
+// ---------- Daily summary, 9:00 PKT ----------
+
+const PKT_OFFSET = 5 * 3_600_000; // Pakistan has no daylight saving
+const pktDate = (t: number) => new Date(t + PKT_OFFSET).toISOString().slice(0, 10);
+const pct = (d: number, t: number) => (t ? `${Math.round((d / t) * 1000) / 10}%` : "0%");
+
+export const sendDailySummary = async (now = Date.now()) => {
+  const todayStart = Date.parse(`${pktDate(now)}T00:00:00Z`) - PKT_OFFSET;
+  const from = new Date(todayStart - DAY);
+  const [s, rows] = await Promise.all([ox.dailySummary(from.toISOString(), new Date(todayStart).toISOString()), ox.coverage()]);
+  const cov = progress(rows);
+  const classes = Object.entries(s.by_class)
+    .map(([k, v]) => `${k.replace("_", " ")} ${v}`)
+    .join(", ");
+  const lines = [
+    `Yesterday (${pktDate(from.getTime())}, Pakistan time):`,
+    `Emails sent: ${s.sent_first} first emails, ${s.sent_followups} follow-ups, ${s.sent_replies} automatic replies.`,
+    `Replies: ${s.replies}${classes ? ` (${classes})` : ""}. Bounces: ${s.bounces}.`,
+    s.hot.length
+      ? `HOT leads you need to call or answer (${s.hot.length}):\n${s.hot
+          .map((h) => `- ${h.name} (${h.type}, ${[h.city, h.country].filter(Boolean).join(", ")}): ${[h.phone, h.email].filter(Boolean).join(" · ")}${h.reply ? `\n  "${h.reply.replace(/\s+/g, " ").slice(0, 200)}"` : ""}`)
+          .join("\n")}`
+      : "HOT leads: none waiting for you.",
+    s.auto_answered.length ? `Answered automatically (fixes or prices sent):\n${s.auto_answered.map((a) => `- ${a.name} (${a.class}): ${[a.phone, a.email].filter(Boolean).join(" · ")}`).join("\n")}` : "",
+    `Homepage demos built: ${s.demos}. New qualified leads: ${s.qualified}. Queued to send: ${s.queued}. Needs a look: ${s.needs_look}.`,
+    `Coverage:\n${cov.countries.map((c) => `- ${c.label}: ${pct(c.done, c.total)}${c.open ? "" : " (locked until a postal address is set)"}`).join("\n")}`,
+    s.paused ? `PAUSED: ${s.pause_reason ?? "paused"}. Resume in ${SITE.url}/admin/prospects once it's fixed.` : "Auto-pause: not triggered.",
+    `${SITE.url}/admin/prospects`,
+  ].filter(Boolean);
+  await sendOwnerAlert(`Outreach daily summary: ${s.sent_first + s.sent_followups} sent, ${s.replies} replies${s.hot.length ? `, ${s.hot.length} HOT` : ""}`, lines);
+  return lines.length;
+};
+
+/** Sends the summary once per day, at the first tick after 9:00 PKT (04:00 UTC). */
+const maybeSummary = async (now = Date.now()) => {
+  const hourPkt = new Date(now + PKT_OFFSET).getUTCHours();
+  if (hourPkt < 9) return null;
+  const key = `daily-summary:${pktDate(now)}`;
+  if (await ox.cacheGet(key, 48)) return null;
+  await ox.cachePut(key, { at: new Date(now).toISOString() });
+  return sendDailySummary(now).then(
+    () => "sent",
+    (e) => `error: ${(e as Error).message}`,
+  );
 };
 
 export const PHASES = ["imap", "send", "draft", "audit"] as const;
@@ -287,6 +361,11 @@ export const tick = async (phases: Phase[] = [...PHASES], budgetMs = 50_000) => 
   await ox.set({ last_tick_at: new Date().toISOString() });
   // Address now set: US/Canadian prospects that were waiting go back through qualification.
   if (postalAddress()) report.released = await ox.releaseWaiting();
+  // "Needs a look" drafts older than 7 days expire (checked hourly).
+  if (!(await ox.cacheGet("expire-reviews", 1))) {
+    await ox.cachePut("expire-reviews", { at: new Date().toISOString() });
+    report.expired = await ox.expireReviews();
+  }
   let state = await ox.state();
 
   // Replies, bounces and "no"s are handled before anything is sent.
@@ -304,11 +383,12 @@ export const tick = async (phases: Phase[] = [...PHASES], budgetMs = 50_000) => 
     state = await ox.state();
   }
   if (phases.includes("send")) report.send = await sendNext(state);
-  // Discovery continues from the tick (once an hour at most) until today's 150 are found, and
-  // covers a daily cron run that failed because the public Overpass servers were busy.
-  if (phases.includes("audit") && left() > 45_000 && state.found_24h < MAX_NEW_PER_DAY && !(await ox.cacheGet("discover-tick", 1))) {
+  if (phases.includes("send")) report.summary = await maybeSummary();
+  // Coverage: niches below today's target search their next cells (at most every 30 minutes).
+  const lastDiscover = await ox.cacheGet<{ at: string }>("discover-tick", 1);
+  if (phases.includes("audit") && left() > 40_000 && state.found_24h < MAX_NEW_PER_DAY && (!lastDiscover || Date.now() - Date.parse(lastDiscover.at) > 30 * 60_000)) {
     await ox.cachePut("discover-tick", { at: new Date().toISOString() });
-    report.discover = await discoverAll(undefined, start + budgetMs - 15_000).catch((e) => `error: ${(e as Error).message}`);
+    report.discover = await discoverRun(start + budgetMs - 25_000).catch((e) => `error: ${(e as Error).message}`);
   }
   if (phases.includes("audit")) {
     const done: string[] = [];
@@ -323,8 +403,8 @@ export const tick = async (phases: Phase[] = [...PHASES], budgetMs = 50_000) => 
   // Templates are instant; a Gemini draft can take up to 2 x 25 s, so one per tick with time left.
   if (phases.includes("draft") && left() > 12_000) {
     if (left() > 30_000) report.drafts = await draftNew(state, 1);
-    if (left() > 8_000) report.followups = await draftFollowUps(state, 5);
-    if (left() > 5_000) report.checkbacks = await draftCheckBacks(state, 5);
+    if (left() > 8_000) report.followups = await draftFollowUps(5);
+    if (left() > 5_000) report.checkbacks = await draftCheckBacks(5);
   }
   report.ms = Date.now() - start;
   return report;

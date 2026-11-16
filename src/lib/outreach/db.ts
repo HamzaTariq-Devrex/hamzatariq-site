@@ -4,7 +4,7 @@ import type { Json } from "@/lib/supabase/database.types";
 import { rpcClient, serverSecret } from "@/lib/supabase/server";
 import type { AuditResult } from "@/lib/audit/types";
 
-export const COUNTRIES = { US: "United States", GB: "United Kingdom", AE: "United Arab Emirates", CA: "Canada", AU: "Australia" } as const;
+export const COUNTRIES = { GB: "United Kingdom", AU: "Australia", NZ: "New Zealand", AE: "United Arab Emirates", US: "United States", CA: "Canada" } as const;
 export type Country = keyof typeof COUNTRIES;
 
 export type Settings = {
@@ -54,7 +54,42 @@ export type Prospect = {
   reply_class?: string | null;
   snooze_until?: string | null;
   next_followup_at?: string | null;
+  region?: string | null;
+  flags?: Record<string, unknown>;
+  preview_id?: string | null;
+  qualified_at?: string | null;
 };
+
+export type Preview = {
+  name: string;
+  business_type: string;
+  city: string | null;
+  country: Country;
+  phone: string | null;
+  tags: Record<string, string>;
+  created_at: string;
+  expires_at: string;
+  expired: boolean;
+};
+
+export type DailySummary = {
+  sent_first: number;
+  sent_followups: number;
+  sent_replies: number;
+  replies: number;
+  by_class: Record<string, number>;
+  bounces: number;
+  hot: { name: string; email: string | null; phone: string | null; type: string; city: string | null; country: string; reply: string | null; lead_id: string | null }[];
+  auto_answered: { name: string; class: string; phone: string | null; email: string | null }[];
+  demos: number;
+  qualified: number;
+  needs_look: number;
+  queued: number;
+  paused: boolean;
+  pause_reason: string | null;
+};
+
+export type CoverageRow = { t: string; c: Country; r: string; y: string; done: boolean; n: number };
 
 export type ProspectAudit = { id: string; report_id: string; url: string; final_url: string | null; score: number | null; result: AuditResult | null; expires_at: string };
 
@@ -126,6 +161,14 @@ export const ox = {
   skip: (id: string, reason: string) => call<void>("app_ox_skip", { p_id: id, p_reason: reason }),
   recheckList: () => call<{ id: string; name: string; website: string | null; osm_tags: Record<string, string>; status: string; name_count: number }[]>("app_ox_recheck_list", {}),
   releaseWaiting: () => call<number>("app_ox_release_waiting", {}),
+  coverage: () => call<CoverageRow[]>("app_ox_coverage", {}),
+  coverageMark: (type: string, country: string, region: string, city: string, found: number, error: string | null) =>
+    call<void>("app_ox_coverage_mark", { p_type: type, p_country: country, p_region: region, p_city: city, p_found: found, p_error: error }),
+  nicheStats: () => call<Record<string, { q: number; backlog: number }>>("app_ox_niche_stats", {}),
+  createPreview: (prospect: string) => call<string>("app_ox_preview_create", { p_prospect: prospect }),
+  preview: (id: string) => call<Preview | null>("app_ox_preview", { p_id: id }),
+  expireReviews: () => call<number>("app_ox_expire_reviews", {}),
+  dailySummary: (from: string, to: string) => call<DailySummary>("app_ox_daily_summary", { p_from: from, p_to: to }),
   setCronSecret: (value: string) => call<void>("app_ox_set_cron_secret", { p_value: value }),
   cronStatus: () => call<{ secret_set: boolean; job: { schedule: string; active: boolean } | null }>("app_ox_cron_status", {}),
   sentIds: () => call<{ message_id: string; prospect_id: string; email: string; name: string }[]>("app_ox_list", { p_kind: "sent_ids", p_limit: 0 }),

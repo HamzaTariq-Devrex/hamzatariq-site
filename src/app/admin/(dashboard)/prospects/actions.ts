@@ -5,9 +5,8 @@ import { getOwner } from "@/lib/supabase/server";
 import { MANUAL_PROSPECT_STATUSES, PROSPECT_STATUSES, type ProspectStatus } from "@/lib/admin/labels";
 import { PAGE_SIZE } from "@/lib/admin/data";
 import type { ProspectRow } from "@/components/admin/outreach/prospect-shared";
-import { COUNTRIES, ox, type Country } from "@/lib/outreach/db";
-import { isBusinessType } from "@/lib/outreach/osm";
-import { discoverAll, draftNew, tick } from "@/lib/outreach/pipeline";
+import { ox } from "@/lib/outreach/db";
+import { draftNew, tick } from "@/lib/outreach/pipeline";
 import { sendTestToOwner } from "@/lib/outreach/test-send";
 
 // Owner-only actions for /admin/prospects. Each one checks the owner again (server actions are
@@ -31,50 +30,6 @@ export async function setPaused(paused: boolean): Promise<Result> {
   return error ? fail(error.message) : done();
 }
 
-export async function setApproveFirst(approveFirst: boolean): Promise<Result> {
-  const owner = await getOwner();
-  if (!owner) return fail("Not allowed.");
-  const { error } = await owner.supabase.from("outreach_settings").update({ approve_first: approveFirst, updated_at: new Date().toISOString() }).eq("id", 1);
-  return error ? fail(error.message) : done();
-}
-
-export async function addSearch(businessType: string, city: string, country: string): Promise<Result> {
-  const owner = await getOwner();
-  if (!owner) return fail("Not allowed.");
-  const name = city.trim().slice(0, 80);
-  if (!isBusinessType(businessType) || !name || !(country in COUNTRIES)) return fail("Pick a business type, a city and a country.");
-  if (country === "US") return fail("US searches are off until a postal address is added to the email footer.");
-  const { error } = await owner.supabase.from("outreach_searches").insert({ business_type: businessType, city: name, country: country as Country });
-  return error ? fail(error.message) : done();
-}
-
-export async function toggleSearch(id: string, active: boolean): Promise<Result> {
-  const owner = await getOwner();
-  if (!owner) return fail("Not allowed.");
-  const { error } = await owner.supabase.from("outreach_searches").update({ active }).eq("id", id);
-  return error ? fail(error.message) : done();
-}
-
-export async function deleteSearch(id: string): Promise<Result> {
-  const owner = await getOwner();
-  if (!owner) return fail("Not allowed.");
-  const { error } = await owner.supabase.from("outreach_searches").delete().eq("id", id);
-  return error ? fail(error.message) : done();
-}
-
-/** Runs one saved search now (OpenStreetMap only; nothing is audited or sent here). */
-export async function runSearchNow(id: string): Promise<Result> {
-  const owner = await getOwner();
-  if (!owner) return fail("Not allowed.");
-  try {
-    const [r] = await discoverAll(id);
-    if (!r) return done("Daily limit of 30 new businesses reached, or the search is switched off.");
-    return r.error ? fail(r.error) : done(`${r.added} new business${r.added === 1 ? "" : "es"} added.`);
-  } catch (e) {
-    return fail(e);
-  }
-}
-
 /** Audits the next sites and writes drafts now. Never sends: the "send" phase is left out. */
 export async function processNow(): Promise<Result> {
   const owner = await getOwner();
@@ -88,7 +43,7 @@ export async function processNow(): Promise<Result> {
   }
 }
 
-/** Approves the given drafts (the day's batch). */
+/** "Needs a look": sends these anyway. They still pass the hard checks again right before sending. */
 export async function approveDrafts(ids: string[]): Promise<Result> {
   const owner = await getOwner();
   if (!owner) return fail("Not allowed.");
@@ -97,15 +52,26 @@ export async function approveDrafts(ids: string[]): Promise<Result> {
     .from("outreach_messages")
     .update({ status: "approved", approved_at: new Date().toISOString() })
     .in("id", ids.slice(0, 500))
-    .eq("status", "draft");
-  return error ? fail(error.message) : done(`${ids.length} approved.`);
+    .in("status", ["draft", "review"]);
+  return error ? fail(error.message) : done(`${ids.length} queued to send.`);
 }
 
+/** Drops the draft; for email 1 the business is skipped too, so it isn't drafted again. */
 export async function discardDraft(id: string): Promise<Result> {
   const owner = await getOwner();
   if (!owner) return fail("Not allowed.");
-  const { error } = await owner.supabase.from("outreach_messages").update({ status: "cancelled" }).eq("id", id).in("status", ["draft", "approved"]);
-  return error ? fail(error.message) : done();
+  const { data, error } = await owner.supabase
+    .from("outreach_messages")
+    .update({ status: "cancelled" })
+    .eq("id", id)
+    .in("status", ["draft", "review", "approved"])
+    .select("prospect_id, step")
+    .maybeSingle();
+  if (error) return fail(error.message);
+  if (data && (data.step ?? 0) === 0) {
+    await owner.supabase.from("prospects").update({ status: "skipped", updated_at: new Date().toISOString() }).eq("id", data.prospect_id).in("status", ["audited", "found"]);
+  }
+  return done();
 }
 
 export async function saveDraft(id: string, subject: string, body: string): Promise<Result> {
@@ -114,7 +80,7 @@ export async function saveDraft(id: string, subject: string, body: string): Prom
   const s = subject.trim();
   const b = body.trim();
   if (!s || s.length >= 50 || !b) return fail("Subject must be under 50 characters, and the email can't be empty.");
-  const { error } = await owner.supabase.from("outreach_messages").update({ subject: s, body: b.slice(0, 8000) }).eq("id", id).eq("status", "draft");
+  const { error } = await owner.supabase.from("outreach_messages").update({ subject: s, body: b.slice(0, 8000) }).eq("id", id).in("status", ["draft", "review"]);
   return error ? fail(error.message) : done("Saved.");
 }
 

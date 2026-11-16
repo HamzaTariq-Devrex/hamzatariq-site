@@ -1,7 +1,8 @@
 // OpenStreetMap only (free, no key): Nominatim finds the city, Overpass lists businesses of one type
 // inside it that have a website, phone or email tag. Both services ask for an identifying
 // User-Agent, at most 1 request per second and caching, so every response is cached in Supabase.
-import { ox, type Country, type Search } from "./db";
+import { ox, type Country } from "./db";
+import { placeQuery, type Cell } from "./areas";
 import { waitingForAddress } from "./address";
 
 export const USER_AGENT = "HamzaTariqOutreach/1.0 (+https://hamzatariq.site)";
@@ -12,7 +13,7 @@ import { BUSINESS_TYPES, isBusinessType, type BusinessType } from "./osm-types";
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 let lastRequest = 0;
 /** Fetch from an OSM service, never more than one request per second from this process. */
-/** Hard deadline for OSM requests in the current run (set by discoverAll), so a busy server can't outlast the function. */
+/** Hard deadline for OSM requests in the current run (set by the discovery run), so a busy server can't outlast the function. */
 let deadlineAt = Number.POSITIVE_INFINITY;
 export const setOsmDeadline = (at: number) => (deadlineAt = at);
 
@@ -94,6 +95,8 @@ export const timezoneFor = (country: Country, lat: number, lon: number) => {
       return "Europe/London";
     case "AE":
       return "Asia/Dubai";
+    case "NZ":
+      return "Pacific/Auckland";
     case "US":
       if (lat > 50 && lon < -130) return "America/Anchorage";
       if (lat < 23 && lon < -150) return "Pacific/Honolulu";
@@ -184,13 +187,13 @@ export const domainOf = (url: string | null) => {
   }
 };
 
-/** Discovery for one saved search: adds up to `budget` new businesses, returns how many. */
-export const discover = async (search: Search, budget: number) => {
+/** Discovery for one coverage cell (niche x city): adds up to `budget` new businesses, returns how many. */
+export const discoverCell = async (type: string, cell: Cell, budget: number) => {
   // No US or Canada until a postal address is set (CAN-SPAM / CASL).
-  if (!isBusinessType(search.business_type) || budget <= 0 || waitingForAddress(search.country)) return 0;
-  const place = await findCity(search.city, search.country);
-  const timezone = timezoneFor(search.country, place.lat, place.lon);
-  const businesses = await findBusinesses(search.business_type, place);
+  if (!isBusinessType(type) || budget <= 0 || waitingForAddress(cell.country)) return 0;
+  const place = await findCity(placeQuery(cell), cell.country);
+  const timezone = timezoneFor(cell.country, place.lat, place.lon);
+  const businesses = await findBusinesses(type, place);
   // Chains: the same name three or more times in one city.
   const key = (n: string) => n.toLowerCase().trim();
   const nameCount = new Map<string, number>();
@@ -201,15 +204,16 @@ export const discover = async (search: Search, budget: number) => {
     if (isBigOrganisation(b.tags, b.name) || (nameCount.get(key(b.name)) ?? 0) >= CHAIN_LOCATIONS) continue;
     const website = websiteOf(b.tags);
     if (isStoreLocatorPage(website)) continue;
-    // The same name already found in other searches: with this one it would be 3+ locations.
+    // The same name already found in other cities: with this one it would be 3+ locations.
     if ((await ox.nameCount(b.name)) >= CHAIN_LOCATIONS - 1) continue;
     const id = await ox.addProspect({
-      search_id: search.id,
+      search_id: null,
       osm_id: b.osmId,
       name: b.name,
-      business_type: search.business_type,
-      city: search.city,
-      country: search.country,
+      business_type: type,
+      city: cell.city,
+      region: cell.region,
+      country: cell.country,
       timezone,
       website,
       domain: domainOf(website),
@@ -220,6 +224,5 @@ export const discover = async (search: Search, budget: number) => {
     });
     if (id) added++;
   }
-  await ox.searchRan(search.id, { lat: place.lat, lon: place.lon, osm_area: place.area, timezone, last_found: added });
   return added;
 };
