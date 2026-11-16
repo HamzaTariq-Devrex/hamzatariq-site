@@ -13,6 +13,7 @@ import { CHAIN_LOCATIONS, isBigOrganisation, isStoreLocatorPage } from "./osm";
 import { takesBookings } from "./osm-types";
 import { waitingForAddress } from "./address";
 import { hasMailServer } from "./mx";
+import { emailProblem } from "./email-check";
 import type { Finding } from "./problems";
 
 export type Verdict = { kind: "ok" } | { kind: "review"; reason: string } | { kind: "reject"; reason: string };
@@ -42,6 +43,15 @@ export const looksLikeUkSoleTrader = (p: Pick<Prospect, "country" | "business_ty
 
 const CHAIN_WORDS = /\b(group|holdings|international|franchise|worldwide|global|nationwide|national|express|outlet|superstore|megastore)\b/i;
 
+/** The name without symbols, for emails ("Joe's @ Home!!" → "Joe's Home"). Letters of any script stay. */
+export const cleanName = (name: string) =>
+  name
+    .replace(/[^\p{L}\p{N}\s&'’.,\-()]/gu, " ")
+    .replace(/\(\s*\)/g, " ")
+    .replace(/\s+/g, " ")
+    .replace(/^[\s&.,-]+|[\s&,-]+$/g, "")
+    .trim();
+
 /** Names that would read oddly in "Hi {name} team," or don't look like a business name. */
 export const oddName = (name: string) => {
   const n = name.trim();
@@ -55,6 +65,14 @@ export const oddName = (name: string) => {
   return null;
 };
 
+/**
+ * Strong sites (owner, 2026-11-17): an audit score of 70+ means the site works; "3 quick fixes" is the
+ * pitch for weak sites. These businesses are held (status "held") until the SEO + blog offer exists.
+ */
+export const STRONG_SITE_SCORE = 70;
+export const HELD_REASON = (score: number) => `Strong site (audit ${score}): waiting for the SEO + blog offer`;
+export const isStrongSite = (p: Pick<Prospect, "audit_score">) => p.audit_score != null && p.audit_score >= STRONG_SITE_SCORE;
+
 /** Every quoted sentence in the email must appear word for word in a real review. */
 export const quotesAreReal = (body: string) => {
   const quotes = [...body.matchAll(/"([^"]{8,})"/g)].map((m) => m[1].replace(/…$/, "").trim());
@@ -64,6 +82,8 @@ export const quotesAreReal = (body: string) => {
 /** Hard rules, re-checked right before sending (cheap: DNS and database only). */
 export const hardChecks = async (p: Prospect): Promise<string | null> => {
   if (!p.email) return "No email address";
+  const bad = emailProblem(p.email);
+  if (bad) return bad;
   if (waitingForAddress(p.country)) return "US/Canada wait for a postal address";
   if (isBigOrganisation(p.osm_tags ?? {}, p.name)) return "Chain, brand or public body";
   if (isStoreLocatorPage(p.website)) return "Store-locator page of a bigger site";
@@ -93,7 +113,9 @@ export const autoCheck = async (p: Prospect, audit: AuditResult | null, f: Findi
   if (flags.redirectOther) return { kind: "review", reason: `Low audit confidence: the website redirects to ${flags.redirectOther}` };
   if (flags.jsPage && f[0].id === "no-contact") return { kind: "review", reason: "Low audit confidence: the page is built with JavaScript, so the contact-button check may be wrong" };
   if (looksLikeUkSoleTrader(p)) return { kind: "review", reason: "Possible UK sole trader (no Ltd/Limited in the name or on the site): needs prior consent under PECR" };
-  const odd = oddName(p.name);
+  // Symbols are dropped from the name in the email (greeting "Hi there," or the person's first name),
+  // so only a name that is still odd without them needs a look.
+  const odd = oddName(cleanName(p.name));
   if (odd) return { kind: "review", reason: `Odd business name (${odd})` };
   if ((await ox.nameCount(p.name)) >= CHAIN_LOCATIONS - 1) return { kind: "review", reason: "Possible chain: the same name at another location" };
   if (CHAIN_WORDS.test(p.name)) return { kind: "review", reason: "Possible chain: the name sounds like a group or brand" };

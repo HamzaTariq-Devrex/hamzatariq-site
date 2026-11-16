@@ -66,13 +66,14 @@ export const formatDate = (date: string, withTime = true) =>
 
 // ---------- Outreach (/admin/prospects) ----------
 
-export const PROSPECT_STATUSES = ["found", "audited", "skipped", "waiting", "whatsapp", "messaged", "emailed", "replied", "call", "won", "lost", "unsubscribed", "bounced"] as const;
+export const PROSPECT_STATUSES = ["found", "audited", "skipped", "waiting", "held", "whatsapp", "messaged", "emailed", "replied", "call", "won", "lost", "unsubscribed", "bounced"] as const;
 export type ProspectStatus = (typeof PROSPECT_STATUSES)[number];
 export const PROSPECT_STATUS_LABELS: Record<ProspectStatus, string> = {
   found: "New",
   audited: "Audited",
   skipped: "Skipped",
   waiting: "Waiting (US/CA address)",
+  held: "Held (strong site, SEO offer)",
   whatsapp: "WhatsApp queue",
   messaged: "WhatsApp sent",
   emailed: "Emailed",
@@ -85,3 +86,15 @@ export const PROSPECT_STATUS_LABELS: Record<ProspectStatus, string> = {
 };
 /** Statuses the owner can set by hand (the rest come from the pipeline). */
 export const MANUAL_PROSPECT_STATUSES: ProspectStatus[] = ["found", "whatsapp", "messaged", "emailed", "replied", "call", "won", "lost", "unsubscribed"];
+/**
+ * What a bounce means, from its SMTP status/diagnostic (suppression_list.detail): a bad address,
+ * a full mailbox, or a spam/policy block (the address exists; the email's content or sender was refused).
+ */
+export const bounceMeaning = (detail: string | null) => {
+  if (!detail) return null;
+  if (/\b5\.7\.\d+|spam|blocked|policy|reputation|blacklist|denied/i.test(detail)) return "Spam/policy block: the address exists, the receiving server refused the email";
+  if (/\b5\.1\.\d+|user unknown|no such user|does not exist|unknown recipient|invalid recipient|address rejected|mailbox unavailable/i.test(detail)) return "Address doesn't exist";
+  if (/\b5\.2\.2|quota|mailbox full/i.test(detail)) return "Mailbox full";
+  if (/\b5\.4\.\d+|host not found|no route|dns/i.test(detail)) return "Mail server can't be reached";
+  return null;
+};

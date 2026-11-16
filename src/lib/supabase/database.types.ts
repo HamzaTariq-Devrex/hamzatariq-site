@@ -1090,18 +1090,21 @@ export type Database = {
       suppression_list: {
         Row: {
           created_at: string
+          detail: string | null
           email: string
           prospect_id: string | null
           reason: string
         }
         Insert: {
           created_at?: string
+          detail?: string | null
           email: string
           prospect_id?: string | null
           reason: string
         }
         Update: {
           created_at?: string
+          detail?: string | null
           email?: string
           prospect_id?: string | null
           reason?: string
@@ -1366,6 +1369,7 @@ export type Database = {
       app_ox_state: { Args: { p_secret: string }; Returns: Json }
       app_ox_stop: {
         Args: {
+          p_detail?: string
           p_email: string
           p_prospect?: string
           p_reason: string

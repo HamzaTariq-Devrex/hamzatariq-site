@@ -1,6 +1,7 @@
 // Outreach emails (owner's playbook, 2026-11-16). Plain text only, no tracking, no HTML.
 //
-// Email 1 (day 0): "Hi {Business} team," + who I am + the ONE most important real problem from that
+// Email 1 (day 0): greeting (hello: "Hi Jo," for a personal address, "Hi {Business} team," or
+// "Hi there," for an odd name) + who I am + the ONE most important real problem from that
 // prospect's audit, told as what it costs them (no technical words) + one niche proof line only when
 // there's a real match (word for word from content/testimonials.json or a real project) + one CTA +
 // a plain opt-out line + signature. No links at all. 60-90 words. Gemini writes the middle part from
@@ -20,10 +21,26 @@ import type { AuditResult } from "@/lib/audit/types";
 import { groupOf, nounFor, takesBookings, type NicheGroup } from "./osm-types";
 import { findings, type Finding } from "./problems";
 import type { Prospect, ProspectAudit } from "./db";
+import { cleanName, oddName } from "./checks";
+import { personFromEmail } from "./email-check";
 
 export const SIGNATURE = "Hamza Tariq\nFounder, Devrex Digital · hamzatariq.site";
 export const OPT_OUT = "Not interested? Just reply 'no' and I won't email again.";
 export { postalAddress, withAddress } from "./address";
+
+type Named = Pick<Prospect, "name"> & { email?: string | null };
+/** The business name as written in emails: no symbols ("Joe's @ Home" → "Joe's Home"). */
+export const biz = (p: Named) => cleanName(p.name) || p.name.trim();
+/**
+ * Greeting (owner, 2026-11-17): "Hi Jo," when the address is clearly a person's (jo.adele@);
+ * otherwise "Hi {Business} team,", or "Hi there," when the business name is odd (symbols etc.).
+ */
+export const hello = (p: Named) => {
+  const person = personFromEmail(p.email, p.name);
+  if (person) return `Hi ${person},`;
+  if (cleanName(p.name) !== p.name.trim().replace(/\s+/g, " ") || oddName(p.name)) return "Hi there,";
+  return `Hi ${biz(p)} team,`;
+};
 
 export const reportUrl = (reportId: string) => `${SITE.url}/report/${reportId}`;
 export const previewUrl = (previewId: string) => `${SITE.url}/preview/${previewId}`;
@@ -125,7 +142,8 @@ export const checkEmail1 = (body: string, subject: string, facts: string, bookin
   if ((body.replace(OPT_OUT, "").match(/\?/g) ?? []).length > 1) problems.push("it asks more than one question");
   const n = words(body);
   if (n > 90 || n < 60) problems.push(`it is ${n} words (must be 60-90)`);
-  if (/\bhi there\b/i.test(body)) problems.push('it says "Hi there"');
+  // "Hi there," is allowed as the greeting for odd business names (owner, 2026-11-17), nowhere else.
+  if (/\bhi there\b/i.test(body.split("\n").slice(1).join("\n"))) problems.push('it says "Hi there"');
   const allowed = new Set(facts.match(/\d+(?:[.,]\d+)?/g) ?? []);
   const nums = (text.match(/\d+(?:[.,]\d+)?/g) ?? []).filter((x) => !allowed.has(x));
   if (nums.length) problems.push(`it uses numbers that aren't in the facts: ${nums.join(", ")}`);
@@ -159,14 +177,14 @@ const cta = (f: Finding[]) => {
 };
 
 const assemble1 = (p: Prospect, middle: string, f: Finding[], withProof = true) =>
-  [`Hi ${p.name} team,`, middle.trim(), withProof ? proofLine(p.business_type) : null, cta(f), OPT_OUT, SIGNATURE].filter(Boolean).join("\n\n");
+  [hello(p), middle.trim(), withProof ? proofLine(p.business_type) : null, cta(f), OPT_OUT, SIGNATURE].filter(Boolean).join("\n\n");
 
 /** Template email 1 from the same real findings (also the fallback when Gemini's draft fails the check). */
 const templateMiddle = (p: Prospect, f: Finding[]) => {
   const first = f[0];
   const parts = [
     "I'm Hamza, a web developer.",
-    first.id === "no-website" ? `${lead(first.cost)}.` : `I had a look at ${p.name} online and noticed that ${first.cost}.`,
+    first.id === "no-website" ? `${lead(first.cost)}.` : `I had a look at ${biz(p)} online and noticed that ${first.cost}.`,
   ];
   return parts.join(" ");
 };
@@ -178,7 +196,7 @@ const templateMiddle = (p: Prospect, f: Finding[]) => {
  */
 const noWebsiteEmail1 = (p: Prospect, f: Finding[], subject: string, variant: "A" | "B") => {
   const intro = "I'm Hamza, a web developer who helps small businesses get more customers online.";
-  const core = `I couldn't find a website for ${p.name}, so I made a quick free homepage idea for you.`;
+  const core = `I couldn't find a website for ${biz(p)}, so I made a quick free homepage idea for you.`;
   const pad = " It only uses your public details, like your address, phone number and opening hours.";
   const facts = [p.name, p.city ?? ""].join("\n");
   const body = [
@@ -200,7 +218,7 @@ export const draftEmail1 = async (p: Prospect, auditRow: ProspectAudit | null): 
   if (f[0].id === "no-website") return noWebsiteEmail1(p, f, subject, variant);
   const fixed = assemble1(p, "", f);
   const budget = { min: Math.max(15, 62 - words(fixed)), max: Math.max(20, 88 - words(fixed)) };
-  const facts = [`${p.name}`, p.city ?? "", ...f.map((x) => x.cost), String(Math.min(3, f.length))].join("\n");
+  const facts = [biz(p), p.city ?? "", ...f.map((x) => x.cost), String(Math.min(3, f.length))].join("\n");
   // Template candidates from the same findings, in order of preference. Email 1 names one problem
   // only, so a short one is padded with what Hamza does (never a second problem), and a long one
   // drops the optional proof line. The first candidate that passes the check is the fallback.
@@ -235,7 +253,7 @@ ${ownerProfile()}`;
     try {
       const res = await ai.models.generateContent({
         model: CHAT_MODEL,
-        contents: [{ role: "user", parts: [{ text: `Business: ${p.name} (${ctx(p).noun}${p.city ? `, ${p.city}` : ""})${feedback}` }] }],
+        contents: [{ role: "user", parts: [{ text: `Business: ${biz(p)} (${ctx(p).noun}${p.city ? `, ${p.city}` : ""})${feedback}` }] }],
         config: {
           systemInstruction: system,
           temperature: 0.6,
@@ -266,8 +284,8 @@ export const draftDay3 = (p: Prospect, firstSubject: string, reportLink: string,
     return {
       subject: reSubject(firstSubject),
       body: [
-        `Hi ${p.name} team,`,
-        `Here's the free homepage idea I made for ${p.name}, using only your public details: ${previewUrl(p.preview_id)}`,
+        hello(p),
+        `Here's the free homepage idea I made for ${biz(p)}, using only your public details: ${previewUrl(p.preview_id)}`,
         "It's yours to keep, with no obligation. If you'd like a real site like it, just reply.",
         OPT_OUT,
         "Hamza",
@@ -278,8 +296,8 @@ export const draftDay3 = (p: Prospect, firstSubject: string, reportLink: string,
   }
   const next = f[1];
   const body = [
-    `Hi ${p.name} team,`,
-    next ? `One more thing I noticed: ${next.cost}.` : `Following up on my note about ${p.name}: ${f[0]?.cost ?? "your website could bring you more enquiries"}.`,
+    hello(p),
+    next ? `One more thing I noticed: ${next.cost}.` : `Following up on my note about ${biz(p)}: ${f[0]?.cost ?? "your website could bring you more enquiries"}.`,
     `I put what I found in a short, plain-English report for you here: ${reportLink}`,
     OPT_OUT,
     "Hamza",
@@ -290,7 +308,7 @@ export const draftDay3 = (p: Prospect, firstSubject: string, reportLink: string,
 /** Day 7 (25-40 words): polite close. */
 export const draftDay7 = (p: Prospect, firstSubject: string): Draft => ({
   subject: reSubject(firstSubject),
-  body: [`Hi ${p.name} team,`, "I haven't heard back, so I'll assume now isn't the right time and stop emailing. Should I close your file?", "Thanks for reading either way.", "Hamza"].join("\n\n"),
+  body: [hello(p), "I haven't heard back, so I'll assume now isn't the right time and stop emailing. Should I close your file?", "Thanks for reading either way.", "Hamza"].join("\n\n"),
   variant: null,
   source: "template",
 });
@@ -306,8 +324,8 @@ export const replyInterested = (p: Prospect, firstSubject: string, f: Finding[],
   const lines = noSite
     ? [
         p.preview_id
-          ? `Here's the homepage idea I made for ${p.name}: ${previewUrl(p.preview_id)}`
-          : `I'll put together a homepage idea for ${p.name} and send it over.`,
+          ? `Here's the homepage idea I made for ${biz(p)}: ${previewUrl(p.preview_id)}`
+          : `I'll put together a homepage idea for ${biz(p)} and send it over.`,
         "It only uses your public details (name, address, phone and opening hours), so you can see how a simple site could look. The real one would have your own photos, services and wording.",
       ]
     : [
@@ -320,7 +338,7 @@ export const replyInterested = (p: Prospect, firstSubject: string, f: Finding[],
       ];
   return {
     subject: reSubject(firstSubject),
-    body: [`Hi ${p.name} team,`, "Thanks for getting back to me.", ...lines, whatsappLine, SIGNATURE].filter(Boolean).join("\n\n"),
+    body: [hello(p), "Thanks for getting back to me.", ...lines, whatsappLine, SIGNATURE].filter(Boolean).join("\n\n"),
     variant: null,
     source: "template",
   };
@@ -334,7 +352,7 @@ export const priceLines = () =>
 export const replyPrice = (p: Prospect, firstSubject: string): Draft => ({
   subject: reSubject(firstSubject),
   body: [
-    `Hi ${p.name} team,`,
+    hello(p),
     "Thanks for asking. These are my starting prices:",
     priceLines(),
     "The final price depends on the features you need.",
@@ -349,9 +367,9 @@ export const replyPrice = (p: Prospect, firstSubject: string): Draft => ({
 export const draftCheckBack = (p: Prospect, firstSubject: string, f: Finding[]): Draft => ({
   subject: reSubject(firstSubject),
   body: [
-    `Hi ${p.name} team,`,
+    hello(p),
     "You mentioned the timing wasn't right when I wrote a while ago, so I'm checking back once.",
-    f[0]?.id === "no-website" ? `Want me to send you the free homepage idea I made for ${p.name}?` : cta(f),
+    f[0]?.id === "no-website" ? `Want me to send you the free homepage idea I made for ${biz(p)}?` : cta(f),
     OPT_OUT,
     "Hamza",
   ].join("\n\n"),
@@ -362,9 +380,9 @@ export const draftCheckBack = (p: Prospect, firstSubject: string, f: Finding[]):
 const reSubject = (s: string) => (/^re:/i.test(s) ? s : `Re: ${s}`);
 
 /** WhatsApp / Instagram message (2-3 lines): one real problem, one question, no links. */
-export const manualMessage = (p: Pick<Prospect, "name" | "business_type" | "osm_tags" | "city">, audit: AuditResult | null) => {
+export const manualMessage = (p: Pick<Prospect, "name" | "business_type" | "osm_tags" | "city"> & { email?: string | null }, audit: AuditResult | null) => {
   const f = findings(audit, ctx(p));
-  if (!f.length) return `Hi ${p.name} team, I'm Hamza, a web developer who helps small businesses get more enquiries online. Would a few ideas for your website be useful?`;
+  if (!f.length) return `${hello(p)} I'm Hamza, a web developer who helps small businesses get more enquiries online. Would a few ideas for your website be useful?`;
   const problem = f[0].id === "no-website" ? `${lead(f[0].cost)}.` : `I had a look at your website and noticed ${f[0].cost}.`;
-  return `Hi ${p.name} team, I'm Hamza, a web developer.\n${problem}\n${cta(f)}`;
+  return `${hello(p)} I'm Hamza, a web developer.\n${problem}\n${cta(f)}`;
 };

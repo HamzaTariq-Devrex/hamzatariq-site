@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Suspense, cache } from "react";
 import { getOwner } from "@/lib/supabase/server";
 import { PAGE_SIZE, getOutreachStats, getProspectStats } from "@/lib/admin/data";
-import { formatDate } from "@/lib/admin/labels";
+import { bounceMeaning, formatDate } from "@/lib/admin/labels";
 import { PageHead } from "@/components/admin/ui";
 import { SkeletonCard } from "@/components/admin/Skeleton";
 import OutreachControls from "@/components/admin/outreach/OutreachControls";
@@ -229,11 +229,11 @@ async function Queue() {
 async function Suppressed({ page }: { page: number }) {
   const { data, error, count } = await (await db())
     .from("suppression_list")
-    .select("email, reason, created_at, prospect:prospects(name)", { count: "exact" })
+    .select("email, reason, detail, created_at, prospect:prospects(name)", { count: "exact" })
     .order("created_at", { ascending: false })
     .range(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE - 1);
   if (error) return <Failed what="the suppression list" message={error.message} />;
-  type Row = { email: string; reason: string; created_at: string; prospect: { name: string } | null };
+  type Row = { email: string; reason: string; detail: string | null; created_at: string; prospect: { name: string } | null };
   const rows = (data ?? []) as unknown as Row[];
   return (
     <section className="adm-card">
@@ -246,6 +246,7 @@ async function Suppressed({ page }: { page: number }) {
                 <th scope="col">Email</th>
                 <th scope="col">Business</th>
                 <th scope="col">Reason</th>
+                <th scope="col">Bounce detail</th>
                 <th scope="col">Since</th>
               </tr>
             </thead>
@@ -255,6 +256,16 @@ async function Suppressed({ page }: { page: number }) {
                   <td>{r.email}</td>
                   <td>{r.prospect?.name ?? "–"}</td>
                   <td>{r.reason}</td>
+                  <td>
+                    {r.detail ? (
+                      <>
+                        {bounceMeaning(r.detail) && <strong>{bounceMeaning(r.detail)}</strong>}
+                        <div className="adm-muted">{r.detail}</div>
+                      </>
+                    ) : (
+                      <span className="adm-muted">–</span>
+                    )}
+                  </td>
                   <td className="adm-nowrap adm-muted">{formatDate(r.created_at)}</td>
                 </tr>
               ))}

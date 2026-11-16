@@ -111,6 +111,8 @@ export type State = {
   sent_24h: number;
   sent_7d: number;
   bounces_7d: number;
+  /** Bounces in the last 24 hours (since the last resume): the guard while fewer than 20 were sent. */
+  bounces_24h: number;
   complaints_7d: number;
   /** Bounce guard: the last 50 emails since outreach was last resumed. */
   last50_sent: number;
@@ -177,8 +179,8 @@ export const ox = {
     call<string>("app_ox_save_audit", { p_prospect: prospect, p_url: url, p_final_url: finalUrl, p_score: score, p_result: json(result) }),
   addMessage: (row: Record<string, unknown>) => call<string>("app_ox_add_message", { p_row: json(row) }),
   updateMessage: (id: string, patch: Record<string, unknown>) => call<void>("app_ox_update_message", { p_id: id, p_patch: json(patch) }),
-  stop: (email: string, reason: "unsubscribed" | "bounced" | "complaint" | "replied", prospect: string | null = null) =>
-    call<void>("app_ox_stop", { p_email: email, p_reason: reason, p_prospect: prospect }),
+  stop: (email: string, reason: "unsubscribed" | "bounced" | "complaint" | "replied", prospect: string | null = null, detail: string | null = null) =>
+    call<void>("app_ox_stop", { p_email: email, p_reason: reason, p_prospect: prospect, p_detail: detail }),
   isSuppressed: (email: string, exclude: string | null = null) => call<boolean>("app_ox_is_suppressed", { p_email: email, p_exclude: exclude }),
   report: (reportId: string) =>
     call<{ name: string; business_type: string; city: string | null; url: string; final_url: string | null; score: number | null; result: AuditResult | null; created_at: string; expires_at: string; expired: boolean } | null>(

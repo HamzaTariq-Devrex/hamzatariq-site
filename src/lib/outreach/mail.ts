@@ -75,7 +75,18 @@ export type Incoming = {
   refs: string[];
   /** Bounced address, from X-Failed-Recipients or Final-Recipient. */
   failed: string | null;
+  /** Bounce reason: SMTP status + diagnostic ("5.7.1 550 High probability of spam (mx1.example.com)"). */
+  reason: string | null;
   text: string;
+};
+
+/** The reason in a delivery-status report: Status, Diagnostic-Code and the remote server. */
+export const bounceReason = (source: string): string | null => {
+  const status = source.match(/^Status:\s*([245]\.\d{1,3}\.\d{1,3})/im)?.[1] ?? "";
+  const diag = (source.match(/^Diagnostic-Code:\s*(?:smtp;\s*)?([^\r\n]*(?:\r?\n[ \t][^\r\n]*)*)/im)?.[1] ?? "").replace(/\s+/g, " ").trim();
+  const mta = source.match(/^Remote-MTA:\s*dns;\s*([^\s(;]+)/im)?.[1]?.replace(/\.$/, "") ?? "";
+  const text = [status, diag].filter(Boolean).join(" ") + (mta ? ` (${mta})` : "");
+  return text.trim() ? text.trim().slice(0, 300) : null;
 };
 
 const header = (raw: string, name: string) => {
@@ -130,12 +141,14 @@ export const readInbox = async (lastUid: number | null, since: Date) => {
       const refs = [...`${header(r.head, "In-Reply-To")} ${header(r.head, "References")}`.matchAll(/<[^>\s]+>/g)].map((m) => m[0]);
       let kind: Incoming["kind"] = "other";
       let failed: string | null = null;
+      let reason: string | null = null;
       if (/report-type="?feedback-report/.test(ctype)) kind = "complaint";
       else if (/^(mailer-daemon|postmaster)@/.test(r.from) || /report-type="?delivery-status/.test(ctype)) {
         const permanent = /^Action:\s*failed/im.test(r.source) || /^Status:\s*5\./im.test(r.source) || /X-Failed-Recipients:/i.test(r.head);
         if (permanent) {
           kind = "bounce";
           failed = (header(r.head, "X-Failed-Recipients") || r.source.match(/Final-Recipient:\s*rfc822;\s*([^\s;]+)/i)?.[1] || "").toLowerCase() || null;
+          reason = bounceReason(r.source);
           for (const m of r.source.matchAll(/^Message-ID:\s*(<[^>\s]+>)/gim)) refs.push(m[1]);
         }
       } else if (/auto-replied|auto-generated/i.test(header(r.head, "Auto-Submitted")) || header(r.head, "X-Autoreply") || /out of (the )?office|automatic reply|auto-?reply|autoreply/i.test(r.subject)) {
@@ -155,7 +168,7 @@ export const readInbox = async (lastUid: number | null, since: Date) => {
       }
       // Keep only the new part of a reply (drop the quoted email below "On … wrote:").
       text = text.split(/\r?\n(?:On .+wrote:|-{2,}\s*Original Message|>)/)[0].trim().slice(0, 3000);
-      out.push({ uid: r.uid, from: r.from, subject: r.subject, date: r.date, kind, refs, failed, text });
+      out.push({ uid: r.uid, from: r.from, subject: r.subject, date: r.date, kind, refs, failed, reason, text });
     }
     // First run: start from the current end of the mailbox, so later runs never re-read old mail.
     const mailbox = client.mailbox;

@@ -1,7 +1,8 @@
 // The outreach jobs (autopilot, owner 2026-11-16). One tick every 5 minutes (Supabase pg_cron):
 // - inbox: bounces, complaints and "no" suppress at once; "yes" and price questions get an automatic
 //   reply in the same thread; anything else is a HOT alert to Hamza, with no reply.
-// - auto-pause (bounces over 3% of the last 50, or any spam complaint) and the on/off switch.
+// - auto-pause (2 bounces in a day until 20 emails are sent, then over 3% of the last 50; or any
+//   spam complaint) and the on/off switch.
 // - send: replies first; then at most one email per tick, Mon-Fri 9:00-17:00 in the recipient's
 //   time zone, 4-11 minute gaps, the daily limit, and a fair share across niches and countries.
 // - coverage: niches below today's target search their next cell (src/lib/outreach/coverage.ts).
@@ -13,11 +14,11 @@ import { rpcClient, serverSecret } from "@/lib/supabase/server";
 import { sendOwnerAlert } from "@/lib/leads/email";
 import { ox, type Prospect, type State } from "./db";
 import { qualify } from "./qualify";
-import { checkEmail1, draftCheckBack, draftDay3, draftDay7, draftEmail1, prospectFindings, replyInterested, replyPrice, reportUrl, subjectFor } from "./compose";
+import { biz, checkEmail1, draftCheckBack, draftDay3, draftDay7, draftEmail1, prospectFindings, replyInterested, replyPrice, reportUrl, subjectFor } from "./compose";
 import { classifyReply, type ReplyClass } from "./classify";
 import { postalAddress, waitingForAddress, withAddress } from "./address";
 import { readInbox, sendOutreach } from "./mail";
-import { autoCheck, hardChecks } from "./checks";
+import { autoCheck, hardChecks, HELD_REASON, isStrongSite } from "./checks";
 import { discoverRun, MAX_NEW_PER_DAY, progress } from "./coverage";
 import { takesBookings } from "./osm-types";
 
@@ -49,13 +50,25 @@ export const inSendingWindow = (timezone: string, now = new Date()) => {
 /** Random gap between two emails: 4 to 11 minutes. */
 const randomGapMs = () => (4 + Math.random() * 7) * 60_000;
 
-/** Auto-pause: more than 3% bounces in the last 50 emails, or any spam complaint (since the last resume). */
+/** Below this many emails (since the last resume) a percentage means little: one bounce in 7 is 14%. */
+export const MIN_SENT_FOR_RATE = 20;
+
+/**
+ * Why outreach should pause, or null (owner, 2026-11-17). Any spam complaint pauses. Until 20 emails
+ * have been sent since the last resume, only 2+ bounces within 24 hours pause; from 20 on, a bounce
+ * rate over 3% of the last 50 emails does.
+ */
+export const pauseReason = (s: Pick<State, "complaints_7d" | "last50_sent" | "last50_bounces" | "bounces_24h">) => {
+  if (s.complaints_7d > 0) return `Spam complaint received (${s.complaints_7d}).`;
+  if (s.last50_sent < MIN_SENT_FOR_RATE) return (s.bounces_24h ?? 0) >= 2 ? `${s.bounces_24h} bounces in the last 24 hours (fewer than ${MIN_SENT_FOR_RATE} emails sent so far).` : null;
+  const rate = s.last50_bounces / s.last50_sent;
+  return rate > 0.03 ? `Bounce rate ${(rate * 100).toFixed(1)}% over the last ${s.last50_sent} emails (${s.last50_bounces} bounced).` : null;
+};
+
+/** Auto-pause on pauseReason (counted since the last resume). */
 const safetyCheck = async (state: State) => {
   if (state.settings.paused) return state.settings.pause_reason ?? "paused";
-  const rate = state.last50_sent ? state.last50_bounces / state.last50_sent : 0;
-  let reason: string | null = null;
-  if (state.complaints_7d > 0) reason = `Spam complaint received (${state.complaints_7d}).`;
-  else if (state.last50_bounces > 0 && rate > 0.03) reason = `Bounce rate ${(rate * 100).toFixed(1)}% over the last ${state.last50_sent} emails (${state.last50_bounces} bounced).`;
+  const reason = pauseReason(state);
   if (!reason) return null;
   await ox.set({ paused: true, pause_reason: `Auto-paused: ${reason}` });
   await sendOwnerAlert("Outreach auto-paused", [`Outreach was paused automatically. ${reason}`, `Check the list and resume in ${SITE.url}/admin/prospects when it's fixed.`]).catch((e) =>
@@ -139,8 +152,8 @@ export const checkInbox = async (state: State) => {
       ox.addMessage({ prospect_id: match.prospect_id, direction: "in", kind, status: "received", subject: m.subject.slice(0, 200) || "(no subject)", body: body || "(empty)", message_id: null });
     if (m.kind === "bounce") {
       count("bounces");
-      await log("bounce", `Bounced: ${m.failed ?? match.email}`);
-      await ox.stop(match.email, "bounced", match.prospect_id);
+      await log("bounce", `Bounced: ${m.failed ?? match.email}${m.reason ? `\nReason: ${m.reason}` : ""}`);
+      await ox.stop(match.email, "bounced", match.prospect_id, m.reason);
       await ox.updateProspect(match.prospect_id, { reply_class: "bounce" });
       continue;
     }
@@ -223,6 +236,12 @@ export const sendNext = async (state: State, now = new Date()) => {
   );
   if (!next) return [...out, queue.length ? "no recipient inside 9:00-17:00 Mon-Fri right now" : "nothing queued"].join("; ");
   const p = next.prospect;
+  // Strong sites (audit 70+) wait for the SEO + blog offer; a first email queued before the rule is held.
+  if (next.message.step === 0 && isStrongSite(p)) {
+    await ox.updateMessage(next.message.id, { status: "cancelled", error: HELD_REASON(p.audit_score!) });
+    await ox.updateProspect(p.id, { status: "held", skip_reason: HELD_REASON(p.audit_score!) });
+    return [...out, `held: ${p.name} (audit ${p.audit_score})`].join("; ");
+  }
   // Hard rules again, right before sending: chain/brand, MX, suppression, address; one company domain once.
   const blocked = (await hardChecks(p)) ?? (next.message.step === 0 && (await ox.domainEmailed(p.email!, p.id)) ? "Someone at this email domain was already emailed" : null);
   if (blocked) {
@@ -253,9 +272,13 @@ export const draftNew = async (_state: State, limit: number, onlyProspect?: stri
   let made = 0;
   for (const p of list) {
     if (!p.audit) continue; // no audit row yet: never treated as "no website"
+    if (isStrongSite(p)) {
+      await ox.updateProspect(p.id, { status: "held", skip_reason: HELD_REASON(p.audit_score!) });
+      continue;
+    }
     try {
       const d = await draftEmail1(p, p.audit);
-      const facts = [p.name, p.city ?? "", ...d.findings.map((x) => x.cost), String(Math.min(3, d.findings.length))].join("\n");
+      const facts = [biz(p), p.city ?? "", ...d.findings.map((x) => x.cost), String(Math.min(3, d.findings.length))].join("\n");
       const verdict = await autoCheck(p, p.audit?.result ?? null, d.findings, d.body, checkEmail1(d.body, d.subject, facts, takesBookings(p.business_type)));
       if (verdict.kind === "reject") {
         await ox.updateProspect(p.id, { status: "skipped", skip_reason: verdict.reason.slice(0, 200) });

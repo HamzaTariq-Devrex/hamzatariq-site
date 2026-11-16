@@ -3,6 +3,7 @@
 // or text), its phone/WhatsApp and Instagram links, checks the email domain has a mail server (MX),
 // applies the skip rules and scores the lead. No guessed addresses, no third-party lookups.
 import { hasMailServer } from "./mx";
+import { emailProblem } from "./email-check";
 import { parse } from "node-html-parser";
 import { runAudit } from "@/lib/audit/run";
 import { AuditFetchError, normalizeUrl, safeFetch, type FetchResult } from "@/lib/audit/safe-fetch";
@@ -18,7 +19,6 @@ import { nounFor, takesBookings } from "./osm-types";
 export const MAX_AUDIT_SCORE = 85;
 
 const EMAIL_RE = /[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,24}/gi;
-const BAD_EMAIL = /\.(png|jpe?g|gif|webp|svg|css|js)$|@(example|domain|email|yourdomain|sentry|wixpress|sentry-next)\.|^(noreply|no-reply|donotreply)@/i;
 // Australian and Canadian anti-spam rules: a page that says it doesn't want unsolicited email is respected.
 const NO_SOLICITING = /(no|not accept|do not send|don't send)[^.]{0,40}(unsolicited|marketing|sales|solicitation|cold)[^.]{0,20}(e-?mails?|messages?|calls?|enquir|offers?)?/i;
 
@@ -59,7 +59,7 @@ const emailsIn = (html: string) => {
     if (e) out.add(e);
   }
   for (const m of root.textContent.matchAll(EMAIL_RE)) out.add(m[0].toLowerCase());
-  return [...out].filter((e) => /^[^@\s]+@[^@\s]+\.[a-z]{2,}$/.test(e) && !BAD_EMAIL.test(e));
+  return [...out].filter((e) => !emailProblem(e));
 };
 
 const pickEmail = (emails: string[], domain: string | null) => (domain ? emails.find((e) => e.endsWith(`@${domain}`) || e.endsWith(`.${domain}`)) : undefined) ?? emails[0] ?? null;
@@ -155,7 +155,7 @@ export const qualify = async (p: Prospect): Promise<string> => {
   const osmInstagram = instagramOf(p.osm_tags);
 
   if (!p.website) {
-    const email = p.email && (await hasMailServer(p.email)) ? p.email : null;
+    const email = p.email && !emailProblem(p.email) && (await hasMailServer(p.email)) ? p.email : null;
     if (email && (await ox.isSuppressed(email, p.id))) return skip(p, "Suppressed or already contacted").then(() => "skipped");
     if (!email && !p.phone && !osmInstagram) return skip(p, "No website, email, phone or Instagram").then(() => "skipped");
     // "No website" is verified: none of the likely domains (name.com, name.co.uk, ...) is theirs.
@@ -205,7 +205,8 @@ export const qualify = async (p: Prospect): Promise<string> => {
     return skip(p, "No clear problem to mention").then(() => "skipped");
   }
 
-  let email = p.email;
+  // An unusable OSM address (no-reply, placeholder, free-mail look-alike) is dropped; the site may list a real one.
+  let email = p.email && !emailProblem(p.email) ? p.email : null;
   let source: "osm" | "contact-page" | null = email ? "osm" : null;
   if (page) {
     const found = await findPublicEmail(page, p.domain);
