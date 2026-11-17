@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { signOut } from "@/app/admin/(dashboard)/actions";
 
 const LINKS = [
@@ -20,6 +20,12 @@ const LINKS = [
     href: "/admin/prospects",
     label: "Prospects",
     icon: <path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z" />,
+  },
+  {
+    // Owner, 2026-11-18: the Prospects Map tab as its own item, under Prospects.
+    href: "/admin/prospects?tab=map",
+    label: "Map",
+    icon: <path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2zM9 4v14M15 6v14" />,
   },
   {
     href: "/admin/seo",
@@ -42,6 +48,7 @@ const Icon = ({ children }: { children: React.ReactNode }) => (
 const AdminNav = ({ email }: { email: string }) => {
   const pathname = usePathname();
   const router = useRouter();
+  const tab = useSearchParams().get("tab");
   // Prefetch every admin page (its code and loading skeleton) as soon as the sidebar is on screen,
   // so the first click is as instant as the next ones.
   useEffect(() => {
@@ -59,7 +66,8 @@ const AdminNav = ({ email }: { email: string }) => {
       </a>
       <nav aria-label="Admin">
         {LINKS.map((l) => {
-          const active = l.href === "/admin" ? pathname === "/admin" : pathname.startsWith(l.href);
+          const onMap = pathname === "/admin/prospects" && tab === "map";
+          const active = l.href === "/admin" ? pathname === "/admin" : l.href.includes("?tab=map") ? onMap : pathname.startsWith(l.href) && !(l.href === "/admin/prospects" && onMap);
           return (
             <Link key={l.href} href={l.href} className={active ? "is-active" : ""} aria-current={active ? "page" : undefined}>
               <Icon>{l.icon}</Icon>

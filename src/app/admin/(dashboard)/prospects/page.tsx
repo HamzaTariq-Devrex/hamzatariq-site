@@ -17,7 +17,7 @@ import { bufferTarget, dailyCap } from "@/lib/outreach/pipeline";
 import Funnel from "@/components/admin/outreach/Funnel";
 import MapTab from "@/components/admin/outreach/MapTab";
 import { pktDay } from "@/lib/outreach/map";
-import { ox, type CoverageRow } from "@/lib/outreach/db";
+import { ox, type CoverageRow, type Prospect } from "@/lib/outreach/db";
 import { DAILY_TARGET_PER_NICHE, progress } from "@/lib/outreach/coverage";
 import { manualMessage } from "@/lib/outreach/compose";
 import { bounceType } from "@/lib/outreach/mail";
@@ -83,14 +83,15 @@ const pktStart = (t = Date.now()) => Date.parse(`${pktDay(t)}T00:00:00Z`) - PKT;
 
 async function Pipeline() {
   try {
-    const [state, today, week, ai] = await Promise.all([
+    const [state, today, week, ai, offers] = await Promise.all([
       ox.state(),
       ox.funnel(new Date(pktStart()).toISOString()),
       ox.funnel(new Date(pktStart() - 6 * 86_400_000).toISOString()),
       aiBudget().catch(() => null),
+      ox.offerStats(new Date(Date.now() - 30 * 86_400_000).toISOString()).catch(() => ({})),
     ]);
     const cap = dailyCap(state.settings.started_at, state);
-    return <Funnel today={today} week={week} ready={state.ready} target={bufferTarget(cap)} cap={cap} spamBlocks7d={state.spam_blocks_7d} bounces7d={state.bounces_7d} ai={ai ? { ...ai, model: OUTREACH_MODEL } : null} />;
+    return <Funnel today={today} week={week} ready={state.ready} target={bufferTarget(cap)} cap={cap} spamBlocks7d={state.spam_blocks_7d} bounces7d={state.bounces_7d} ai={ai ? { ...ai, model: OUTREACH_MODEL } : null} offers={offers} />;
   } catch (e) {
     return <Failed what="the pipeline funnel" message={(e as Error).message} />;
   }
@@ -235,17 +236,17 @@ async function Hot() {
 async function Queue() {
   const { data, error } = await (await db())
     .from("prospects")
-    .select("id, name, business_type, city, country, phone, instagram, audit_score, lead_score, osm_tags, audits:prospect_audits(created_at, checks:result->checks, extras:result->extras, lab:result->pagespeed->lab)")
+    .select("id, name, business_type, city, country, phone, instagram, audit_score, lead_score, osm_tags, website, research, audits:prospect_audits(created_at, checks:result->checks, extras:result->extras, lab:result->pagespeed->lab)")
     .eq("status", "whatsapp")
     .order("lead_score", { ascending: false, nullsFirst: false })
     .limit(PAGE_SIZE);
   if (error) return <Failed what="the WhatsApp queue" message={error.message} />;
-  type Row = Omit<QueueItem, "message"> & { osm_tags: Record<string, string>; audits: { created_at: string; checks: AuditResult["checks"] | null; extras: AuditResult["extras"] | null; lab: NonNullable<AuditResult["pagespeed"]>["lab"] | null }[] };
-  const items: QueueItem[] = ((data ?? []) as unknown as Row[]).map(({ audits, osm_tags, ...p }) => {
+  type Row = Omit<QueueItem, "message"> & { osm_tags: Record<string, string>; website: string | null; research: Prospect["research"]; audits: { created_at: string; checks: AuditResult["checks"] | null; extras: AuditResult["extras"] | null; lab: NonNullable<AuditResult["pagespeed"]>["lab"] | null }[] };
+  const items: QueueItem[] = ((data ?? []) as unknown as Row[]).map(({ audits, osm_tags, website, research, ...p }) => {
     const a = [...audits].sort((x, y) => y.created_at.localeCompare(x.created_at))[0];
     // Only the parts of the audit the message needs (never the stored screenshot).
     const result = a?.checks ? ({ checks: a.checks, extras: a.extras ?? undefined, pagespeed: a.lab ? { performance: null, lab: a.lab, field: [] } : null } as unknown as AuditResult) : null;
-    return { ...p, message: manualMessage({ name: p.name, business_type: p.business_type, osm_tags, city: p.city }, result) };
+    return { ...p, message: manualMessage({ name: p.name, business_type: p.business_type, osm_tags, city: p.city, website, research, audit_score: p.audit_score }, result) };
   });
   return <WhatsAppQueue items={items} />;
 }

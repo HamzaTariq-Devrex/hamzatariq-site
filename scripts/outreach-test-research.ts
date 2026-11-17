@@ -19,7 +19,8 @@ const done = new Set<string>();
 let sent = 0;
 
 const tryOne = async (p: Prospect & { audit: ProspectAudit | null }) => {
-  if (done.has(p.id) || !p.website) return;
+  // SKIP="Name A,Name B": businesses already sent as tests.
+  if (done.has(p.id) || !p.website || (process.env.SKIP ?? "").split(",").includes(p.name)) return;
   done.add(p.id);
   // Research again with the current rules (the note and line are saved, as in the tick).
   const r = await researchFor({ ...p, research: undefined, researched_at: undefined } as typeof p);

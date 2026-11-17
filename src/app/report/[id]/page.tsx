@@ -8,7 +8,7 @@ import { ScoreRing } from "@/components/tools/AuditReportView";
 import { SEO_AUDIT_TOOL } from "@/data/tools";
 import { IMAGE_BASE } from "@/data/projects";
 import { ox } from "@/lib/outreach/db";
-import { relatedProject } from "@/lib/outreach/compose";
+import { contentService, relatedProject } from "@/lib/outreach/compose";
 import { findings } from "@/lib/outreach/problems";
 import { nounFor, takesBookings } from "@/lib/outreach/osm-types";
 import { formatDate } from "@/lib/admin/labels";
@@ -60,6 +60,8 @@ export default async function ReportPage({ params }: { params: Promise<{ id: str
   const result = r.result;
   const top = findings(result, { noun: nounFor(r.business_type), city: r.city, bookings: takesBookings(r.business_type) }).slice(0, 3);
   const project = relatedProject(r.business_type);
+  // Owner, 2026-11-18: demo pages mention the Monthly SEO + content service (real tier and price).
+  const service = contentService();
   const shot = result?.pagespeed?.screenshot;
 
   return (
@@ -146,6 +148,15 @@ export default async function ReportPage({ params }: { params: Promise<{ id: str
               </span>
             </Link>
           </section>
+
+          {service && (
+            <section className="audit-group report-service">
+              <h2>After the fixes: keep it bringing in customers</h2>
+              <p>
+                My <Link href="/services/react-nextjs-seo">{service.name}</Link> service ({service.price}) adds useful posts every month on what your customers search for, and keeps your pages up to date on Google.
+              </p>
+            </section>
+          )}
 
           <div className="audit-next">
             <div className="audit-cta x-card">

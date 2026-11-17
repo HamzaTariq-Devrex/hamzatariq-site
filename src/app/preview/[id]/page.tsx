@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { ox } from "@/lib/outreach/db";
 import { groupOf, nounFor } from "@/lib/outreach/osm-types";
 import { EXAMPLES, addressLine, directionsUrl, hoursRows, telUrl, templateFor, whatsappUrl, type Example } from "@/lib/outreach/preview-templates";
+import { contentService } from "@/lib/outreach/compose";
 import "@/components/styles/Preview.css";
 
 // Homepage concept for a business with no website (owner, 2026-11-16). A premium one-page design
@@ -149,6 +150,8 @@ export default async function PreviewPage({ params, searchParams }: { params: Pr
   const wa = whatsappUrl(p.tags, p.country);
   const maps = where || p.city ? directionsUrl(p.name, where, p.city) : null;
   const expires = new Date(p.expires_at).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+  // Owner, 2026-11-18: demo pages mention the Monthly SEO + content service (real tier and price).
+  const service = contentService();
 
   return (
     <div className="pv" data-t={t}>
@@ -252,6 +255,11 @@ export default async function PreviewPage({ params, searchParams }: { params: Pr
         <p>
           Homepage concept by Devrex Digital, made only from public OpenStreetMap details. Not the official website of {p.name}. Available until {expires}.
         </p>
+        {service && (
+          <p>
+            Devrex Digital also offers {service.name} ({service.price}): new posts every month on what customers search for, to keep a site like this bringing in visitors.
+          </p>
+        )}
       </footer>
 
       {(tel || wa) && (

@@ -43,6 +43,14 @@ export type Research = {
   sources?: string[];
   /** The site answered from another domain (a redirect): the email would name the wrong business. */
   redirectedTo?: string | null;
+  /**
+   * The city emails may name (owner, 2026-11-18): the address on their own site when it differs from
+   * OpenStreetMap, OSM's city when the site confirms it, null (leave the city out) when the site
+   * doesn't show it. Absent = not checked (OSM's city is used).
+   */
+  city?: string | null;
+  /** Content on their site (SEO + content offer): blog/news page, pages listed for Google, latest post. */
+  content?: ContentInfo;
   quality?: { total: number; active: number; size: number; gain: number };
   /** The AI writer didn't answer: attempts so far (retried on later ticks, up to 3). */
   pending?: number;
@@ -282,6 +290,93 @@ ${ownerProfile()}`;
   });
 };
 
+// ---------- The site's own address (owner, 2026-11-18) ----------
+
+const plain = (s: string) => s.toLowerCase().normalize("NFKD").replace(/[^a-z ]+/g, " ").replace(/\s+/g, " ").trim();
+
+/** City from the site's structured address (schema.org addressLocality), else whether the site names OSM's city. */
+export const siteCity = (osmCity: string | null, rawHtml: string, text: string): string | null => {
+  const locality = rawHtml.match(/"addressLocality"\s*:\s*"([^"]{2,60})"/i)?.[1]?.trim() ?? null;
+  const osm = osmCity ? plain(osmCity) : "";
+  if (locality) {
+    const loc = plain(locality);
+    // Same place (or a part of it): keep OSM's spelling; otherwise the site's own address wins.
+    if (osm && (loc === osm || loc.includes(osm) || osm.includes(loc))) return osmCity;
+    return locality;
+  }
+  if (osm && new RegExp(`(^| )${osm}( |$)`).test(plain(text))) return osmCity;
+  return null; // the site doesn't show where they are: leave the city out
+};
+
+// ---------- Content signals (SEO + content offer, owner 2026-11-18) ----------
+
+export type ContentInfo = {
+  /** Their blog/news page, if the home page links one. */
+  blog: string | null;
+  /** Pages their sitemap lists for Google (null = no sitemap found). */
+  pages: number | null;
+  /** Newest post date on the blog page, "YYYY-MM" (null = none found). */
+  latest: string | null;
+};
+
+const BLOG_LINK = /\b(blog|news|journal|articles?|insights|stories|latest|guides?|advice|updates)\b/i;
+
+/** Newest date on a page: <time datetime>, "12 March 2025", "March 2025", "12/03/2025". */
+export const latestDate = (html: string, text: string): string | null => {
+  const dates: string[] = [];
+  for (const m of html.matchAll(/<time[^>]*datetime="((?:19|20)\d\d)-(\d\d)/gi)) dates.push(`${m[1]}-${m[2]}`);
+  for (const m of html.matchAll(/"datePublished"\s*:\s*"((?:19|20)\d\d)-(\d\d)/gi)) dates.push(`${m[1]}-${m[2]}`);
+  const names = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+  for (const m of text.matchAll(new RegExp(`\\b(?:\\d{1,2}(?:st|nd|rd|th)?\\s+)?(${MONTHS})\\.?,?\\s+((?:19|20)\\d\\d)\\b`, "gi")))
+    dates.push(`${m[2]}-${String(names.indexOf(m[1].slice(0, 3).toLowerCase()) + 1).padStart(2, "0")}`);
+  for (const m of text.matchAll(/\b\d{1,2}[/.](\d{1,2})[/.]((?:19|20)\d\d)\b/g)) dates.push(`${m[2]}-${m[1].padStart(2, "0")}`);
+  const now = new Date().toISOString().slice(0, 7);
+  return dates.filter((d) => d <= now && !d.endsWith("-00")).sort().at(-1) ?? null;
+};
+
+/** Pages in the site's sitemap (index files: up to 3 child sitemaps), or null. */
+const sitemapPages = async (origin: string) => {
+  const get = async (u: string) => {
+    try {
+      const r = await safeFetch(new URL(u), { maxBytes: 2 * 1024 * 1024, timeoutMs: 8000 });
+      return r.status === 200 && /<(urlset|sitemapindex)/i.test(r.body) ? r.body : null;
+    } catch {
+      return null;
+    }
+  };
+  const root = (await get(`${origin}/sitemap.xml`)) ?? (await get(`${origin}/sitemap_index.xml`));
+  if (!root) return null;
+  if (/<sitemapindex/i.test(root)) {
+    const children = [...root.matchAll(/<loc>\s*([^<\s]+)\s*<\/loc>/gi)].map((m) => m[1]).slice(0, 3);
+    let n = 0;
+    for (const c of children) n += ((await get(c)) ?? "").match(/<url>/gi)?.length ?? 0;
+    return n || null;
+  }
+  return root.match(/<url>/gi)?.length ?? null;
+};
+
+export const contentInfo = async (home: FetchResult): Promise<ContentInfo> => {
+  const base = new URL(home.url);
+  const root = parse(home.body, { comment: false });
+  let blog: string | null = null;
+  for (const a of root.querySelectorAll("a[href]")) {
+    const href = a.getAttribute("href") ?? "";
+    if (!BLOG_LINK.test(`${href} ${a.textContent}`)) continue;
+    try {
+      const u = new URL(href, base);
+      if (u.hostname.replace(/^www\./, "") === base.hostname.replace(/^www\./, "") && u.pathname.length > 1) {
+        blog = u.toString();
+        break;
+      }
+    } catch {
+      // bad link
+    }
+  }
+  const [pages, blogPage] = await Promise.all([sitemapPages(base.origin), blog ? fetchPage(new URL(blog)) : Promise.resolve(null)]);
+  const latest = blogPage ? latestDate(blogPage.body, pageText(blogPage.body)) : null;
+  return { blog, pages, latest };
+};
+
 /** Quality score 0-100: active signals (0-30) + size fit (0-25) + how much a better site would help (0-45). */
 export const qualityScore = (p: Pick<Prospect, "website" | "phone" | "osm_tags" | "name">, audit: AuditResult | null, signals: string[], pagesFound: number) => {
   const active = Math.min(30, signals.length * 9 + (signals.some((s) => s.startsWith("copyright 202")) ? 3 : 0));
@@ -360,13 +455,20 @@ export const researchProspect = async (p: Prospect, audit: AuditResult | null, d
   const from = host(p.website);
   const to = host(home.url);
   const redirectedTo = from && to && from !== to && !to.endsWith(`.${from}`) && !from.endsWith(`.${to}`) ? to : null;
-  const base: Research = { active: true, signals: a.signals, sources: pages.map((x) => x.url), quality, redirectedTo, at };
+  // The city the emails may name: the address on their own site wins over OpenStreetMap (owner, 2026-11-18).
+  const raw = [home.body, ...fetched.map((x) => x.page?.body ?? "")].join("\n");
+  const city = siteCity(p.city, raw, `${corpus} ${contact ? pageText(contact.body) : ""}`);
+  // Content signals for the SEO + content offer (strong sites).
+  const content = await contentInfo(home);
+  const base: Research = { active: true, signals: a.signals, sources: pages.map((x) => x.url), quality, redirectedTo, city, content, at };
 
   void deadline;
-  const top = findings(audit, { noun: nounFor(p.business_type, p.osm_tags ?? {}), city: p.city, bookings: takesBookings(p.business_type) })[0];
+  const strong = (audit?.score ?? 0) >= 70;
+  const top = findings(audit, { noun: nounFor(p.business_type, p.osm_tags ?? {}), city, bookings: takesBookings(p.business_type) })[0];
   let g: GeminiNote;
   try {
-    g = await askGemini(p, pages, top && top.id !== "no-website" ? top.cost : null);
+    // Strong sites get the content email, written from a fixed template: no Gemini sentence needed.
+    g = await askGemini(p, pages, !strong && top && top.id !== "no-website" ? top.cost : null);
   } catch (e) {
     const reason = e instanceof AiUnavailable ? e.reason : "error";
     // No budget left today or a back-off running: wait (doesn't count as an attempt).

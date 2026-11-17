@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { getOwner } from "@/lib/supabase/server";
 import AdminNav from "@/components/admin/AdminNav";
@@ -9,7 +10,10 @@ export default async function DashboardLayout({ children }: { children: React.Re
   if (!owner) redirect("/admin/login");
   return (
     <div className="adm-shell">
-      <AdminNav email={owner.user.email ?? ""} />
+      {/* The nav reads ?tab= (the Map item), so it sits in its own Suspense boundary. */}
+      <Suspense fallback={<aside className="adm-nav" />}>
+        <AdminNav email={owner.user.email ?? ""} />
+      </Suspense>
       <div className="adm-content">{children}</div>
     </div>
   );

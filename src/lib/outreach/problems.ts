@@ -181,3 +181,46 @@ export const findings = (a: AuditResult | null, ctx: { noun: string; city: strin
   }
   return out.sort((x, y) => x.rank - y.rank);
 };
+
+// ---------- Content findings for strong sites (SEO + content offer, owner 2026-11-18) ----------
+// Only what research saw on their site: the blog/news page, its newest post date, and how many
+// pages the site lists for Google. Each line is literally true for that site.
+
+const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const monthsSince = (ym: string, now = new Date()) => (now.getUTCFullYear() - Number(ym.slice(0, 4))) * 12 + (now.getUTCMonth() + 1 - Number(ym.slice(5, 7)));
+
+export type ContentSignals = { blog: string | null; pages: number | null; latest: string | null };
+
+export const contentFindings = (c: ContentSignals | undefined | null): Finding[] => {
+  if (!c) return [];
+  const out: Finding[] = [];
+  if (c.blog && c.latest && monthsSince(c.latest) >= 6) {
+    const when = `${MONTH_NAMES[Number(c.latest.slice(5, 7)) - 1]} ${c.latest.slice(0, 4)}`;
+    out.push({
+      id: "stale-blog",
+      rank: 1,
+      cost: `the newest post on your blog is from ${when}, so there's nothing new on your site from the months since for Google to show`,
+      title: `No new posts since ${when}`,
+      fix: "Publish one or two short, useful posts a month that answer what your customers search for.",
+    });
+  }
+  if (!c.blog) {
+    out.push({
+      id: "no-blog",
+      rank: 2,
+      cost: "your website has no blog or news page, so there are no articles on it for Google to show when people search with a question instead of your name",
+      title: "No blog or news page",
+      fix: "Add a blog and publish short posts that answer the questions your customers search for.",
+    });
+  }
+  if (c.pages != null && c.pages <= 8) {
+    out.push({
+      id: "few-pages",
+      rank: 3,
+      cost: `your website lists only ${c.pages} pages for Google, so only a few of your pages can show up in searches`,
+      title: `Only ${c.pages} pages listed for Google`,
+      fix: "Add pages and posts for each service and the questions customers ask, so more searches can lead to you.",
+    });
+  }
+  return out.sort((x, y) => x.rank - y.rank);
+};

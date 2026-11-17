@@ -16,7 +16,8 @@ import { PROJECTS } from "@/data/projects";
 import { SERVICES } from "@/data/services";
 import type { AuditResult } from "@/lib/audit/types";
 import { groupOf, nounFor, takesBookings, type NicheGroup } from "./osm-types";
-import { findings, type Finding } from "./problems";
+import { contentFindings, findings, type Finding } from "./problems";
+import type { Topic } from "./topics";
 import type { Prospect, ProspectAudit } from "./db";
 import { cleanName, oddName } from "./checks";
 import { personFromEmail } from "./email-check";
@@ -107,6 +108,9 @@ const PROBLEM_SUBJECT: Record<string, string> = {
   description: "on google",
   hidden: "on google",
   "no-contact": "enquiries",
+  "stale-blog": "blog",
+  "no-blog": "blog",
+  "few-pages": "blog",
 };
 
 /**
@@ -154,13 +158,39 @@ export const checkEmail1 = (body: string, subject: string, facts: string, bookin
 export type Draft = { subject: string; body: string; variant: "A" | "B" | null; source: "gemini" | "template" };
 
 const lead = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
-const ctx = (p: Pick<Prospect, "business_type" | "osm_tags" | "city">) => ({ noun: nounFor(p.business_type, p.osm_tags ?? {}), city: p.city, bookings: takesBookings(p.business_type) });
-export const prospectFindings = (p: Prospect, audit: AuditResult | null) => findings(audit, ctx(p));
+/**
+ * The city emails name (owner, 2026-11-18): the address on their own site wins over OpenStreetMap;
+ * when the site doesn't show where they are, no city at all.
+ */
+export const emailCity = (p: Pick<Prospect, "city"> & { research?: Prospect["research"] }) => (p.research && p.research.city !== undefined ? p.research.city : p.city);
+const ctx = (p: Pick<Prospect, "business_type" | "osm_tags" | "city"> & { research?: Prospect["research"] }) => ({
+  noun: nounFor(p.business_type, p.osm_tags ?? {}),
+  city: emailCity(p),
+  bookings: takesBookings(p.business_type),
+});
+
+/** Strong sites (audit 70+) get the SEO + content offer instead of small fixes (owner, 2026-11-18). */
+export const isContentLead = (p: Pick<Prospect, "website" | "audit_score">) => !!p.website && (p.audit_score ?? 0) >= 70;
+export type Offer = "no-website" | "fixes" | "content";
+export const offerFor = (p: Pick<Prospect, "website" | "audit_score">): Offer => (!p.website ? "no-website" : isContentLead(p) ? "content" : "fixes");
+const CONTENT_IDS = new Set(["stale-blog", "no-blog", "few-pages"]);
+export const isContentFinding = (f?: Finding) => !!f && CONTENT_IDS.has(f.id);
+
+/** The findings an email talks about: content gaps for strong sites, else the audit's problems. */
+export const prospectFindings = (p: Prospect, audit: AuditResult | null) => (isContentLead(p) ? contentFindings(p.research?.content) : findings(audit, ctx(p)));
+
+/** The real "Monthly SEO + content" tier from src/data/services.ts. */
+export const contentService = () => {
+  for (const s of SERVICES) for (const t of s.pricing) if (/monthly seo/i.test(t.name)) return { name: t.name, price: `$${t.price.toLocaleString("en-US")}${t.unit ?? ""}` };
+  return null;
+};
+export const CONTENT_CTA = "Want me to send you 3 blog topics your customers are searching for?";
 
 /** The CTA never promises more fixes than the audit really found. */
 const cta = (f: Finding[]) => {
   // No website: offer a free sample homepage (owner, 2026-11-17: never "send it" without saying what).
   if (f[0]?.id === "no-website") return "Want me to make you a free sample homepage?";
+  if (isContentFinding(f[0])) return CONTENT_CTA;
   const n = f.length;
   return n >= 3 ? "Want me to send you the 3 quick fixes I found?" : n === 2 ? "Want me to send you the 2 quick fixes I found?" : "Want me to send you the quick fix I found?";
 };
@@ -199,9 +229,10 @@ const templateMiddle = (p: Prospect, f: Finding[]) => {
 };
 
 /** "a jeweller in Manchester" / "an optician nearby". */
-const searchPhrase = (p: Pick<Prospect, "business_type" | "osm_tags" | "city">) => {
+const searchPhrase = (p: Pick<Prospect, "business_type" | "osm_tags" | "city"> & { research?: Prospect["research"] }) => {
   const noun = nounFor(p.business_type, p.osm_tags ?? {});
-  return `${/^[aeiou]/i.test(noun) ? "an" : "a"} ${noun}${p.city ? ` in ${p.city}` : " nearby"}`;
+  const city = emailCity(p);
+  return `${/^[aeiou]/i.test(noun) ? "an" : "a"} ${noun}${city ? ` in ${city}` : " nearby"}`;
 };
 
 /**
@@ -212,7 +243,7 @@ const searchPhrase = (p: Pick<Prospect, "business_type" | "osm_tags" | "city">) 
 const noWebsiteEmail1 = (p: Prospect, f: Finding[], subject: string, variant: "A" | "B") => {
   const core = `I couldn't find a website for ${biz(p)}, so people searching for ${searchPhrase(p)} find other places first.`;
   const pad = " A simple site with your opening hours, location and a call button would fix that.";
-  const facts = [p.name, p.city ?? ""].join("\n");
+  const facts = [p.name, emailCity(p) ?? ""].join("\n");
   const body = [
     assemble1(p, core, f),
     assemble1(p, `${core}${pad}`, f),
@@ -226,14 +257,14 @@ const noWebsiteEmail1 = (p: Prospect, f: Finding[], subject: string, variant: "A
 export const draftEmail1 = async (p: Prospect, auditRow: ProspectAudit | null): Promise<Draft & { findings: Finding[] }> => {
   const audit = auditRow?.result ?? null;
   const f = prospectFindings(p, audit);
-  if (!f.length) throw new Error("No real finding to write about.");
+  if (!f.length) throw new Error(isContentLead(p) ? "Strong site with no content gap to mention" : "No real finding to write about.");
   const variant = variantFor(p.id);
   const subject = subjectFor(p, variant, f[0].id);
   if (f[0].id === "no-website") return noWebsiteEmail1(p, f, subject, variant);
   const fixed = assemble1(p, "", f);
   const line = personalLine(p);
   const budget = { min: Math.max(15, 62 - words(fixed)), max: Math.max(20, 88 - words(fixed)) };
-  const facts = [biz(p), p.city ?? "", line, ...f.map((x) => x.cost), String(Math.min(3, f.length))].join("\n");
+  const facts = [biz(p), emailCity(p) ?? "", line, ...f.map((x) => x.cost), String(Math.min(3, f.length))].join("\n");
   // Template candidates from the same findings, in order of preference. Email 1 names one problem
   // only, so a short one is padded with what Hamza does (never a second problem), and a long one
   // drops the optional proof line. The first candidate that passes the check is the fallback.
@@ -297,6 +328,21 @@ export const draftDay3 = (p: Prospect, firstSubject: string, reportLink: string,
       source: "template",
     };
   }
+  // Content offer: the next content gap, the same question again, no report link.
+  if (isContentFinding(f[0])) {
+    return {
+      subject: reSubject(firstSubject),
+      body: [
+        hello(p),
+        f[1] ? `One more thing I noticed: ${f[1].cost}.` : `Following up on my note about ${biz(p)}: ${f[0].cost}.`,
+        CONTENT_CTA,
+        OPT_OUT,
+        "Hamza",
+      ].join("\n\n"),
+      variant: null,
+      source: "template",
+    };
+  }
   const next = f[1];
   const body = [
     hello(p),
@@ -322,9 +368,23 @@ const whatsappLine = `If it's easier to talk it through, message me on WhatsApp:
  * Automatic answer to "yes / send it / interested" (owner, 2026-11-16): the (up to) 3 real fixes in
  * plain words + the /report or /preview link + WhatsApp, in the same thread.
  */
-export const replyInterested = (p: Prospect, firstSubject: string, f: Finding[], reportLink: string | null): Draft => {
+export const replyInterested = (p: Prospect, firstSubject: string, f: Finding[], reportLink: string | null, topics?: Topic[] | null): Draft => {
   const noSite = f[0]?.id === "no-website";
-  const lines = noSite
+  const service = contentService();
+  const city = emailCity(p);
+  const lines = isContentFinding(f[0]) && topics?.length
+    ? [
+        // Owner, 2026-11-18: 3 topics from real Google searches + the real service and price + WhatsApp.
+        `Here are 3 blog topics for ${biz(p)}, each based on something people really search for on Google${city ? ` around ${city}` : ""}:`,
+        topics
+          .slice(0, 3)
+          .map((t, i) => `${i + 1}. ${t.title} (people search: ${t.search})`)
+          .join("\n"),
+        service
+          ? `If you'd like posts like these written and published for you every month, that's my ${service.name} service: ${service.price}. It includes the topic research and keeping your pages up to date on Google.`
+          : "",
+      ]
+    : noSite
     ? [
         // Owner, 2026-11-18: no concept link until the premium template is approved; Hamza makes it himself.
         "Great, I'll make it and send it to you within 2 days.",
@@ -357,9 +417,13 @@ export const replyPrice = (p: Prospect, firstSubject: string): Draft => ({
     "Thanks for asking. These are my starting prices:",
     priceLines(),
     "The final price depends on the features you need.",
+    // Owner, 2026-11-18: price answers mention the content service too.
+    contentService() ? `If your site already works well, ${contentService()!.name} (${contentService()!.price}) keeps it bringing in new searches with fresh posts every month.` : "",
     whatsappLine,
     SIGNATURE,
-  ].join("\n\n"),
+  ]
+    .filter(Boolean)
+    .join("\n\n"),
   variant: null,
   source: "template",
 });
@@ -384,8 +448,13 @@ const reSubject = (s: string) => (/^re:/i.test(s) ? s : `Re: ${s}`);
  * WhatsApp / Instagram message (owner, 2026-11-17): one real problem, one question that says what is
  * offered (never "send it"), signed "Founder, Devrex Digital" like the emails. No links.
  */
-export const manualMessage = (p: Pick<Prospect, "name" | "business_type" | "osm_tags" | "city"> & { email?: string | null; research?: Prospect["research"] }, audit: AuditResult | null) => {
-  const f = findings(audit, ctx(p));
+export const manualMessage = (
+  p: Pick<Prospect, "name" | "business_type" | "osm_tags" | "city"> & { email?: string | null; research?: Prospect["research"]; website?: string | null; audit_score?: number | null },
+  audit: AuditResult | null,
+) => {
+  // Strong sites (70+): the content question, never small fixes (owner, 2026-11-18).
+  const content = isContentLead({ website: p.website ?? null, audit_score: p.audit_score ?? null }) ? contentFindings(p.research?.content) : [];
+  const f = content.length ? content : findings(audit, ctx(p));
   const intro = `${hello(p)} ${INTRO}`;
   const sign = "Hamza Tariq\nFounder, Devrex Digital";
   if (!f.length) return `${intro}\nWould a few free ideas to get more enquiries from your website be useful?\n\n${sign}`;

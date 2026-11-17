@@ -14,7 +14,7 @@ import { rpcClient, serverSecret } from "@/lib/supabase/server";
 import { sendOwnerAlert } from "@/lib/leads/email";
 import { ox, type Funnel, type Prospect, type State } from "./db";
 import { qualify } from "./qualify";
-import { biz, checkEmail1, personalLine, draftCheckBack, draftDay3, draftDay7, draftEmail1, prospectFindings, replyInterested, replyPrice, reportUrl, subjectFor } from "./compose";
+import { biz, checkEmail1, emailCity, isContentLead, offerFor, personalLine, draftCheckBack, draftDay3, draftDay7, draftEmail1, prospectFindings, replyInterested, replyPrice, reportUrl, subjectFor } from "./compose";
 import { classifyReply, type ReplyClass } from "./classify";
 import { postalAddress, waitingForAddress, withAddress } from "./address";
 import { bounceType, readInbox, sendOutreach } from "./mail";
@@ -24,6 +24,7 @@ import { cellLabel } from "./areas";
 import { takesBookings } from "./osm-types";
 import { researchProspect } from "./research";
 import { aiBudget } from "./ai";
+import { blogTopics } from "./topics";
 import { dailyLog } from "./map";
 
 export { MAX_NEW_PER_DAY };
@@ -135,12 +136,15 @@ const handleReply = async (p: Prospect, cls: ReplyClass, text: string, subject: 
   const thread = await ox.thread(p.id);
   const first = thread.find((m) => m.direction === "out" && m.step === 0);
   const firstSubject = first?.subject ?? subject;
-  if (cls === "interested" || cls === "price") {
+  // Content offer + "yes": 3 topics from real Google searches. Fewer than 3 found → Hamza answers (HOT).
+  const contentYes = cls === "interested" && isContentLead(p);
+  const topics = contentYes ? await blogTopics(p).catch(() => null) : null;
+  if ((cls === "interested" && !contentYes) || cls === "price" || (contentYes && topics)) {
     const audit = await ox.latestAudit(p.id);
     const d =
       cls === "price"
         ? replyPrice(p, firstSubject)
-        : replyInterested(p, firstSubject, prospectFindings(p, audit?.result ?? null), audit?.report_id && audit.result ? reportUrl(audit.report_id) : null);
+        : replyInterested(p, firstSubject, prospectFindings(p, audit?.result ?? null), audit?.report_id && audit.result ? reportUrl(audit.report_id) : null, topics);
     await ox.addMessage({
       prospect_id: p.id,
       step: 3,
@@ -166,6 +170,7 @@ const handleReply = async (p: Prospect, cls: ReplyClass, text: string, subject: 
     }
     return;
   }
+  if (contentYes) await ox.updateProspect(p.id, { reply_class: "question" }); // no 3 real topics found: Hamza answers
   const transcript = [...thread.map((m) => `--- ${m.direction === "out" ? "You" : p.name} (${m.kind}, ${m.sent_at ?? m.created_at})\n${m.body}`), `--- ${p.name} (reply, now)\n${text}`].join("\n\n");
   await sendOwnerAlert(
     `HOT: ${p.name} replied and needs you`,
@@ -354,7 +359,8 @@ export const draftNew = async (_state: State, limit: number, onlyProspect?: stri
     if (deadline - Date.now() < 22_000) break; // researched; drafted next tick (the research is reused)
     try {
       const d = await draftEmail1(p, p.audit);
-      const facts = [biz(p), p.city ?? "", personalLine(p), ...d.findings.map((x) => x.cost), String(Math.min(3, d.findings.length))].join("\n");
+      const facts = [biz(p), emailCity(p) ?? "", personalLine(p), ...d.findings.map((x) => x.cost), String(Math.min(3, d.findings.length))].join("\n");
+      await ox.updateProspect(p.id, { offer: offerFor(p) });
       const verdict = await autoCheck(p, p.audit?.result ?? null, d.findings, d.body, checkEmail1(d.body, d.subject, facts, takesBookings(p.business_type)));
       if (verdict.kind === "reject") {
         await ox.updateProspect(p.id, { status: "skipped", skip_reason: verdict.reason.slice(0, 200) });

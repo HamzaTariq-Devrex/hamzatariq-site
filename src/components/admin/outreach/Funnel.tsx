@@ -18,10 +18,17 @@ type Props = {
   cap: number;
   spamBlocks7d: number;
   bounces7d: number;
+  offers: Record<string, { drafted: number; sent: number; replied: number; positive: number }>;
   ai: { used: number; budget: number; limit: number; limitLearned: boolean; backoff: string | null; lastError: string | null; model: string } | null;
 };
 
-const Funnel = ({ today, week, ready, target, cap, spamBlocks7d, bounces7d, ai }: Props) => (
+const OFFERS: [string, string][] = [
+  ["no-website", "No website: free sample homepage"],
+  ["fixes", "Weak site: quick fixes"],
+  ["content", "Strong site (70+): SEO + content"],
+];
+
+const Funnel = ({ today, week, ready, target, cap, spamBlocks7d, bounces7d, ai, offers }: Props) => (
   <section className="adm-card ox-funnel" aria-label="Pipeline funnel">
     <div className="adm-card-head">
       <h2>Pipeline</h2>
@@ -57,6 +64,31 @@ const Funnel = ({ today, week, ready, target, cap, spamBlocks7d, bounces7d, ai }
               <td>{label}</td>
               <td>{today[k] as number}</td>
               <td>{week[k] as number}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+    <div className="adm-table-wrap">
+      <table className="adm-table ox-stats">
+        <caption className="ox-caption">By offer, last 30 days (email 1)</caption>
+        <thead>
+          <tr>
+            <th scope="col">Offer</th>
+            <th scope="col">Drafted</th>
+            <th scope="col">Sent</th>
+            <th scope="col">Replied</th>
+            <th scope="col">Yes or price</th>
+          </tr>
+        </thead>
+        <tbody>
+          {OFFERS.map(([k, label]) => (
+            <tr key={k}>
+              <td>{label}</td>
+              <td>{offers[k]?.drafted ?? 0}</td>
+              <td>{offers[k]?.sent ?? 0}</td>
+              <td>{offers[k]?.replied ?? 0}</td>
+              <td>{offers[k]?.positive ?? 0}</td>
             </tr>
           ))}
         </tbody>

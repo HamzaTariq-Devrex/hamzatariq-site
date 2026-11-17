@@ -204,6 +204,8 @@ export const ox = {
   createPreview: (prospect: string) => call<string>("app_ox_preview_create", { p_prospect: prospect }),
   preview: (id: string) => call<Preview | null>("app_ox_preview", { p_id: id }),
   funnel: (from: string) => call<Funnel>("app_ox_funnel", { p_from: from }),
+  /** Per offer (no-website, fixes, content): email 1s drafted, sent, replied, positive since `from`. */
+  offerStats: (from: string) => call<Record<string, { drafted: number; sent: number; replied: number; positive: number }>>("app_ox_offer_stats", { p_from: from }),
   map: () => call<import("./map").MapData>("app_ox_map", {}),
   expireReviews: () => call<number>("app_ox_expire_reviews", {}),
   dailySummary: (from: string, to: string) => call<DailySummary>("app_ox_daily_summary", { p_from: from, p_to: to }),
