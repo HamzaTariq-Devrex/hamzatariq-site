@@ -356,8 +356,9 @@
         "how long does it take to build a web app?"
       ],
       "angle": "The hub for the cluster: when spreadsheets stop working, what a first version includes, real prices and timelines, and links to every supporting post.",
-      "status": "queued",
-      "publishedSlug": null
+      "status": "published",
+      "publishedSlug": "custom-web-app-for-small-business",
+      "published": "2026-11-17"
     },
     {
       "keyword": "questions to ask a next.js developer before hiring",
