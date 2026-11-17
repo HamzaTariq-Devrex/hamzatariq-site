@@ -12,15 +12,17 @@
 import { SITE } from "@/lib/site";
 import { rpcClient, serverSecret } from "@/lib/supabase/server";
 import { sendOwnerAlert } from "@/lib/leads/email";
-import { ox, type Prospect, type State } from "./db";
+import { ox, type Funnel, type Prospect, type State } from "./db";
 import { qualify } from "./qualify";
-import { biz, checkEmail1, draftCheckBack, draftDay3, draftDay7, draftEmail1, prospectFindings, replyInterested, replyPrice, reportUrl, subjectFor } from "./compose";
+import { biz, checkEmail1, personalLine, draftCheckBack, draftDay3, draftDay7, draftEmail1, prospectFindings, replyInterested, replyPrice, reportUrl, subjectFor } from "./compose";
 import { classifyReply, type ReplyClass } from "./classify";
 import { postalAddress, waitingForAddress, withAddress } from "./address";
-import { readInbox, sendOutreach } from "./mail";
-import { autoCheck, hardChecks, HELD_REASON, isStrongSite } from "./checks";
-import { discoverRun, MAX_NEW_PER_DAY, progress } from "./coverage";
+import { bounceType, readInbox, sendOutreach } from "./mail";
+import { autoCheck, hardChecks } from "./checks";
+import { discoverRun, MAX_NEW_PER_DAY, progress, scanArea } from "./coverage";
 import { takesBookings } from "./osm-types";
+import { researchProspect } from "./research";
+import { dailyLog } from "./map";
 
 export { MAX_NEW_PER_DAY };
 const DAY = 86_400_000;
@@ -29,15 +31,26 @@ const DAY = 86_400_000;
  * One free Gmail account: 15/day in week 1, 20 in week 2, 30 in week 3, then 40 only while the
  * bounce rate stays under 2% (last 50 emails) with no spam complaint; otherwise 30.
  */
-export const dailyCap = (startedAt: string | null, health?: { last50_sent: number; last50_bounces: number; complaints_7d: number }, now = Date.now()) => {
-  if (!startedAt) return 15;
-  const days = (now - Date.parse(startedAt)) / DAY;
-  if (days < 7) return 15;
-  if (days < 14) return 20;
-  if (days < 21) return 30;
-  const healthy = !!health && health.complaints_7d === 0 && (health.last50_sent ? health.last50_bounces / health.last50_sent : 0) < 0.02;
-  return healthy ? 40 : 30;
+export const dailyCap = (startedAt: string | null, health?: { last50_sent: number; last50_bounces: number; complaints_7d: number; settings?: { cap_cut?: number } }, now = Date.now()) => {
+  // Lowered by 5 each time 2 spam/policy blocks happen within 7 days (owner, 2026-11-17); never below 5.
+  const cut = health?.settings?.cap_cut ?? 0;
+  const base = (() => {
+    if (!startedAt) return 15;
+    const days = (now - Date.parse(startedAt)) / DAY;
+    if (days < 7) return 15;
+    if (days < 14) return 20;
+    if (days < 21) return 30;
+    const healthy = !!health && health.complaints_7d === 0 && (health.last50_sent ? health.last50_bounces / health.last50_sent : 0) < 0.02;
+    return healthy ? 40 : 30;
+  })();
+  return Math.max(5, base - cut);
 };
+
+/** Ready drafts to keep in the buffer: two days of the daily limit (owner, 2026-11-17). */
+export const bufferTarget = (cap: number) => cap * 2;
+
+/** Never two cold emails less than 4 minutes apart (owner, 2026-11-17). */
+export const MIN_GAP_MS = 4 * 60_000;
 
 /** Monday–Friday, 9:00–17:00 in the recipient's time zone. */
 export const inSendingWindow = (timezone: string, now = new Date()) => {
@@ -63,6 +76,20 @@ export const pauseReason = (s: Pick<State, "complaints_7d" | "last50_sent" | "la
   if (s.last50_sent < MIN_SENT_FOR_RATE) return (s.bounces_24h ?? 0) >= 2 ? `${s.bounces_24h} bounces in the last 24 hours (fewer than ${MIN_SENT_FOR_RATE} emails sent so far).` : null;
   const rate = s.last50_bounces / s.last50_sent;
   return rate > 0.03 ? `Bounce rate ${(rate * 100).toFixed(1)}% over the last ${s.last50_sent} emails (${s.last50_bounces} bounced).` : null;
+};
+
+/** 2 spam/policy blocks within 7 days (since the last cut): lower the daily limit by 5 and email Hamza. */
+const spamBlockCheck = async (state: State) => {
+  if ((state.spam_blocks_since_cut ?? 0) < 2) return null;
+  const cut = (state.settings.cap_cut ?? 0) + 5;
+  await ox.set({ cap_cut: cut, cap_cut_at: new Date().toISOString() });
+  const cap = dailyCap(state.settings.started_at, { ...state, settings: { ...state.settings, cap_cut: cut } });
+  await sendOwnerAlert("Outreach: daily limit lowered after spam blocks", [
+    `${state.spam_blocks_since_cut} emails were refused as spam/policy blocks (550 5.7.x) in the last 7 days, so the daily limit is now ${cap} (lowered by ${cut} in total).`,
+    "These addresses exist; the receiving servers refused the email. Check the Suppressed tab for the exact reasons, and whether the sending Gmail is healthy.",
+    `${SITE.url}/admin/prospects?tab=suppressed`,
+  ]).catch((e) => console.error("outreach alert:", (e as Error).message));
+  return `limit lowered by 5 (now ${cap})`;
 };
 
 /** Auto-pause on pauseReason (counted since the last resume). */
@@ -148,11 +175,12 @@ export const checkInbox = async (state: State) => {
   for (const m of messages) {
     const match = m.refs.map((r) => byId.get(r)).find(Boolean) ?? (m.failed ? byEmail.get(m.failed) : undefined) ?? byEmail.get(m.from);
     if (!match || m.kind === "other") continue;
-    const log = (kind: string, body: string) =>
-      ox.addMessage({ prospect_id: match.prospect_id, direction: "in", kind, status: "received", subject: m.subject.slice(0, 200) || "(no subject)", body: body || "(empty)", message_id: null });
+    const log = (kind: string, body: string, extra: Record<string, unknown> = {}) =>
+      ox.addMessage({ prospect_id: match.prospect_id, direction: "in", kind, status: "received", subject: m.subject.slice(0, 200) || "(no subject)", body: body || "(empty)", message_id: null, ...extra });
     if (m.kind === "bounce") {
-      count("bounces");
-      await log("bounce", `Bounced: ${m.failed ?? match.email}${m.reason ? `\nReason: ${m.reason}` : ""}`);
+      const type = bounceType(m.reason);
+      count(type === "spam" ? "spam_blocks" : "bounces");
+      await log("bounce", `Bounced: ${m.failed ?? match.email}${m.reason ? `\nReason: ${m.reason}` : ""}`, { bounce_type: type });
       await ox.stop(match.email, "bounced", match.prospect_id, m.reason);
       await ox.updateProspect(match.prospect_id, { reply_class: "bounce" });
       continue;
@@ -228,6 +256,8 @@ export const sendNext = async (state: State, now = new Date()) => {
     }
   }
   if (state.settings.next_send_at && Date.parse(state.settings.next_send_at) > now.getTime()) return [...out, `waiting until ${state.settings.next_send_at}`].join("; ");
+  // Also from the database, so a failed save of next_send_at or two overlapping ticks can't send closer than 4 minutes.
+  if (state.last_cold_sent_at && now.getTime() - Date.parse(state.last_cold_sent_at) < MIN_GAP_MS) return [...out, "less than 4 minutes since the last email"].join("; ");
   const cap = dailyCap(state.settings.started_at, state, now.getTime());
   if (state.sent_24h >= cap) return [...out, `daily limit reached (${state.sent_24h}/${cap})`].join("; ");
   // The queue is ordered by fewest sends in the last 24 h per niche, then per country (fair share).
@@ -236,12 +266,6 @@ export const sendNext = async (state: State, now = new Date()) => {
   );
   if (!next) return [...out, queue.length ? "no recipient inside 9:00-17:00 Mon-Fri right now" : "nothing queued"].join("; ");
   const p = next.prospect;
-  // Strong sites (audit 70+) wait for the SEO + blog offer; a first email queued before the rule is held.
-  if (next.message.step === 0 && isStrongSite(p)) {
-    await ox.updateMessage(next.message.id, { status: "cancelled", error: HELD_REASON(p.audit_score!) });
-    await ox.updateProspect(p.id, { status: "held", skip_reason: HELD_REASON(p.audit_score!) });
-    return [...out, `held: ${p.name} (audit ${p.audit_score})`].join("; ");
-  }
   // Hard rules again, right before sending: chain/brand, MX, suppression, address; one company domain once.
   const blocked = (await hardChecks(p)) ?? (next.message.step === 0 && (await ox.domainEmailed(p.email!, p.id)) ? "Someone at this email domain was already emailed" : null);
   if (blocked) {
@@ -262,23 +286,55 @@ export const sendNext = async (state: State, now = new Date()) => {
 
 const approved = () => ({ status: "approved", approved_at: new Date().toISOString() });
 
+const RESEARCH_MAX_AGE = 14 * DAY;
+
 /**
- * Email 1 for audited prospects, best leads first. Each draft goes through the automatic checks:
- * ok → queued, uncertain → "Needs a look", broken rule → the business is skipped.
+ * Active check + research for one audited prospect (owner, 2026-11-17). Returns the prospect with
+ * its research, or null when it was skipped as inactive. Research younger than 14 days is reused.
+ */
+export const researchFor = async <P extends Prospect & { audit: { result: unknown } | null }>(p: P, deadline = Number.POSITIVE_INFINITY): Promise<P | null> => {
+  if (p.research && !p.research.pending && p.researched_at && Date.now() - Date.parse(p.researched_at) < RESEARCH_MAX_AGE) return p.research.active ? p : null;
+  const r = await researchProspect(p, (p.audit?.result ?? null) as Parameters<typeof researchProspect>[1], deadline, (p.research?.pending ?? 0) + 1);
+  const at = new Date().toISOString();
+  if (!r.active) {
+    await ox.updateProspect(p.id, { research: r, researched_at: at, status: "skipped", skip_reason: `Inactive: ${r.inactiveReason ?? "no sign of life"}`.slice(0, 200) });
+    return null;
+  }
+  await ox.updateProspect(p.id, { research: r, researched_at: at, ...(r.quality ? { lead_score: r.quality.total } : {}) });
+  return { ...p, research: r, researched_at: at, lead_score: r.quality?.total ?? p.lead_score };
+};
+
+/**
+ * Email 1 for audited prospects, best leads first, each one researched first (active check, research
+ * note, personal line). Each draft goes through the automatic checks: ok → queued, uncertain →
+ * "Needs a look", broken rule → the business is skipped.
  * `onlyProspect` redrafts one business; `forReview` keeps the new draft in "Needs a look".
  */
-export const draftNew = async (_state: State, limit: number, onlyProspect?: string, forReview?: string) => {
-  const list = onlyProspect ? (await ox.toDraft(500)).filter((p) => p.id === onlyProspect) : await ox.toDraft(limit);
+export const draftNew = async (_state: State, limit: number, onlyProspect?: string, forReview?: string, deadline = Number.POSITIVE_INFINITY) => {
+  // A few extra rows, so businesses waiting for a research retry never block the ones behind them.
+  const list = onlyProspect ? (await ox.toDraft(500)).filter((x) => x.id === onlyProspect) : await ox.toDraft(limit * 6);
   let made = 0;
-  for (const p of list) {
-    if (!p.audit) continue; // no audit row yet: never treated as "no website"
-    if (isStrongSite(p)) {
-      await ox.updateProspect(p.id, { status: "held", skip_reason: HELD_REASON(p.audit_score!) });
+  let worked = 0;
+  for (const listed of list) {
+    // Research takes up to ~40 s and a Gemini draft up to ~25 s: stop before the function's time runs out.
+    if (worked >= limit || deadline - Date.now() < 30_000) break;
+    if (!listed.audit) continue; // no audit row yet: never treated as "no website"
+    // The AI writer was busy last time: wait 30 minutes between research attempts.
+    if (listed.research?.pending && listed.researched_at && Date.now() - Date.parse(listed.researched_at) < 30 * 60_000) continue;
+    worked++;
+    let p: typeof listed | null;
+    try {
+      p = await researchFor(listed, deadline);
+    } catch (e) {
+      await ox.updateProspect(listed.id, { status: "skipped", skip_reason: `Research failed: ${(e as Error).message}`.slice(0, 200) });
       continue;
     }
+    if (!p) continue;
+    if (p.research?.pending) continue; // the AI writer was busy: researched again on a later tick before drafting
+    if (deadline - Date.now() < 22_000) break; // researched; drafted next tick (the research is reused)
     try {
       const d = await draftEmail1(p, p.audit);
-      const facts = [biz(p), p.city ?? "", ...d.findings.map((x) => x.cost), String(Math.min(3, d.findings.length))].join("\n");
+      const facts = [biz(p), p.city ?? "", personalLine(p), ...d.findings.map((x) => x.cost), String(Math.min(3, d.findings.length))].join("\n");
       const verdict = await autoCheck(p, p.audit?.result ?? null, d.findings, d.body, checkEmail1(d.body, d.subject, facts, takesBookings(p.business_type)));
       if (verdict.kind === "reject") {
         await ox.updateProspect(p.id, { status: "skipped", skip_reason: verdict.reason.slice(0, 200) });
@@ -330,18 +386,31 @@ export const draftCheckBacks = async (limit: number) => {
 
 const PKT_OFFSET = 5 * 3_600_000; // Pakistan has no daylight saving
 const pktDate = (t: number) => new Date(t + PKT_OFFSET).toISOString().slice(0, 10);
+const pktDayStart = (t: number) => Date.parse(`${pktDate(t)}T00:00:00Z`) - PKT_OFFSET;
 const pct = (d: number, t: number) => (t ? `${Math.round((d / t) * 1000) / 10}%` : "0%");
 
+/** The funnel as plain lines (shortfall email, summary). */
+export const funnelLines = (f: Funnel) => [
+  `Found ${f.found} businesses → ${f.checked} checked → ${f.with_email} with an email → ${f.active} passed the active check (of ${f.active_checked}) → ${f.researched} researched → ${f.drafted} drafted → ${f.sent} sent.`,
+  f.held.length ? `Held or skipped:\n${f.held.slice(0, 12).map((h) => `- ${h.n} × ${h.reason}`).join("\n")}` : "Held or skipped: none.",
+];
+
 export const sendDailySummary = async (now = Date.now()) => {
-  const todayStart = Date.parse(`${pktDate(now)}T00:00:00Z`) - PKT_OFFSET;
+  const todayStart = pktDayStart(now);
   const from = new Date(todayStart - DAY);
-  const [s, rows] = await Promise.all([ox.dailySummary(from.toISOString(), new Date(todayStart).toISOString()), ox.coverage()]);
+  const [s, rows, funnel, map] = await Promise.all([
+    ox.dailySummary(from.toISOString(), new Date(todayStart).toISOString()),
+    ox.coverage(),
+    ox.funnel(from.toISOString()),
+    ox.map().catch(() => null),
+  ]);
   const cov = progress(rows);
   const classes = Object.entries(s.by_class)
     .map(([k, v]) => `${k.replace("_", " ")} ${v}`)
     .join(", ");
   const lines = [
     `Yesterday (${pktDate(from.getTime())}, Pakistan time):`,
+    ...(map ? dailyLog(map, from.getTime(), todayStart, "Area") : []),
     `Emails sent: ${s.sent_first} first emails, ${s.sent_followups} follow-ups, ${s.sent_replies} automatic replies.`,
     `Replies: ${s.replies}${classes ? ` (${classes})` : ""}. Bounces: ${s.bounces}.`,
     s.hot.length
@@ -350,10 +419,11 @@ export const sendDailySummary = async (now = Date.now()) => {
           .join("\n")}`
       : "HOT leads: none waiting for you.",
     s.auto_answered.length ? `Answered automatically (fixes or prices sent):\n${s.auto_answered.map((a) => `- ${a.name} (${a.class}): ${[a.phone, a.email].filter(Boolean).join(" · ")}`).join("\n")}` : "",
-    `Homepage demos built: ${s.demos}. New qualified leads: ${s.qualified}. Queued to send: ${s.queued}. Needs a look: ${s.needs_look}.`,
+    `Funnel yesterday:\n${funnelLines(funnel).join("\n")}`,
+    `New qualified leads: ${s.qualified}. Queued to send: ${s.queued}. Needs a look: ${s.needs_look}.`,
     `Coverage:\n${cov.countries.map((c) => `- ${c.label}: ${pct(c.done, c.total)}${c.open ? "" : " (locked until a postal address is set)"}`).join("\n")}`,
     s.paused ? `PAUSED: ${s.pause_reason ?? "paused"}. Resume in ${SITE.url}/admin/prospects once it's fixed.` : "Auto-pause: not triggered.",
-    `${SITE.url}/admin/prospects`,
+    `${SITE.url}/admin/prospects?tab=map`,
   ].filter(Boolean);
   await sendOwnerAlert(`Outreach daily summary: ${s.sent_first + s.sent_followups} sent, ${s.replies} replies${s.hot.length ? `, ${s.hot.length} HOT` : ""}`, lines);
   return lines.length;
@@ -372,8 +442,53 @@ const maybeSummary = async (now = Date.now()) => {
   );
 };
 
+/**
+ * Daily guarantee (owner, 2026-11-17): at 23:30 PKT on a weekday (after the UK window closes), if
+ * fewer first emails went out than the daily limit, Hamza gets an email saying why, with the funnel.
+ */
+const maybeShortfall = async (state: State, now = Date.now()) => {
+  const local = new Date(now + PKT_OFFSET);
+  const day = local.getUTCDay();
+  if (day === 0 || day === 6 || local.getUTCHours() * 60 + local.getUTCMinutes() < 23 * 60 + 30) return null;
+  const key = `shortfall:${pktDate(now)}`;
+  if (await ox.cacheGet(key, 48)) return null;
+  await ox.cachePut(key, { at: new Date(now).toISOString() });
+  const funnel = await ox.funnel(new Date(pktDayStart(now)).toISOString());
+  const cap = dailyCap(state.settings.started_at, state, now);
+  if (funnel.sent >= cap) return `limit reached (${funnel.sent}/${cap})`;
+  const why = [
+    state.settings.paused ? `Outreach is paused: ${state.settings.pause_reason ?? "paused"}.` : "",
+    state.ready ? `${state.ready} checked emails are still queued; most recipients were outside their 9:00-17:00 weekday window or the 4-11 minute gaps ran out of day.` : "No checked emails were left in the queue (the buffer ran dry).",
+    `Waiting: ${state.backlog_found} businesses to check, ${state.to_prepare} to research and draft.`,
+  ].filter(Boolean);
+  await sendOwnerAlert(`Outreach: only ${funnel.sent} of ${cap} emails sent today`, [
+    `Today (${pktDate(now)}, Pakistan time) ${funnel.sent} first emails went out against a daily limit of ${cap}.`,
+    ...why,
+    `Funnel today:\n${funnelLines(funnel).join("\n")}`,
+    `${SITE.url}/admin/prospects`,
+  ]).catch((e) => console.error("outreach alert:", (e as Error).message));
+  return `shortfall email sent (${funnel.sent}/${cap})`;
+};
+
 export const PHASES = ["imap", "send", "draft", "audit"] as const;
 export type Phase = (typeof PHASES)[number];
+
+/**
+ * Should discovery run this tick? The current area keeps scanning until every niche there is done
+ * (area by area, owner 2026-11-17); a new area starts only when nothing is left to check or research
+ * and the ready buffer is below two days' limit.
+ */
+const discoveryPlan = async (state: State, cap: number) => {
+  if (state.found_24h >= MAX_NEW_PER_DAY) return null;
+  const rows = await ox.coverage();
+  const done = new Set(rows.filter((r) => r.done).map((r) => `${r.t}|${r.c}|${r.r}|${r.y}`));
+  const area = scanArea(done);
+  if (!area) return null;
+  const started = rows.some((r) => r.c === area.country && r.r === area.region && r.y === area.city);
+  if (started) return `scanning ${area.city}`;
+  if (state.backlog_found === 0 && state.to_prepare === 0 && state.ready < bufferTarget(cap)) return `new area ${area.city} (buffer ${state.ready}/${bufferTarget(cap)})`;
+  return null;
+};
 
 /** One scheduler tick. `phases` limits what runs (local tests leave out "send"). */
 export const tick = async (phases: Phase[] = [...PHASES], budgetMs = 50_000) => {
@@ -400,6 +515,11 @@ export const tick = async (phases: Phase[] = [...PHASES], budgetMs = 50_000) => 
     }
     state = await ox.state();
   }
+  const cut = await spamBlockCheck(state);
+  if (cut) {
+    report.spamBlocks = cut;
+    state = await ox.state();
+  }
   const paused = await safetyCheck(state);
   if (paused) {
     report.paused = paused;
@@ -407,11 +527,19 @@ export const tick = async (phases: Phase[] = [...PHASES], budgetMs = 50_000) => 
   }
   if (phases.includes("send")) report.send = await sendNext(state);
   if (phases.includes("send")) report.summary = await maybeSummary();
-  // Coverage: niches below today's target search their next cells (at most every 30 minutes).
-  const lastDiscover = await ox.cacheGet<{ at: string }>("discover-tick", 1);
-  if (phases.includes("audit") && left() > 40_000 && state.found_24h < MAX_NEW_PER_DAY && (!lastDiscover || Date.now() - Date.parse(lastDiscover.at) > 30 * 60_000)) {
-    await ox.cachePut("discover-tick", { at: new Date().toISOString() });
-    report.discover = await discoverRun(start + budgetMs - 25_000).catch((e) => `error: ${(e as Error).message}`);
+  if (phases.includes("send")) report.shortfall = await maybeShortfall(state);
+
+  const cap = dailyCap(state.settings.started_at, state);
+  const target = bufferTarget(cap);
+  report.buffer = `${state.ready}/${target}`;
+  // Buffer low and businesses already checked: research and draft first, so the queue refills fastest.
+  if (phases.includes("draft") && state.ready < target && state.to_prepare > 0 && left() > 40_000) report.drafts = await draftNew(state, 2, undefined, undefined, start + budgetMs - 5_000);
+
+  if (phases.includes("audit") && left() > 30_000) {
+    const plan = await discoveryPlan(state, cap).catch(() => null);
+    if (plan) {
+      report.discover = { plan, results: await discoverRun(Math.min(start + budgetMs - 15_000, Date.now() + 30_000)).catch((e) => `error: ${(e as Error).message}`) };
+    }
   }
   if (phases.includes("audit")) {
     const done: string[] = [];
@@ -423,9 +551,8 @@ export const tick = async (phases: Phase[] = [...PHASES], budgetMs = 50_000) => 
     }
     report.audits = done;
   }
-  // Templates are instant; a Gemini draft can take up to 2 x 25 s, so one per tick with time left.
   if (phases.includes("draft") && left() > 12_000) {
-    if (left() > 30_000) report.drafts = await draftNew(state, 1);
+    if (left() > 30_000 && report.drafts === undefined) report.drafts = await draftNew(state, 2, undefined, undefined, start + budgetMs - 5_000);
     if (left() > 8_000) report.followups = await draftFollowUps(5);
     if (left() > 5_000) report.checkbacks = await draftCheckBacks(5);
   }

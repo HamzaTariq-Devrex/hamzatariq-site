@@ -1,5 +1,6 @@
 // Client-safe helpers for the manual WhatsApp messages in /admin/prospects. Hamza reads and sends
 // every WhatsApp message himself; nothing here sends anything.
+import { nounFor } from "./osm-types";
 
 const CALLING_CODES: Record<string, string> = { GB: "44", US: "1", CA: "1", AE: "971", AU: "61" };
 
@@ -15,17 +16,22 @@ export const whatsappNumber = (phone: string, country: string) => {
   return digits.startsWith(code) ? digits : `${code}${digits}`;
 };
 
-type ForMessage = { name: string; website: string | null; reportId: string | null; reportExpires: string | null };
+type ForMessage = { name: string; website: string | null; reportId: string | null; reportExpires: string | null; businessType?: string; city?: string | null };
 
-/** Short, personal first message. Only facts from the audit: no numbers, no claims. */
+/**
+ * Short, personal first message (owner, 2026-11-17): says exactly what is offered (never "send it"),
+ * signed "Founder, Devrex Digital" like the emails. Only facts from the audit: no numbers, no claims.
+ */
 export const whatsappText = (p: ForMessage) => {
+  const noun = p.businessType ? nounFor(p.businessType) : "business like yours";
+  const where = p.city ? ` in ${p.city}` : " nearby";
   return [
-    `Hi ${p.name} team, this is Hamza Tariq, a web developer.`,
+    `Hi ${p.name} team, I'm Hamza Tariq, founder of Devrex Digital. I help small businesses get more customers online.`,
     p.website
-      ? "I had a look at your website and noticed a few things that make it harder for people to find you and get in touch."
-      : "I couldn't find a website listed for your business and wanted to ask whether you'd like a few ideas for one.",
-    "Happy to explain in a quick chat if it's useful. No pressure at all.",
-  ].join(" ");
+      ? "I had a look at your website and noticed a few things that make it harder for people to find you and get in touch. Want me to send you the quick fixes I found?"
+      : `I couldn't find a website for ${p.name}, so people searching for ${/^[aeiou]/i.test(noun) ? "an" : "a"} ${noun}${where} find other places first. Want me to make you a free sample homepage?`,
+    "Hamza Tariq\nFounder, Devrex Digital",
+  ].join("\n\n");
 };
 
 export const whatsappLink = (phone: string, country: string, text: string) => `https://wa.me/${whatsappNumber(phone, country)}?text=${encodeURIComponent(text)}`;

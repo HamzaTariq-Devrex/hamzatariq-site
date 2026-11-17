@@ -233,6 +233,7 @@ export type Database = {
         Row: {
           approved_at: string | null
           body: string
+          bounce_type: string | null
           created_at: string
           direction: string
           error: string | null
@@ -251,6 +252,7 @@ export type Database = {
         Insert: {
           approved_at?: string | null
           body: string
+          bounce_type?: string | null
           created_at?: string
           direction?: string
           error?: string | null
@@ -269,6 +271,7 @@ export type Database = {
         Update: {
           approved_at?: string | null
           body?: string
+          bounce_type?: string | null
           created_at?: string
           direction?: string
           error?: string | null
@@ -342,6 +345,8 @@ export type Database = {
       outreach_settings: {
         Row: {
           approve_first: boolean
+          cap_cut: number
+          cap_cut_at: string | null
           id: number
           last_imap_at: string | null
           last_imap_uid: number | null
@@ -355,6 +360,8 @@ export type Database = {
         }
         Insert: {
           approve_first?: boolean
+          cap_cut?: number
+          cap_cut_at?: string | null
           id?: number
           last_imap_at?: string | null
           last_imap_uid?: number | null
@@ -368,6 +375,8 @@ export type Database = {
         }
         Update: {
           approve_first?: boolean
+          cap_cut?: number
+          cap_cut_at?: string | null
           id?: number
           last_imap_at?: string | null
           last_imap_uid?: number | null
@@ -456,8 +465,10 @@ export type Database = {
       }
       prospects: {
         Row: {
+          area: string | null
           audit_score: number | null
           business_type: string
+          checked_at: string | null
           city: string | null
           country: string
           created_at: string
@@ -468,8 +479,10 @@ export type Database = {
           id: string
           instagram: string | null
           last_contacted_at: string | null
+          lat: number | null
           lead_id: string | null
           lead_score: number | null
+          lon: number | null
           name: string
           next_followup_at: string | null
           notes: string | null
@@ -480,6 +493,8 @@ export type Database = {
           qualified_at: string | null
           region: string | null
           reply_class: string | null
+          research: Json | null
+          researched_at: string | null
           search_id: string | null
           skip_reason: string | null
           snooze_until: string | null
@@ -490,8 +505,10 @@ export type Database = {
           website: string | null
         }
         Insert: {
+          area?: string | null
           audit_score?: number | null
           business_type: string
+          checked_at?: string | null
           city?: string | null
           country: string
           created_at?: string
@@ -502,8 +519,10 @@ export type Database = {
           id?: string
           instagram?: string | null
           last_contacted_at?: string | null
+          lat?: number | null
           lead_id?: string | null
           lead_score?: number | null
+          lon?: number | null
           name: string
           next_followup_at?: string | null
           notes?: string | null
@@ -514,6 +533,8 @@ export type Database = {
           qualified_at?: string | null
           region?: string | null
           reply_class?: string | null
+          research?: Json | null
+          researched_at?: string | null
           search_id?: string | null
           skip_reason?: string | null
           snooze_until?: string | null
@@ -524,8 +545,10 @@ export type Database = {
           website?: string | null
         }
         Update: {
+          area?: string | null
           audit_score?: number | null
           business_type?: string
+          checked_at?: string | null
           city?: string | null
           country?: string
           created_at?: string
@@ -536,8 +559,10 @@ export type Database = {
           id?: string
           instagram?: string | null
           last_contacted_at?: string | null
+          lat?: number | null
           lead_id?: string | null
           lead_score?: number | null
+          lon?: number | null
           name?: string
           next_followup_at?: string | null
           notes?: string | null
@@ -548,6 +573,8 @@ export type Database = {
           qualified_at?: string | null
           region?: string | null
           reply_class?: string | null
+          research?: Json | null
+          researched_at?: string | null
           search_id?: string | null
           skip_reason?: string | null
           snooze_until?: string | null
@@ -1303,6 +1330,10 @@ export type Database = {
         Returns: boolean
       }
       app_ox_expire_reviews: { Args: { p_secret: string }; Returns: number }
+      app_ox_funnel: {
+        Args: { p_from: string; p_secret: string }
+        Returns: Json
+      }
       app_ox_is_suppressed: {
         Args: { p_email: string; p_exclude?: string; p_secret: string }
         Returns: boolean
@@ -1311,6 +1342,7 @@ export type Database = {
         Args: { p_kind: string; p_limit?: number; p_secret: string }
         Returns: Json
       }
+      app_ox_map: { Args: { p_secret: string }; Returns: Json }
       app_ox_message_for_test: {
         Args: { p_id: string; p_secret: string }
         Returns: Json

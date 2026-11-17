@@ -21,6 +21,7 @@ export type ProspectRow = {
   lead_id: string | null;
   last_contacted_at: string | null;
   created_at: string;
+  research: import("@/lib/outreach/research").Research | null;
   audits: { report_id: string; score: number | null; final_url: string | null; created_at: string; expires_at: string }[];
 };
 
@@ -30,5 +31,5 @@ export const latestAudit = (p: ProspectRow) => [...(p.audits ?? [])].sort((a, b)
 /** The shared prefilled WhatsApp message for this prospect (Hamza sends it himself). */
 export const messageFor = (p: ProspectRow) => {
   const a = latestAudit(p);
-  return whatsappText({ name: p.name, website: a?.final_url ?? null, reportId: a?.report_id ?? null, reportExpires: a?.expires_at ?? null });
+  return whatsappText({ name: p.name, website: a?.final_url ?? p.website, reportId: a?.report_id ?? null, reportExpires: a?.expires_at ?? null, businessType: p.business_type, city: p.city });
 };

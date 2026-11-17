@@ -28,7 +28,7 @@ export const SIGNATURE = "Hamza Tariq\nFounder, Devrex Digital · hamzatariq.sit
 export const OPT_OUT = "Not interested? Just reply 'no' and I won't email again.";
 export { postalAddress, withAddress } from "./address";
 
-type Named = Pick<Prospect, "name"> & { email?: string | null };
+type Named = Pick<Prospect, "name"> & { email?: string | null; research?: Prospect["research"] };
 /** The business name as written in emails: no symbols ("Joe's @ Home" → "Joe's Home"). */
 export const biz = (p: Named) => cleanName(p.name) || p.name.trim();
 /**
@@ -36,7 +36,8 @@ export const biz = (p: Named) => cleanName(p.name) || p.name.trim();
  * otherwise "Hi {Business} team,", or "Hi there," when the business name is odd (symbols etc.).
  */
 export const hello = (p: Named) => {
-  const person = personFromEmail(p.email, p.name);
+  // The owner's first name when the research found it clearly stated on their site.
+  const person = p.research?.owner ?? personFromEmail(p.email, p.name);
   if (person) return `Hi ${person},`;
   if (cleanName(p.name) !== p.name.trim().replace(/\s+/g, " ") || oddName(p.name)) return "Hi there,";
   return `Hi ${biz(p)} team,`;
@@ -170,14 +171,17 @@ export const prospectFindings = (p: Prospect, audit: AuditResult | null) => find
 
 /** The CTA never promises more fixes than the audit really found. */
 const cta = (f: Finding[]) => {
-  // No website: email 1 says a homepage idea was made for them (owner's wording, 2026-11-16).
-  if (f[0]?.id === "no-website") return "Want me to send it?";
+  // No website: offer a free sample homepage (owner, 2026-11-17: never "send it" without saying what).
+  if (f[0]?.id === "no-website") return "Want me to make you a free sample homepage?";
   const n = f.length;
   return n >= 3 ? "Want me to send you the 3 quick fixes I found?" : n === 2 ? "Want me to send you the 2 quick fixes I found?" : "Want me to send you the quick fix I found?";
 };
 
+/** The research's personal opening line (verified against their site), or "" when there's none. */
+export const personalLine = (p: Pick<Prospect, "research">) => (p.research?.active && p.research.line ? p.research.line.trim() : "");
+
 const assemble1 = (p: Prospect, middle: string, f: Finding[], withProof = true) =>
-  [hello(p), middle.trim(), withProof ? proofLine(p.business_type) : null, cta(f), OPT_OUT, SIGNATURE].filter(Boolean).join("\n\n");
+  [hello(p), [personalLine(p), middle.trim()].filter(Boolean).join(" "), withProof ? proofLine(p.business_type) : null, cta(f), OPT_OUT, SIGNATURE].filter(Boolean).join("\n\n");
 
 /** Template email 1 from the same real findings (also the fallback when Gemini's draft fails the check). */
 const templateMiddle = (p: Prospect, f: Finding[]) => {
@@ -189,15 +193,21 @@ const templateMiddle = (p: Prospect, f: Finding[]) => {
   return parts.join(" ");
 };
 
+/** "a jeweller in Manchester" / "an optician nearby". */
+const searchPhrase = (p: Pick<Prospect, "business_type" | "osm_tags" | "city">) => {
+  const noun = nounFor(p.business_type, p.osm_tags ?? {});
+  return `${/^[aeiou]/i.test(noun) ? "an" : "a"} ${noun}${p.city ? ` in ${p.city}` : " nearby"}`;
+};
+
 /**
- * No website (verified, homepage concept built): fixed template, no Gemini. "I couldn't find a
- * website for {business}, so I made a quick free homepage idea for you. Want me to send it?"
- * The /preview link is never in email 1; it goes in the reply to a "yes" or in the day-3 email.
+ * No website (verified), no-link version until the premium demo template is built (owner, 2026-11-17):
+ * "I couldn't find a website for {business}, so people searching for a {niche} in {city} find other
+ * places first. Want me to make you a free sample homepage?" Fixed template, no Gemini, no link.
  */
 const noWebsiteEmail1 = (p: Prospect, f: Finding[], subject: string, variant: "A" | "B") => {
   const intro = "I'm Hamza, a web developer who helps small businesses get more customers online.";
-  const core = `I couldn't find a website for ${biz(p)}, so I made a quick free homepage idea for you.`;
-  const pad = " It only uses your public details, like your address, phone number and opening hours.";
+  const core = `I couldn't find a website for ${biz(p)}, so people searching for ${searchPhrase(p)} find other places first.`;
+  const pad = " A simple site with your opening hours, location and a call button would fix that.";
   const facts = [p.name, p.city ?? ""].join("\n");
   const body = [
     assemble1(p, `${intro} ${core}`, f),
@@ -217,8 +227,9 @@ export const draftEmail1 = async (p: Prospect, auditRow: ProspectAudit | null): 
   if (!f.length) throw new Error("No real finding to write about.");
   if (f[0].id === "no-website") return noWebsiteEmail1(p, f, subject, variant);
   const fixed = assemble1(p, "", f);
+  const line = personalLine(p);
   const budget = { min: Math.max(15, 62 - words(fixed)), max: Math.max(20, 88 - words(fixed)) };
-  const facts = [biz(p), p.city ?? "", ...f.map((x) => x.cost), String(Math.min(3, f.length))].join("\n");
+  const facts = [biz(p), p.city ?? "", line, ...f.map((x) => x.cost), String(Math.min(3, f.length))].join("\n");
   // Template candidates from the same findings, in order of preference. Email 1 names one problem
   // only, so a short one is padded with what Hamza does (never a second problem), and a long one
   // drops the optional proof line. The first candidate that passes the check is the fallback.
@@ -238,7 +249,7 @@ export const draftEmail1 = async (p: Prospect, auditRow: ProspectAudit | null): 
 
   const system = `You write the middle of a short cold email from Hamza Tariq, founder of Devrex Digital, a small web studio, to a small business.
 Write ONLY the middle part: ${budget.min}-${budget.max} words, plain friendly English, 1 to 3 sentences.
-- Start by saying who Hamza is in a few words (a web developer who helps small businesses).
+- ${line ? `It comes right after this opening line, so don't repeat it: "${line}". ` : ""}Start by saying who Hamza is in a few words (a web developer who helps small businesses).
 - Then explain this ONE problem from their website, in plain words, as what it costs them: "${f[0].cost}".
 - You may rephrase it, but keep its meaning and any number exactly as given. Do not add other problems.
 - No greeting, no sign-off, no question, no links, no web addresses, no technical words (no SEO, H1, meta, schema, SSL, speed scores, etc.).
@@ -280,13 +291,14 @@ ${ownerProfile()}`;
 /** Day 3 (40-60 words): one more real finding in plain words + the report link (the only link). */
 export const draftDay3 = (p: Prospect, firstSubject: string, reportLink: string, f: Finding[]): Draft => {
   // No website: the homepage concept link instead of a report.
-  if (f[0]?.id === "no-website" && p.preview_id) {
+  // No website: no link until the premium demo template is built (owner, 2026-11-17).
+  if (f[0]?.id === "no-website") {
     return {
       subject: reSubject(firstSubject),
       body: [
         hello(p),
-        `Here's the free homepage idea I made for ${biz(p)}, using only your public details: ${previewUrl(p.preview_id)}`,
-        "It's yours to keep, with no obligation. If you'd like a real site like it, just reply.",
+        `Just following up: I'd be happy to make a free sample homepage for ${biz(p)}, using only your public details like your address, phone number and opening hours.`,
+        "No cost and no obligation. Want me to make it?",
         OPT_OUT,
         "Hamza",
       ].join("\n\n"),
@@ -369,7 +381,7 @@ export const draftCheckBack = (p: Prospect, firstSubject: string, f: Finding[]):
   body: [
     hello(p),
     "You mentioned the timing wasn't right when I wrote a while ago, so I'm checking back once.",
-    f[0]?.id === "no-website" ? `Want me to send you the free homepage idea I made for ${biz(p)}?` : cta(f),
+    f[0]?.id === "no-website" ? `Want me to make a free sample homepage for ${biz(p)}?` : cta(f),
     OPT_OUT,
     "Hamza",
   ].join("\n\n"),
@@ -379,10 +391,15 @@ export const draftCheckBack = (p: Prospect, firstSubject: string, f: Finding[]):
 
 const reSubject = (s: string) => (/^re:/i.test(s) ? s : `Re: ${s}`);
 
-/** WhatsApp / Instagram message (2-3 lines): one real problem, one question, no links. */
-export const manualMessage = (p: Pick<Prospect, "name" | "business_type" | "osm_tags" | "city"> & { email?: string | null }, audit: AuditResult | null) => {
+/**
+ * WhatsApp / Instagram message (owner, 2026-11-17): one real problem, one question that says what is
+ * offered (never "send it"), signed "Founder, Devrex Digital" like the emails. No links.
+ */
+export const manualMessage = (p: Pick<Prospect, "name" | "business_type" | "osm_tags" | "city"> & { email?: string | null; research?: Prospect["research"] }, audit: AuditResult | null) => {
   const f = findings(audit, ctx(p));
-  if (!f.length) return `${hello(p)} I'm Hamza, a web developer who helps small businesses get more enquiries online. Would a few ideas for your website be useful?`;
-  const problem = f[0].id === "no-website" ? `${lead(f[0].cost)}.` : `I had a look at your website and noticed ${f[0].cost}.`;
-  return `${hello(p)} I'm Hamza, a web developer.\n${problem}\n${cta(f)}`;
+  const intro = `${hello(p)} I'm Hamza Tariq, founder of Devrex Digital. I help small businesses get more customers online.`;
+  const sign = "Hamza Tariq\nFounder, Devrex Digital";
+  if (!f.length) return `${intro}\nWould a few free ideas to get more enquiries from your website be useful?\n\n${sign}`;
+  if (f[0].id === "no-website") return `${intro}\nI couldn't find a website for ${biz(p)}, so people searching for ${searchPhrase(p)} find other places first.\nWant me to make you a free sample homepage?\n\n${sign}`;
+  return `${intro}\nI had a look at your website and noticed ${f[0].cost}.\n${cta(f)}\n\n${sign}`;
 };

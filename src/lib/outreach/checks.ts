@@ -66,8 +66,9 @@ export const oddName = (name: string) => {
 };
 
 /**
- * Strong sites (owner, 2026-11-17): an audit score of 70+ means the site works; "3 quick fixes" is the
- * pitch for weak sites. These businesses are held (status "held") until the SEO + blog offer exists.
+ * Strong sites (audit 70+). Owner, 2026-11-17 (later the same day): until the SEO + blog offer exists
+ * they get a normal email 1 with their most important real finding, so they never block the queue.
+ * Kept for labels only; nothing is held on this any more.
  */
 export const STRONG_SITE_SCORE = 70;
 export const HELD_REASON = (score: number) => `Strong site (audit ${score}): waiting for the SEO + blog offer`;
@@ -105,8 +106,8 @@ export const autoCheck = async (p: Prospect, audit: AuditResult | null, f: Findi
 
   // Uncertain: a person should look first.
   if (f[0].id === "no-website") {
+    // Email 1 for no-website businesses has no link (owner, 2026-11-17), so no concept is needed first.
     if (flags.noSite !== "verified") return { kind: "review", reason: "Couldn't verify that they have no website" };
-    if (!p.preview_id) return { kind: "review", reason: "No homepage concept was built" };
   } else if (!audit) {
     return { kind: "review", reason: "Low audit confidence: no audit result" };
   }

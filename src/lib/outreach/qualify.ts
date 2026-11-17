@@ -27,7 +27,7 @@ export const isShopify = (page: FetchResult) =>
 
 const sameSite = (a: string, b: string) => a.replace(/^www\./, "") === b.replace(/^www\./, "");
 
-/** Contact and about pages linked from the home page, on the same site (contact first, at most 2). */
+/** Contact, about and imprint/legal pages linked from the home page, on the same site (contact first, at most 3). */
 export const contactPages = (page: FetchResult) => {
   const base = new URL(page.url);
   const root = parse(page.body, { comment: false });
@@ -35,7 +35,7 @@ export const contactPages = (page: FetchResult) => {
   for (const a of root.querySelectorAll("a[href]")) {
     const href = a.getAttribute("href") ?? "";
     const label = `${href} ${a.textContent}`.toLowerCase();
-    const rank = /contact|get-in-touch|kontakt|enquir/.test(label) ? 0 : /about|impressum/.test(label) ? 1 : -1;
+    const rank = /contact|get-in-touch|get in touch|kontakt|enquir|find-us|find us/.test(label) ? 0 : /about|our-story|who-we-are/.test(label) ? 1 : /impressum|imprint|legal|terms|privacy|company-info/.test(label) ? 2 : -1;
     if (rank < 0) continue;
     try {
       const u = new URL(href, base);
@@ -47,10 +47,28 @@ export const contactPages = (page: FetchResult) => {
       // ignore bad links
     }
   }
-  return [...found.entries()].sort((x, y) => x[1] - y[1]).slice(0, 2).map(([u]) => new URL(u));
+  // One page per kind: contact, about, imprint/legal.
+  const best = new Map<number, string>();
+  for (const [u, r] of [...found.entries()].sort((x, y) => x[1] - y[1])) if (!best.has(r)) best.set(r, u);
+  return [...best.entries()].sort((x, y) => x[0] - y[0]).map(([, u]) => new URL(u));
 };
 
-/** Emails actually published in the page: mailto links and plain text. Never guessed. */
+/** Cloudflare's email protection: the address is published, only hex-encoded in data-cfemail. */
+const decodeCfEmail = (hex: string) => {
+  try {
+    const key = parseInt(hex.slice(0, 2), 16);
+    let out = "";
+    for (let i = 2; i < hex.length; i += 2) out += String.fromCharCode(parseInt(hex.slice(i, i + 2), 16) ^ key);
+    return out;
+  } catch {
+    return "";
+  }
+};
+
+/**
+ * Emails actually published in the page: mailto links, plain text (footer included), addresses
+ * written as "name [at] domain [dot] com", and Cloudflare-protected ones. Never guessed.
+ */
 const emailsIn = (html: string) => {
   const root = parse(html, { comment: false });
   const out = new Set<string>();
@@ -58,13 +76,18 @@ const emailsIn = (html: string) => {
     const e = decodeURIComponent((a.getAttribute("href") ?? "").slice(7).split("?")[0]).trim().toLowerCase();
     if (e) out.add(e);
   }
-  for (const m of root.textContent.matchAll(EMAIL_RE)) out.add(m[0].toLowerCase());
+  const text = root.textContent.replace(/\s*[[(]\s*at\s*[\])]\s*/gi, "@").replace(/\s*[[(]\s*dot\s*[\])]\s*/gi, ".");
+  for (const m of text.matchAll(EMAIL_RE)) out.add(m[0].toLowerCase());
+  for (const m of html.matchAll(/data-cfemail="([0-9a-f]{6,})"/gi)) {
+    const e = decodeCfEmail(m[1]).toLowerCase();
+    if (/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/.test(e)) out.add(e);
+  }
   return [...out].filter((e) => !emailProblem(e));
 };
 
 const pickEmail = (emails: string[], domain: string | null) => (domain ? emails.find((e) => e.endsWith(`@${domain}`) || e.endsWith(`.${domain}`)) : undefined) ?? emails[0] ?? null;
 
-/** Publicly listed email: home page mailto links first, then the site's contact/about page. */
+/** Publicly listed email: the home page (footer included) first, then the Contact, About and Imprint/legal pages. */
 export const findPublicEmail = async (home: FetchResult, domain: string | null) => {
   const onHome = emailsIn(home.body);
   if (onHome.length) return { email: pickEmail(onHome, domain), noSoliciting: NO_SOLICITING.test(parse(home.body).textContent) };
@@ -81,6 +104,26 @@ export const findPublicEmail = async (home: FetchResult, domain: string | null) 
     if (emails.length) return { email: pickEmail(emails, domain), noSoliciting: false };
   }
   return { email: null, noSoliciting: false };
+};
+
+/**
+ * The email in the business's public Facebook page "About" text, when OSM links the page. Facebook
+ * often shows servers a login wall; then nothing is found (never guessed).
+ */
+export const facebookEmail = async (tags: Record<string, string>, domain: string | null) => {
+  const raw = (tags["contact:facebook"] ?? tags.facebook ?? "").split(";")[0].trim();
+  if (!raw) return null;
+  const url = /^https?:\/\//i.test(raw) ? raw : /^[\w.-]+$/.test(raw) ? `https://www.facebook.com/${raw}` : null;
+  try {
+    if (!url || !/(^|\.)facebook\.com$/i.test(new URL(url).hostname)) return null;
+    const page = await safeFetch(new URL(url), { maxBytes: 1024 * 1024, timeoutMs: 8000 });
+    if (page.status !== 200) return null;
+    const meta = [...page.body.matchAll(/<meta[^>]+(?:name|property)="(?:og:)?description"[^>]+content="([^"]*)"/gi)].map((m) => m[1]).join(" ");
+    const emails = [...new Set([...`${meta} ${page.body}`.matchAll(EMAIL_RE)].map((m) => m[0].toLowerCase()))].filter((e) => !emailProblem(e) && !/facebook|fbcdn|meta\.com/.test(e));
+    return pickEmail(emails, domain);
+  } catch {
+    return null;
+  }
 };
 
 /** What the home page offers: contact/WhatsApp/booking buttons and the Instagram link. */
@@ -141,8 +184,14 @@ export const leadScore = (p: Prospect, audit: AuditResult | null) => {
 
 const skip = (p: Prospect, reason: string) => ox.updateProspect(p.id, { status: "skipped", skip_reason: reason });
 
-/** Runs the whole qualification for one prospect and stores the outcome. */
+/** Runs the whole qualification for one prospect, stores the outcome and when it finished (funnel). */
 export const qualify = async (p: Prospect): Promise<string> => {
+  const out = await qualifyOne(p);
+  await ox.updateProspect(p.id, { checked_at: new Date().toISOString() });
+  return out;
+};
+
+const qualifyOne = async (p: Prospect): Promise<string> => {
   // Chains, franchises, big brands, government, schools and hospitals: never.
   // US and Canada wait (kept, not skipped) until a postal address is set (CAN-SPAM / CASL).
   if (waitingForAddress(p.country)) {
@@ -155,14 +204,22 @@ export const qualify = async (p: Prospect): Promise<string> => {
   const osmInstagram = instagramOf(p.osm_tags);
 
   if (!p.website) {
-    const email = p.email && !emailProblem(p.email) && (await hasMailServer(p.email)) ? p.email : null;
+    let email = p.email && !emailProblem(p.email) && (await hasMailServer(p.email)) ? p.email : null;
+    let source: "osm" | "facebook" | null = email ? "osm" : null;
+    if (!email) {
+      const fb = await facebookEmail(p.osm_tags ?? {}, null);
+      if (fb && (await hasMailServer(fb))) {
+        email = fb;
+        source = "facebook";
+      }
+    }
     if (email && (await ox.isSuppressed(email, p.id))) return skip(p, "Suppressed or already contacted").then(() => "skipped");
     if (!email && !p.phone && !osmInstagram) return skip(p, "No website, email, phone or Instagram").then(() => "skipped");
     // "No website" is verified: none of the likely domains (name.com, name.co.uk, ...) is theirs.
     const check = await verifyNoWebsite(p.name, p.country);
     if (check.result === "found" && check.url) {
       await ox.updateProspect(p.id, { website: check.url, domain: domainOf(check.url) });
-      return qualify({ ...p, website: check.url, domain: domainOf(check.url) });
+      return qualifyOne({ ...p, website: check.url, domain: domainOf(check.url) });
     }
     const flags: Flags = { noSite: check.result === "none" ? "verified" : "uncertain" };
     await ox.saveAudit(p.id, "", null, null, null);
@@ -172,6 +229,7 @@ export const qualify = async (p: Prospect): Promise<string> => {
     await ox.updateProspect(p.id, {
       status: email ? "audited" : "whatsapp",
       email: email ?? "",
+      email_source: source,
       instagram: osmInstagram,
       skip_reason: null,
       lead_score: leadScore(p, null),
@@ -207,13 +265,20 @@ export const qualify = async (p: Prospect): Promise<string> => {
 
   // An unusable OSM address (no-reply, placeholder, free-mail look-alike) is dropped; the site may list a real one.
   let email = p.email && !emailProblem(p.email) ? p.email : null;
-  let source: "osm" | "contact-page" | null = email ? "osm" : null;
+  let source: "osm" | "contact-page" | "facebook" | null = email ? "osm" : null;
   if (page) {
     const found = await findPublicEmail(page, p.domain);
     if (found.noSoliciting) return skip(p, "Site asks for no unsolicited email").then(() => "skipped");
     if (!email && found.email) {
       email = found.email;
       source = "contact-page";
+    }
+  }
+  if (!email) {
+    const fb = await facebookEmail(p.osm_tags ?? {}, p.domain);
+    if (fb) {
+      email = fb;
+      source = "facebook";
     }
   }
   if (email && !(await hasMailServer(email))) email = null; // dead domain or typo: dropped

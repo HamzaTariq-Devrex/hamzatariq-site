@@ -13,10 +13,14 @@ import DraftQueue, { type Draft } from "@/components/admin/outreach/DraftQueue";
 import ProspectsBrowser from "@/components/admin/outreach/ProspectsBrowser";
 import WhatsAppQueue, { type QueueItem } from "@/components/admin/outreach/WhatsAppQueue";
 import { typeLabel } from "@/components/admin/outreach/prospect-shared";
-import { dailyCap } from "@/lib/outreach/pipeline";
+import { bufferTarget, dailyCap } from "@/lib/outreach/pipeline";
+import Funnel from "@/components/admin/outreach/Funnel";
+import MapTab from "@/components/admin/outreach/MapTab";
+import { pktDay } from "@/lib/outreach/map";
 import { ox, type CoverageRow } from "@/lib/outreach/db";
 import { DAILY_TARGET_PER_NICHE, progress } from "@/lib/outreach/coverage";
 import { manualMessage } from "@/lib/outreach/compose";
+import { bounceType } from "@/lib/outreach/mail";
 import type { AuditResult } from "@/lib/audit/types";
 import { listProspects } from "./actions";
 
@@ -25,6 +29,7 @@ export const metadata: Metadata = { title: "Prospects" };
 const DAYS = 14;
 const TABS = [
   ["ready", "Needs a look"],
+  ["map", "Map"],
   ["coverage", "Coverage"],
   ["sent", "Sent"],
   ["hot", "Hot replies"],
@@ -72,13 +77,26 @@ async function Controls() {
   );
 }
 
+const PKT = 5 * 3_600_000;
+const pktStart = (t = Date.now()) => Date.parse(`${pktDay(t)}T00:00:00Z`) - PKT;
+
+async function Pipeline() {
+  try {
+    const [state, today, week] = await Promise.all([ox.state(), ox.funnel(new Date(pktStart()).toISOString()), ox.funnel(new Date(pktStart() - 6 * 86_400_000).toISOString())]);
+    const cap = dailyCap(state.settings.started_at, state);
+    return <Funnel today={today} week={week} ready={state.ready} target={bufferTarget(cap)} cap={cap} spamBlocks7d={state.spam_blocks_7d} bounces7d={state.bounces_7d} />;
+  } catch (e) {
+    return <Failed what="the pipeline funnel" message={(e as Error).message} />;
+  }
+}
+
 async function Numbers() {
   return <OutreachStats s={await stats()} />;
 }
 
 async function Tabs({ active }: { active: Tab }) {
   const s = await stats();
-  const count: Record<Tab, number | null> = { ready: s.tabs.ready, coverage: null, sent: s.tabs.sent, hot: s.tabs.hot, whatsapp: s.tabs.whatsapp, suppressed: s.tabs.suppressed, all: null };
+  const count: Record<Tab, number | null> = { ready: s.tabs.ready, map: null, coverage: null, sent: s.tabs.sent, hot: s.tabs.hot, whatsapp: s.tabs.whatsapp, suppressed: s.tabs.suppressed, all: null };
   return (
     <nav className="ox-tabs" aria-label="Outreach">
       {TABS.map(([key, label]) => (
@@ -246,6 +264,7 @@ async function Suppressed({ page }: { page: number }) {
                 <th scope="col">Email</th>
                 <th scope="col">Business</th>
                 <th scope="col">Reason</th>
+                <th scope="col">Bounce type</th>
                 <th scope="col">Bounce detail</th>
                 <th scope="col">Since</th>
               </tr>
@@ -256,6 +275,7 @@ async function Suppressed({ page }: { page: number }) {
                   <td>{r.email}</td>
                   <td>{r.prospect?.name ?? "–"}</td>
                   <td>{r.reason}</td>
+                  <td>{r.reason === "bounced" ? ({ spam: "Spam/policy block", address: "Bad address", other: "Other" } as const)[bounceType(r.detail)] : "–"}</td>
                   <td>
                     {r.detail ? (
                       <>
@@ -345,6 +365,9 @@ export default async function ProspectsPage({ searchParams }: { searchParams: Pr
       <Suspense fallback={<SkeletonCard rows={3} title={false} />}>
         <Controls />
       </Suspense>
+      <Suspense fallback={<SkeletonCard rows={4} title={false} />}>
+        <Pipeline />
+      </Suspense>
       <Suspense fallback={<SkeletonCard rows={2} title={false} />}>
         <Numbers />
       </Suspense>
@@ -353,6 +376,7 @@ export default async function ProspectsPage({ searchParams }: { searchParams: Pr
       </Suspense>
       <Suspense key={`${tab}-${page}`} fallback={<SkeletonCard rows={8} />}>
         {tab === "ready" && <Ready page={page} />}
+        {tab === "map" && <MapTab />}
         {tab === "coverage" && <CoverageTab />}
         {tab === "sent" && <Sent page={page} />}
         {tab === "hot" && <Hot />}

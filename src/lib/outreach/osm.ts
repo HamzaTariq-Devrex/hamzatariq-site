@@ -221,6 +221,8 @@ export const discoverCell = async (type: string, cell: Cell, budget: number) => 
       email: emailOf(b.tags),
       instagram: instagramOf(b.tags),
       osm_tags: b.tags,
+      lat: b.lat,
+      lon: b.lon,
     });
     if (id) added++;
   }

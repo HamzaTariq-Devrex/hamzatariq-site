@@ -21,6 +21,21 @@ const env = () => {
 
 export const outreachAddress = () => env().user.toLowerCase();
 
+export const SENDER_NAME = "Hamza Tariq";
+/** The address part of OUTREACH_FROM ("Name <a@b.c>" or "a@b.c"), else the login. */
+export const fromAddress = (from: string, user: string) => (from.match(/<([^>\s]+@[^>\s]+)>/)?.[1] ?? (/^[^\s<>]+@[^\s<>]+$/.test(from.trim()) ? from.trim() : user));
+
+/**
+ * Bounce type (owner, 2026-11-17): "spam" = the receiving server refused us for spam/policy reasons
+ * (550 5.7.1 and the like; the address may be fine), "address" = the address doesn't exist, else "other".
+ */
+export const bounceType = (reason: string | null): "spam" | "address" | "other" => {
+  const r = reason ?? "";
+  if (/\b5\.1\.\d+\b|user unknown|no such user|does not exist|doesn't exist|unknown recipient|invalid recipient|recipient not found|address rejected|mailbox unavailable|mailbox not found/i.test(r)) return "address";
+  if (/\b5\.7\.\d+\b|spam|policy|blocked|block ?list|black ?list|reputation|denied|not authori[sz]ed|dmarc|spf|dkim|rejected for/i.test(r)) return "spam";
+  return "other";
+};
+
 export type Outgoing = {
   to: string;
   subject: string;
@@ -37,7 +52,8 @@ export const sendOutreach = async (m: Outgoing) => {
   const messageId = `<${randomUUID()}@hamzatariq.site>`;
   try {
     await transport.sendMail({
-      from: e.from,
+      // Always "Hamza Tariq <address>" (owner, 2026-11-17), whatever display name OUTREACH_FROM has.
+      from: { name: SENDER_NAME, address: fromAddress(e.from, e.user) },
       to: m.to,
       subject: m.subject,
       // Plain text only: no HTML, images, tracking pixel or open tracking (owner, 2026-11-16).

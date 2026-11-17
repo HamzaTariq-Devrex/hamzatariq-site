@@ -1,15 +1,14 @@
-// Coverage engine: for each niche below today's target (7 new qualified leads), search its next
-// unsearched cell (niche x city) in AREAS order, mark it done, repeat while time allows.
-// Progress (percent per country and per niche, current cell) is computed from the same data.
+// Coverage engine (owner, 2026-11-17): area by area. The current area (city, in AREAS order) gets
+// every niche scanned (one cell = niche x city), then its list is audited, researched and emailed;
+// the tick starts the next area when the current one has nothing left to process and the ready
+// buffer is below two days' limit. Progress (percent per country and per niche) uses the same data.
 import { ox, type CoverageRow } from "./db";
 import { BUSINESS_TYPES, type BusinessType } from "./osm-types";
 import { ALL_CELLS, AREAS, cellKey, openCountries, type Cell } from "./areas";
 import { discoverCell, setOsmDeadline } from "./osm";
 
-/** New qualified leads wanted per niche per day (owner, 2026-11-16). */
+/** Shown in the Coverage tab only: new qualified leads per niche per day (the old per-niche target). */
 export const DAILY_TARGET_PER_NICHE = 7;
-/** A niche with this many businesses still waiting for an audit doesn't need new searches yet. */
-const MAX_BACKLOG = 12;
 /** New businesses per cell run, and a safety cap per day across all niches (OpenStreetMap fair use). */
 const PER_CELL = 25;
 export const MAX_NEW_PER_DAY = 400;
@@ -48,26 +47,41 @@ export const progress = (rows: CoverageRow[]): Progress => {
   return { countries, niches };
 };
 
+// ---------- Area by area (owner, 2026-11-17) ----------
+// One area (city) at a time: scan every niche there and build the full list, then audit, research
+// and email the ones that need a website (best leads first), then move to the next area.
+
+export const areaKey = (c: Pick<Cell, "country" | "region" | "city">) => `${c.country}|${c.region}|${c.city}`;
+/** Cities in coverage order, open countries only, without duplicates. */
+export const openAreas = (open = openCountries()) => {
+  const seen = new Set<string>();
+  return ALL_CELLS.filter((c) => open.includes(c.country) && !seen.has(areaKey(c)) && !!seen.add(areaKey(c)));
+};
+/** The first area with a niche not yet scanned. */
+export const scanArea = (done: Set<string>, open = openCountries()) => openAreas(open).find((a) => NICHES.some((t) => !done.has(cellKey(t, a)))) ?? null;
+
 /**
- * One discovery run: niches furthest below today's target first. Each searched cell is marked done
- * (an OpenStreetMap error counts as an attempt; three attempts also mark it done).
+ * One discovery run in the current area: every niche not yet scanned there, in order. Each searched
+ * cell is marked done (an OpenStreetMap error counts as an attempt; three attempts also mark it done).
+ * `onlyType` (tests, the daily route with ?type=) searches that niche's next cell instead.
  */
 export const discoverRun = async (deadline = Date.now() + 50_000, onlyType?: string) => {
   const state = await ox.state();
   let budget = Math.max(0, MAX_NEW_PER_DAY - state.found_24h);
-  const [rows, stats] = await Promise.all([ox.coverage(), ox.nicheStats()]);
+  const rows = await ox.coverage();
   const done = doneSet(rows);
-  const needy = NICHES.filter((t) => !onlyType || t === onlyType)
-    .map((t) => ({ t, q: stats[t]?.q ?? 0, backlog: stats[t]?.backlog ?? 0 }))
-    .filter((n) => onlyType || (n.q < DAILY_TARGET_PER_NICHE && n.backlog < MAX_BACKLOG))
-    .sort((a, b) => a.q - b.q || a.backlog - b.backlog);
+  const area = onlyType ? null : scanArea(done);
+  const todo: { t: string; cell: Cell }[] = onlyType
+    ? [nextCell(onlyType, done)].filter((c): c is Cell => !!c).map((cell) => ({ t: onlyType, cell }))
+    : area
+      ? NICHES.filter((t) => !done.has(cellKey(t, area))).map((t) => ({ t, cell: area }))
+      : [];
   const results: { cell: string; added: number; error?: string }[] = [];
   setOsmDeadline(deadline);
   try {
-    for (const n of needy) {
+    for (const n of todo) {
       if (budget <= 0 || deadline - Date.now() < 15_000) break;
-      const cell = nextCell(n.t, done);
-      if (!cell) continue; // every open cell searched for this niche
+      const cell = n.cell;
       const label = `${n.t}: ${cell.city}, ${cell.region}, ${cell.country}`;
       try {
         const added = await discoverCell(n.t, cell, Math.min(budget, PER_CELL));

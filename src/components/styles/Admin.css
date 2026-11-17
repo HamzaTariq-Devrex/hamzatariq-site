@@ -2130,3 +2130,35 @@ a.ox-row {
 .seo-urls code {
   color: var(--page-text);
 }
+
+/* Pipeline funnel (owner, 2026-11-17) */
+.ox-funnel .ox-low { color: var(--warn); }
+.ox-held { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: 0.9rem; }
+.ox-held strong { display: inline-block; min-width: 2.2em; }
+
+/* Lead map (owner, 2026-11-17) */
+.ox-map-card { display: grid; gap: 14px; }
+.ox-map-log p { margin: 0 0 4px; }
+.ox-map-tools { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; }
+.ox-map-tools .adm-field { margin: 0; min-width: 180px; }
+.ox-map-legend { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 0.82rem; color: var(--muted); }
+.ox-map-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; }
+.ox-map-legend i.is-ring { background: transparent; border: 2px solid; }
+.ox-map-wrap { display: grid; gap: 14px; }
+.ox-map { height: min(68vh, 620px); min-height: 380px; border-radius: 14px; border: 1px solid var(--line); overflow: hidden; background: #0b0a18; }
+.ox-map-panel { border: 1px solid var(--line); border-radius: 14px; padding: 16px; max-height: min(68vh, 620px); overflow: auto; display: grid; gap: 10px; align-content: start; }
+.ox-map-panel h2 { margin: 0; font-size: 1.15rem; }
+.ox-map-panel h3 { margin: 6px 0 0; font-size: 0.95rem; }
+.ox-map-panel-head { display: flex; justify-content: space-between; gap: 10px; }
+.ox-steps { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; font-size: 0.8rem; }
+.ox-steps li { padding: 3px 10px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); }
+.ox-steps li + li::before { content: "→ "; }
+.ox-steps li.is-active { border-color: var(--accent); color: var(--fg); background: rgba(109, 74, 255, 0.18); }
+.ox-map-list, .ox-map-done { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; font-size: 0.88rem; }
+.ox-map-list li, .ox-map-done li { display: grid; gap: 2px; }
+.ox-map-done span { color: var(--muted); }
+.ox-note { color: var(--fg); opacity: 0.8; font-size: 0.82rem; }
+.ox-map .leaflet-popup-content-wrapper, .ox-map .leaflet-popup-tip { background: #15132a; color: var(--fg); }
+@media (min-width: 1100px) {
+  .ox-map-wrap.has-panel { grid-template-columns: minmax(0, 1fr) 380px; }
+}

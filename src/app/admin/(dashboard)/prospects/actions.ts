@@ -170,7 +170,7 @@ export async function redraft(id: string): Promise<Result> {
 }
 /** Columns the list and the side panel show (plus the latest audit for the report link). */
 const PROSPECT_COLUMNS =
-  "id, name, business_type, city, country, timezone, website, phone, email, email_source, status, skip_reason, audit_score, lead_score, notes, lead_id, last_contacted_at, created_at, audits:prospect_audits(report_id, score, final_url, created_at, expires_at)";
+  "id, name, business_type, city, country, timezone, website, phone, email, email_source, status, skip_reason, audit_score, lead_score, notes, lead_id, last_contacted_at, created_at, research, audits:prospect_audits(report_id, score, final_url, created_at, expires_at)";
 
 /** One page of prospects (best leads first), filtered by status and search in Postgres. */
 export async function listProspects(status: string, search: string, offset: number, id?: string): Promise<{ rows: ProspectRow[]; total: number }> {

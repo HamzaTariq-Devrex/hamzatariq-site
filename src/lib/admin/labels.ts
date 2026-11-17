@@ -92,8 +92,8 @@ export const MANUAL_PROSPECT_STATUSES: ProspectStatus[] = ["found", "whatsapp", 
  */
 export const bounceMeaning = (detail: string | null) => {
   if (!detail) return null;
-  if (/\b5\.7\.\d+|spam|blocked|policy|reputation|blacklist|denied/i.test(detail)) return "Spam/policy block: the address exists, the receiving server refused the email";
   if (/\b5\.1\.\d+|user unknown|no such user|does not exist|unknown recipient|invalid recipient|address rejected|mailbox unavailable/i.test(detail)) return "Address doesn't exist";
+  if (/\b5\.7\.\d+|spam|blocked|policy|reputation|blacklist|denied/i.test(detail)) return "Spam/policy block: the address exists, the receiving server refused the email";
   if (/\b5\.2\.2|quota|mailbox full/i.test(detail)) return "Mailbox full";
   if (/\b5\.4\.\d+|host not found|no route|dns/i.test(detail)) return "Mail server can't be reached";
   return null;

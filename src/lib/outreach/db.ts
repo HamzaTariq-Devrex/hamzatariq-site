@@ -16,6 +16,9 @@ export type Settings = {
   last_imap_at: string | null;
   last_imap_uid: number | null;
   last_tick_at?: string | null;
+  /** Daily limit lowered by this much after spam blocks (2 in 7 days → -5). */
+  cap_cut?: number;
+  cap_cut_at?: string | null;
 };
 
 export type Search = {
@@ -44,7 +47,7 @@ export type Prospect = {
   domain: string | null;
   phone: string | null;
   email: string | null;
-  email_source: "osm" | "contact-page" | null;
+  email_source: "osm" | "contact-page" | "facebook" | null;
   osm_tags: Record<string, string>;
   status: string;
   audit_score: number | null;
@@ -58,6 +61,13 @@ export type Prospect = {
   flags?: Record<string, unknown>;
   preview_id?: string | null;
   qualified_at?: string | null;
+  /** Private research note and active signals (research.ts). */
+  research?: import("./research").Research | null;
+  researched_at?: string | null;
+  checked_at?: string | null;
+  lat?: number | null;
+  lon?: number | null;
+  area?: string | null;
 };
 
 export type Preview = {
@@ -118,6 +128,29 @@ export type State = {
   last50_sent: number;
   last50_bounces: number;
   found_24h: number;
+  spam_blocks_7d: number;
+  spam_blocks_since_cut: number;
+  /** Businesses found and not yet qualified. */
+  backlog_found: number;
+  /** Audited with an email, waiting for research and a draft. */
+  to_prepare: number;
+  /** Checked email-1 drafts waiting to go out (the buffer). */
+  ready: number;
+  ready_by_country: Record<string, number>;
+  last_cold_sent_at: string | null;
+};
+
+export type Funnel = {
+  found: number;
+  checked: number;
+  with_email: number;
+  active_checked: number;
+  active: number;
+  researched: number;
+  drafted: number;
+  queued: number;
+  sent: number;
+  held: { reason: string; n: number }[];
 };
 
 const db = () => {
@@ -169,6 +202,8 @@ export const ox = {
   nicheStats: () => call<Record<string, { q: number; backlog: number }>>("app_ox_niche_stats", {}),
   createPreview: (prospect: string) => call<string>("app_ox_preview_create", { p_prospect: prospect }),
   preview: (id: string) => call<Preview | null>("app_ox_preview", { p_id: id }),
+  funnel: (from: string) => call<Funnel>("app_ox_funnel", { p_from: from }),
+  map: () => call<import("./map").MapData>("app_ox_map", {}),
   expireReviews: () => call<number>("app_ox_expire_reviews", {}),
   dailySummary: (from: string, to: string) => call<DailySummary>("app_ox_daily_summary", { p_from: from, p_to: to }),
   setCronSecret: (value: string) => call<void>("app_ox_set_cron_secret", { p_value: value }),
