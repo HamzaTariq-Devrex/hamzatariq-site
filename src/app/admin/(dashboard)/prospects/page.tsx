@@ -21,6 +21,7 @@ import { ox, type CoverageRow } from "@/lib/outreach/db";
 import { DAILY_TARGET_PER_NICHE, progress } from "@/lib/outreach/coverage";
 import { manualMessage } from "@/lib/outreach/compose";
 import { bounceType } from "@/lib/outreach/mail";
+import { OUTREACH_MODEL, aiBudget } from "@/lib/outreach/ai";
 import type { AuditResult } from "@/lib/audit/types";
 import { listProspects } from "./actions";
 
@@ -82,9 +83,14 @@ const pktStart = (t = Date.now()) => Date.parse(`${pktDay(t)}T00:00:00Z`) - PKT;
 
 async function Pipeline() {
   try {
-    const [state, today, week] = await Promise.all([ox.state(), ox.funnel(new Date(pktStart()).toISOString()), ox.funnel(new Date(pktStart() - 6 * 86_400_000).toISOString())]);
+    const [state, today, week, ai] = await Promise.all([
+      ox.state(),
+      ox.funnel(new Date(pktStart()).toISOString()),
+      ox.funnel(new Date(pktStart() - 6 * 86_400_000).toISOString()),
+      aiBudget().catch(() => null),
+    ]);
     const cap = dailyCap(state.settings.started_at, state);
-    return <Funnel today={today} week={week} ready={state.ready} target={bufferTarget(cap)} cap={cap} spamBlocks7d={state.spam_blocks_7d} bounces7d={state.bounces_7d} />;
+    return <Funnel today={today} week={week} ready={state.ready} target={bufferTarget(cap)} cap={cap} spamBlocks7d={state.spam_blocks_7d} bounces7d={state.bounces_7d} ai={ai ? { ...ai, model: OUTREACH_MODEL } : null} />;
   } catch (e) {
     return <Failed what="the pipeline funnel" message={(e as Error).message} />;
   }

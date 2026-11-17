@@ -2145,8 +2145,8 @@ a.ox-row {
 .ox-map-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; }
 .ox-map-legend i.is-ring { background: transparent; border: 2px solid; }
 .ox-map-wrap { display: grid; gap: 14px; }
-.ox-map { height: min(68vh, 620px); min-height: 380px; border-radius: 14px; border: 1px solid var(--line); overflow: hidden; background: #0b0a18; }
-.ox-map-panel { border: 1px solid var(--line); border-radius: 14px; padding: 16px; max-height: min(68vh, 620px); overflow: auto; display: grid; gap: 10px; align-content: start; }
+.ox-map { height: 70vh; min-height: 420px; border-radius: 14px; border: 1px solid var(--line); overflow: hidden; background: #0b0a18; }
+.ox-map-panel { border: 1px solid var(--line); border-radius: 14px; padding: 16px; max-height: 70vh; overflow: auto; display: grid; gap: 10px; align-content: start; }
 .ox-map-panel h2 { margin: 0; font-size: 1.15rem; }
 .ox-map-panel h3 { margin: 6px 0 0; font-size: 0.95rem; }
 .ox-map-panel-head { display: flex; justify-content: space-between; gap: 10px; }
@@ -2161,4 +2161,11 @@ a.ox-row {
 .ox-map .leaflet-popup-content-wrapper, .ox-map .leaflet-popup-tip { background: #15132a; color: var(--fg); }
 @media (min-width: 1100px) {
   .ox-map-wrap.has-panel { grid-template-columns: minmax(0, 1fr) 380px; }
+}
+
+/* Phones: the map runs edge to edge inside the card (owner, 2026-11-18). */
+@media (max-width: 700px) {
+  .ox-map-card { padding-inline: 0; overflow: hidden; }
+  .ox-map-card > :not(.ox-map-wrap), .ox-map-panel { margin-inline: 16px; }
+  .ox-map { height: 62vh; min-height: 360px; border-radius: 0; border-inline: 0; }
 }

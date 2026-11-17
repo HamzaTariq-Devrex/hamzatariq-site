@@ -18,9 +18,10 @@ type Props = {
   cap: number;
   spamBlocks7d: number;
   bounces7d: number;
+  ai: { used: number; budget: number; limit: number; limitLearned: boolean; backoff: string | null; lastError: string | null; model: string } | null;
 };
 
-const Funnel = ({ today, week, ready, target, cap, spamBlocks7d, bounces7d }: Props) => (
+const Funnel = ({ today, week, ready, target, cap, spamBlocks7d, bounces7d, ai }: Props) => (
   <section className="adm-card ox-funnel" aria-label="Pipeline funnel">
     <div className="adm-card-head">
       <h2>Pipeline</h2>
@@ -29,6 +30,18 @@ const Funnel = ({ today, week, ready, target, cap, spamBlocks7d, bounces7d }: Pr
         {Math.max(0, bounces7d - spamBlocks7d)}
       </span>
     </div>
+    <p className="adm-muted ox-ai">
+      Gemini used today (outreach, {ai?.model ?? "Flash-Lite"}):{" "}
+      {ai ? (
+        <>
+          <strong className={ai.used >= ai.budget ? "ox-low" : ""}>{ai.used}</strong> / {ai.budget} calls (70% of {ai.limitLearned ? "" : "about "}
+          {ai.limit} free per day; resets at midnight Pacific){ai.backoff ? ` · backing off until ${new Date(ai.backoff).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Karachi" })} PKT` : ""}
+          {ai.used >= ai.budget ? " · paused for today" : ""}. The site chatbot has its own model and quota.
+        </>
+      ) : (
+        "unknown"
+      )}
+    </p>
     <div className="adm-table-wrap">
       <table className="adm-table ox-stats">
         <thead>

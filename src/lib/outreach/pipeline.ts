@@ -19,9 +19,11 @@ import { classifyReply, type ReplyClass } from "./classify";
 import { postalAddress, waitingForAddress, withAddress } from "./address";
 import { bounceType, readInbox, sendOutreach } from "./mail";
 import { autoCheck, hardChecks } from "./checks";
-import { discoverRun, MAX_NEW_PER_DAY, progress, scanArea } from "./coverage";
+import { discoverRun, doneSet, MAX_NEW_PER_DAY, progress, scanArea } from "./coverage";
+import { cellLabel } from "./areas";
 import { takesBookings } from "./osm-types";
 import { researchProspect } from "./research";
+import { aiBudget } from "./ai";
 import { dailyLog } from "./map";
 
 export { MAX_NEW_PER_DAY };
@@ -148,6 +150,20 @@ const handleReply = async (p: Prospect, cls: ReplyClass, text: string, subject: 
       body: withAddress(p.country, d.body),
       in_reply_to: first?.message_id ?? null,
     });
+    // No website + "yes": Hamza promised a sample homepage within 2 days, so this lead is HOT.
+    if (cls === "interested" && prospectFindings(p, audit?.result ?? null)[0]?.id === "no-website") {
+      await ox.updateProspect(p.id, { reply_class: "question" });
+      await sendOwnerAlert(
+        `HOT: ${p.name} wants a free sample homepage (promised within 2 days)`,
+        [
+          `${p.name} (${p.email}${p.phone ? `, ${p.phone}` : ""}) said yes to a free sample homepage. They got an automatic reply: "Great, I'll make it and send it to you within 2 days."`,
+          `Their reply: "${text.replace(/\s+/g, " ").slice(0, 400)}"`,
+          p.research?.note ? `Research note: ${p.research.note}` : "",
+          `Lead: ${SITE.url}/admin/leads${leadId ? `?lead=${leadId}` : ""} · Prospect: ${SITE.url}/admin/prospects?p=${p.id}`,
+        ].filter(Boolean),
+        p.email!,
+      ).catch((e) => console.error("outreach alert:", (e as Error).message));
+    }
     return;
   }
   const transcript = [...thread.map((m) => `--- ${m.direction === "out" ? "You" : p.name} (${m.kind}, ${m.sent_at ?? m.created_at})\n${m.body}`), `--- ${p.name} (reply, now)\n${text}`].join("\n\n");
@@ -293,7 +309,7 @@ const RESEARCH_MAX_AGE = 14 * DAY;
  * its research, or null when it was skipped as inactive. Research younger than 14 days is reused.
  */
 export const researchFor = async <P extends Prospect & { audit: { result: unknown } | null }>(p: P, deadline = Number.POSITIVE_INFINITY): Promise<P | null> => {
-  if (p.research && !p.research.pending && p.researched_at && Date.now() - Date.parse(p.researched_at) < RESEARCH_MAX_AGE) return p.research.active ? p : null;
+  if (p.research && !p.research.pending && !p.research.wait && p.researched_at && Date.now() - Date.parse(p.researched_at) < RESEARCH_MAX_AGE) return p.research.active ? p : null;
   const r = await researchProspect(p, (p.audit?.result ?? null) as Parameters<typeof researchProspect>[1], deadline, (p.research?.pending ?? 0) + 1);
   const at = new Date().toISOString();
   if (!r.active) {
@@ -315,10 +331,14 @@ export const draftNew = async (_state: State, limit: number, onlyProspect?: stri
   const list = onlyProspect ? (await ox.toDraft(500)).filter((x) => x.id === onlyProspect) : await ox.toDraft(limit * 6);
   let made = 0;
   let worked = 0;
+  const ai = await aiBudget().catch(() => ({ blocked: null as "budget" | "backoff" | null }));
   for (const listed of list) {
     // Research takes up to ~40 s and a Gemini draft up to ~25 s: stop before the function's time runs out.
     if (worked >= limit || deadline - Date.now() < 30_000) break;
     if (!listed.audit) continue; // no audit row yet: never treated as "no website"
+    // Sites need the outreach Gemini budget for research: none left today or a back-off running → wait.
+    const fresh = listed.research && !listed.research.pending && !listed.research.wait;
+    if (listed.website && !fresh && ai.blocked) continue;
     // The AI writer was busy last time: wait 30 minutes between research attempts.
     if (listed.research?.pending && listed.researched_at && Date.now() - Date.parse(listed.researched_at) < 30 * 60_000) continue;
     worked++;
@@ -330,7 +350,7 @@ export const draftNew = async (_state: State, limit: number, onlyProspect?: stri
       continue;
     }
     if (!p) continue;
-    if (p.research?.pending) continue; // the AI writer was busy: researched again on a later tick before drafting
+    if (p.research?.pending || p.research?.wait) continue; // the AI writer was busy: researched again on a later tick before drafting
     if (deadline - Date.now() < 22_000) break; // researched; drafted next tick (the research is reused)
     try {
       const d = await draftEmail1(p, p.audit);
@@ -481,12 +501,12 @@ export type Phase = (typeof PHASES)[number];
 const discoveryPlan = async (state: State, cap: number) => {
   if (state.found_24h >= MAX_NEW_PER_DAY) return null;
   const rows = await ox.coverage();
-  const done = new Set(rows.filter((r) => r.done).map((r) => `${r.t}|${r.c}|${r.r}|${r.y}`));
+  const done = doneSet(rows);
   const area = scanArea(done);
   if (!area) return null;
-  const started = rows.some((r) => r.c === area.country && r.r === area.region && r.y === area.city);
-  if (started) return `scanning ${area.city}`;
-  if (state.backlog_found === 0 && state.to_prepare === 0 && state.ready < bufferTarget(cap)) return `new area ${area.city} (buffer ${state.ready}/${bufferTarget(cap)})`;
+  const started = rows.some((r) => r.c === area.country && r.r === area.region && r.y === area.city && (r.d ?? "") === area.district);
+  if (started) return `scanning ${cellLabel(area)}`;
+  if (state.backlog_found === 0 && state.to_prepare === 0 && state.ready < bufferTarget(cap)) return `new area ${cellLabel(area)} (buffer ${state.ready}/${bufferTarget(cap)})`;
   return null;
 };
 

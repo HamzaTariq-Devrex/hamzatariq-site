@@ -4,7 +4,7 @@
 // buffer is below two days' limit. Progress (percent per country and per niche) uses the same data.
 import { ox, type CoverageRow } from "./db";
 import { BUSINESS_TYPES, type BusinessType } from "./osm-types";
-import { ALL_CELLS, AREAS, cellKey, openCountries, type Cell } from "./areas";
+import { ALL_CELLS, AREAS, cellKey, cellLabel, openCountries, type Cell } from "./areas";
 import { discoverCell, setOsmDeadline } from "./osm";
 
 /** Shown in the Coverage tab only: new qualified leads per niche per day (the old per-niche target). */
@@ -15,7 +15,7 @@ export const MAX_NEW_PER_DAY = 400;
 
 export const NICHES = Object.keys(BUSINESS_TYPES) as BusinessType[];
 
-const doneSet = (rows: CoverageRow[]) => new Set(rows.filter((r) => r.done).map((r) => `${r.t}|${r.c}|${r.r}|${r.y}`));
+export const doneSet = (rows: CoverageRow[]) => new Set(rows.filter((r) => r.done).map((r) => `${r.t}|${r.c}|${r.r}|${r.y}|${r.d ?? ""}`));
 
 /** The next unsearched cell for a niche, in coverage order, in open countries only. */
 export const nextCell = (type: string, done: Set<string>, open = openCountries()): Cell | null =>
@@ -51,7 +51,7 @@ export const progress = (rows: CoverageRow[]): Progress => {
 // One area (city) at a time: scan every niche there and build the full list, then audit, research
 // and email the ones that need a website (best leads first), then move to the next area.
 
-export const areaKey = (c: Pick<Cell, "country" | "region" | "city">) => `${c.country}|${c.region}|${c.city}`;
+export const areaKey = (c: Pick<Cell, "country" | "region" | "city" | "district">) => `${c.country}|${c.region}|${c.city}|${c.district ?? ""}`;
 /** Cities in coverage order, open countries only, without duplicates. */
 export const openAreas = (open = openCountries()) => {
   const seen = new Set<string>();
@@ -82,18 +82,18 @@ export const discoverRun = async (deadline = Date.now() + 50_000, onlyType?: str
     for (const n of todo) {
       if (budget <= 0 || deadline - Date.now() < 15_000) break;
       const cell = n.cell;
-      const label = `${n.t}: ${cell.city}, ${cell.region}, ${cell.country}`;
+      const label = `${n.t}: ${cellLabel(cell)}, ${cell.country}`;
       try {
         const added = await discoverCell(n.t, cell, Math.min(budget, PER_CELL));
         budget -= added;
-        await ox.coverageMark(n.t, cell.country, cell.region, cell.city, added, null);
+        await ox.coverageMark(n.t, cell.country, cell.region, cell.city, cell.district, added, null);
         done.add(cellKey(n.t, cell));
         results.push({ cell: label, added });
       } catch (e) {
         const msg = (e as Error).message;
         // Out of time is not the cell's fault: try it again next run without counting an attempt.
         // A timeout caused by this run's own deadline (big cities like London) doesn't count either.
-        if (!/No time left/.test(msg) && !(/abort|timeout/i.test(msg) && deadline - Date.now() < 8_000)) await ox.coverageMark(n.t, cell.country, cell.region, cell.city, 0, msg);
+        if (!/No time left/.test(msg) && !(/abort|timeout/i.test(msg) && deadline - Date.now() < 8_000)) await ox.coverageMark(n.t, cell.country, cell.region, cell.city, cell.district, 0, msg);
         results.push({ cell: label, added: 0, error: msg });
       }
     }

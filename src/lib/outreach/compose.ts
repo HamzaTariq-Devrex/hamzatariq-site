@@ -9,10 +9,7 @@
 // wrong length, and asks for a rewrite; after that a fixed template from the same findings is used.
 // Day 3 (40-60 words): one more real finding + the /report link (the only link). Day 7 (25-40
 // words): polite close. Replies to hot replies and the 60-day "not now" check-back are templates too.
-import fs from "node:fs";
-import path from "node:path";
-import { ThinkingLevel } from "@google/genai";
-import { CHAT_MODEL, gemini } from "@/lib/assistant/gemini";
+import { outreachJson } from "./ai";
 import { SITE } from "@/lib/site";
 import { getTestimonial } from "@/lib/testimonials";
 import { PROJECTS } from "@/data/projects";
@@ -152,16 +149,6 @@ export const checkEmail1 = (body: string, subject: string, facts: string, bookin
   return problems;
 };
 
-let profileCache: string | null = null;
-const ownerProfile = () => {
-  if (profileCache !== null) return profileCache;
-  try {
-    profileCache = fs.readFileSync(path.join(process.cwd(), "content/owner/profile.md"), "utf8").slice(0, 5000);
-  } catch {
-    profileCache = "";
-  }
-  return profileCache;
-};
 
 export type Draft = { subject: string; body: string; variant: "A" | "B" | null; source: "gemini" | "template" };
 
@@ -244,47 +231,32 @@ export const draftEmail1 = async (p: Prospect, auditRow: ProspectAudit | null): 
     if (!fallback) throw new Error("Email 1 could not meet the rules (60-90 words, no links, no technical words).");
     return { subject, body: fallback, variant, source: "template" as const, findings: f };
   };
-  const ai = gemini();
-  if (!ai) return noDraft();
-
-  const system = `You write the middle of a short cold email from Hamza Tariq, founder of Devrex Digital, a small web studio, to a small business.
-Write ONLY the middle part: ${budget.min}-${budget.max} words, plain friendly English, 1 to 3 sentences.
-- ${line ? `It comes right after this opening line, so don't repeat it: "${line}". ` : ""}Start by saying who Hamza is in a few words (a web developer who helps small businesses).
-- Then explain this ONE problem from their website, in plain words, as what it costs them: "${f[0].cost}".
-- You may rephrase it, but keep its meaning and any number exactly as given. Do not add other problems.
-- No greeting, no sign-off, no question, no links, no web addresses, no technical words (no SEO, H1, meta, schema, SSL, speed scores, etc.).
-- Never invent anything: no results, clients, prices, guarantees or claims about their business beyond the facts.
-Answer as JSON: {"middle": "..."}
-
-HAMZA'S PROFILE (background only)
-${ownerProfile()}`;
-
-  let feedback = "";
-  for (let attempt = 0; attempt < 2; attempt++) {
+  const ok = (middle: string) =>
+    [assemble1(p, middle, f), assemble1(p, middle, f, false)].find((b) => !checkEmail1(b, subject, facts, takesBookings(p.business_type)).length) ?? null;
+  // 1. The middle written in the research call (one Gemini call per lead, owner 2026-11-18).
+  const first = p.research?.middle?.trim();
+  if (first) {
+    const body = ok(first);
+    if (body) return { subject, body, variant, source: "gemini", findings: f };
+    // 2. One rewrite call only when a check fails.
+    const problems = checkEmail1(assemble1(p, first, f, false), subject, facts, takesBookings(p.business_type));
     try {
-      const res = await ai.models.generateContent({
-        model: CHAT_MODEL,
-        contents: [{ role: "user", parts: [{ text: `Business: ${biz(p)} (${ctx(p).noun}${p.city ? `, ${p.city}` : ""})${feedback}` }] }],
-        config: {
-          systemInstruction: system,
-          temperature: 0.6,
-          maxOutputTokens: 400,
-          responseMimeType: "application/json",
-          thinkingConfig: { thinkingLevel: ThinkingLevel.MINIMAL },
-          abortSignal: AbortSignal.timeout(25000),
-        },
+      const out = await outreachJson<{ middle?: string }>({
+        system: `You fix the middle of a short cold email from Hamza Tariq, founder of Devrex Digital, to a small business. ${budget.min}-${budget.max} words, plain friendly English, 1-2 sentences.
+${line ? `It comes right after this opening line, so don't repeat it: "${line}". ` : ""}Say who Hamza is in a few words (a web developer who helps small businesses), then this ONE problem as what it costs them: "${f[0].cost}". Keep any number exactly.
+No greeting, sign-off, question, link, web address or technical word (no SEO, H1, meta, schema, SSL, speed scores). Never invent anything.
+Answer as JSON: {"middle": "..."}`,
+        user: `Business: ${biz(p)} (${ctx(p).noun}${p.city ? `, ${p.city}` : ""})\nYour draft: "${first}"\nIt was rejected because ${problems.join("; ") || "the whole email was too long or too short"}. Rewrite it.`,
+        maxTokens: 300,
+        temperature: 0.4,
       });
-      const out = JSON.parse(res.text ?? "{}") as { middle?: string };
-      if (!out.middle) throw new Error("empty");
-      const body = assemble1(p, out.middle, f);
-      const problems = checkEmail1(body, subject, facts, takesBookings(p.business_type));
-      if (!problems.length) return { subject, body, variant, source: "gemini", findings: f };
-      feedback = `\n\nYour last draft was rejected because ${problems.join("; ")}. Rewrite it.`;
+      const body = out.middle ? ok(out.middle) : null;
+      if (body) return { subject, body, variant, source: "gemini", findings: f };
     } catch {
-      break;
+      // budget, back-off or busy: the template below
     }
   }
-  // Never returns a draft that fails the check: the caller skips the prospect instead.
+  // 3. Never returns a draft that fails the check: the template, or the caller skips the prospect.
   return noDraft();
 };
 
@@ -335,10 +307,8 @@ export const replyInterested = (p: Prospect, firstSubject: string, f: Finding[],
   const noSite = f[0]?.id === "no-website";
   const lines = noSite
     ? [
-        p.preview_id
-          ? `Here's the homepage idea I made for ${biz(p)}: ${previewUrl(p.preview_id)}`
-          : `I'll put together a homepage idea for ${biz(p)} and send it over.`,
-        "It only uses your public details (name, address, phone and opening hours), so you can see how a simple site could look. The real one would have your own photos, services and wording.",
+        // Owner, 2026-11-18: no concept link until the premium template is approved; Hamza makes it himself.
+        "Great, I'll make it and send it to you within 2 days.",
       ]
     : [
         `Here ${f.length === 1 ? "is the fix" : `are the ${Math.min(3, f.length)} fixes`} I found, in plain words:`,

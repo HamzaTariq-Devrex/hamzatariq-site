@@ -2,6 +2,7 @@
 // 9:00 PKT summary email. Data comes from app_ox_map (one call); nothing here is invented: every count
 // is a count of real rows.
 import { BUSINESS_TYPES } from "./osm-types";
+import { cellLabel } from "./areas";
 
 export type MapBusiness = {
   id: string;
@@ -11,6 +12,8 @@ export type MapBusiness = {
   r: string | null;
   c: string;
   a: string | null;
+  /** District (borough/suburb) the business was found in; null = the whole town. */
+  d: string | null;
   lat: number | null;
   lon: number | null;
   s: string;
@@ -29,7 +32,7 @@ export type MapBusiness = {
   rv: string | null;
   q: boolean;
 };
-export type MapCell = { t: string; c: string; r: string; y: string; done: boolean; n: number; at: string | null };
+export type MapCell = { t: string; c: string; r: string; y: string; d: string; done: boolean; n: number; at: string | null };
 export type MapData = { cells: MapCell[]; centres: Record<string, { lat: number; lon: number }>; businesses: MapBusiness[] };
 
 export const PIN = {
@@ -70,7 +73,7 @@ export const nicheLabel = (t: string, n = 2) => {
   return def.noun.replace(/([^aeiou])y$/, "$1ies").replace(/(s|sh|ch|x)$/, "$1es").replace(/([^s])$/, "$1s");
 };
 
-export const cityKey = (b: { c: string; r: string | null; y: string | null }) => `${b.c}|${b.r ?? ""}|${b.y ?? ""}`;
+export const cityKey = (b: { c: string; r: string | null; y: string | null; d?: string | null }) => `${b.c}|${b.r ?? ""}|${b.y ?? ""}|${b.d ?? ""}`;
 export const areaName = (b: Pick<MapBusiness, "a" | "y">) => (b.a ? `${b.a}, ${b.y ?? ""}`.replace(/, $/, "") : (b.y ?? "Unknown area"));
 
 export type AreaStep = "Not started" | "Scanning" | "List ready" | "Emailing" | "Done";
@@ -99,23 +102,25 @@ export const nicheCounts = (list: MapBusiness[], max = 6) => {
 };
 
 /**
- * Daily log, one line per area worked on in [from, to): "Today: Didsbury, Manchester. Found 41
- * businesses (14 jewellers, 9 boutiques…). 17 need a website. Emailed 12, WhatsApp queue 5."
+ * Daily log, one line per area worked on in [from, to) (owner, 2026-11-18: today's numbers and the
+ * area total are labelled apart): "Today: Harrow, London. Today: found 25 businesses (14 jewellers…),
+ * 17 need a website. Total in this area: 55. Emailed today 12, WhatsApp queue 5."
  */
 export const dailyLog = (data: MapData, from: number, to: number, label = "Today") => {
   const touched = data.businesses.filter((b) => inRange(b.f, from, to) || inRange(b.sent, from, to) || inRange(b.ck, from, to));
-  const byCity = new Map<string, MapBusiness[]>();
-  for (const b of touched) byCity.set(cityKey(b), [...(byCity.get(cityKey(b)) ?? []), b]);
+  const byArea = new Map<string, MapBusiness[]>();
+  for (const b of touched) byArea.set(cityKey(b), [...(byArea.get(cityKey(b)) ?? []), b]);
   const lines: string[] = [];
-  for (const list of [...byCity.values()].sort((a, b) => b.length - a.length)) {
+  const when = label === "Today" ? "today" : "that day";
+  for (const [key, list] of [...byArea.entries()].sort((a, b) => b[1].length - a[1].length)) {
     const found = list.filter((b) => inRange(b.f, from, to));
-    const subAreas = [...new Set(found.map((b) => b.a).filter(Boolean))];
-    const where = subAreas.length === 1 ? `${subAreas[0]}, ${list[0].y}` : (list[0].y ?? "Unknown area");
+    const total = data.businesses.filter((b) => cityKey(b) === key).length;
+    const where = list[0].y ? cellLabel({ city: list[0].y, district: list[0].d ?? "" }) : "Unknown area";
     const need = found.filter(needsWebsite).length;
     const emailed = list.filter((b) => inRange(b.sent, from, to)).length;
     const wa = list.filter((b) => b.s === "whatsapp" && inRange(b.ck, from, to)).length;
     lines.push(
-      `${label}: ${where}. ${found.length ? `Found ${found.length} business${found.length === 1 ? "" : "es"} (${nicheCounts(found)}). ${need} need${need === 1 ? "s" : ""} a website.` : "No new businesses found."} Emailed ${emailed}, WhatsApp queue ${wa}.`,
+      `${label}: ${where}. ${found.length ? `${label === "Today" ? "Today" : "That day"}: found ${found.length} business${found.length === 1 ? "" : "es"} (${nicheCounts(found)}), ${need} need${need === 1 ? "s" : ""} a website.` : `No new businesses found ${when}.`} Total in this area: ${total}. Emailed ${when} ${emailed}, WhatsApp queue ${wa}.`,
     );
   }
   return lines.length ? lines : [`${label}: no area worked on.`];

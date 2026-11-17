@@ -12,13 +12,14 @@
 //    built only from a verified fact, checkable on their site, no flattery. Nothing specific → no line.
 // 4. Quality score: active signals + size fit + how much a better site would help.
 import { parse } from "node-html-parser";
-import { ThinkingLevel } from "@google/genai";
-import { CHAT_MODEL, gemini } from "@/lib/assistant/gemini";
+import fs from "node:fs";
+import path from "node:path";
+import { AiUnavailable, outreachJson } from "./ai";
 import { normalizeUrl, safeFetch, type FetchResult } from "@/lib/audit/safe-fetch";
 import type { AuditResult } from "@/lib/audit/types";
 import type { Prospect } from "./db";
-import { nounFor } from "./osm-types";
-import { mobileSeconds } from "./problems";
+import { nounFor, takesBookings } from "./osm-types";
+import { findings, mobileSeconds } from "./problems";
 import { COMPANY_NAME } from "./checks";
 
 export type Research = {
@@ -43,6 +44,10 @@ export type Research = {
   quality?: { total: number; active: number; size: number; gain: number };
   /** The AI writer didn't answer: attempts so far (retried on later ticks, up to 3). */
   pending?: number;
+  /** Waiting for the outreach Gemini budget or a back-off (not counted as an attempt). */
+  wait?: string;
+  /** Email-1 middle written in the same Gemini call (checked in code before use). */
+  middle?: string | null;
   at: string;
 };
 
@@ -210,47 +215,57 @@ const verifyOwner = (name: string | null | undefined, corpus: string, businessNa
   return re.test(corpus) ? n : null;
 };
 
-type GeminiNote = { sells?: string; area?: string; customers?: string; owner_first_name?: string | null; facts?: { fact: string; quote: string }[]; line?: string | null; note?: string };
+type GeminiNote = {
+  sells?: string;
+  area?: string;
+  customers?: string;
+  owner_first_name?: string | null;
+  facts?: { fact: string; quote: string }[];
+  line?: string | null;
+  note?: string;
+  /** Email 1 middle part (who Hamza is + the one problem), written in the same call. */
+  middle?: string;
+};
 
-const askGemini = async (p: Pick<Prospect, "name" | "city" | "business_type" | "osm_tags">, pages: { kind: string; url: string; text: string }[], feedback = ""): Promise<GeminiNote | null> => {
-  const ai = gemini();
-  if (!ai) return null;
-  const system = `You research a small business from its own website text, for a short private note. Facts only from the text given; never guess.
+/** Owner's profile (background for the email middle). */
+let profileCache: string | null = null;
+const ownerProfile = () => {
+  if (profileCache !== null) return profileCache;
+  try {
+    profileCache = fs.readFileSync(path.join(process.cwd(), "content/owner/profile.md"), "utf8").slice(0, 3000);
+  } catch {
+    profileCache = "";
+  }
+  return profileCache;
+};
+
+/**
+ * ONE Flash-Lite call per lead (owner, 2026-11-18): the research note AND the email-1 middle in a
+ * single JSON answer. Throws AiUnavailable (budget, back-off, busy); the caller retries on a later tick.
+ */
+const askGemini = async (p: Pick<Prospect, "name" | "city" | "business_type" | "osm_tags">, pages: { kind: string; url: string; text: string }[], problem: string | null) => {
+  const system = `You research a small business from its own website text and write part of a short cold email. Facts only from the text given; never guess.
 Return JSON:
 {"sells": what they sell or do (short), "area": the area/neighbourhood they serve if stated, "customers": who their customers are if stated,
  "owner_first_name": the owner's or founder's first name ONLY if the text clearly says who owns/founded/runs it, else null,
  "facts": up to 3 specific things that make them different, each {"fact": plain words, "quote": the exact words copied from the text that prove it},
  "line": ONE sentence starting "I saw" that mentions one specific fact (what they make or do, and where if stated), e.g. "I saw you make custom engagement rings in Hatton Garden." Max 18 words. No praise or adjectives like amazing/beautiful/great, no question, nothing about their website. Use only words from the text. If nothing specific, null.
- "note": 2-3 plain sentences summarising the above for Hamza}`;
-  const body = pages.map((x) => `--- ${x.kind.toUpperCase()} PAGE (${x.url})\n${x.text.slice(0, 3500)}`).join("\n\n");
-  // One quick second try when Gemini says it's busy (503/429).
-  for (let i = 0; i < 2; i++) {
-    try {
-      return await callGemini(ai, system, p, body, feedback);
-    } catch (e) {
-      if (i === 1 || !/503|429|UNAVAILABLE|RESOURCE_EXHAUSTED|high demand/i.test((e as Error).message)) return null;
-      await new Promise((r) => setTimeout(r, 2500));
-    }
-  }
-  return null;
-};
-
-const callGemini = async (ai: NonNullable<ReturnType<typeof gemini>>, system: string, p: Pick<Prospect, "name" | "city" | "business_type" | "osm_tags">, body: string, feedback: string) => {
-  {
-    const res = await ai.models.generateContent({
-      model: CHAT_MODEL,
-      contents: [{ role: "user", parts: [{ text: `Business: ${p.name} (${nounFor(p.business_type, p.osm_tags ?? {})}${p.city ? `, ${p.city}` : ""})\n\n${body}${feedback}` }] }],
-      config: {
-        systemInstruction: system,
-        temperature: 0.2,
-        maxOutputTokens: 700,
-        responseMimeType: "application/json",
-        thinkingConfig: { thinkingLevel: ThinkingLevel.MINIMAL },
-        abortSignal: AbortSignal.timeout(15_000),
-      },
-    });
-    return JSON.parse(res.text ?? "{}") as GeminiNote;
-  }
+ "note": 2-3 plain sentences summarising the above for Hamza,
+ "middle": ${
+   problem
+     ? `the middle of Hamza's cold email, 22-32 words, plain friendly English, 1-2 sentences, coming right after the "line". First say who Hamza is in a few words (a web developer who helps small businesses), then explain this ONE problem with their website as what it costs them: "${problem}". Keep its meaning and any number exactly; no other problem; no greeting, sign-off, question, link, web address or technical word (no SEO, H1, meta, schema, SSL, speed scores); never invent results, clients, prices or claims`
+     : "null"
+ }}
+HAMZA'S PROFILE (background only)
+${ownerProfile()}`;
+  const body = pages.map((x) => `--- ${x.kind.toUpperCase()} PAGE (${x.url})\n${x.text.slice(0, 3000)}`).join("\n\n");
+  return outreachJson<GeminiNote>({
+    system,
+    user: `Business: ${p.name} (${nounFor(p.business_type, p.osm_tags ?? {})}${p.city ? `, ${p.city}` : ""})\n\n${body}`,
+    maxTokens: 900,
+    temperature: 0.3,
+    timeoutMs: 20_000,
+  });
 };
 
 /** Quality score 0-100: active signals (0-30) + size fit (0-25) + how much a better site would help (0-45). */
@@ -323,26 +338,24 @@ export const researchProspect = async (p: Prospect, audit: AuditResult | null, d
   const quality = qualityScore(p, audit, a.signals, pages.length);
   const base: Research = { active: true, signals: a.signals, sources: pages.map((x) => x.url), quality, at };
 
-  let g = await askGemini(p, pages);
-  if (!g) {
-    // Gemini busy or out of quota: try again on a later tick; after 3 attempts the email goes without a line.
+  void deadline;
+  const top = findings(audit, { noun: nounFor(p.business_type, p.osm_tags ?? {}), city: p.city, bookings: takesBookings(p.business_type) })[0];
+  let g: GeminiNote;
+  try {
+    g = await askGemini(p, pages, top && top.id !== "no-website" ? top.cost : null);
+  } catch (e) {
+    const reason = e instanceof AiUnavailable ? e.reason : "error";
+    // No budget left today or a back-off running: wait (doesn't count as an attempt).
+    if (reason === "budget" || reason === "backoff" || reason === "no-key") return { ...base, pending: attempt - 1, wait: reason, line: null, facts: [] };
+    // Busy or a failed answer: try again on a later tick; after 3 attempts the email goes without a line.
     if (attempt < 3) return { ...base, pending: attempt, line: null, facts: [] };
     return { ...base, note: "Research note unavailable (the AI writer didn't answer 3 times); no personal line.", line: null, facts: [] };
   }
   const ncorpus = norm(corpus);
   const facts = (g.facts ?? []).filter((f) => f?.quote && f.quote.length >= 6 && ncorpus.includes(norm(f.quote))).slice(0, 3);
   let line = g.line ? g.line.trim() : null;
-  let why = line ? verifyLine(line, corpus, extra) : null;
-  if (line && why && deadline - Date.now() > 40_000) {
-    // One retry with the reason; then no line rather than a generic one.
-    const again = await askGemini(p, pages, `\n\nYour line "${line}" was rejected (${why}). Write the line again using only words from the text, or null.`);
-    if (again?.line) {
-      line = again.line.trim();
-      why = verifyLine(line, corpus, extra);
-      g = { ...g, line };
-    }
-  }
-  if (why) line = null;
+  // A line that fails the check is dropped (no line rather than a generic one; no extra call).
+  if (line && verifyLine(line, corpus, extra)) line = null;
   if (line && !/[.]$/.test(line)) line += ".";
   return {
     ...base,
@@ -353,5 +366,6 @@ export const researchProspect = async (p: Prospect, audit: AuditResult | null, d
     owner: verifyOwner(g.owner_first_name, corpus, p.name),
     facts,
     line,
+    middle: g.middle?.trim().slice(0, 600) || null,
   };
 };

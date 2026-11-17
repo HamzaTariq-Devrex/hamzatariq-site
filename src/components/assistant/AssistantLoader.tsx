@@ -34,7 +34,8 @@ const AssistantLoader = () => {
   }, []);
 
   // Not on /admin, and not on homepage concepts (/preview): those must have no form that collects data.
-  if (!ready || pathname.startsWith("/admin") || pathname.startsWith("/preview")) return null;
+  // Second guard (owner, 2026-11-18): never inside the admin layout, whatever the path.
+  if (!ready || pathname.startsWith("/admin") || pathname.startsWith("/preview") || document.querySelector(".page.admin")) return null;
   return <ChatWidget startOpen={openNow} />;
 };
 

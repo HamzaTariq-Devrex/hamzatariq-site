@@ -3,7 +3,7 @@ import LeadMapLoader from "./LeadMapLoader";
 import type { MapArea } from "./LeadMap";
 import { ox } from "@/lib/outreach/db";
 import { NICHES, areaKey, openAreas } from "@/lib/outreach/coverage";
-import { placeQuery } from "@/lib/outreach/areas";
+import { cellLabel, placeQuery } from "@/lib/outreach/areas";
 import { areaStep, dailyLog, pktDay, type MapData } from "@/lib/outreach/map";
 import { BUSINESS_TYPES } from "@/lib/outreach/osm-types";
 
@@ -15,14 +15,16 @@ const mapAreas = (d: MapData): MapArea[] => {
   const from = pktStart();
   const touchedToday = (iso: string | null) => !!iso && Date.parse(iso) >= from;
   const areas = openAreas().map((cell) => {
-    const cells = d.cells.filter((c) => c.c === cell.country && c.r === cell.region && c.y === cell.city);
-    const list = d.businesses.filter((b) => b.c === cell.country && b.y === cell.city && (!b.r || b.r === cell.region));
+    const cells = d.cells.filter((c) => c.c === cell.country && c.r === cell.region && c.y === cell.city && (c.d ?? "") === cell.district);
+    const list = d.businesses.filter((b) => b.c === cell.country && b.y === cell.city && (b.d ?? "") === cell.district && (!b.r || b.r === cell.region));
     const centre = d.centres[`${cell.country}:${placeQuery(cell).toLowerCase().trim()}`];
     return {
       key: areaKey(cell),
       country: cell.country,
       region: cell.region,
       city: cell.city,
+      district: cell.district,
+      label: cellLabel(cell),
       step: areaStep(cells, list, NICHES.length),
       lat: centre ? Number(centre.lat) : null,
       lon: centre ? Number(centre.lon) : null,

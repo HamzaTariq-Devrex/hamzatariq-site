@@ -7,13 +7,16 @@ import "leaflet/dist/leaflet.css";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type * as Leaflet from "leaflet";
 import { PROSPECT_STATUS_LABELS, type ProspectStatus } from "@/lib/admin/labels";
-import { PIN, areaCsv, needsWebsite, nicheCounts, nicheLabel, pinKind, siteClass, type AreaStep, type MapBusiness, type PinKind } from "@/lib/outreach/map";
+import { PIN, areaCsv, pktDay, needsWebsite, nicheCounts, nicheLabel, pinKind, siteClass, type AreaStep, type MapBusiness, type PinKind } from "@/lib/outreach/map";
 
 export type MapArea = {
   key: string;
   country: string;
   region: string;
   city: string;
+  district: string;
+  /** "Harrow, London" or "Leicester". */
+  label: string;
   step: AreaStep;
   lat: number | null;
   lon: number | null;
@@ -33,7 +36,7 @@ const STEP_COLOR: Record<AreaStep, string> = {
 };
 const STEP_LABEL = (s: AreaStep) => (s === "Not started" ? "not started" : s === "Done" ? "done" : "in progress");
 
-const inArea = (b: MapBusiness, a: Pick<MapArea, "country" | "region" | "city">) => b.c === a.country && b.y === a.city && (!b.r || b.r === a.region);
+const inArea = (b: MapBusiness, a: Pick<MapArea, "country" | "region" | "city" | "district">) => b.c === a.country && b.y === a.city && (b.d ?? "") === a.district && (!b.r || b.r === a.region);
 const contactOf = (b: MapBusiness) => [b.e && "email", b.ph && "WhatsApp/phone", b.ig && "Instagram"].filter(Boolean).join(" / ") || "none";
 const statusLabel = (s: string) => PROSPECT_STATUS_LABELS[s as ProspectStatus] ?? s;
 const day = (iso: string | null) => (iso ? iso.slice(0, 10) : "");
@@ -101,8 +104,8 @@ const LeadMap = ({ businesses, areas, niches, log }: { businesses: MapBusiness[]
         weight: a.today ? 3 : 1.5,
         fillOpacity: 0.06,
       });
-      circle.bindTooltip(`${a.city}: ${a.step} (${a.nichesDone}/${a.niches} niches scanned)`);
-      circle.on("click", () => setSel({ city: a.city, key: a.key, sub: null }));
+      circle.bindTooltip(`${a.label}: ${a.step} (${a.nichesDone}/${a.niches} niches scanned)`);
+      circle.on("click", () => setSel({ city: a.label, key: a.key, sub: null }));
       circle.addTo(layer);
       // Neighbourhoods/districts from the businesses' address tags.
       const subs = new Map<string, MapBusiness[]>();
@@ -112,10 +115,10 @@ const LeadMap = ({ businesses, areas, niches, log }: { businesses: MapBusiness[]
         if (!ss) continue;
         const pending = sl.some((b) => b.s === "found" || (b.s === "audited" && !b.sent));
         const sub = L.circle([ss.lat, ss.lon], { radius: Math.min(2_500, Math.max(300, ss.r * 1.2)), color: pending ? "#f59e0b" : "#10b981", weight: 1, dashArray: "4 4", fillOpacity: 0.04 });
-        sub.bindTooltip(`${name}, ${a.city}: ${sl.length} businesses`);
+        sub.bindTooltip(`${name}, ${a.label}: ${sl.length} businesses`);
         sub.on("click", (e) => {
           L.DomEvent.stopPropagation(e);
-          setSel({ city: a.city, key: a.key, sub: name });
+          setSel({ city: a.label, key: a.key, sub: name });
         });
         sub.addTo(layer);
       }
@@ -136,7 +139,7 @@ const LeadMap = ({ businesses, areas, niches, log }: { businesses: MapBusiness[]
     const lat = s?.lat ?? a.lat;
     const lon = s?.lon ?? a.lon;
     if (lat != null && lon != null) mapRef.current.setView([lat, lon], 12);
-    setSel({ city: a.city, key: a.key, sub: null });
+    setSel({ city: a.label, key: a.key, sub: null });
   };
 
   // Open on today's area (or the one in progress) once the map is ready.
@@ -159,6 +162,8 @@ const LeadMap = ({ businesses, areas, niches, log }: { businesses: MapBusiness[]
     })
     .sort((a, b) => b.n - a.n);
   const need = list.filter((b) => needsWebsite(b) && !["skipped", "bounced", "unsubscribed", "lost"].includes(b.s)).sort((a, b) => (b.ls ?? 0) - (a.ls ?? 0));
+  const todayFrom = Date.parse(`${pktDay(Date.now())}T00:00:00Z`) - 5 * 3_600_000;
+  const foundToday = list.filter((b) => Date.parse(b.f) >= todayFrom);
   const emailed = list.filter((b) => b.sent);
   const wa = list.filter((b) => b.s === "whatsapp");
   const replied = list.filter((b) => b.rc && b.rc !== "bounce" && b.rc !== "out_of_office");
@@ -251,7 +256,12 @@ const LeadMap = ({ businesses, areas, niches, log }: { businesses: MapBusiness[]
               ))}
             </ol>
             <p>
-              <strong>{title}:</strong> {list.length ? nicheCounts(list, 12) : "no businesses found yet."}
+              <strong>Total in this area: {list.length}</strong>
+              {list.length ? ` (${nicheCounts(list, 12)})` : " (no businesses found yet)"}
+            </p>
+            <p>
+              <strong>Today: found {foundToday.length}</strong>
+              {foundToday.length ? ` (${nicheCounts(foundToday, 8)})` : ""}
             </p>
             {byNiche.length > 0 && (
               <div className="adm-table-wrap">

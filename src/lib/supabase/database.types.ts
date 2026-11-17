@@ -175,6 +175,36 @@ export type Database = {
           },
         ]
       }
+      outreach_ai_usage: {
+        Row: {
+          backoff_until: string | null
+          calls: number
+          daily_limit: number | null
+          day: string
+          errors: number
+          last_error: string | null
+          updated_at: string
+        }
+        Insert: {
+          backoff_until?: string | null
+          calls?: number
+          daily_limit?: number | null
+          day: string
+          errors?: number
+          last_error?: string | null
+          updated_at?: string
+        }
+        Update: {
+          backoff_until?: string | null
+          calls?: number
+          daily_limit?: number | null
+          day?: string
+          errors?: number
+          last_error?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       outreach_cache: {
         Row: {
           created_at: string
@@ -199,6 +229,7 @@ export type Database = {
           business_type: string
           city: string
           country: string
+          district: string
           done_at: string | null
           error: string | null
           found: number
@@ -210,6 +241,7 @@ export type Database = {
           business_type: string
           city: string
           country: string
+          district?: string
           done_at?: string | null
           error?: string | null
           found?: number
@@ -221,6 +253,7 @@ export type Database = {
           business_type?: string
           city?: string
           country?: string
+          district?: string
           done_at?: string | null
           error?: string | null
           found?: number
@@ -472,6 +505,7 @@ export type Database = {
           city: string | null
           country: string
           created_at: string
+          district: string | null
           domain: string | null
           email: string | null
           email_source: string | null
@@ -512,6 +546,7 @@ export type Database = {
           city?: string | null
           country: string
           created_at?: string
+          district?: string | null
           domain?: string | null
           email?: string | null
           email_source?: string | null
@@ -552,6 +587,7 @@ export type Database = {
           city?: string | null
           country?: string
           created_at?: string
+          district?: string | null
           domain?: string | null
           email?: string | null
           email_source?: string | null
@@ -1295,6 +1331,29 @@ export type Database = {
         Args: { p_row: Json; p_secret: string }
         Returns: string
       }
+      app_ox_ai_error: {
+        Args: {
+          p_backoff_until: string
+          p_day: string
+          p_error: string
+          p_limit: number
+          p_secret: string
+        }
+        Returns: undefined
+      }
+      app_ox_ai_take: {
+        Args: {
+          p_day: string
+          p_default_limit: number
+          p_secret: string
+          p_share: number
+        }
+        Returns: Json
+      }
+      app_ox_ai_usage: {
+        Args: { p_day: string; p_secret: string }
+        Returns: Json
+      }
       app_ox_cache_get: {
         Args: { p_hours: number; p_key: string; p_secret: string }
         Returns: Json
@@ -1308,6 +1367,7 @@ export type Database = {
         Args: {
           p_city: string
           p_country: string
+          p_district: string
           p_error: string
           p_found: number
           p_region: string

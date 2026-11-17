@@ -3,10 +3,9 @@
 // - price: only asks what it costs → automatic reply with the real starting prices
 // - question: anything else that needs Hamza (call time, negotiation, unclear) → no reply, HOT alert
 // - not_now, no, out_of_office, bounce: as before.
-// Gemini first; a keyword check is the fallback (and always wins for a clear "no"). When unsure,
+// Gemini Flash-Lite first (outreach budget, ai.ts); a keyword check is the fallback (and always wins for a clear "no"). When unsure,
 // the answer is "question": Hamza answers it himself.
-import { ThinkingLevel } from "@google/genai";
-import { CHAT_MODEL, gemini } from "@/lib/assistant/gemini";
+import { outreachJson } from "./ai";
 
 export const REPLY_CLASSES = ["interested", "price", "question", "not_now", "no", "out_of_office", "bounce"] as const;
 export type ReplyClass = (typeof REPLY_CLASSES)[number];
@@ -33,23 +32,20 @@ export const classifyByWords = (text: string, subject = ""): ReplyClass => {
 export const classifyReply = async (text: string, subject: string): Promise<ReplyClass> => {
   const fallback = classifyByWords(text, subject);
   if (fallback === "no") return "no"; // a clear "no" is never second-guessed
-  const ai = gemini();
-  if (!ai || !text.trim()) return fallback;
+  if (!text.trim()) return fallback;
   try {
-    const res = await ai.models.generateContent({
-      model: CHAT_MODEL,
-      contents: [{ role: "user", parts: [{ text: `Subject: ${subject}\n\n${text.slice(0, 2000)}` }] }],
-      config: {
-        systemInstruction:
-          'Classify this reply to a cold email from a web developer who offered to send website fixes or a free homepage idea. Answer as JSON {"class": "..."} with exactly one of: interested (ONLY a plain yes / send it / interested, with no other question, condition or request), price (ONLY asks what it costs or for prices, nothing else to answer), question (anything else a person must answer: a call or meeting time, negotiation, discounts, who are you, several questions, or unclear), not_now (maybe later / bad timing), no (not interested, unsubscribe, stop, angry), out_of_office (automatic away message), bounce (delivery failure). When unsure, answer question.',
-        temperature: 0,
-        maxOutputTokens: 50,
-        responseMimeType: "application/json",
-        thinkingConfig: { thinkingLevel: ThinkingLevel.MINIMAL },
-        abortSignal: AbortSignal.timeout(15000),
-      },
+    // Outreach's own Flash-Lite budget (ai.ts); no budget or Gemini busy → the keyword answer.
+    const out = await outreachJson<{ class?: string }>({
+      system:
+        'Classify this reply to a cold email from a web developer who offered to send website fixes or a free homepage idea. Answer as JSON {"class": "..."} with exactly one of: interested (ONLY a plain yes / send it / interested, with no other question, condition or request), price (ONLY asks what it costs or for prices, nothing else to answer), question (anything else a person must answer: a call or meeting time, negotiation, discounts, who are you, several questions, or unclear), not_now (maybe later / bad timing), no (not interested, unsubscribe, stop, angry), out_of_office (automatic away message), bounce (delivery failure). When unsure, answer question.',
+      user: `Subject: ${subject}
+
+${text.slice(0, 2000)}`,
+      maxTokens: 60,
+      temperature: 0,
+      timeoutMs: 15_000,
     });
-    const c = (JSON.parse(res.text ?? "{}") as { class?: string }).class;
+    const c = out.class;
     if (!(REPLY_CLASSES as readonly string[]).includes(c ?? "")) return fallback;
     // An automatic answer needs both Gemini and the keywords to agree; otherwise Hamza answers.
     if ((c === "interested" || c === "price") && fallback !== c) return "question";

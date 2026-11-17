@@ -2,7 +2,7 @@
 // inside it that have a website, phone or email tag. Both services ask for an identifying
 // User-Agent, at most 1 request per second and caching, so every response is cached in Supabase.
 import { ox, type Country } from "./db";
-import { placeQuery, type Cell } from "./areas";
+import { isPrimeLocation, placeQuery, type Cell } from "./areas";
 import { waitingForAddress } from "./address";
 
 export const USER_AGENT = "HamzaTariqOutreach/1.0 (+https://hamzatariq.site)";
@@ -55,13 +55,13 @@ const OVERPASS_ENDPOINTS = ["https://overpass-api.de/api/interpreter", "https://
 export type OsmBusiness = { osmId: string; name: string; tags: Record<string, string>; lat: number; lon: number };
 
 /** Businesses of one type in the area that have a website, phone or email tag (cached 24 hours). */
-export const findBusinesses = async (type: BusinessType, place: Place): Promise<OsmBusiness[]> => {
-  const key = `overpass:${type}:${place.area ?? `${place.lat.toFixed(3)},${place.lon.toFixed(3)}`}`;
+export const findBusinesses = async (type: BusinessType, place: Place, radius = 8000): Promise<OsmBusiness[]> => {
+  const key = `overpass:${type}:${place.area ?? `${place.lat.toFixed(3)},${place.lon.toFixed(3)}${radius === 8000 ? "" : `:${radius}`}`}`;
   const cached = await ox.cacheGet<OsmBusiness[]>(key, 24);
   if (cached) return cached;
   // With an area, search inside it; otherwise 8 km around the city centre.
   const scope = place.area ? `area(${place.area})->.a;` : "";
-  const filter = place.area ? "(area.a)" : `(around:8000,${place.lat},${place.lon})`;
+  const filter = place.area ? "(area.a)" : `(around:${radius},${place.lat},${place.lon})`;
   const union = BUSINESS_TYPES[type].tags.map(([k, v]) => `nwr["${k}"="${v}"]["name"]${filter};`).join("");
   const query = `[out:json][timeout:60];${scope}(${union})->.p;nwr.p[~"^(website|contact:website|email|contact:email|phone|contact:phone)$"~"."];out center tags 500;`;
   // The main Overpass server is often busy (502/504/429); the public mirrors serve the same OSM data.
@@ -153,7 +153,34 @@ const runByOther = (tags: Record<string, string>, name: string) => {
  * brand:wikidata or wikidata tag (a place notable enough for Wikidata is a known brand), an operator
  * that is another company or has a Wikidata entry, public operators, and public-body names.
  */
+/**
+ * Well-known luxury and global brands by name (owner, 2026-11-18): OSM often has no brand tag on a
+ * flagship store (Van Cleef & Arpels in London had none). Matched on whole words, case-insensitive.
+ */
+const GLOBAL_BRANDS = [
+  // jewellery and watches
+  "van cleef", "cartier", "tiffany", "bulgari", "bvlgari", "chopard", "boodles", "de beers", "harry winston", "piaget", "rolex", "patek philippe",
+  "audemars piguet", "breitling", "tag heuer", "hublot", "iwc", "jaeger-lecoultre", "vacheron constantin", "messika", "mikimoto", "david morris", "pandora", "swarovski",
+  "ernest jones", "h samuel", "h\\. samuel", "goldsmiths", "mappin & webb", "mappin and webb", "beaverbrooks", "links of london", "thomas sabo", "monica vinader", "missoma",
+  "astley clarke", "chaumet", "boucheron", "fred leighton", "watches of switzerland", "michael hill", "prouds", "angus & coote",
+  // fashion, bags and shoes
+  "chanel", "dior", "louis vuitton", "gucci", "prada", "herm[eè]s", "burberry", "fendi", "versace", "armani", "hugo boss", "ralph lauren", "tommy hilfiger", "michael kors",
+  "mulberry", "jimmy choo", "louboutin", "balenciaga", "saint laurent", "yves saint laurent", "valentino", "givenchy", "bottega veneta", "loewe", "miu miu",
+  "alexander mcqueen", "stella mccartney", "vivienne westwood", "ted baker", "all ?saints", "karen millen", "whistles", "phase eight", "zara", "h&m",
+  "uniqlo", "primark", "marks & spencer", "marks and spencer", "john lewis", "selfridges", "harrods", "harvey nichols", "liberty london", "nike", "adidas", "puma",
+  "clarks", "schuh", "dr\\.? martens", "skechers", "converse", "timberland", "geox", "kurt geiger", "russell & bromley", "pronovias", "vera wang", "lacoste",
+  "levi'?s", "calvin klein", "superdry", "jack wills", "fat face", "white stuff", "seasalt", "joules", "barbour", "longchamp", "kate spade", "furla",
+  // food, beauty, fitness, hotels, property, retail
+  "starbucks", "costa coffee", "pret a manger", "mcdonald'?s", "kfc", "subway restaurant", "nando'?s", "domino'?s", "pizza hut", "papa john'?s", "greggs", "wagamama", "five guys",
+  "gail'?s", "caff[eè] nero", "krispy kreme", "burger king", "toni ?& ?guy", "rush hair", "supercuts", "specsavers", "vision express",
+  "superdrug", "puregym", "the gym group", "anytime fitness", "virgin active", "david lloyd", "snap fitness", "f45", "nuffield health", "bupa", "mydentist",
+  "foxtons", "savills", "knight frank", "chestertons", "winkworth", "purplebricks", "kwik fit", "halfords", "ikea", "dfs", "oak furnitureland",   "samsung", "hilton", "marriott", "premier inn", "travelodge", "holiday inn", "ibis", "novotel", "radisson", "hyatt", "intercontinental", "best western",
+];
+const BRAND_RE = new RegExp(`(^|[^\\p{L}])(${GLOBAL_BRANDS.join("|")})($|[^\\p{L}])`, "iu");
+export const isGlobalBrand = (name: string) => BRAND_RE.test(name.replace(/[’]/g, "'"));
+
 export const isBigOrganisation = (tags: Record<string, string>, name: string) =>
+  isGlobalBrand(name) ||
   !!(tags.brand || tags["brand:wikidata"] || tags["brand:wikipedia"] || tags.wikidata || tags.wikipedia || tags["operator:wikidata"]) ||
   runByOther(tags, name) ||
   ["government", "public", "national", "regional", "municipal"].includes((tags["operator:type"] ?? "").toLowerCase()) ||
@@ -193,7 +220,8 @@ export const discoverCell = async (type: string, cell: Cell, budget: number) => 
   if (!isBusinessType(type) || budget <= 0 || waitingForAddress(cell.country)) return 0;
   const place = await findCity(placeQuery(cell), cell.country);
   const timezone = timezoneFor(cell.country, place.lat, place.lon);
-  const businesses = await findBusinesses(type, place);
+  // A district without a boundary in OSM (most suburbs): 2 km around its centre, not the 8 km of a town.
+  const businesses = await findBusinesses(type, place, cell.district ? 2000 : 8000);
   // Chains: the same name three or more times in one city.
   const key = (n: string) => n.toLowerCase().trim();
   const nameCount = new Map<string, number>();
@@ -201,7 +229,7 @@ export const discoverCell = async (type: string, cell: Cell, budget: number) => 
   let added = 0;
   for (const b of businesses) {
     if (added >= budget) break;
-    if (isBigOrganisation(b.tags, b.name) || (nameCount.get(key(b.name)) ?? 0) >= CHAIN_LOCATIONS) continue;
+    if (isBigOrganisation(b.tags, b.name) || isPrimeLocation(b.tags) || (nameCount.get(key(b.name)) ?? 0) >= CHAIN_LOCATIONS) continue;
     const website = websiteOf(b.tags);
     if (isStoreLocatorPage(website)) continue;
     // The same name already found in other cities: with this one it would be 3+ locations.
@@ -213,6 +241,7 @@ export const discoverCell = async (type: string, cell: Cell, budget: number) => 
       business_type: type,
       city: cell.city,
       region: cell.region,
+      district: cell.district,
       country: cell.country,
       timezone,
       website,

@@ -1,5 +1,6 @@
 // Coverage progress (server component): percent of cells (niche x city) searched per country and
 // per niche, each niche's current cell, and today's qualified leads against the daily target.
+import { cellLabel } from "@/lib/outreach/areas";
 import type { Progress } from "@/lib/outreach/coverage";
 
 const pct = (d: number, t: number) => (t ? Math.round((d / t) * 1000) / 10 : 0);
@@ -70,7 +71,7 @@ const Coverage = ({ p, today, target }: { p: Progress; today: Record<string, { q
                 <td className="adm-nowrap">
                   <Bar value={pct(n.done, n.total)} /> {pct(n.done, n.total)}%
                 </td>
-                <td className="adm-muted">{n.current ? `${n.current.city}, ${n.current.region} (${n.current.country})` : "All open cells done"}</td>
+                <td className="adm-muted">{n.current ? `${cellLabel(n.current)}, ${n.current.region} (${n.current.country})` : "All open cells done"}</td>
               </tr>
             ))}
           </tbody>
