@@ -137,7 +137,8 @@ export const checkEmail1 = (body: string, subject: string, facts: string, bookin
   const problems: string[] = [];
   // Shops and offices don't take bookings: "book" only for booking niches (owner, 2026-11-16).
   if (!bookings && /\bbook(s|ed|ing|ings)?\b/i.test(body)) problems.push('it mentions booking, but this business does not take bookings (say "call or WhatsApp")');
-  const text = body.replaceAll("hamzatariq.site", "");
+  // The fixed content CTA ("…3 blog topics…") is our own offer, not a claim about them.
+  const text = body.replaceAll("hamzatariq.site", "").replace("Want me to send you 3 blog topics your customers are searching for?", "");
   if (LINK.test(text)) problems.push("it contains a link or web address (email 1 must have no links)");
   const banned = text.match(BANNED);
   if (banned) problems.push(`it uses the technical word "${banned[0]}"`);
@@ -278,7 +279,7 @@ export const draftEmail1 = async (p: Prospect, auditRow: ProspectAudit | null): 
     assemble1(p, templateMiddle(p, f) + pad, f, false),
   ].find((b) => !checkEmail1(b, subject, facts, takesBookings(p.business_type)).length);
   const noDraft = () => {
-    if (!fallback) throw new Error("Email 1 could not meet the rules (60-90 words, no links, no technical words).");
+    if (!fallback) throw new Error(`Email 1 could not meet the rules: ${checkEmail1(assemble1(p, templateMiddle(p, f), f, false), subject, facts, takesBookings(p.business_type)).join("; ")}`);
     return { subject, body: fallback, variant, source: "template" as const, findings: f };
   };
   const ok = (middle: string) =>
@@ -380,7 +381,7 @@ export const replyInterested = (p: Prospect, firstSubject: string, f: Finding[],
         `Here are 3 blog topics for ${biz(p)}, each based on something people really search for on Google${city ? ` around ${city}` : ""}:`,
         topics
           .slice(0, 3)
-          .map((t, i) => `${i + 1}. ${t.title} (people search: ${t.search})`)
+          .map((t, i) => `${i + 1}. ${t.title}${t.title.toLowerCase().replace(/[^a-z0-9]/g, "") === t.search.replace(/[^a-z0-9]/g, "") ? "" : ` (people search: "${t.search}")`}`)
           .join("\n"),
         service
           ? `If you'd like posts like these written and published for you every month, that's my ${service.name} service: ${service.price}. It includes the topic research and keeping your pages up to date on Google.`

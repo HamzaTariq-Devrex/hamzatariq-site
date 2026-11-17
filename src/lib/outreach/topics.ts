@@ -35,6 +35,10 @@ const SEEDS: Record<string, string[]> = {
   barber: ["barber", "fade haircut", "beard trim"],
 };
 
+/** Places that make a search about somewhere else (checked unless it's their own city). */
+const FOREIGN = /\b(usa|america|canada|ontario|texas|florida|california|new york|ohio|kentucky|australia|sydney|melbourne|new zealand|auckland|india|pakistan|nigeria|ghana|kenya|south africa|dubai|uae|singapore|malaysia|philippines|ireland|dublin)\b/;
+const FOREIGN_ALWAYS = /\b(rupees?|naira|rand|dollars?|ksh|aed|php)\b/;
+
 const GL: Record<string, string> = { GB: "uk", AU: "au", NZ: "nz", AE: "ae", US: "us", CA: "ca" };
 
 /** Google's public autocomplete suggestions for one query (real searches), or []. */
@@ -59,14 +63,21 @@ export type Topic = { search: string; title: string };
 export const blogTopics = async (p: Pick<Prospect, "name" | "business_type" | "osm_tags" | "city" | "country" | "research">): Promise<Topic[] | null> => {
   const city = p.research && p.research.city !== undefined ? p.research.city : p.city;
   const seeds = SEEDS[p.business_type] ?? [nounFor(p.business_type, p.osm_tags ?? {})];
-  const queries = seeds.flatMap((s) => [city ? `${s} ${city}` : s, `how much ${s}`, `best ${s}`, `${s} ideas`]);
+  const queries = seeds.flatMap((seed) => [city ? `${seed} ${city}` : seed, `how much ${seed}`, `best ${seed}`, `${seed} ideas`].map((q) => ({ q, seed })));
   const found: string[] = [];
-  for (const q of queries) {
+  for (const { q, seed } of queries) {
+    // The search must contain the niche phrase itself ("boiler service", not "boilermaker").
     for (const s of await suggest(q, p.country)) {
+      if (!` ${s.toLowerCase().replace(/[^a-z0-9]+/g, " ")} `.includes(` ${seed} `)) continue;
       const t = s.toLowerCase().trim();
       if (t.split(/\s+/).length < 3 || found.includes(t) || t.includes(p.name.toLowerCase())) continue;
-      // "…at sterns": a search about another shop.
-      if (/\b(at|from|in) [a-z]+$/.test(t) && !(city && t.endsWith(city.toLowerCase()))) continue;
+      // "…at sterns", "…in south africa": another shop or another place.
+      const tail = t.match(/\b(?:at|from|in|near)\s+(.+)$/)?.[1];
+      if (tail && !(city && tail === city.toLowerCase())) continue;
+      // Their city followed by something else ("london ontario"), or a place in another country.
+      if (city && new RegExp(`\\b${city.toLowerCase()}\\s+\\w+$`).test(t)) continue;
+      if (FOREIGN.test(t) && !(city && t.includes(city.toLowerCase()))) continue;
+      if (FOREIGN_ALWAYS.test(t)) continue;
       if (/\b(near me|open now|opening times|jobs|vacancies|login|amazon|ebay|argos|ikea|primark)\b/.test(t)) continue;
       found.push(t);
     }
@@ -101,6 +112,6 @@ const overlap = (a: string, b: string) => {
   return n / Math.max(1, Math.min(A.size, B.size));
 };
 const template = (s: string) => {
-  const t = s.charAt(0).toUpperCase() + s.slice(1);
+  const t = s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
   return /^(how|what|which|why|when|where|can|do|does|is|are|should)\b/i.test(s) ? `${t}?` : `${t}: a simple guide`;
 };
