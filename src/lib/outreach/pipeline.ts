@@ -537,8 +537,11 @@ export const tick = async (phases: Phase[] = [...PHASES], budgetMs = 50_000) => 
 
   if (phases.includes("audit") && left() > 30_000) {
     const plan = await discoveryPlan(state, cap).catch(() => null);
-    if (plan) {
-      report.discover = { plan, results: await discoverRun(Math.min(start + budgetMs - 15_000, Date.now() + 30_000)).catch((e) => `error: ${(e as Error).message}`) };
+    // With a big unchecked list and a low buffer, scanning takes every other tick so audits keep going.
+    const auditTurn = state.backlog_found >= 20 && state.ready < target && Math.floor(Date.now() / 300_000) % 2 === 1;
+    if (plan && !auditTurn) {
+      // Big cities (London) need long Overpass queries: the scan gets the rest of this tick.
+      report.discover = { plan, results: await discoverRun(start + budgetMs - 3_000).catch((e) => `error: ${(e as Error).message}`) };
     }
   }
   if (phases.includes("audit")) {

@@ -92,7 +92,8 @@ export const discoverRun = async (deadline = Date.now() + 50_000, onlyType?: str
       } catch (e) {
         const msg = (e as Error).message;
         // Out of time is not the cell's fault: try it again next run without counting an attempt.
-        if (!/No time left/.test(msg)) await ox.coverageMark(n.t, cell.country, cell.region, cell.city, 0, msg);
+        // A timeout caused by this run's own deadline (big cities like London) doesn't count either.
+        if (!/No time left/.test(msg) && !(/abort|timeout/i.test(msg) && deadline - Date.now() < 8_000)) await ox.coverageMark(n.t, cell.country, cell.region, cell.city, 0, msg);
         results.push({ cell: label, added: 0, error: msg });
       }
     }
