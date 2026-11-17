@@ -41,6 +41,8 @@ export type Research = {
   line?: string | null;
   /** Pages read. */
   sources?: string[];
+  /** The site answered from another domain (a redirect): the email would name the wrong business. */
+  redirectedTo?: string | null;
   quality?: { total: number; active: number; size: number; gain: number };
   /** The AI writer didn't answer: attempts so far (retried on later ticks, up to 3). */
   pending?: number;
@@ -348,7 +350,17 @@ export const researchProspect = async (p: Prospect, audit: AuditResult | null, d
   const corpus = pages.map((x) => x.text).join(" ");
   const extra = [p.name, p.city ?? "", p.region ?? "", p.osm_tags?.["addr:suburb"] ?? "", p.osm_tags?.["addr:street"] ?? ""];
   const quality = qualityScore(p, audit, a.signals, pages.length);
-  const base: Research = { active: true, signals: a.signals, sources: pages.map((x) => x.url), quality, at };
+  const host = (u: string) => {
+    try {
+      return new URL(u).hostname.toLowerCase().replace(/^www\./, "");
+    } catch {
+      return "";
+    }
+  };
+  const from = host(p.website);
+  const to = host(home.url);
+  const redirectedTo = from && to && from !== to && !to.endsWith(`.${from}`) && !from.endsWith(`.${to}`) ? to : null;
+  const base: Research = { active: true, signals: a.signals, sources: pages.map((x) => x.url), quality, redirectedTo, at };
 
   void deadline;
   const top = findings(audit, { noun: nounFor(p.business_type, p.osm_tags ?? {}), city: p.city, bookings: takesBookings(p.business_type) })[0];

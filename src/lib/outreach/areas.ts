@@ -230,7 +230,8 @@ export const cellKey = (type: string, c: Pick<Cell, "country" | "region" | "city
 const PRIME_STREETS =
   /\b(hatton garden|bond street|old bond street|new bond street|burlington arcade|savile row|jermyn street|sloane street|brompton road|mount street|regent street|oxford street|king street|spinningfields|st ann'?s square|new cathedral street|pitt street mall|castlereagh street|collins street|chapel street|queen street mall|the dubai mall|mall of the emirates|sheikh mohammed bin rashid boulevard)\b/i;
 const PRIME_AREAS = /\b(mayfair|knightsbridge|belgravia|st james'?s|marylebone high street|downtown dubai|dubai mall)\b/i;
-const PRIME_POSTCODES = /^(W1[A-Z]?|SW1[A-Z]?|EC1N|EC2|EC3|EC4|WC2)\s?\d/i;
+// Full postcodes only, so SW11 (Battersea) or W12 never count as SW1/W1.
+const PRIME_POSTCODES = /^(W1[A-Z]?|SW1[A-Z]?|EC1N|EC[234][A-Z]?|WC2[A-Z]?)\s*\d[A-Z]{2}$/i;
 export const isPrimeLocation = (tags: Record<string, string>) =>
   PRIME_STREETS.test(tags["addr:street"] ?? "") ||
   PRIME_AREAS.test(`${tags["addr:suburb"] ?? ""} ${tags["addr:district"] ?? ""} ${tags["addr:place"] ?? ""} ${tags["addr:quarter"] ?? ""}`) ||

@@ -126,6 +126,7 @@ export const autoCheck = async (p: Prospect, audit: AuditResult | null, f: Findi
   // Their "website" is one page on a bigger site (a shopping centre, a directory, a group): the audit
   // is of someone else's site, so a person looks first.
   if (p.website && isSubPage(p.website)) return { kind: "review", reason: "Their website is a page on a bigger site, so the audit may not be theirs" };
+  if (p.research?.redirectedTo) return { kind: "review", reason: `Their website now opens ${p.research.redirectedTo}: a different name or business` };
   if (flags.redirectOther) return { kind: "review", reason: `Low audit confidence: the website redirects to ${flags.redirectOther}` };
   if (flags.jsPage && f[0].id === "no-contact") return { kind: "review", reason: "Low audit confidence: the page is built with JavaScript, so the contact-button check may be wrong" };
   if (looksLikeUkSoleTrader(p)) return { kind: "review", reason: "Possible UK sole trader (no Ltd/Limited in the name or on the site): needs prior consent under PECR" };
