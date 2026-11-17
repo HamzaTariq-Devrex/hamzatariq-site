@@ -277,8 +277,9 @@
         "do i need next.js for seo?"
       ],
       "angle": "Shows the raw HTML a crawler gets from each setup side by side, using my site before and after, instead of a feature list.",
-      "status": "queued",
-      "publishedSlug": null
+      "status": "published",
+      "publishedSlug": "react-vs-nextjs-for-seo",
+      "published": "2026-11-17"
     },
     {
       "keyword": "working with a remote web developer",

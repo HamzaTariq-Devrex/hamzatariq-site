@@ -127,7 +127,7 @@ Pages that were blocked by a rendering problem usually need a recrawl before any
 
 It depends on which status you have, and how many pages it covers.
 
-If only a few pages are affected by noindex, a bad canonical or sitemap errors, patch them. Those are small fixes in any React app. Google not indexing React pages across the whole site, with "Crawled – currently not indexed" or soft errors everywhere, points at the rendering itself, and patching that in a client-rendered app means adding a pre-render service or a hand-built server on top.
+If only a few pages are affected by noindex, a bad canonical or sitemap errors, patch them. Those are small fixes in any React app. Google not indexing React pages across the whole site, with "Crawled – currently not indexed" or soft errors everywhere, points at the rendering itself, and patching that in a client-rendered app means adding a pre-render service or a hand-built server on top. My comparison of [React vs Next.js for SEO](/blog/react-vs-nextjs-for-seo) shows the HTML Google gets from each setup.
 
 <MyTake>
 For a business site that needs search traffic, I recommend fixing the rendering once rather than working around it. Moving a Vite or CRA site to Next.js keeps your React components and design, and it fixes the empty HTML, the shared titles, the canonical tags and the not-found status in one go, because Next.js does each of them by default. Patching with react-helmet and a pre-render service is cheaper at the start, but you keep maintaining two versions of every page. If your app is behind a login and has no public pages to rank, don't bother: indexing doesn't matter there.

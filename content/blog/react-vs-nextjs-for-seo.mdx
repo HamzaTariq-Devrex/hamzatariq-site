@@ -1,0 +1,160 @@
+---
+title: "React vs Next.js for SEO: What Google Sees in Each"
+seoTitle: "React vs Next.js for SEO: What Google Sees"
+description: "React vs Next.js for SEO, decided by the HTML each one sends to Google. See both side by side, which site types need Next.js, and what switching really costs."
+keyword: "react vs next.js for seo"
+category: react-nextjs-seo
+cluster: react-seo
+role: supporting
+intent: compare
+funnel: consideration
+secondary: ["is react good for seo", "next.js seo benefits", "server side rendering vs client side seo"]
+trust: "I've shipped 40+ live production websites in React and Next.js as the sole frontend developer on each build, I build custom Next.js stores for clients at Devrex Digital, and I built the free SEO audit tool that reads a page's raw HTML the way a crawler does."
+tags: [react, next.js, seo, server-side rendering, comparison]
+published: 2026-11-17
+faq:
+  - q: "Is Next.js better than React for SEO?"
+    a: "For public pages that need to rank, yes in practice: Next.js sends finished HTML with each page's own title and text by default, while a standard React app sends an empty shell and builds the page in the browser. React rendered on the server or at build time can rank just as well; it's the rendering, not the brand name."
+  - q: "Do I need Next.js for SEO?"
+    a: "No. You need every public URL to send real HTML. Next.js is the easiest way to get that from React, but a prerender step or React Router in framework mode also works. A dashboard behind a login doesn't need any of it."
+  - q: "Server side rendering vs client side SEO: which wins?"
+    a: "Server-side rendering (or building pages ahead of time) wins for anything you want found on Google. Client-side rendering makes Google run your JavaScript before it sees any content, which is slower and breaks more easily, and many other crawlers and link previews never run it at all."
+  - q: "Is React good for SEO?"
+    a: "React is fine for SEO when the server sends each page as finished HTML, through Next.js, React Router in framework mode or a prerender step. A standard client-rendered React app is weak for SEO because every URL sends the same empty shell."
+  - q: "How much does it cost to move a React site to Next.js?"
+    a: "With me, a React (Vite/CRA) to Next.js migration for SEO starts at $800 and is quoted after a free call. If you aren't sure the migration is needed, an SEO audit with a prioritized fix list starts at $150 and takes 2–3 days."
+---
+
+For **React vs Next.js for SEO**, the verdict is simple: Next.js wins for any page you want found on Google, because it sends the finished page as HTML, while a standard React app sends an empty shell and builds the page in the browser. React itself isn't the problem. A React site that renders its pages on the server or at build time can rank just as well. Next.js is just the easiest, most complete way to get there.
+
+Here is the short version before the details.
+
+| | Standard React app (Vite, Create React App) | Next.js |
+| --- | --- | --- |
+| HTML a crawler gets | One empty shell for every URL | The full page, with text, for every URL |
+| Title and description | Same for every page, unless changed later by JavaScript | Set per page, in the HTML |
+| Canonical tag, social previews | Missing or wrong without extra work | Per page, built in |
+| Missing pages | Answer "OK" with the same shell (a soft error to Google) | Send a real not-found status |
+| Sitemap and robots.txt | Written by hand or with a plugin | Generated from code |
+| Best for | Dashboards and tools behind a login | Business sites, stores, blogs, service pages |
+
+## React vs Next.js for SEO: the difference is when the HTML exists
+
+Both use the same React components. The question is where the page gets built.
+
+**Client-side rendering** means the server sends a nearly empty HTML file and a big JavaScript file. The browser runs the script and builds the page. That's how a standard Vite or Create React App project works.
+
+**Server-side rendering** (or static generation, which does the same thing ahead of time at build) means the server sends the page already built. The browser shows it at once, then React takes over for the clicks and menus.
+
+Google can run JavaScript, but it does it in two steps. It crawls the HTML first, then puts the page in a queue to render the JavaScript later. Google's own [JavaScript SEO basics guide](https://developers.google.com/search/docs/crawling-indexing/javascript/javascript-seo-basics) describes this crawl, render and index process. Anything that fails in the render step, like a slow API call or a script error, leaves Google with the empty shell. Many other crawlers and the link previews in chat apps never run JavaScript at all, so they only ever see the shell.
+
+Next.js renders on the server by default. Plain React renders in the browser by default. That default is the whole SEO difference.
+
+## What does a crawler get from each one?
+
+None of the top guides on this topic show this, so here it is. Below is a simplified version of what a crawler receives for the same product page of an online store: first from a client-rendered React app, then from Next.js.
+
+The client-rendered React app sends this for every URL on the site, whether it's the home page, a product or an address that doesn't exist:
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>My Store</title>
+    <!-- one large JavaScript bundle loads here -->
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
+```
+
+Next.js sends this for the product page, and different HTML for every other page:
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>Embroidered Silk Waistcoat | My Store</title>
+    <meta name="description" content="Hand-embroidered silk waistcoat, made to order. Ships worldwide." />
+    <link rel="canonical" href="https://mystore.com/products/embroidered-silk-waistcoat" />
+    <meta property="og:image" content="https://mystore.com/og/embroidered-silk-waistcoat.png" />
+  </head>
+  <body>
+    <main>
+      <h1>Embroidered Silk Waistcoat</h1>
+      <p>Hand-embroidered silk waistcoat, cut to your measurements.</p>
+      <a href="/collections/waistcoats">More waistcoats</a>
+    </main>
+    <!-- smaller JavaScript loads here for clicks and menus -->
+  </body>
+</html>
+```
+
+What each difference means for Google:
+
+- **Title.** The React shell gives every page the title "My Store". Google sees many URLs with one name and treats them as copies. The Next.js page names the product.
+- **Description and social image.** Missing in the shell, so Google writes its own snippet and a shared link shows a blank card. Next.js puts both in the HTML.
+- **Canonical tag.** It tells Google which address is the main one. The shell has none, or one shared tag that points every page at the home page.
+- **Text and links.** The shell has an empty `div`. Google has to render the page to find the heading, the description and the link to the collection. In Next.js they're there on the first crawl.
+
+You can check your own site in a minute: open a page, right-click, choose "View page source" (not Inspect) and search for a sentence you can see on the screen. If it's not there, crawlers get the shell.
+
+## Is Next.js better than React for SEO?
+
+For public pages, yes, because of what it does by default. The Next.js SEO benefits beyond rendering are the small things that a plain React app needs extra code or plugins for:
+
+- **Per-page metadata.** Each page exports its title, description, canonical and social image, and Next.js writes them into the HTML. No react-helmet, no tags that change only after JavaScript runs.
+- **Sitemap and robots.txt from code.** New products and posts appear in the sitemap on the next build, without anyone editing a file.
+- **Real not-found pages.** A missing product sends a proper not-found status instead of a soft error.
+- **Images and fonts.** The built-in image component serves the right size for each screen and loads off-screen images later, which helps speed.
+- **Static pages with fresh data.** Pages can be built ahead of time and rebuilt when the content changes, so they load fast and stay current.
+
+Next.js doesn't fix everything. A Next.js page that loads all its content in the browser with a client-side fetch sends an empty page too. Slow, huge images still make a page slow. Thin pages with nothing worth reading still don't rank. The framework removes the technical ceiling; the content still has to earn the position.
+
+## Can plain React rank without Next.js?
+
+Yes, and React is good for SEO once you change how it renders. React has had [server rendering APIs](https://react.dev/reference/react-dom/server) for years; Next.js is built on them. Three ways to get real HTML out of React without Next.js:
+
+1. **A prerender step at build time.** A tool loads every route during the build and saves the finished HTML. It works well for small sites whose pages rarely change, like a portfolio or a short service site.
+2. **React Router in framework mode.** If your app already uses React Router, its framework mode adds server rendering and per-route metadata, close to what Next.js does.
+3. **Your own server render.** Possible, but you then build and maintain the routing, data loading and caching yourself. I don't recommend it for a business site.
+
+So the answer to "do I need Next.js for SEO" is no. You need every public URL to send real HTML with its own title. Next.js is the route with the fewest moving parts, which is why I use it for public sites. The [React SEO guide for React and Next.js sites](/blog/react-seo-guide) goes through each rendering option in more depth.
+
+<FromMyWork title="How I build client stores for search">
+The online stores I build at Devrex Digital are custom Next.js stores, never Shopify themes. [The Dulhahouse wedding wear store](/work/dulhahouse) is a good example of why that matters for search: it presents each ceremonial collection like a lookbook, and in Next.js each of those collections can be its own page with its own title, text and links in the HTML. A crawler doesn't have to run anything to read it.
+
+When a client brings me an existing React site instead, the first thing I run is my [free SEO audit tool](/tools/free-seo-audit). It fetches the raw HTML without JavaScript, exactly like the first crawl in the comparison above, and flags an empty app shell, a missing or shared title, a missing canonical and a missing sitemap. That result decides whether the site needs a few fixes or a move to Next.js.
+</FromMyWork>
+
+## Server side rendering vs client side: which site needs which?
+
+The choice depends on what the site is for. Here is how I decide with clients, with my real starting prices.
+
+| Your site | Pick | Why | From (with me) |
+| --- | --- | --- | --- |
+| Online store | Next.js | Every product and collection needs its own page on Google | $1,000, 2–3 weeks |
+| Service business or portfolio site | Next.js (or React with a prerender step) | Few pages, but each must be found and shared | $400, 5–7 days |
+| Blog or content site | Next.js | New posts need HTML, a sitemap entry and metadata on publish | Quoted after a free call |
+| Dashboard or tool behind a login | Plain React is fine | Google can't see logged-in pages anyway | $1,200, 2–4 weeks |
+| Existing React site that doesn't rank | Audit first, then fix or migrate | Some sites need small fixes, some need the rendering changed | $150 audit, 2–3 days |
+
+The dashboard row is the one most comparisons skip. If nobody should find the pages on Google, client-side React is a perfectly good choice and server rendering adds nothing.
+
+<MyTake>
+For any business site that needs search traffic, I recommend Next.js from day one. Starting in plain React and adding a prerender step later is cheaper by a little at the start, but you end up maintaining a workaround on every page you add. If you already have a client-rendered React site with real content, don't rebuild it from scratch: move it to Next.js and keep your components and design. And if your app lives behind a login, stay with plain React and spend the money on features instead.
+</MyTake>
+
+## What does switching from React to Next.js cost?
+
+If you already have a React site, you don't need to throw it away. Your components, styles and design move over; what changes is the routing, the data loading and the metadata. These are my starting prices:
+
+| Work | From | Time |
+| --- | --- | --- |
+| SEO audit (report + prioritized fix list) | $150 | 2–3 days |
+| Technical SEO setup for React / Next.js | $500 | Quoted after a free call |
+| React (Vite/CRA) to Next.js migration for SEO | $800 | Quoted after a free call |
+| Monthly SEO + content | $400/month | Ongoing |
+
+The audit is the right first step when you're not sure which side of this comparison your site is on. It tells you whether your pages already send real HTML, and if not, which fix is the cheapest one that works. If your pages are already rendered but still missing from Google, start with the steps in [why a React site is not indexed by Google](/blog/react-site-not-indexed-by-google-fix); if they're indexed but low, see [why a React website is not ranking on Google](/blog/react-website-not-ranking-on-google). Everything in this post is part of my [React and Next.js SEO service](/services/react-nextjs-seo).
