@@ -225,7 +225,9 @@ const assemble1 = (p: Prospect, middle: string, f: Finding[], withProof = true) 
 /** Template email 1 from the same real findings (also the fallback when Gemini's draft fails the check). */
 const templateMiddle = (p: Prospect, f: Finding[]) => {
   const first = f[0];
-  return first.id === "no-website" ? `${lead(first.cost)}.` : `I had a look at ${biz(p)} online and noticed that ${first.cost}.`;
+  if (first.id === "no-website") return `${lead(first.cost)}.`;
+  // Content gaps: shorter lead-in, so the email stays within 90 words.
+  return isContentFinding(first) ? `I noticed ${first.cost}.` : `I had a look at ${biz(p)} online and noticed that ${first.cost}.`;
 };
 
 /** "a jeweller in Manchester" / "an optician nearby". */

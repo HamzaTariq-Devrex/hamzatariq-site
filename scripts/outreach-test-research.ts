@@ -33,7 +33,13 @@ const tryOne = async (p: Prospect & { audit: ProspectAudit | null }) => {
     return;
   }
   if (!r.research.line) console.log(`  ${p.name}: no specific line found (would send without one)`);
-  const d = await draftEmail1(r, p.audit);
+  let d: Awaited<ReturnType<typeof draftEmail1>>;
+  try {
+    d = await draftEmail1(r, p.audit);
+  } catch (e) {
+    console.log(`  ${r.name}: skipped: ${(e as Error).message} · content ${JSON.stringify(r.research.content ?? null)}`);
+    return;
+  }
   const facts = [biz(r), r.city ?? "", personalLine(r), ...d.findings.map((f) => f.cost), String(Math.min(3, d.findings.length))].join("\n");
   const problems = checkEmail1(d.body, d.subject, facts, takesBookings(r.business_type));
   // The same automatic checks as production: "Needs a look" or rejected drafts are not sent.

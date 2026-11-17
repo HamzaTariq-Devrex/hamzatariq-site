@@ -334,8 +334,8 @@ export const latestDate = (html: string, text: string): string | null => {
   return dates.filter((d) => d <= now && !d.endsWith("-00")).sort().at(-1) ?? null;
 };
 
-/** Pages in the site's sitemap (index files: up to 3 child sitemaps), or null. */
-const sitemapPages = async (origin: string) => {
+/** Pages in the site's sitemap (index files: up to 3 child sitemaps) and the newest blog/news lastmod. */
+const sitemapPages = async (origin: string): Promise<{ count: number | null; blogLatest: string | null }> => {
   const get = async (u: string) => {
     try {
       const r = await safeFetch(new URL(u), { maxBytes: 2 * 1024 * 1024, timeoutMs: 8000 });
@@ -345,14 +345,22 @@ const sitemapPages = async (origin: string) => {
     }
   };
   const root = (await get(`${origin}/sitemap.xml`)) ?? (await get(`${origin}/sitemap_index.xml`));
-  if (!root) return null;
-  if (/<sitemapindex/i.test(root)) {
-    const children = [...root.matchAll(/<loc>\s*([^<\s]+)\s*<\/loc>/gi)].map((m) => m[1]).slice(0, 3);
-    let n = 0;
-    for (const c of children) n += ((await get(c)) ?? "").match(/<url>/gi)?.length ?? 0;
-    return n || null;
-  }
-  return root.match(/<url>/gi)?.length ?? null;
+  if (!root) return { count: null, blogLatest: null };
+  const bodies = /<sitemapindex/i.test(root)
+    ? await Promise.all([...root.matchAll(/<loc>\s*([^<\s]+)\s*<\/loc>/gi)].map((m) => m[1]).slice(0, 3).map(async (c) => (await get(c)) ?? ""))
+    : [root];
+  const count = bodies.reduce((n, b) => n + (b.match(/<url>/gi)?.length ?? 0), 0);
+  // Newest lastmod of a blog/news URL (YYYY-MM), from the same sitemap.
+  const now = new Date().toISOString().slice(0, 7);
+  const blogLatest =
+    bodies
+      .flatMap((b) => [...b.matchAll(/<url>([\s\S]*?)<\/url>/gi)].map((m) => m[1]))
+      .filter((u) => /<loc>[^<]*\/(blog|news|journal|articles?|insights|stories|posts?)\//i.test(u))
+      .map((u) => u.match(/<lastmod>\s*((?:19|20)\d\d-\d\d)/i)?.[1] ?? "")
+      .filter((d) => d && d <= now)
+      .sort()
+      .at(-1) ?? null;
+  return { count: count || null, blogLatest };
 };
 
 export const contentInfo = async (home: FetchResult): Promise<ContentInfo> => {
@@ -372,9 +380,10 @@ export const contentInfo = async (home: FetchResult): Promise<ContentInfo> => {
       // bad link
     }
   }
-  const [pages, blogPage] = await Promise.all([sitemapPages(base.origin), blog ? fetchPage(new URL(blog)) : Promise.resolve(null)]);
-  const latest = blogPage ? latestDate(blogPage.body, pageText(blogPage.body)) : null;
-  return { blog, pages, latest };
+  const [map, blogPage] = await Promise.all([sitemapPages(base.origin), blog ? fetchPage(new URL(blog)) : Promise.resolve(null)]);
+  // The blog page's own dates first; else the newest blog/news date in the sitemap.
+  const latest = blog ? ((blogPage ? latestDate(blogPage.body, pageText(blogPage.body)) : null) ?? map.blogLatest) : null;
+  return { blog, pages: map.count, latest };
 };
 
 /** Quality score 0-100: active signals (0-30) + size fit (0-25) + how much a better site would help (0-45). */
@@ -433,7 +442,8 @@ export const researchProspect = async (p: Prospect, audit: AuditResult | null, d
   } catch {
     home = null;
   }
-  if (!home) return { active: false, signals: [], inactiveReason: "Website didn't load during research", at };
+  // One failed load isn't a dead site: retried on later ticks (30 minutes apart), inactive after 3 tries.
+  if (!home) return attempt < 3 ? { active: true, signals: [], pending: attempt, at } : { active: false, signals: [], inactiveReason: "Website didn't load during research (3 tries)", at };
   const links = researchPages(home);
   const fetched = await Promise.all([...links.entries()].filter(([k]) => k !== "imprint").map(async ([kind, u]) => ({ kind, url: u.toString(), page: await fetchPage(u) })));
   const contact = fetched.find((x) => x.kind === "contact")?.page;

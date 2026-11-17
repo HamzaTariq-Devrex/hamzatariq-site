@@ -199,7 +199,7 @@ export const contentFindings = (c: ContentSignals | undefined | null): Finding[]
     out.push({
       id: "stale-blog",
       rank: 1,
-      cost: `the newest post on your blog is from ${when}, so there's nothing new on your site from the months since for Google to show`,
+      cost: `the newest post on your blog is from ${when}, so Google has seen nothing new from you since`,
       title: `No new posts since ${when}`,
       fix: "Publish one or two short, useful posts a month that answer what your customers search for.",
     });
@@ -208,7 +208,7 @@ export const contentFindings = (c: ContentSignals | undefined | null): Finding[]
     out.push({
       id: "no-blog",
       rank: 2,
-      cost: "your website has no blog or news page, so there are no articles on it for Google to show when people search with a question instead of your name",
+      cost: "your website has no blog or news page, so Google has no articles of yours to show when people search with questions",
       title: "No blog or news page",
       fix: "Add a blog and publish short posts that answer the questions your customers search for.",
     });
@@ -217,7 +217,7 @@ export const contentFindings = (c: ContentSignals | undefined | null): Finding[]
     out.push({
       id: "few-pages",
       rank: 3,
-      cost: `your website lists only ${c.pages} pages for Google, so only a few of your pages can show up in searches`,
+      cost: `your website lists only ${c.pages} pages for Google, so few of your pages can show up in searches`,
       title: `Only ${c.pages} pages listed for Google`,
       fix: "Add pages and posts for each service and the questions customers ask, so more searches can lead to you.",
     });
