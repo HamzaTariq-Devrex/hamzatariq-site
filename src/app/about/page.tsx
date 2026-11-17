@@ -189,15 +189,13 @@ export default function AboutPage() {
             <Icon name="code" size={16} /> React &amp; Next.js
           </span>
           <Image
-            src={SITE.photo.src}
-            alt={SITE.photo.alt}
-            width={SITE.photo.width}
-            height={SITE.photo.height}
-            sizes="(max-width: 960px) 72vw, 420px"
+            src={SITE.workPhoto.square.src}
+            alt={SITE.workPhoto.alt}
+            width={SITE.workPhoto.square.width}
+            height={SITE.workPhoto.square.height}
+            sizes="(max-width: 960px) 78vw, 460px"
             priority
           />
-          {/* The owner's working photo (blue shirt at a desk) replaces this headshot once it's provided. */}
-          <OwnerTodo what="Send the working photo (blue shirt at a desk) for /about and the home 'How I work' section." />
         </div>
       </section>
 

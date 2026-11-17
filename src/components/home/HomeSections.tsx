@@ -2,7 +2,6 @@ import Image from "next/image";
 import Link from "next/link";
 import Section from "@/components/site/ds/Section";
 import Icon, { type IconName } from "@/components/site/ds/Icon";
-import OwnerTodo from "@/components/site/OwnerTodo";
 import PostCard from "@/components/blog/PostCard";
 import Marquee from "@/components/ui/Marquee";
 import NumberTicker from "@/components/ui/NumberTicker";
@@ -150,10 +149,15 @@ export const HowIWork = () => (
       aside={
         <figure className="process-photo">
           <span className="process-photo-frame">
-            {/* The owner's working photo (blue shirt at a desk) goes here once it's provided; until then the headshot. */}
-            <Image src={SITE.photo.src} alt={SITE.photo.alt} width={SITE.photo.width} height={SITE.photo.height} sizes="(max-width: 900px) 90vw, 420px" data-parallax />
+            <Image
+              src={SITE.workPhoto.tall.src}
+              alt={SITE.workPhoto.alt}
+              width={SITE.workPhoto.tall.width}
+              height={SITE.workPhoto.tall.height}
+              sizes="(max-width: 900px) 90vw, 420px"
+              data-parallax
+            />
           </span>
-          <OwnerTodo what="Send the working photo (blue shirt at a desk). It replaces this headshot here and on /about." />
         </figure>
       }
     />

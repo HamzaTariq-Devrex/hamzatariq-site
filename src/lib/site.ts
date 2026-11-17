@@ -14,6 +14,12 @@ export const SITE = {
     height: 1024,
     alt: "Hamza Tariq, React and Next.js developer",
   },
+  /** Working photo (owner, 2026-11-18): /about hero (square) and the home "How I work" section (4:5). */
+  workPhoto: {
+    square: { src: "/images/hamza-tariq-desk-square.webp", width: 900, height: 900 },
+    tall: { src: "/images/hamza-tariq-desk-4x5.webp", width: 819, height: 1024 },
+    alt: "Hamza Tariq working at his desk",
+  },
   positioning:
     "I build custom-coded Next.js websites, dashboards and AI chatbots, and fix React sites that don't rank on Google, so your site loads fast, ranks and turns visitors into customers.",
   /** Short line under the name (About hero, author box). */

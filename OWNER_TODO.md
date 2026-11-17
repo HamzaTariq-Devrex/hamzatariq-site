@@ -52,4 +52,4 @@ Facts and access only Hamza can provide. Nothing on the site may be invented to 
 - [x] LinkedIn removed; GitHub `HamzaTariq-Devrex` is the main profile link.
 - [x] Projects labelled "Built at Devrex Digital".
 
-- [ ] **Working photo** (/about, home "How I work"): the photo in the blue shirt at a desk. It will be cropped (the blurry laptop corner at the bottom right removed), saved as WebP in responsive sizes and colour-matched to the headshot. Until then both spots show the headshot.
+- [x] **Working photo** (/about, home "How I work"): done 2026-11-18. Cropped without the laptop corner (square for /about, 4:5 for home), WebP, served in responsive sizes by next/image.
