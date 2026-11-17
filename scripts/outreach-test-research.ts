@@ -11,6 +11,7 @@ import { biz, checkEmail1, draftEmail1, personalLine, words } from "../src/lib/o
 import { researchFor } from "../src/lib/outreach/pipeline";
 import { sendOutreach } from "../src/lib/outreach/mail";
 import { takesBookings } from "../src/lib/outreach/osm-types";
+import { autoCheck } from "../src/lib/outreach/checks";
 
 const DRY = process.env.DRY === "1";
 const COUNT = Number(process.env.COUNT ?? 3);
@@ -20,7 +21,8 @@ let sent = 0;
 const tryOne = async (p: Prospect & { audit: ProspectAudit | null }) => {
   if (done.has(p.id) || !p.website) return;
   done.add(p.id);
-  const r = await researchFor(p);
+  // Research again with the current rules (the note and line are saved, as in the tick).
+  const r = await researchFor({ ...p, research: undefined, researched_at: undefined } as typeof p);
   if (!r?.research) {
     console.log(`  ${p.name}: inactive, skipped`);
     return;
@@ -33,6 +35,12 @@ const tryOne = async (p: Prospect & { audit: ProspectAudit | null }) => {
   const d = await draftEmail1(r, p.audit);
   const facts = [biz(r), r.city ?? "", personalLine(r), ...d.findings.map((f) => f.cost), String(Math.min(3, d.findings.length))].join("\n");
   const problems = checkEmail1(d.body, d.subject, facts, takesBookings(r.business_type));
+  // The same automatic checks as production: "Needs a look" or rejected drafts are not sent.
+  const verdict = await autoCheck(r, p.audit?.result ?? null, d.findings, d.body, problems);
+  if (verdict.kind !== "ok") {
+    console.log(`  ${r.name}: ${verdict.kind === "review" ? "held for Needs a look" : "rejected"}: ${verdict.reason}`);
+    return;
+  }
   const q = r.research.quality;
   const note = [
     "---",

@@ -26,7 +26,7 @@ export const whatsappText = (p: ForMessage) => {
   const noun = p.businessType ? nounFor(p.businessType) : "business like yours";
   const where = p.city ? ` in ${p.city}` : " nearby";
   return [
-    `Hi ${p.name} team, I'm Hamza Tariq, founder of Devrex Digital. I help small businesses get more customers online.`,
+    `Hi ${p.name} team, I'm Hamza, I run Devrex Digital, a small web studio.`,
     p.website
       ? "I had a look at your website and noticed a few things that make it harder for people to find you and get in touch. Want me to send you the quick fixes I found?"
       : `I couldn't find a website for ${p.name}, so people searching for ${/^[aeiou]/i.test(noun) ? "an" : "a"} ${noun}${where} find other places first. Want me to make you a free sample homepage?`,

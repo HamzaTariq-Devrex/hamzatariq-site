@@ -78,7 +78,10 @@ export const relatedProject = (businessType: string) => {
   return PROJECTS.find((p) => p.slug === slug) ?? PROJECTS[0];
 };
 
-// ---------- Subjects: 2-4 lowercase words, A/B per niche ----------
+// ---------- Subjects: short and lowercase, the full business name, A/B ----------
+
+/** Up to 6 words, so a long business name is never cut in half (owner, 2026-11-18). */
+const SUBJECT_MAX_WORDS = 6;
 
 const shortName = (name: string, maxWords: number) =>
   name
@@ -92,33 +95,31 @@ const shortName = (name: string, maxWords: number) =>
     .slice(0, maxWords)
     .join(" ");
 
-const B_SUBJECT: Record<NicheGroup, string> = {
-  jewellery: "online",
-  fashion: "online shop",
-  clinic: "new patients",
-  restaurant: "on phones",
-  salon: "new clients",
-  realestate: "enquiries",
-  gym: "new members",
-  law: "new clients",
-  accounting: "new clients",
-  hotel: "direct bookings",
-  auto: "on google",
-  home: "on google",
-  education: "new students",
-  ecommerce: "online shop",
-  delivery: "new customers",
-};
 
 /** Variant A or B, 50/50 by prospect id (stable). */
 export const variantFor = (prospectId: string): "A" | "B" => (parseInt(prospectId.replace(/-/g, "").slice(-2), 16) % 2 === 0 ? "A" : "B");
 
-export const subjectFor = (p: Pick<Prospect, "name" | "business_type">, variant: "A" | "B") => {
-  const g = groupOf(p.business_type) ?? "ecommerce";
-  const suffix = variant === "A" ? "website" : B_SUBJECT[g];
-  // 2-4 lowercase words in total: as much of the name as fits next to the suffix.
-  const s = `${shortName(p.name, Math.max(1, 4 - words(suffix)))} ${suffix}`.trim();
-  return s.split(/\s+/).slice(0, 4).join(" ");
+/** Subject words that match the email's one problem (owner, 2026-11-18); anything else is "website". */
+const PROBLEM_SUBJECT: Record<string, string> = {
+  "not-mobile": "on phones",
+  "slow-mobile": "on phones",
+  title: "on google",
+  description: "on google",
+  hidden: "on google",
+  "no-contact": "enquiries",
+};
+
+/**
+ * "{business} website" (A) or "{business} {what the problem is about}" (B), lowercase. The business
+ * name is never cut (owner, 2026-11-18): a long name just gets "website" or nothing after it.
+ */
+export const subjectFor = (p: Pick<Prospect, "name" | "business_type">, variant: "A" | "B", problem?: string) => {
+  const name = shortName(p.name, 99);
+  const suffix = variant === "B" && problem && PROBLEM_SUBJECT[problem] ? PROBLEM_SUBJECT[problem] : "website";
+  const n = words(name);
+  if (n + words(suffix) <= SUBJECT_MAX_WORDS) return `${name} ${suffix}`;
+  if (n + 1 <= SUBJECT_MAX_WORDS) return `${name} website`;
+  return n >= 2 ? name : `${name} website`;
 };
 
 // ---------- Checks ----------
@@ -145,7 +146,7 @@ export const checkEmail1 = (body: string, subject: string, facts: string, bookin
   const allowed = new Set(facts.match(/\d+(?:[.,]\d+)?/g) ?? []);
   const nums = (text.match(/\d+(?:[.,]\d+)?/g) ?? []).filter((x) => !allowed.has(x));
   if (nums.length) problems.push(`it uses numbers that aren't in the facts: ${nums.join(", ")}`);
-  if (subject !== subject.toLowerCase() || words(subject) < 2 || words(subject) > 4) problems.push("the subject must be 2-4 lowercase words");
+  if (subject !== subject.toLowerCase() || words(subject) < 2 || words(subject) > SUBJECT_MAX_WORDS) problems.push(`the subject must be 2-${SUBJECT_MAX_WORDS} lowercase words`);
   return problems;
 };
 
@@ -167,17 +168,34 @@ const cta = (f: Finding[]) => {
 /** The research's personal opening line (verified against their site), or "" when there's none. */
 export const personalLine = (p: Pick<Prospect, "research">) => (p.research?.active && p.research.line ? p.research.line.trim() : "");
 
+/** Who Hamza is, in every email 1 (owner, 2026-11-18: matches the signature). Written by code, never by Gemini. */
+export const INTRO = "I'm Hamza, I run Devrex Digital, a small web studio.";
+/** An older Gemini middle that still starts with its own intro: that sentence is dropped. */
+const problemOnly = (middle: string) => {
+  const m = middle.trim().replace(/^I'?m Hamza\b[^.]*\.\s*/i, "");
+  // A sentence, even when Gemini copied the plain finding ("your homepage title…" → "Your homepage title….").
+  return m ? `${m.charAt(0).toUpperCase()}${m.slice(1)}${/[.!?]$/.test(m) ? "" : "."}` : m;
+};
+
+/**
+ * The Gemini sentence must say the audit's finding, not something else (owner, 2026-11-18: every
+ * problem literally true): most of the finding's key words (by stem) must be in it.
+ */
+export const conveysProblem = (middle: string, cost: string) => {
+  const stem = (w: string) => w.replace(/(ing|ed|es|s)$/, "").slice(0, 5);
+  const keys = [...new Set(cost.toLowerCase().match(/[a-z]{4,}/g) ?? [])].filter((w) => !["your", "that", "they", "them", "have", "from", "with", "this", "there", "people", "visitors"].includes(w));
+  const text = middle.toLowerCase();
+  const hit = keys.filter((w) => text.includes(stem(w))).length;
+  return keys.length ? hit / keys.length >= 0.6 : true;
+};
+
 const assemble1 = (p: Prospect, middle: string, f: Finding[], withProof = true) =>
-  [hello(p), [personalLine(p), middle.trim()].filter(Boolean).join(" "), withProof ? proofLine(p.business_type) : null, cta(f), OPT_OUT, SIGNATURE].filter(Boolean).join("\n\n");
+  [hello(p), [personalLine(p), INTRO, problemOnly(middle)].filter(Boolean).join(" "), withProof ? proofLine(p.business_type) : null, cta(f), OPT_OUT, SIGNATURE].filter(Boolean).join("\n\n");
 
 /** Template email 1 from the same real findings (also the fallback when Gemini's draft fails the check). */
 const templateMiddle = (p: Prospect, f: Finding[]) => {
   const first = f[0];
-  const parts = [
-    "I'm Hamza, a web developer.",
-    first.id === "no-website" ? `${lead(first.cost)}.` : `I had a look at ${biz(p)} online and noticed that ${first.cost}.`,
-  ];
-  return parts.join(" ");
+  return first.id === "no-website" ? `${lead(first.cost)}.` : `I had a look at ${biz(p)} online and noticed that ${first.cost}.`;
 };
 
 /** "a jeweller in Manchester" / "an optician nearby". */
@@ -192,15 +210,14 @@ const searchPhrase = (p: Pick<Prospect, "business_type" | "osm_tags" | "city">) 
  * places first. Want me to make you a free sample homepage?" Fixed template, no Gemini, no link.
  */
 const noWebsiteEmail1 = (p: Prospect, f: Finding[], subject: string, variant: "A" | "B") => {
-  const intro = "I'm Hamza, a web developer who helps small businesses get more customers online.";
   const core = `I couldn't find a website for ${biz(p)}, so people searching for ${searchPhrase(p)} find other places first.`;
   const pad = " A simple site with your opening hours, location and a call button would fix that.";
   const facts = [p.name, p.city ?? ""].join("\n");
   const body = [
-    assemble1(p, `${intro} ${core}`, f),
-    assemble1(p, `${intro} ${core}${pad}`, f),
-    assemble1(p, `${intro} ${core}`, f, false),
-    assemble1(p, `${intro} ${core}${pad}`, f, false),
+    assemble1(p, core, f),
+    assemble1(p, `${core}${pad}`, f),
+    assemble1(p, core, f, false),
+    assemble1(p, `${core}${pad}`, f, false),
   ].find((b) => !checkEmail1(b, subject, facts, takesBookings(p.business_type)).length);
   if (!body) throw new Error("Email 1 could not meet the rules (60-90 words, no links, no technical words).");
   return { subject, body, variant, source: "template" as const, findings: f };
@@ -209,9 +226,9 @@ const noWebsiteEmail1 = (p: Prospect, f: Finding[], subject: string, variant: "A
 export const draftEmail1 = async (p: Prospect, auditRow: ProspectAudit | null): Promise<Draft & { findings: Finding[] }> => {
   const audit = auditRow?.result ?? null;
   const f = prospectFindings(p, audit);
-  const variant = variantFor(p.id);
-  const subject = subjectFor(p, variant);
   if (!f.length) throw new Error("No real finding to write about.");
+  const variant = variantFor(p.id);
+  const subject = subjectFor(p, variant, f[0].id);
   if (f[0].id === "no-website") return noWebsiteEmail1(p, f, subject, variant);
   const fixed = assemble1(p, "", f);
   const line = personalLine(p);
@@ -232,7 +249,9 @@ export const draftEmail1 = async (p: Prospect, auditRow: ProspectAudit | null): 
     return { subject, body: fallback, variant, source: "template" as const, findings: f };
   };
   const ok = (middle: string) =>
-    [assemble1(p, middle, f), assemble1(p, middle, f, false)].find((b) => !checkEmail1(b, subject, facts, takesBookings(p.business_type)).length) ?? null;
+    !conveysProblem(problemOnly(middle), f[0].cost)
+      ? null
+      : [assemble1(p, middle, f), assemble1(p, middle, f, false)].find((b) => !checkEmail1(b, subject, facts, takesBookings(p.business_type)).length) ?? null;
   // 1. The middle written in the research call (one Gemini call per lead, owner 2026-11-18).
   const first = p.research?.middle?.trim();
   if (first) {
@@ -242,8 +261,8 @@ export const draftEmail1 = async (p: Prospect, auditRow: ProspectAudit | null): 
     const problems = checkEmail1(assemble1(p, first, f, false), subject, facts, takesBookings(p.business_type));
     try {
       const out = await outreachJson<{ middle?: string }>({
-        system: `You fix the middle of a short cold email from Hamza Tariq, founder of Devrex Digital, to a small business. ${budget.min}-${budget.max} words, plain friendly English, 1-2 sentences.
-${line ? `It comes right after this opening line, so don't repeat it: "${line}". ` : ""}Say who Hamza is in a few words (a web developer who helps small businesses), then this ONE problem as what it costs them: "${f[0].cost}". Keep any number exactly.
+        system: `You fix one sentence of a short cold email from Hamza Tariq, who runs Devrex Digital, to a small business. ${Math.max(10, budget.min)}-${budget.max} words, plain friendly English, 1 sentence.
+It comes right after "${[line, INTRO].filter(Boolean).join(" ")}", so don't introduce Hamza again. Explain this ONE problem with their website as what it costs them: "${f[0].cost}". Keep its meaning and any number exactly; don't exaggerate.
 No greeting, sign-off, question, link, web address or technical word (no SEO, H1, meta, schema, SSL, speed scores). Never invent anything.
 Answer as JSON: {"middle": "..."}`,
         user: `Business: ${biz(p)} (${ctx(p).noun}${p.city ? `, ${p.city}` : ""})\nYour draft: "${first}"\nIt was rejected because ${problems.join("; ") || "the whole email was too long or too short"}. Rewrite it.`,
@@ -367,7 +386,7 @@ const reSubject = (s: string) => (/^re:/i.test(s) ? s : `Re: ${s}`);
  */
 export const manualMessage = (p: Pick<Prospect, "name" | "business_type" | "osm_tags" | "city"> & { email?: string | null; research?: Prospect["research"] }, audit: AuditResult | null) => {
   const f = findings(audit, ctx(p));
-  const intro = `${hello(p)} I'm Hamza Tariq, founder of Devrex Digital. I help small businesses get more customers online.`;
+  const intro = `${hello(p)} ${INTRO}`;
   const sign = "Hamza Tariq\nFounder, Devrex Digital";
   if (!f.length) return `${intro}\nWould a few free ideas to get more enquiries from your website be useful?\n\n${sign}`;
   if (f[0].id === "no-website") return `${intro}\nI couldn't find a website for ${biz(p)}, so people searching for ${searchPhrase(p)} find other places first.\nWant me to make you a free sample homepage?\n\n${sign}`;

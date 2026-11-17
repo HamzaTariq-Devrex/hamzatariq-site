@@ -193,13 +193,25 @@ export const verifyLine = (line: string, corpus: string, extra: string[]) => {
   if (/[?!]/.test(l) || (l.match(/[.]/g) ?? []).length > 1) return "one plain sentence only";
   if (FLATTERY.test(l)) return "flattery";
   if (/\b(seo|website|google|online|instagram|facebook|reviews?)\b/i.test(l)) return "about their site, not their business";
+  // Owner, 2026-11-18: a short paraphrase of a fact is fine ("I saw you do repairs and commission work
+  // in Battersea"), but names, numbers and key nouns must appear on their site.
   const known = norm(`${corpus} ${extra.join(" ")}`);
-  const words = norm(l)
+  const raw = `${corpus} ${extra.join(" ")}`;
+  const numbers = l.match(/\d+/g) ?? [];
+  const missingNumbers = numbers.filter((n) => !raw.includes(n));
+  if (missingNumbers.length) return `numbers not on their site: ${missingNumbers.join(", ")}`;
+  const names = (l.slice(2).match(/\b[A-Z][\p{L}'’-]+/gu) ?? []).map((w) => norm(w).replace(/'s$/, ""));
+  const missingNames = names.filter((w) => w && !known.includes(w));
+  if (missingNames.length) return `names not on their site: ${missingNames.join(", ")}`;
+  // Key nouns and other content words: matched on their stem ("making" ~ "make", "repairs" ~ "repair");
+  // a few connecting words may be paraphrased.
+  const stem = (w: string) => w.replace(/'s$/, "").replace(/(ing|ed|es|s)$/, "").slice(0, Math.max(4, w.length - 3));
+  const content = norm(l)
     .split(" ")
     .slice(2)
     .filter((w) => w.length >= 4 && !STOP.has(w));
-  const missing = words.filter((w) => !known.includes(w.replace(/'s$/, "")) && !known.includes(w.replace(/s$/, "")));
-  if (missing.length) return `not on their site: ${missing.join(", ")}`;
+  const missing = content.filter((w) => !known.includes(stem(w)));
+  if (missing.length > Math.floor(content.length * 0.3)) return `not on their site: ${missing.join(", ")}`;
   return null;
 };
 
@@ -249,11 +261,11 @@ Return JSON:
 {"sells": what they sell or do (short), "area": the area/neighbourhood they serve if stated, "customers": who their customers are if stated,
  "owner_first_name": the owner's or founder's first name ONLY if the text clearly says who owns/founded/runs it, else null,
  "facts": up to 3 specific things that make them different, each {"fact": plain words, "quote": the exact words copied from the text that prove it},
- "line": ONE sentence starting "I saw" that mentions one specific fact (what they make or do, and where if stated), e.g. "I saw you make custom engagement rings in Hatton Garden." Max 18 words. No praise or adjectives like amazing/beautiful/great, no question, nothing about their website. Use only words from the text. If nothing specific, null.
+ "line": ONE sentence starting "I saw" about the MOST specific, human fact in the text: years in business or the year they started, family history, a signature product or service, what they are known for, where they are. Examples: "I saw Lavan has been making handmade jewellery since 1993.", "I saw you do repairs and commission work in Battersea.", "I saw your family has run the bakery for three generations." Max 18 words. A short paraphrase is fine, but every name, number and key noun must come from the text. No praise or adjectives like amazing/beautiful/great, no question, nothing about their website. null ONLY when the text has no specific fact at all,
  "note": 2-3 plain sentences about the business only (what they do, where, for whom, what stands out), for Hamza to read; never mention Hamza, websites or the email,
  "middle": ${
    problem
-     ? `the middle of Hamza's cold email, 22-32 words, plain friendly English, 1-2 sentences, coming right after the "line". First say who Hamza is in a few words (a web developer who helps small businesses), then explain this ONE problem with their website as what it costs them: "${problem}". Keep its meaning and any number exactly; no other problem; no greeting, sign-off, question, link, web address or technical word (no SEO, H1, meta, schema, SSL, speed scores); never invent results, clients, prices or claims`
+     ? `ONE sentence of Hamza's cold email, 14-26 words, plain friendly English. It comes right after the "line" and "I'm Hamza, I run Devrex Digital, a small web studio.", so don't introduce Hamza. Explain this ONE problem with their website as what it costs them: "${problem}". Keep its meaning and any number exactly and don't exaggerate (no "empty", "invisible", "losing all", "most people leave"); no other problem; no greeting, sign-off, question, link, web address or technical word (no SEO, H1, meta, schema, SSL, speed scores); never invent results, clients, prices or claims`
      : "null"
  }}
 HAMZA'S PROFILE (background only)

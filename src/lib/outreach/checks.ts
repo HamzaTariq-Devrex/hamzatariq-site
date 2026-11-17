@@ -10,6 +10,7 @@ import { TESTIMONIALS } from "@/lib/testimonials";
 import type { AuditResult } from "@/lib/audit/types";
 import { ox, type Prospect } from "./db";
 import { CHAIN_LOCATIONS, isBigOrganisation, isStoreLocatorPage } from "./osm";
+import { isPrimeLocation } from "./areas";
 import { takesBookings } from "./osm-types";
 import { waitingForAddress } from "./address";
 import { hasMailServer } from "./mx";
@@ -74,6 +75,16 @@ export const STRONG_SITE_SCORE = 70;
 export const HELD_REASON = (score: number) => `Strong site (audit ${score}): waiting for the SEO + blog offer`;
 export const isStrongSite = (p: Pick<Prospect, "audit_score">) => p.audit_score != null && p.audit_score >= STRONG_SITE_SCORE;
 
+/** A website that is a sub-page (not the home page) of a domain: "/royal-exchange-jewellers/". */
+export const isSubPage = (url: string) => {
+  try {
+    const path = new URL(url).pathname.replace(/\/+$/, "").toLowerCase();
+    return !!path && !/^\/(index(\.\w+)?|home|en|en-gb|uk|gb)$/.test(path);
+  } catch {
+    return false;
+  }
+};
+
 /** Every quoted sentence in the email must appear word for word in a real review. */
 export const quotesAreReal = (body: string) => {
   const quotes = [...body.matchAll(/"([^"]{8,})"/g)].map((m) => m[1].replace(/…$/, "").trim());
@@ -88,6 +99,7 @@ export const hardChecks = async (p: Prospect): Promise<string | null> => {
   if (waitingForAddress(p.country)) return "US/Canada wait for a postal address";
   if (isBigOrganisation(p.osm_tags ?? {}, p.name)) return "Chain, brand or public body";
   if (isStoreLocatorPage(p.website)) return "Store-locator page of a bigger site";
+  if (isPrimeLocation(p.osm_tags ?? {})) return "Prime luxury address (owner, 2026-11-18: skipped)";
   if ((await ox.nameCount(p.name)) >= CHAIN_LOCATIONS) return `Same name at ${CHAIN_LOCATIONS}+ locations (chain)`;
   if (!(await hasMailServer(p.email))) return "Email domain has no mail server";
   if (await ox.isSuppressed(p.email, p.id)) return "Suppressed or already contacted";
@@ -111,6 +123,9 @@ export const autoCheck = async (p: Prospect, audit: AuditResult | null, f: Findi
   } else if (!audit) {
     return { kind: "review", reason: "Low audit confidence: no audit result" };
   }
+  // Their "website" is one page on a bigger site (a shopping centre, a directory, a group): the audit
+  // is of someone else's site, so a person looks first.
+  if (p.website && isSubPage(p.website)) return { kind: "review", reason: "Their website is a page on a bigger site, so the audit may not be theirs" };
   if (flags.redirectOther) return { kind: "review", reason: `Low audit confidence: the website redirects to ${flags.redirectOther}` };
   if (flags.jsPage && f[0].id === "no-contact") return { kind: "review", reason: "Low audit confidence: the page is built with JavaScript, so the contact-button check may be wrong" };
   if (looksLikeUkSoleTrader(p)) return { kind: "review", reason: "Possible UK sole trader (no Ltd/Limited in the name or on the site): needs prior consent under PECR" };
