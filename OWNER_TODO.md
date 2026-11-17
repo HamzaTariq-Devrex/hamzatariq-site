@@ -45,7 +45,7 @@ Facts and access only Hamza can provide. Nothing on the site may be invented to 
 - [x] Project terms: 50% upfront / 50% on delivery, 2 free revision rounds, 30 days of free bug fixes (maintenance quoted separately), and delivery times per service.
 - [x] Supabase Auth URLs: Site URL `https://hamzatariq.site`, redirects `https://hamzatariq.site/**` and `http://localhost:3000/**`.
 - [x] Resend DNS records added on Vercel (old records from an earlier Resend setup replaced).
-- [x] Positioning line, short bio and photo (`public/images/hamza-tariq-2026.webp`).
+- [x] Positioning line, short bio and photo (`public/images/hamza-tariq-portrait.webp`).
 - [x] Pricing for all four services.
 - [x] First case study: `/work/hamzatariq-site`.
 - [x] Client count confirmed: 45+.

@@ -21,7 +21,7 @@ I'm Hamza Tariq, founder of Devrex Digital and a full-stack developer specializi
 - Education: BS in Artificial Intelligence, The Islamia University of Bahawalpur (2022–2026); ICS (Intermediate in Computer Science), SE College Bahawalpur (2020–2022).
 - Email: hamzabuildsweb@gmail.com. WhatsApp: +92 305 4122637.
 - GitHub: https://github.com/HamzaTariq-Devrex (main profile link). No LinkedIn.
-- Photo: `public/images/hamza-tariq-2026.webp`.
+- Photo: `public/images/hamza-tariq-portrait.webp`.
 - Availability (owner confirmed 2026-11-07): open to full-time remote roles, contract work and freelance projects; available to start within 2 weeks.
 - Contact (owner, 2026-11-15): no booking link or scheduled calls through the site. Every call-to-action opens WhatsApp with a prefilled message; the contact form and email are the alternatives.
 - Shopify (owner confirmed 2026-11-05): Hamza does not do Shopify work (no Shopify themes, apps or chatbots on Shopify stores). Online stores are built as custom Next.js stores.
