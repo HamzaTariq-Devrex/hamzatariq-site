@@ -250,7 +250,7 @@ Return JSON:
  "owner_first_name": the owner's or founder's first name ONLY if the text clearly says who owns/founded/runs it, else null,
  "facts": up to 3 specific things that make them different, each {"fact": plain words, "quote": the exact words copied from the text that prove it},
  "line": ONE sentence starting "I saw" that mentions one specific fact (what they make or do, and where if stated), e.g. "I saw you make custom engagement rings in Hatton Garden." Max 18 words. No praise or adjectives like amazing/beautiful/great, no question, nothing about their website. Use only words from the text. If nothing specific, null.
- "note": 2-3 plain sentences summarising the above for Hamza,
+ "note": 2-3 plain sentences about the business only (what they do, where, for whom, what stands out), for Hamza to read; never mention Hamza, websites or the email,
  "middle": ${
    problem
      ? `the middle of Hamza's cold email, 22-32 words, plain friendly English, 1-2 sentences, coming right after the "line". First say who Hamza is in a few words (a web developer who helps small businesses), then explain this ONE problem with their website as what it costs them: "${problem}". Keep its meaning and any number exactly; no other problem; no greeting, sign-off, question, link, web address or technical word (no SEO, H1, meta, schema, SSL, speed scores); never invent results, clients, prices or claims`
