@@ -1,0 +1,133 @@
+---
+title: "Red Flags When Hiring a React Developer (and What to Ask)"
+seoTitle: "Red Flags When Hiring a React Developer"
+description: "Red flags when hiring a React developer you can hear in one call: the stack, rendering and SEO plan they propose, what to ask and which answers to avoid."
+keyword: "red flags when hiring a react developer"
+category: hiring
+cluster: hire-developer
+role: supporting
+intent: hire
+funnel: decision
+secondary: ["react developer warning signs", "bad web developer signs", "hire react developer mistakes"]
+trust: "I've shipped 40+ live production websites in React, Next.js and TypeScript as the sole frontend developer on each build, and as founder of Devrex Digital I scope and quote every project with the client myself."
+tags: [hiring, react, next.js, freelancer]
+published: 2026-11-19
+faq:
+  - q: "How do you spot a bad developer if you can't read code?"
+    a: "Listen to what they propose. Starting a new project on Create React App, building a public site that needs Google as a browser-only app, or answering SEO with 'we'll add react-helmet' are warning signs you can hear in one call. Then test their live sites with View page source and a phone."
+  - q: "What are red flags in a developer portfolio?"
+    a: "Only screenshots or demo apps (to-do lists, weather apps, streaming-site clones) and no live business sites; live sites that break on a phone; and vague answers about which part they built. A good portfolio has live links and a specific answer for each one."
+  - q: "Is Create React App a red flag?"
+    a: "For a new project, yes. The React team has deprecated Create React App and recommends a framework such as Next.js for new apps. An older site built on it is fine to maintain; starting a new one on it in your project is a sign the developer hasn't kept up."
+  - q: "Is it a red flag if the developer keeps the code or accounts?"
+    a: "No. Developers and agencies handle this in different ways, and there's no single right answer. The red flag is when nobody says it out loud: agree in writing who holds the code, hosting and accounts, and what a handover includes, before work starts."
+  - q: "What should a React website cost?"
+    a: "With me, a landing page or portfolio site starts at $400 (5–7 days), an ecommerce store with an admin dashboard at $1,000 (2–3 weeks) and a custom dashboard at $1,200 (2–4 weeks). Every project is quoted after a free call."
+---
+
+The biggest **red flags when hiring a React developer** are in what they propose, not in their CV. You don't need to read code to hear them. Watch for these:
+
+- **Create React App for a new project.** The React team has deprecated it.
+- **A browser-only app for a public site** that needs Google, with "Google runs JavaScript now" as the reason.
+- **"We'll add react-helmet" as the whole SEO plan.**
+- **No answer to "where does the page get built?"**
+- **A pile of libraries** for a simple site.
+- **Live links missing from the portfolio**, or vague answers about who built what.
+- **A price with no list of pages and features.**
+
+Each one is explained below, with the questions that bring them out and the answers you want.
+
+## What to look for in a React developer before the first call
+
+Spend ten minutes on their work before you talk. My [guide to hiring a Next.js developer](/blog/hire-nextjs-developer) has a portfolio test you can run with Chrome and a phone: open the page source, read the tab titles, run Lighthouse, try the menu and forms on your phone. Run it on two or three of their live client sites.
+
+Then look for three good signs:
+
+- **Live business sites you can open**, not only screenshots. A shop, a booking page or a service site that real customers use.
+- **Work like yours.** If you need a store, at least one store. If you need a dashboard, something with logins and data.
+- **Plain explanations.** On their site or in their first message, they explain what they do without hiding behind terms.
+
+If those are there, the call is worth having. The red flags below are what to listen for on it.
+
+## How do you spot a bad developer from what they propose?
+
+This is where React-specific warning signs show up, and none of the top guides on this topic cover them. Most are written for engineering managers who review code. These are the ones a founder can hear.
+
+**Create React App for a new project.** It used to be the standard way to start a React app. The React team has since [deprecated Create React App](https://react.dev/blog/2025/02/14/sunsetting-create-react-app) and points new projects to a framework like Next.js. A developer proposing it for your new site hasn't kept up. Maintaining an old site that already uses it is a different matter and fine.
+
+**A browser-only app for a site that needs Google.** A standard React app sends an almost empty page and builds everything in the browser. Google can run JavaScript, but it does so in a second, later step, as its own [JavaScript SEO basics guide](https://developers.google.com/search/docs/crawling-indexing/javascript/javascript-seo-basics) explains, and many other crawlers and link previews never do. For a store, a service site or a blog, the page should arrive as finished HTML. If the developer shrugs this off, your site may not show up. My comparison of [Next.js and WordPress for a business website](/blog/nextjs-vs-wordpress-for-business-website) covers how to pick a platform that ranks.
+
+**"We'll add react-helmet" as the SEO plan.** That library changes the page title in the browser after the page loads. It doesn't fix the empty page a crawler gets first. A good answer talks about server rendering or building pages ahead of time, a title and description per page, a sitemap and canonical URLs, the items in my [Next.js SEO checklist](/blog/nextjs-seo-checklist).
+
+**No clear answer to "where is each page built?"** In Next.js, a developer who marks every page "use client" has rebuilt a browser-only app inside a server framework. You don't need to know the term. Ask the question and listen for a calm, specific answer: "the product pages are built on the server, the cart runs in the browser".
+
+**A pile of libraries for a simple site.** Three animation libraries, a big component kit and a state library for a five-page site all ship to every visitor's phone. Ask what each one is for. "It's what I always use" is a weak answer.
+
+## What are red flags in a developer portfolio?
+
+These are the bad web developer signs I'd look for in any portfolio, React or not:
+
+- **Only demo apps.** To-do lists, weather apps and streaming-site clones show someone has learned React, not that they've shipped for a client.
+- **Screenshots without links.** Live sites can be tested; pictures can't.
+- **Live sites that break on a phone.** Sideways scrolling, a menu that doesn't open, a form that doesn't send.
+- **"We did everything."** Ask what they built personally on each project. A real answer is specific: "I built the store front and the admin dashboard; the client's designer did the logo."
+- **No work like yours.** A strong portfolio of landing pages doesn't prove someone can build a store with orders and stock.
+
+<FromMyWork title="What I propose for a new business site">
+The online stores I build at Devrex Digital are custom Next.js and TypeScript stores: product catalogues, category and filter pages, cart and checkout, hand-coded rather than templated. [The Nagina Jewels online jewellery store](/work/nagina-jewels) is a good example: a large catalogue organised so shoppers reach bridal, kundan, earrings and necklaces in a few taps, built mobile-first.
+
+When a client asks me "where is each page built?", I can answer for every page type: the catalogue and product pages arrive as finished HTML for Google, and the parts that need a click, like the cart, run in the browser. For the admin side I design the Supabase database, logins and access rules, and build the React dashboard for orders and products on top. That's the level of detail you should expect from any developer on a first call.
+</FromMyWork>
+
+## Red flags when hiring a React developer: what to ask
+
+You don't need to judge the code to judge these answers. Look for specific, calm, plain-English replies.
+
+| Ask | A good answer sounds like | React developer warning signs |
+| --- | --- | --- |
+| What will you build it with, and why? | A framework such as Next.js, with a reason tied to your site | "Create React App", or "whatever's fastest for me" |
+| How will Google see my pages? | Pages built on the server or ahead of time, each with its own title | "Google runs JavaScript, it's fine" |
+| What's your SEO plan? | Per-page titles and descriptions, a sitemap, canonical URLs, speed | "We'll add react-helmet" |
+| What exactly is in the price? | A list of pages, features and revision rounds | One number with no list |
+| What happens after launch? | A set period of bug fixes, then maintenance quoted separately | "Just message me if anything breaks" |
+| Who holds the code and accounts, and what does handover include? | A clear answer you can put in writing | A shrug, or "we'll sort it out later" |
+| Can I see a live project like mine? | A link and what they built on it | Screenshots, or "it's under NDA" for everything |
+
+That ownership row matters, and it's often misread. A developer or agency keeping the code or accounts isn't a red flag by itself; it's a common setup. The red flag is leaving it unsaid. Agree on it before work starts.
+
+## Hire React developer mistakes founders make
+
+Some problems come from the hiring side, not the developer's:
+
+- **Choosing on hourly rate alone.** A low rate with no scope often costs more by the end than a fixed quote for a clear list.
+- **No written scope.** Without a list of pages, screens and features, every disagreement becomes your word against theirs.
+- **Paying everything upfront.** Split payments tie money to delivery. Mine are 50% upfront and 50% on delivery.
+- **Skipping the phone test.** Most of your visitors are on a phone. Test the developer's live work there before you hire.
+- **Not asking about support.** Know what happens if something breaks in the first month after launch.
+
+Before you send the first payment, tick these off:
+
+- [ ] I've opened at least two of their live sites on my phone.
+- [ ] They've told me how Google will see my pages, in plain words.
+- [ ] I have a written list of pages and features with the price.
+- [ ] Payment is split, not all upfront.
+- [ ] We've agreed in writing who holds the code and accounts and what handover includes.
+- [ ] I know what support I get after launch.
+
+<MyTake>
+If you can only ask one question, ask "how will Google see my pages?" It separates developers who build sites for businesses from developers who build apps for themselves faster than anything else. A good developer answers it in two sentences without a single buzzword. Someone who gets defensive, or tells you it doesn't matter for a public site, has shown you what you'll be fixing later.
+</MyTake>
+
+## What should a React developer cost for your project?
+
+Hourly rate tables online vary wildly and most come from staffing companies selling hours. A fixed quote for a defined project is easier to compare. These are my starting prices:
+
+| Project | From | Usual time |
+| --- | --- | --- |
+| Landing page / portfolio website | $400 | 5–7 days |
+| Ecommerce store with admin dashboard | $1,000 | 2–3 weeks |
+| Full ecommerce app (user logins, accounts, orders) | $2,000 | Quoted after a free call |
+| Custom dashboard | $1,200 | 2–4 weeks |
+| Custom web app | $2,500 | 4–8 weeks |
+
+Every project includes 2 revision rounds and 30 days of free bug fixes after launch. If you'd like to put the questions above to me directly, my [Next.js website development service](/services/nextjs-websites) is the place to start.

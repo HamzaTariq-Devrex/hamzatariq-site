@@ -507,8 +507,9 @@
         "what are red flags in a developer portfolio?"
       ],
       "angle": "A red-flag list a non-technical founder can check in 10 minutes: view-source on their past sites, Lighthouse on their own site, who owns the code and accounts.",
-      "status": "queued",
-      "publishedSlug": null
+      "status": "published",
+      "publishedSlug": "red-flags-when-hiring-a-react-developer",
+      "published": "2026-11-19"
     },
     {
       "keyword": "create react app seo problems",
