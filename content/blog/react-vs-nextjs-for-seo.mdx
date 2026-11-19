@@ -105,7 +105,7 @@ You can check your own site in a minute: open a page, right-click, choose "View 
 For public pages, yes, because of what it does by default. The Next.js SEO benefits beyond rendering are the small things that a plain React app needs extra code or plugins for:
 
 - **Per-page metadata.** Each page exports its title, description, canonical and social image, and Next.js writes them into the HTML. No react-helmet, no tags that change only after JavaScript runs.
-- **Sitemap and robots.txt from code.** New products and posts appear in the sitemap on the next build, without anyone editing a file.
+- **Sitemap and robots.txt from code.** New products and posts appear in the sitemap on the next build, without anyone editing a file. The code for this and the rest of the setup is in my [Next.js SEO checklist with 20 items](/blog/nextjs-seo-checklist).
 - **Real not-found pages.** A missing product sends a proper not-found status instead of a soft error.
 - **Images and fonts.** The built-in image component serves the right size for each screen and loads off-screen images later, which helps speed.
 - **Static pages with fresh data.** Pages can be built ahead of time and rebuilt when the content changes, so they load fast and stay current.

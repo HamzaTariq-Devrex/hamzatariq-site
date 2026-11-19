@@ -407,8 +407,9 @@
         "does next.js generate a sitemap?"
       ],
       "angle": "A copyable checklist with the exact App Router code for each item, taken from this site's codebase, plus how to test each one.",
-      "status": "queued",
-      "publishedSlug": null
+      "status": "published",
+      "publishedSlug": "nextjs-seo-checklist",
+      "published": "2026-11-19"
     },
     {
       "keyword": "ecommerce website cost breakdown",

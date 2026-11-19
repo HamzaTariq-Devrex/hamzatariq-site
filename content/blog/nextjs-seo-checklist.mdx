@@ -1,0 +1,243 @@
+---
+title: "Next.js SEO Checklist: 20 Things Every Page Needs"
+seoTitle: "Next.js SEO Checklist: 20 Items With Code"
+description: "A Next.js SEO checklist for the App Router: 20 items with the exact code (metadata, sitemap, canonical, JSON-LD) and a one-minute test for each before launch."
+keyword: "next.js seo checklist"
+category: react-nextjs-seo
+cluster: react-seo
+role: supporting
+intent: learn
+funnel: consideration
+secondary: ["next.js metadata api", "next.js seo best practices", "next.js sitemap", "next.js canonical url"]
+trust: "I've shipped 40+ live production websites in React and Next.js as the sole frontend developer on each build, I build custom Next.js stores for clients at Devrex Digital, and I built the free SEO audit tool that checks a page's raw HTML for most of the items on this list."
+tags: [next.js, seo, checklist, app router, metadata]
+published: 2026-11-19
+faq:
+  - q: "How do I add SEO to Next.js?"
+    a: "Export a metadata object (or a generateMetadata function for dynamic pages) from each page with its title, description and canonical URL, set metadataBase once in the root layout, and add sitemap.ts and robots.ts in the app folder. Keep the main content rendered on the server so it's in the HTML."
+  - q: "Does Next.js generate a sitemap?"
+    a: "Not on its own, but it gives you the file for it. Add app/sitemap.ts that returns your URLs and Next.js serves it at /sitemap.xml. Build the list from the same data as your pages, so new products and posts appear without anyone editing a file."
+  - q: "How do I set a canonical URL in Next.js?"
+    a: "Set alternates.canonical in the page's metadata, for example '/products/silk-waistcoat'. With metadataBase set in the root layout, Next.js turns it into a full URL in the HTML. Every page should point to its own clean address."
+  - q: "Do I still need next-seo or next-sitemap?"
+    a: "Not with the App Router. The built-in Metadata API covers titles, descriptions, canonicals and social tags, and sitemap.ts and robots.ts replace the sitemap package. Fewer packages means fewer things that break on an upgrade."
+  - q: "How do I stop preview deploys from being indexed?"
+    a: "Make app/robots.ts check the environment and return 'Disallow: /' for every deploy that isn't production. On Vercel that's process.env.VERCEL_ENV; elsewhere use your own variable. Then open /robots.txt on a preview link to confirm it."
+---
+
+This **Next.js SEO checklist** is the list I go through on every App Router site before it goes live: a title, description and canonical URL on every page, a sitemap and robots file generated from code, content in the HTML, real not-found statuses, structured data, social images and fast images and fonts. Below are all 20 items, the code for each and a quick test, so you can check a site yourself or check your developer's work.
+
+## The Next.js SEO checklist: all 20 items
+
+Tick these off page type by page type (home, service, product, post), not just on the home page.
+
+**Metadata**
+
+- [ ] Every page has its own title, with the main keyword near the start.
+- [ ] Every page has its own meta description that gives a reason to click.
+- [ ] `metadataBase` is set once in the root layout.
+- [ ] Every page has a canonical URL pointing to its own clean address.
+- [ ] Open Graph and Twitter tags are set, so shared links show a proper card.
+- [ ] Dynamic pages (products, posts) use `generateMetadata`.
+
+**Crawling**
+
+- [ ] `app/sitemap.ts` lists every public URL, built from your data.
+- [ ] `app/robots.ts` allows public pages, blocks admin and API routes and points to the sitemap.
+- [ ] Preview and staging deploys tell Google not to index them.
+- [ ] The sitemap is submitted in Google Search Console.
+
+**Content in the HTML**
+
+- [ ] The main content is rendered on the server, not fetched in the browser.
+- [ ] One H1 per page, headings in order.
+- [ ] Internal links are real links (`next/link`), not click handlers.
+- [ ] Missing pages call `notFound()` and send a real not-found status.
+- [ ] Moved pages have permanent redirects.
+- [ ] One version of every URL (www or not, with or without a trailing slash).
+
+**Rich results and sharing**
+
+- [ ] Structured data (JSON-LD) is in the page, escaped.
+- [ ] Each route has an `opengraph-image`.
+
+**Speed**
+
+- [ ] Images use `next/image` with a width and height, and the main image above the fold loads first.
+- [ ] Fonts load through `next/font`, self-hosted, with a fallback that matches their size.
+
+## How do I add SEO to Next.js with the Metadata API?
+
+The six metadata items are all done through the Next.js Metadata API. You don't need `next/head` or a package like next-seo in the App Router. Several top-ranking checklists still show `next/head` in App Router code; it doesn't work there.
+
+Set `metadataBase` once in the root layout. Without it, a relative canonical or image path stays relative, and Google and chat apps can't use it.
+
+```tsx
+// app/layout.tsx
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  metadataBase: new URL("https://example.com"),
+  title: { default: "Example Store", template: "%s | Example Store" },
+  openGraph: { siteName: "Example Store", type: "website" },
+};
+```
+
+Then each static page exports its own title, description and canonical. The `template` above adds the store name after every page title for you.
+
+```tsx
+// app/services/page.tsx
+export const metadata = {
+  title: "Custom Next.js Stores",
+  description: "Custom online stores with an admin dashboard, built to load fast and rank.",
+  alternates: { canonical: "/services" },
+};
+```
+
+For pages built from data, use `generateMetadata`. Since Next.js 15, `params` is a Promise, so await it. Most examples online still skip that, and the code then fails the type check.
+
+```tsx
+// app/products/[slug]/page.tsx
+import type { Metadata } from "next";
+import { getProduct } from "@/lib/products";
+
+type Props = { params: Promise<{ slug: string }> };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const product = await getProduct(slug);
+  return {
+    title: product.name,
+    description: product.summary,
+    alternates: { canonical: `/products/${slug}` },
+    openGraph: { title: product.name, description: product.summary },
+  };
+}
+```
+
+That last line is the **Next.js canonical URL**: one per page, pointing at itself. It tells Google which address is the real one when the same page is reachable with tracking codes or filters in the URL. Google explains the reasons in its guide to [consolidating duplicate URLs](https://developers.google.com/search/docs/crawling-indexing/consolidate-duplicate-urls). The full list of fields is in the [Next.js metadata docs](https://nextjs.org/docs/app/getting-started/metadata-and-og-images).
+
+## Does Next.js generate a sitemap?
+
+Not by itself, but it gives you a file for it. Add `app/sitemap.ts`, return your URLs, and Next.js serves the result at `/sitemap.xml`. Build the list from the same data as your pages, so the **Next.js sitemap** never goes out of date.
+
+```ts
+// app/sitemap.ts
+import type { MetadataRoute } from "next";
+import { getProducts } from "@/lib/products";
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const products = await getProducts();
+  return [
+    { url: "https://example.com", lastModified: new Date() },
+    ...products.map((p) => ({
+      url: `https://example.com/products/${p.slug}`,
+      lastModified: p.updatedAt,
+    })),
+  ];
+}
+```
+
+The robots rules go in `app/robots.ts`. This version is the one most checklists warn about but never show: it blocks every deploy that isn't production, so a preview link someone shares never ends up in Google.
+
+```ts
+// app/robots.ts
+import type { MetadataRoute } from "next";
+
+export default function robots(): MetadataRoute.Robots {
+  if (process.env.VERCEL_ENV !== "production") {
+    return { rules: [{ userAgent: "*", disallow: "/" }] };
+  }
+  return {
+    rules: [{ userAgent: "*", allow: "/", disallow: ["/admin", "/api/"] }],
+    sitemap: "https://example.com/sitemap.xml",
+  };
+}
+```
+
+If you host somewhere other than Vercel, use your own environment variable for the check. Then submit the sitemap once in Search Console. The options for large sites, such as splitting it into several files, are in the [Next.js sitemap file convention docs](https://nextjs.org/docs/app/api-reference/file-conventions/metadata/sitemap).
+
+## Content, status codes and redirects
+
+The six content items decide whether Google gets a real page at all.
+
+**Server-rendered content.** Next.js renders on the server by default, but a page that loads its products with a fetch inside `useEffect` sends an empty list to crawlers, just like a plain React app. Load the main content in a server component and keep client components for clicks, menus and carts. The difference is explained in my comparison of [React vs Next.js for SEO](/blog/react-vs-nextjs-for-seo).
+
+**Headings and links.** One H1 that matches what the page is about. Internal links through `next/link`, which renders a real `<a href>` that Google can follow. A button that changes the page with JavaScript is not a link to a crawler.
+
+**Not-found pages.** When a product doesn't exist, call `notFound()` from `next/navigation`. Next.js then sends a real `404` status with your not-found page. Showing "Product not found" with a `200` status is what Google reports as a soft error.
+
+```tsx
+import { notFound } from "next/navigation";
+
+const product = await getProduct(slug);
+if (!product) notFound();
+```
+
+**Redirects and one version of each URL.** Put moved pages in `redirects()` in `next.config.ts` with `permanent: true`, which sends a `308`. Pick www or no www and redirect the other one there, and keep the default trailing slash setting so every page has one address.
+
+## Structured data, social images and speed
+
+**JSON-LD.** Put it in a `<script type="application/ld+json">` tag inside the page component. Escape `<` first. A product name or review that contains `</script>` can otherwise close the tag early and break the page. None of the top checklists mention this.
+
+```tsx
+const jsonLd = (data: object) => ({
+  __html: JSON.stringify(data).replace(/</g, "\\u003c"),
+});
+
+<script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(productSchema)} />
+```
+
+**Social images.** Add an `opengraph-image.tsx` file next to a page and Next.js generates the image and the meta tags for it. One file per page type (post, product, service) is enough; each page fills in its own title.
+
+**Images and fonts.** `next/image` with a width and height reserves the space, so the page doesn't jump while it loads. Give the main image at the top `priority` and nothing else. Load fonts with `next/font`, which self-hosts them, and keep `display: "swap"` so text shows at once in a fallback font. These are the **Next.js SEO best practices** for speed that matter most in real audits; the rest of speed work is in the [React SEO guide](/blog/react-seo-guide).
+
+<FromMyWork title="Why this list matters on a big catalogue">
+<Figure
+  src="https://www.devrexdigital.site/images/portfolio/v2/nagina.webp"
+  alt="Nagina Jewels online jewellery store showing bridal and kundan categories"
+  width={1440}
+  height={1177}
+  caption="Nagina Jewels: a large jewellery catalogue where every category is its own page on Google."
+/>
+
+[The Nagina Jewels online jewellery store](/work/nagina-jewels) has a large catalogue, organised so shoppers can reach bridal, kundan, earrings and necklaces in a few taps. On a store like that, the checklist isn't something you do once on the home page. Every category and every product is a page that needs its own title, description, canonical and sitemap entry, so the code above is written once per page type and runs for all of them.
+
+That's also why I check page types, not pages. When a client sends me an existing site, I run my [free SEO audit tool](/tools/free-seo-audit) on one URL of each type. It reads the raw HTML the way a crawler does and flags a missing title, description or canonical, an empty app shell and a missing sitemap.
+</FromMyWork>
+
+## How do I test each item before launch?
+
+This is the part most checklists leave out. Each test takes about a minute and needs no developer tools beyond a browser.
+
+| Item | Test |
+| --- | --- |
+| Title, description, canonical, social tags | Open the page, right-click, "View page source", search for `<title`, `description`, `canonical` and `og:` |
+| Sitemap | Open `/sitemap.xml`; check new products and posts are there with full URLs |
+| Robots and preview deploys | Open `/robots.txt` on the live site and on a preview link; the preview should say `Disallow: /` |
+| Search Console | Sitemaps report shows "Success" and the number of discovered URLs |
+| Content and headings in the HTML | In "View page source", search for a sentence you can see on the screen |
+| Links | In the page source, internal links appear as `<a href="/…">` |
+| Not-found pages | Run `curl -I https://example.com/products/does-not-exist` and look for `404` |
+| Redirects, one version of each URL | Run `curl -I` on the old URL and the www version; each should answer `308` or `301` to the main address |
+| Structured data | Paste the URL into Google's Rich Results Test |
+| Social images | Paste the link into a chat app, or open the `og:image` URL from the page source |
+| Images and fonts | Run PageSpeed Insights on mobile; look at the layout shift and largest paint lines |
+
+After launch, use the URL Inspection tool in Search Console on one page of each type. It shows the HTML Google rendered and whether the page is indexed. If pages stay out of the index, work through my steps for a [React site not indexed by Google](/blog/react-site-not-indexed-by-google-fix).
+
+<MyTake>
+I don't add next-seo or next-sitemap to App Router projects anymore. The built-in Metadata API, `sitemap.ts` and `robots.ts` do the same job with no extra package to update, and they type-check against your data. The one thing I always add by hand is the non-production block in `robots.ts`: a preview deploy that gets indexed is the easiest SEO mistake to make and one of the most annoying to clean up.
+</MyTake>
+
+## What does it cost to have this done?
+
+If you'd rather not work through the list yourself, these are my starting prices:
+
+| Work | From | Time |
+| --- | --- | --- |
+| SEO audit (report + prioritized fix list) | $150 | 2–3 days |
+| Technical SEO setup for React / Next.js | $500 | Quoted after a free call |
+| React (Vite/CRA) to Next.js migration for SEO | $800 | Quoted after a free call |
+
+The audit covers every item on this checklist and tells you which ones are missing on your site and in what order to fix them. The setup is the work itself, done once per page type. Both are part of my [React and Next.js SEO service](/services/react-nextjs-seo).

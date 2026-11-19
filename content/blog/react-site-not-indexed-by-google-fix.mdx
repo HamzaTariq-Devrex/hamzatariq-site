@@ -60,7 +60,7 @@ You can do all of this from Search Console, without touching code. The code chan
 1. **Find the status.** Open Search Console, go to Indexing, then Pages. Under "Why pages aren't indexed", click each reason and note which of your important URLs sit there. Ignore reasons that only list URLs you don't care about.
 2. **Inspect one affected URL.** Paste it into URL Inspection, click "Test live URL", then "View tested page". The HTML tab shows what Google actually got. If your headings and text aren't in it, Google sees an empty page.
 3. **Fix the cause for that status.** Use the table above. The rendering fix is the big one; the others are small changes to routing, tags or links.
-4. **Clean the sitemap.** Your `sitemap.xml` should list every page you want indexed and nothing else: no redirects, no missing pages, no URLs with noindex. Resubmit it under Sitemaps.
+4. **Clean the sitemap.** Your `sitemap.xml` should list every page you want indexed and nothing else: no redirects, no missing pages, no URLs with noindex. Resubmit it under Sitemaps. On a Next.js site, the [Next.js SEO checklist](/blog/nextjs-seo-checklist) shows how to generate it from code so it stays clean.
 5. **Validate and request indexing.** Click "Validate fix" on the status in the Page indexing report. Then request indexing for your few most important URLs in URL Inspection.
 6. **Watch the report.** Check the same report over the next weeks. If the count of affected pages goes down, leave it alone. If it doesn't move, go back to step 2 with another URL.
 

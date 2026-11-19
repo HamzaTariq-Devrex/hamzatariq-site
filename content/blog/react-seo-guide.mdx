@@ -182,7 +182,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 }
 ```
 
-**Images and fonts are optimised for you.** `next/image` serves modern formats in the right size, and `next/font` self-hosts fonts so text doesn't wait on another server.
+**Images and fonts are optimised for you.** `next/image` serves modern formats in the right size, and `next/font` self-hosts fonts so text doesn't wait on another server. For every setting in one list, with a test for each, use my [Next.js SEO checklist for App Router sites](/blog/nextjs-seo-checklist).
 
 One warning: Next.js doesn't fix SEO on its own. If you mark the whole app `"use client"` and fetch everything in a `useEffect`, you've rebuilt a client-side SPA on a different framework. The official migration guide even starts that way, so treat it as stage one: crawlers still get an empty page until you move data fetching into server components and drop `"use client"` from pages that don't need it.
 
