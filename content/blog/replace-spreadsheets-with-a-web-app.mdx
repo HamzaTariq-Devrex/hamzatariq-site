@@ -1,0 +1,150 @@
+---
+title: "Replace Spreadsheets With a Web App: When and How"
+seoTitle: "Replace Spreadsheets With a Web App: 7 Steps"
+description: "When to replace spreadsheets with a web app, what your tabs and formulas become, a prep checklist and the steps that keep the sheet live until the data matches."
+keyword: "replace spreadsheets with a web app"
+category: dashboards
+cluster: dashboards
+role: supporting
+intent: learn
+funnel: consideration
+secondary: ["spreadsheet to web app", "excel to web application", "google sheets alternative for business"]
+trust: "I design the Supabase database, logins and access rules for client projects at Devrex Digital and build the React and TypeScript admin dashboards on top for order and product management."
+tags: [dashboards, web apps, spreadsheets, excel, google sheets]
+published: 2026-11-19
+howto:
+  name: "Replace spreadsheets with a web app"
+  steps:
+    - name: "Free call and a sample"
+      text: "Show the spreadsheets in use today and explain what each tab, colour and formula is for."
+    - name: "Write the map"
+      text: "Write down the screens, user roles and data the app needs, based on what the spreadsheet does, and check it together."
+    - name: "Build the app"
+      text: "Build the app on a real database, testing each screen as it's ready."
+    - name: "First import"
+      text: "Import the cleaned sheets into the database, as CSV files or through a small import script."
+    - name: "Match check"
+      text: "Compare record counts and the totals that matter, such as stock on hand or money owed, with the spreadsheet, and fix any difference."
+    - name: "Run side by side"
+      text: "For a short, agreed period the team works in the app while the spreadsheet stays available as a reference."
+    - name: "Switch on an agreed date"
+      text: "Do a final import of the last changes, make the spreadsheet read-only and change data only in the app from then on."
+faq:
+  - q: "When should I stop using spreadsheets?"
+    a: "When the spreadsheet costs you time or mistakes every week: people overwrite each other, nobody trusts which file is current, staff can see things they shouldn't, or the same report is rebuilt by hand. If one person updates one file and it works, keep it."
+  - q: "Can my spreadsheet data move to an app?"
+    a: "Yes. Each tab usually becomes a table, each row a record and each column a field. The data is cleaned, imported and checked against the original, so the app starts with everything you already have."
+  - q: "Will I lose Excel completely?"
+    a: "No. A good app has an export button, so you can download orders, customers or stock as an Excel or CSV file for your accountant or a one-off analysis. The difference is that the app becomes the one place where the data is changed."
+  - q: "Is a Google Sheets alternative like a no-code tool enough?"
+    a: "Sometimes. If your process is simple and a ready-made or no-code tool fits it without workarounds, start there. A custom web app makes sense when the tool forces you to change how you work, or when you need access rules and screens the tool can't give you."
+  - q: "How much does it cost to replace spreadsheets with a custom app?"
+    a: "With me, a custom dashboard starts at $1,200 and usually takes 2–4 weeks; a custom web app starts at $2,500 and takes 4–8 weeks. Every project is quoted after a free call, and moving your existing data is part of that quote."
+---
+
+You should **replace spreadsheets with a web app** when the sheet starts costing you hours or mistakes every week, not before. The move itself is less scary than it sounds: your data comes with you. Here's the short version of how I plan it:
+
+1. **Map what the sheet does.** Every tab, column, formula, colour and filter view gets a place in the app.
+2. **Clean the data** so each column holds one kind of value.
+3. **Build the app** around that map, with logins and access rules.
+4. **Import and check** that rows and totals match the original.
+5. **Run both side by side** for a short period, then switch on an agreed date.
+6. **Keep an export** to Excel or CSV for your accountant and one-off analysis.
+
+The rest of this post goes through each step, and what each spreadsheet habit becomes in the app.
+
+## When should I stop using spreadsheets?
+
+Most guides on this topic are written by companies selling a no-code tool, so their answer is always "now". Mine is more boring: stop when the spreadsheet costs you something you can count.
+
+Try this for one normal week. Write down every time someone:
+
+- **fixes a row someone else overwrote**, or asks "which file is the latest?";
+- **copies data by hand** from the sheet into another place, such as an invoice, a WhatsApp message or a second sheet;
+- **rebuilds the same report** that was built the week before;
+- **gets sent the whole file** when they only needed one part of it.
+
+At the end of the week, add up the time and the mistakes that reached a customer. If the total is small, keep the spreadsheet. A tidy sheet that one person updates is a perfectly good system. If the total keeps growing with every new order or new member of staff, the spreadsheet has become the expensive option.
+
+My [guide to custom web apps for small business](/blog/custom-web-app-for-small-business) covers the wider decision, including when a ready-made tool is the better buy.
+
+## Can my spreadsheet data move to an app?
+
+Yes, and none of it has to be typed in again. The basic rule is simple: each tab becomes a table, each row becomes a record and each column becomes a field. The interesting part is everything else your team does in the sheet without thinking about it. This is how each habit carries over in a spreadsheet to web app move:
+
+| In your spreadsheet | In the web app |
+| --- | --- |
+| A tab per thing (Orders, Customers, Stock) | A table per thing, linked to each other |
+| Typing the customer's name on every order | Picking the customer once; the order links to them |
+| A dropdown column (Paid, Unpaid) | A fixed list of statuses nobody can misspell |
+| Colour coding a row red for "late" | A status field and a filter, so "late" is a list you open, not a colour you scan for |
+| Comments on cells | Notes on the record, with who wrote them and when |
+| Formulas for totals and stock left | Calculated by the app, the same way every time |
+| Filter views and personal copies | Saved screens for each job, such as "today's orders" |
+| Sharing the file by link | Logins, with each person seeing only their part |
+| Version history | A record of who changed what |
+
+That colour coding row is the one I pay most attention to. Teams often run their whole process on colours that live only in people's heads. Writing them down as statuses is half of the planning.
+
+## How do I prepare a spreadsheet before the move?
+
+The cleaner the data, the faster the import and the lower the quote. You don't have to do this yourself, but it helps to know what clean means. Before the import, each sheet should pass this checklist:
+
+- [ ] One header row per tab, with one name per column.
+- [ ] One kind of value per column: dates only in date columns, numbers only in number columns, no "TBC" next to prices.
+- [ ] No merged cells, and no total or subtotal rows in the middle of the data.
+- [ ] Each customer, product or supplier spelled one way, ideally with its own ID.
+- [ ] Dates in one format across every tab.
+- [ ] Old test rows and duplicates removed, or at least marked.
+- [ ] A note of which columns are filled in by formulas, so they're rebuilt, not copied.
+
+If your data is spread across several files that spell the same customer three ways, cleaning comes first. It's normal work, and it's quoted on the free call once I've seen a sample.
+
+## How to replace spreadsheets with a web app, step by step
+
+This is how I plan an Excel to web application move, or a Google Sheets one. The idea is that nobody has to trust the new system blindly on day one.
+
+1. **Free call and a sample.** You show me the spreadsheets in use today, and we go through what each tab, colour and formula is for.
+2. **The written map.** Before building, I write down the screens, the user roles and the data, based on the table above. You check it. This is where the quote becomes exact.
+3. **Build.** I build the app in React and Next.js on a real Postgres database, and you test each screen as it's ready.
+4. **First import.** The cleaned sheets are imported into the database. Supabase, which I use for client projects, can [import CSV files into Postgres](https://supabase.com/docs/guides/database/import-data) directly, and larger or messier data goes through a small import script.
+5. **Match check.** We compare the app with the spreadsheet: the number of orders, customers and products, and the totals that matter to you, such as stock on hand or money owed. If they don't match, we find out why before going further.
+6. **Side by side.** For a short, agreed period, the team works in the app while the spreadsheet stays available as a reference. Questions come up here that no planning catches.
+7. **Switch date.** On an agreed day, a final import brings in the last changes, the spreadsheet becomes read-only, and the app is the only place where data is changed.
+
+<FromMyWork title="The admin dashboards I build on Supabase">
+At Devrex Digital I design the Supabase layer for each client project (logins, the Postgres database, file storage and the access rules) and build React and TypeScript admin dashboards on top for order and product management. Those dashboards do exactly what a team's order sheet used to do: staff log in, see the orders and products they're responsible for, and update them in one place.
+
+The part that replaces "share the file by link" is the access rules. With [Supabase row level security](https://supabase.com/docs/guides/database/postgres/row-level-security), the database itself decides who can read and change each row, so a staff member who only packs orders never sees the money side, even if a button is left visible by mistake.
+</FromMyWork>
+
+## What stays in a spreadsheet afterwards?
+
+Replacing spreadsheets doesn't mean banning them. They're still the best tool for some jobs:
+
+- **Exports for your accountant.** Ask for an export button on the screens that matter, so you can download orders or payments as an Excel or CSV file whenever you need them.
+- **One-off analysis.** Trying out a price change or a "what if" is faster in a sheet. Export the data, play with it, and change nothing in the app until you've decided.
+- **Planning that isn't a process yet.** A list of ideas for next season doesn't need a database.
+
+The rule I suggest: the app is where data is changed; a spreadsheet is where you look at a copy.
+
+## Is a Google Sheets alternative enough?
+
+Sometimes, yes. If what you need is a better shared table, a ready-made tool or a no-code builder can be a good Google Sheets alternative for business, and cheaper to start. It's enough when your process fits the tool without workarounds.
+
+It stops being enough when you start bending your business around the tool: paying for seats for staff who only need one screen, keeping a second sheet for the things the tool can't do, or giving everyone access to everything because the tool's permissions are too coarse. That's the point where a custom dashboard, built around how you already work, is worth pricing.
+
+<MyTake>
+I recommend moving one process at a time, usually the one that causes the most mistakes, such as orders or stock, and leaving the rest in spreadsheets until the first part is running well. It keeps the first build small and the quote low, and your team learns the new system on the part that hurts most. Trying to replace every spreadsheet in one go is how these projects get late and expensive.
+</MyTake>
+
+## What does it cost, and how long does it take?
+
+These are my starting prices for the two sizes of build. Moving and checking your existing data is part of the quote, not an extra surprise at the end.
+
+| Build | From | Usual time |
+| --- | --- | --- |
+| Custom dashboard (manage orders, stock, customers; reports) | $1,200 | 2–4 weeks |
+| Custom web app (its own users and workflows, for your team or customers) | $2,500 | 4–8 weeks |
+
+Every project is paid 50% upfront and 50% on delivery, includes 2 revision rounds and comes with 30 days of free bug fixes after launch. For what pushes a quote up or down, see [how much a custom dashboard costs](/blog/how-much-does-a-custom-dashboard-cost). If your spreadsheets are ready to retire, my [custom dashboard development service](/services/dashboards) is where to start.
