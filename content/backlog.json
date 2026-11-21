@@ -559,8 +559,9 @@
         "will the chatbot make up answers?"
       ],
       "angle": "Walks through the real pipeline on this site (44 pages embedded, re-embedded on every deploy, offline answer bank) in plain words, with what the owner has to maintain.",
-      "status": "queued",
-      "publishedSlug": null
+      "status": "published",
+      "publishedSlug": "ai-chatbot-trained-on-website-content",
+      "published": "2026-11-21"
     },
     {
       "keyword": "custom dashboard vs off the shelf software",

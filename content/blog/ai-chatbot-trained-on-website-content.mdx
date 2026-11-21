@@ -1,0 +1,119 @@
+---
+title: "AI Chatbot Trained on Your Website Content: How It Works"
+seoTitle: "AI Chatbot Trained on Website Content: 5 Steps"
+description: "How an AI chatbot trained on website content really works: what it reads from your pages, why it shouldn't make things up, and what you maintain after launch."
+keyword: "ai chatbot trained on website content"
+category: ai-chatbots
+cluster: ai-chatbots
+role: supporting
+intent: learn
+funnel: consideration
+secondary: ["chatbot that answers from your website", "rag chatbot", "custom gpt for website", "chatbot knowledge base"]
+trust: "I built and run the AI assistant on this site (Google Gemini and Supabase pgvector, 44 pages embedded at launch, 30 saved answers for when the AI is unavailable), hold a BS in Artificial Intelligence, and build custom chatbots for clients at Devrex Digital."
+tags: [ai chatbot, rag, embeddings, knowledge base, gemini]
+published: 2026-11-21
+faq:
+  - q: "Can the chatbot read my PDFs and price lists?"
+    a: "Only if they're given to it. A bot built from your web pages reads the text on those pages, not files linked from them or text inside images. A price list or brochure has to be added as text, or published as a normal page, before the bot can answer from it."
+  - q: "How long does it take to set up a chatbot trained on my content?"
+    a: "With me, an AI chatbot usually takes 3–5 days, from collecting your content to testing it against real questions and launching it on your site."
+  - q: "How much does an AI chatbot trained on my website cost?"
+    a: "My AI chatbot starts at $350 and is quoted after a free call. The AI provider's usage is a separate running cost, and on a small site it can fit inside a free tier."
+  - q: "Does the chatbot learn from what visitors type?"
+    a: "Not in the setup I build. Visitor messages are saved so you can read them, but they never change the bot's knowledge. Only the content you publish or add does."
+  - q: "Will it answer in other languages?"
+    a: "The AI model can read questions in many languages. Mine is set to always reply in simple English, and its saved answers also match common Roman Urdu phrasings. You decide the reply language for your bot."
+---
+
+An **AI chatbot trained on website content** is a chat window that answers visitors only from what your own pages say. Nothing about the AI model itself is changed. Instead, your pages are split into short passages and stored in a database that can be searched by meaning. For each question, the bot looks up the closest passages and the AI writes a short reply from them, and only from them.
+
+In practice that gives you three things:
+
+- **Answers that match your site.** Change a price on the page and the bot's answer changes with it.
+- **An honest "I don't know".** When nothing on your site answers the question, the bot says so and offers a person.
+- **No training run.** Updating the bot means updating your content, not paying to retrain an AI.
+
+## How does an AI chatbot trained on website content work?
+
+The technical name is **retrieval-augmented generation**, so you'll also see it sold as a RAG chatbot. "Retrieval" is the lookup step; "generation" is the AI writing the reply. Here is the short version of each step on a chatbot that answers from your website:
+
+1. **Collect.** The text of your pages is gathered after the site is built.
+2. **Split.** Each page becomes passages of a few paragraphs, so a question about delivery doesn't pull in your whole site.
+3. **Embed.** Each passage is turned into a list of numbers that captures its meaning, called an [embedding](https://ai.google.dev/gemini-api/docs/embeddings). On the assistant I built, each list has 768 numbers.
+4. **Store.** The passages and their numbers go into a database. I use Postgres with [pgvector in Supabase](https://supabase.com/docs/guides/database/extensions/pgvector), an extension that finds the passages closest in meaning to a question.
+5. **Answer.** The visitor's question is embedded the same way, the closest passages are found, and the AI gets them along with strict rules about what it may say.
+
+I cover how this fits into a full chatbot project in my [guide to AI chatbots for small business](/blog/ai-chatbot-for-small-business). The rest of this post is about the parts that decide whether the answers are any good.
+
+## What text does the chatbot actually read from your site?
+
+This is the part most "train it on your site" tools gloss over. The bot only knows the text it was given, and a page holds less readable text than it looks.
+
+On the assistant I built, the collector reads the visible text of each page's main content. It skips:
+
+- **The menu, header and footer,** because the same links on every page would crowd out the real answers.
+- **Scripts, styles and icons,** which are code, not content.
+- **Admin pages and error pages,** which visitors should never be quoted.
+
+It also can't see anything that isn't text on a page. A price list inside an image, a menu as a PDF, an opening-hours graphic: the bot knows none of it. Text that only appears after a click (a tab, a pop-up) can be missed too, depending on how the page is built.
+
+So the first job is a content check, not a technical one. I list the questions customers really ask, then look for the answer as plain text somewhere on the site. Facts that aren't on any page, like your refund rules, go into a short written file that the bot reads alongside the pages. That written file plus your pages is the bot's whole chatbot knowledge base.
+
+## How do you train a chatbot on your website?
+
+For a business owner, "training" is mostly preparing content and testing. These are the steps I follow on a client build:
+
+1. **List the questions.** Collect the ten or so questions your team answers every week, from WhatsApp, email and calls.
+2. **Find each answer on the site.** If it's missing, vague or only in an image, write it as text on the right page or in the owner facts file.
+3. **Decide what the bot must never do.** Typical rules: no discounts, no delivery promises, no medical or legal advice, no topics outside your business.
+4. **Build and embed.** I embed the content and set the bot's tone and length of reply to match your brand.
+5. **Test it like a difficult customer.** Ask for a discount you don't offer, a service you don't sell, a date you can't promise. Fix the content or the rules until every answer is right or an honest "I don't know".
+6. **Connect the handoff.** Questions the bot can't answer end in a lead form or WhatsApp, so they become leads instead of lost visitors.
+
+## Will the chatbot make up answers?
+
+A well-built one shouldn't, but "answer only from the content" isn't enough on its own. Three details make the difference.
+
+**A cut-off for weak matches.** The database always returns the closest passages, even when none of them is really about the question. Ask about shipping to a country you've never mentioned and the closest passage might be your delivery page for your home market. If the AI gets that passage, it may turn it into a confident wrong answer. So passages below a similarity threshold are dropped, and when nothing is left, the AI is told plainly that nothing relevant was found, which makes it say it doesn't know.
+
+**Follow-ups searched with context.** A visitor asks about a store, then types "how much?". Searched alone, those two words match nothing useful. Short follow-ups should be searched together with the previous question, so the bot finds the pricing for the right service.
+
+**Rules the AI can't argue with.** My assistant's instructions say to state only facts written in the site content, never to invent prices, clients, results, timelines or guarantees, and to send the visitor to a person when the answer isn't there. Off-topic questions (coding help, trivia, jokes) get one fixed line, and the clear ones are caught before any AI call is made.
+
+<FromMyWork title="How the assistant I built reads its content">
+"Hamza's AI", the assistant on this site, answers from the pages of the site itself. It embedded **44 pages** at launch, with Google Gemini for the embeddings and the replies, and Supabase with pgvector for the search.
+
+Two choices keep it current without anyone touching it. Pages are embedded again automatically on every production deploy, so a new blog post or a changed price reaches the bot the same day. And only pages whose text changed are sent to Gemini again, which keeps the free AI quota for answering visitors.
+
+When Gemini fails or the free quota runs out, the bot doesn't show an error. An offline bank of **30 saved answers** replies instantly, matching common English and Roman Urdu phrasings without any AI call. Anything it can't match gets "Hamza will answer this personally" and the lead form. You can try all of this with the chat button on this page.
+</FromMyWork>
+
+## RAG chatbot vs custom GPT vs fine-tuning: which do you need?
+
+These three get mixed up in sales pitches. For a business website, they solve different problems.
+
+| Option | What it is | On your own site? | Updating it | Fits |
+| --- | --- | --- | --- | --- |
+| RAG chatbot | Looks up your content for each question | Yes, as a chat window | Change the page; it's re-embedded | Customer questions about your business |
+| Custom GPT | A ChatGPT set up with your files and instructions | No: it lives inside ChatGPT, not on your site | Re-upload files by hand | Internal use by your team |
+| Fine-tuning | Retraining a model on your examples | Only through a custom build | Retrain each time facts change | Teaching a style or format, not facts |
+| Whole site pasted into the prompt | Every page sent with every question | Yes | Edit the prompt | Tiny sites only; slow and costly per reply |
+
+A custom GPT for website use is the one people ask me about most. A custom GPT is made for use inside ChatGPT. To put a chat window on your own site, the bot has to be built on an AI provider's API, and that build is what a RAG chatbot is. Fine-tuning is the wrong tool for facts: prices and policies change, and you'd retrain every time.
+
+<MyTake>
+For a business website, a RAG chatbot is the right choice almost every time: it's the only option that answers on your site, from your current content, without retraining. Spend the effort on the content, not the model. A bot that reads clear, complete pages with a cheap model gives better answers than an expensive model reading vague pages. And never launch one without a fallback for when the AI is down, because that's exactly when a ready-to-buy visitor gets an error.
+</MyTake>
+
+## What do you have to maintain after launch?
+
+Less than with a scripted bot, but not nothing. The bot is only as current as the content behind it. Here's the list I give clients:
+
+- [ ] When a price, service or policy changes, change it on the website first. The bot follows the site.
+- [ ] Keep the owner facts file (refunds, delivery, hours) in line with the website.
+- [ ] Update the saved answers when prices or services change, because they reply without the AI.
+- [ ] Read the most asked questions in the admin dashboard once a week. A question asked often with no good answer means a page needs writing.
+- [ ] Check that unanswered questions reached you as leads, and reply to them.
+- [ ] Keep an eye on the AI provider's free-tier limits; my assistant's fast model allowed 20 replies a day on the free tier when I measured it.
+
+The build itself is a one-off. My AI chatbot starts at $350 and is usually live in 3–5 days, and the full breakdown of build and running costs is in [what an AI chatbot for a website costs](/blog/ai-chatbot-for-website-cost). If you'd like one that answers from your own content, the [AI chatbot service page](/services/ai-chatbots) has the details.
