@@ -584,8 +584,9 @@
         "when is off-the-shelf software enough?"
       ],
       "angle": "A decision table by team size and workflow, with real build prices instead of vague 'it depends'.",
-      "status": "queued",
-      "publishedSlug": null
+      "status": "published",
+      "publishedSlug": "custom-dashboard-vs-off-the-shelf-software",
+      "published": "2026-11-21"
     },
     {
       "keyword": "remote developer time zone overlap",
