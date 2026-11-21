@@ -95,7 +95,7 @@ So link every important page from at least one other page with a normal link, ke
 
 These two statuses come from the way a single-page app answers requests, and the top guides on this topic mostly skip them.
 
-**Soft `404`.** In a SPA, the server sends the same HTML shell for every address, including ones that don't exist. React then shows a "Page not found" message, but the server already said status `200` (OK). Google sees a page that says "not found" while claiming to be fine, and flags it. Worse, it can flag thin real pages the same way. The fix is that missing pages must send a real not-found status from the server. In Next.js that's built in: calling `notFound()` or adding a not-found file sends the right status. In a plain Vite or CRA app, you need server or hosting rules for it.
+**Soft `404`.** In a SPA, the server sends the same HTML shell for every address, including ones that don't exist. React then shows a "Page not found" message, but the server already said status `200` (OK). Google sees a page that says "not found" while claiming to be fine, and flags it. Worse, it can flag thin real pages the same way. The fix is that missing pages must send a real not-found status from the server. In Next.js that's built in: calling `notFound()` or adding a not-found file sends the right status. In a plain Vite or CRA app, you need server or hosting rules for it. The other [Create React App SEO problems, with fixes ranked by cost](/blog/create-react-app-seo-problems), follow from the same single HTML file.
 
 **Duplicate without user-selected canonical.** This shows up when Google finds the same content at several addresses and you haven't told it which one is the main one. In React sites the usual causes are:
 

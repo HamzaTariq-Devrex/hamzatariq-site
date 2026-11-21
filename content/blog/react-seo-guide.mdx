@@ -46,7 +46,7 @@ React is a library for building interfaces. It doesn't decide where your HTML ge
 
 There are two ways a React page can reach a visitor:
 
-- **Client-side rendering (CSR).** The server sends a small HTML file with an empty `<div id="root">` and a script. The browser downloads the script, runs it, and only then does the page have headings, text and links. Vite and Create React App work this way by default.
+- **Client-side rendering (CSR).** The server sends a small HTML file with an empty `<div id="root">` and a script. The browser downloads the script, runs it, and only then does the page have headings, text and links. Vite and Create React App work this way by default. For a site built on the now-deprecated Create React App, my guide to [fixing Create React App SEO problems](/blog/create-react-app-seo-problems) covers helmet, prerendering and the Next.js move.
 - **Server or build-time rendering.** The HTML for each URL already contains the page. React then "hydrates" it in the browser (attaches the click handlers), so it still behaves like an app.
 
 The first is what people mean by "React is bad for SEO". The second is what Next.js, and frameworks like it, give you. Same components, same design, different delivery.

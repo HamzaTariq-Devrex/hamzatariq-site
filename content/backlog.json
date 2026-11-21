@@ -533,8 +533,9 @@
         "should i move create react app to next.js?"
       ],
       "angle": "Fix options ranked by cost and effect (prerender, react-helmet, migration) with the trade-offs I hit, and when a migration is not worth it.",
-      "status": "queued",
-      "publishedSlug": null
+      "status": "published",
+      "publishedSlug": "create-react-app-seo-problems",
+      "published": "2026-11-21"
     },
     {
       "keyword": "ai chatbot trained on website content",

@@ -1,0 +1,154 @@
+---
+title: "Create React App SEO Problems and How to Fix Them"
+seoTitle: "Create React App SEO Problems: Fixes Ranked"
+description: "Create React App SEO problems fixed in order of cost and effect: meta tags, prerendering or Next.js, plus the Vite trap nobody mentions and real prices."
+keyword: "create react app seo problems"
+category: react-nextjs-seo
+cluster: react-seo
+role: supporting
+intent: fix
+funnel: consideration
+secondary: ["cra seo", "create react app meta tags", "create react app prerender", "create react app deprecated"]
+trust: "I've shipped 40+ live production websites in React and Next.js as the sole frontend developer on each build, and I built the free SEO audit tool that reads a page's raw HTML the way a crawler does."
+tags: [create react app, react, seo, next.js, prerendering]
+published: 2026-11-21
+faq:
+  - q: "Is Create React App bad for SEO?"
+    a: "Out of the box, yes for public pages. Every URL sends the same almost empty HTML file with one title, and Google only sees your content after it runs the JavaScript. It's fine for an app behind a login, where Google can't see the pages anyway."
+  - q: "Is Create React App deprecated?"
+    a: "Yes. The React team deprecated it for new apps and it now runs in maintenance mode with no active maintainers. Existing sites keep working, but new projects should start on a framework such as Next.js, and existing ones should plan a move."
+  - q: "Does react-helmet fix CRA SEO?"
+    a: "Only partly. It changes the title and meta tags after the JavaScript runs, so Google can pick them up when it renders the page, but the HTML a crawler gets first is still the empty shell, and most link previews never see the new tags."
+  - q: "Can I fix Create React App SEO without rewriting the site?"
+    a: "Yes. A prerender step at build time or a move into Next.js both keep your components and design. A move to Next.js is a migration of the same pages, not a rebuild from scratch."
+  - q: "How much does it cost to fix Create React App SEO?"
+    a: "With me, an SEO audit with a prioritized fix list starts at $150 and takes 2–3 days, a technical SEO setup starts at $500, and a React (Vite/CRA) to Next.js migration for SEO starts at $800. Each is quoted after a free call."
+---
+
+The fix for most **create react app seo problems** is to make every URL send its own finished HTML, with its own title, description, canonical tag and text. On a small site that rarely changes, a prerender step at build time does it. On a store, a blog or any site with many pages, move the site to Next.js with server-rendered pages. Adding react-helmet alone is the cheapest step, but it fixes the least.
+
+Here are the options, ranked from cheapest to most complete.
+
+| Fix | What it fixes | What it doesn't fix | Fits |
+| --- | --- | --- | --- |
+| react-helmet-async | Titles and meta tags after the page renders | The empty first HTML, link previews, soft `404`s | A stopgap while you plan |
+| Prerender at build time | Real HTML for every route you list | Pages added after the build, fast-changing data | Small sites, under a few dozen pages |
+| Move CRA to Vite | Build speed, a maintained tool | Nothing for SEO: still rendered in the browser | Apps behind a login |
+| Next.js, client-only | Gets you off CRA | Still one empty shell per URL | Step one of a migration only |
+| Next.js, server-rendered pages | All of it, per page | Weak content still won't rank | Stores, blogs, service sites |
+
+## Create React App SEO problems, in order of damage
+
+A standard CRA build has one HTML file, `public/index.html`. The server sends it for every address, and the browser builds the page with JavaScript. That one design choice causes all the problems below.
+
+1. **An empty first page.** The HTML has a `<div id="root"></div>` and a script tag. Google crawls that first and queues the page to run the JavaScript later, as Google's own JavaScript SEO documentation explains. If the render fails or an API call is slow, Google keeps the empty version.
+2. **One title for every URL.** Whatever is in `public/index.html` (often still "React App") is the title of the home page, every product and every post. Google sees many pages with one name and treats them as near copies.
+3. **Soft `404` errors.** A typo in the address still answers "OK" with the same shell, because the server can't know which routes exist. Google reports these as soft `404` errors and wastes crawl time on them.
+4. **No canonical tag or social image per page.** A shared link in WhatsApp or Slack shows a blank card, because those previews read only the first HTML and never run JavaScript.
+5. **No sitemap.** CRA doesn't make one, so new pages wait until Google finds a link to them.
+6. **One big JavaScript bundle.** The visitor sees nothing until the script loads and runs, which hurts load speed on phones.
+
+You can see the first two yourself. Open any page of the site, right-click, choose "View page source" (not Inspect) and search for a sentence you can read on the screen. If it's missing, and the title is the same on every page, you have the CRA problem. If pages are already dropping out of Google, my guide to [fixing a React site not indexed by Google](/blog/react-site-not-indexed-by-google-fix) walks through the Search Console statuses.
+
+## How do I add meta tags to Create React App?
+
+Use react-helmet-async, the maintained fork of react-helmet. Wrap the app once, then set the tags on each page:
+
+```jsx
+import { Helmet, HelmetProvider } from "react-helmet-async";
+
+// index.js: wrap the app once
+root.render(
+  <HelmetProvider>
+    <App />
+  </HelmetProvider>
+);
+
+// ProductPage.jsx: set the tags per page
+export default function ProductPage({ product }) {
+  return (
+    <>
+      <Helmet>
+        <title>{`${product.name} | My Store`}</title>
+        <meta name="description" content={product.summary} />
+        <link rel="canonical" href={`https://mystore.com/products/${product.slug}`} />
+      </Helmet>
+      <h1>{product.name}</h1>
+    </>
+  );
+}
+```
+
+Also replace the default title and description in `public/index.html` with your brand name and a real one-line summary, because that is what every crawler gets before JavaScript runs.
+
+These create react app meta tags are better than nothing: when Google renders the page, it reads the right title. But the first HTML is unchanged, so link previews, many other crawlers and Google's first pass still see the shell. Treat helmet as a stopgap, not the fix. The [React SEO guide for React and Next.js sites](/blog/react-seo-guide) goes deeper into why tags set by JavaScript fall short.
+
+## Does prerendering fix CRA SEO?
+
+For a small site, mostly yes. A **create react app prerender** step loads every route in a headless browser during the build and saves the finished HTML as a file. The server then sends real HTML for those routes, helmet tags included.
+
+The catches I check before recommending it:
+
+- **It only covers routes it knows about.** A page added in a CMS after the build gets the shell until the next build.
+- **The common tools are old.** The prerender packages most CRA tutorials name were written for CRA years ago. Check the last release date on npm before you build on one.
+- **Code that touches `window` during render can break the snapshot.** Expect some fixes in the app itself.
+- **Missing pages still answer "OK"** unless your host is set up to send a real not-found page.
+
+A paid prerender service, which detects bots and serves them a stored copy, is a different thing. Google now calls that kind of setup a workaround in its page on [dynamic rendering](https://developers.google.com/search/docs/crawling-indexing/javascript/dynamic-rendering) and recommends server rendering or static rendering instead. I don't set it up for new clients.
+
+## Does moving from Create React App to Vite fix SEO?
+
+No. This is the trap I see most since **Create React App was deprecated**. The React team's notice, [Sunsetting Create React App](https://react.dev/blog/2025/02/14/sunsetting-create-react-app), says CRA is in maintenance mode with no active maintainers and lists two kinds of replacement: frameworks such as Next.js and React Router, and build tools such as Vite.
+
+Vite is a faster, maintained build tool. It still builds a client-rendered app with one `index.html` for every URL. So a CRA site moved to Vite has every SEO problem in the list above, just with quicker builds. That move is worth it for an internal dashboard. For a site that needs Google, it spends the budget without fixing the reason it doesn't rank.
+
+The same notice makes the point that server rendering is not only about SEO: sending finished HTML also shows content sooner, which matters on phones.
+
+## Should I move Create React App to Next.js?
+
+If the site has public pages that need search traffic, yes. Next.js sends each page as finished HTML with its own metadata, generates the sitemap and robots.txt from code, and sends a real not-found status for missing pages. You keep your React components and your design.
+
+There's one thing to know before you hire anyone for it. The official [Next.js guide for migrating from Create React App](https://nextjs.org/docs/app/guides/migrating/from-create-react-app) gets you off CRA in small steps, and its end result is still a client-only app: a static export where the old app loads in the browser. Every URL still sends the same shell. The guide says server rendering comes later. That's a sensible first step, but on its own it changes nothing for Google.
+
+So when a developer says "we moved to Next.js", check it the same way:
+
+1. Open a product, service or post page and choose "View page source".
+2. Search for the page's heading and its first sentence.
+3. Compare the `<title>` with a second page; they should differ.
+4. Type a wrong address and check the browser's network tab shows a not-found status, not `200`.
+5. Open `/sitemap.xml` and look for your newest page.
+
+If any of those fail, the migration stopped at step one. The [React vs Next.js for SEO comparison](/blog/react-vs-nextjs-for-seo) shows side by side what a crawler gets from each.
+
+<FromMyWork title="The kind of site where one shell costs the most">
+<Figure
+  src="https://www.devrexdigital.site/images/portfolio/v2/trekkerz.webp"
+  alt="The Trekkerz Pakistan tour agency website with domestic tour packages and destinations"
+  width={1440}
+  height={1657}
+  caption="The Trekkerz Pakistan: tour packages, destinations and a blog, each something travellers search for."
+/>
+
+[The Trekkerz Pakistan tour agency website](/work/the-trekkerz-pakistan), built at Devrex Digital, presents domestic tour packages and destinations across Pakistan, with a trip designer, a blog and call and WhatsApp booking. That is exactly the shape of site where CRA hurts most. Every tour, every destination and every blog post is something a traveller types into Google. If all of them shared one title and one empty HTML file, none could compete on its own.
+
+When a client brings me an existing CRA site, I start with my [free SEO audit tool](/tools/free-seo-audit). It fetches the raw HTML without running JavaScript, like Google's first crawl, and flags an empty app shell, a missing or shared title, a missing canonical and a missing sitemap. That result decides between a prerender step and a migration.
+</FromMyWork>
+
+<MyTake>
+For a public site on CRA, skip the half-steps and move it to Next.js with server-rendered pages. Helmet and a prerender plugin each buy a little time, but you keep paying for a workaround on a tool that is no longer maintained. Two cases where I tell clients not to migrate: an app that lives entirely behind a login, where Google can't see the pages anyway (move it to Vite instead), and a site you're about to redesign, where the new build should simply start on Next.js.
+</MyTake>
+
+## What does fixing CRA SEO cost, and which fix fits your site?
+
+These are my real starting prices. Each project is quoted after a free call, because the final price depends on the number of pages and what the app does.
+
+| Your situation | What I do | From |
+| --- | --- | --- |
+| Not sure what's wrong | SEO audit: report and prioritized fix list | $150, 2–3 days |
+| Small site, few pages, rarely changes | Technical SEO setup for React, with the scope agreed after the audit | $500 |
+| Public site, store or blog on CRA | React (Vite/CRA) to Next.js migration for SEO, design kept | $800 |
+| App behind a login | Usually no SEO work needed | Nothing |
+
+Payment is 50% upfront and 50% on delivery, with 2 free revision rounds and 30 days of free bug fixes after launch. Fixes are live once deployed, but Google needs time to recrawl, so nobody can honestly promise a ranking or a date.
+
+For CRA SEO the order is the same every time: check what the first HTML contains, decide whether the pages need Google at all, and then pick the cheapest fix that gives each URL its own real HTML. If you'd like me to do that check and the work, the [React SEO services page](/services/react-nextjs-seo) has the details.
