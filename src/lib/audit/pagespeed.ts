@@ -1,8 +1,22 @@
-// Google PageSpeed Insights (mobile). Works without a key on a small shared quota;
-// set PAGESPEED_API_KEY (free, Google Cloud console) for a reliable daily quota.
+// Google PageSpeed Insights (mobile). Every call goes through pagespeedUrl(), which adds our own
+// PAGESPEED_API_KEY (Google Cloud project hamzatariq-seo, restricted to this API, 25,000 queries/day).
+// Without a key Google uses a small shared quota that is often used up (429 "Queries per day").
 import type { CheckStatus, Metric, PageSpeed } from "./types";
 
 const ENDPOINT = "https://www.googleapis.com/pagespeedonline/v5/runPagespeed";
+
+let warned = false;
+/** The PageSpeed request URL for a page (mobile, performance), always with our key when it is set. */
+export const pagespeedUrl = (url: string) => {
+  const params = new URLSearchParams({ url, strategy: "mobile", category: "performance" });
+  const key = process.env.PAGESPEED_API_KEY?.trim();
+  if (key) params.set("key", key);
+  else if (!warned) {
+    warned = true;
+    console.warn("PAGESPEED_API_KEY is not set: PageSpeed uses Google's shared quota (often 429).");
+  }
+  return `${ENDPOINT}?${params}`;
+};
 
 type LhAudit = { displayValue?: string; score?: number | null; details?: { data?: string } };
 type FieldMetric = { percentile?: number; category?: "FAST" | "AVERAGE" | "SLOW" };
@@ -34,12 +48,9 @@ export class PageSpeedError extends Error {}
 
 /** `screenshot`: keep Lighthouse's final mobile screenshot (a small JPEG data URI) for outreach reports. */
 export const runPageSpeed = async (url: string, timeoutMs = 40000, opts: { screenshot?: boolean } = {}): Promise<PageSpeed> => {
-  const params = new URLSearchParams({ url, strategy: "mobile", category: "performance" });
-  const key = process.env.PAGESPEED_API_KEY?.trim();
-  if (key) params.set("key", key);
   let res: Response;
   try {
-    res = await fetch(`${ENDPOINT}?${params}`, { signal: AbortSignal.timeout(timeoutMs), cache: "no-store" });
+    res = await fetch(pagespeedUrl(url), { signal: AbortSignal.timeout(timeoutMs), cache: "no-store" });
   } catch {
     throw new PageSpeedError("Google PageSpeed took too long to answer, so speed is not part of this score.");
   }

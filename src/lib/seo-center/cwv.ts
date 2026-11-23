@@ -1,6 +1,7 @@
 // Core Web Vitals per template: CrUX field data (real Chrome users, page-level when Google has
 // enough data, else origin-level) and Lighthouse lab numbers, both from the PageSpeed Insights API.
 import { SITE_ORIGIN } from "./config";
+import { pagespeedUrl } from "@/lib/audit/pagespeed";
 
 type FieldMetric = { percentile?: number; category?: string };
 type Psi = {
@@ -11,10 +12,7 @@ type Psi = {
 
 export const measureCwv = async (template: string, path: string) => {
   const url = `${SITE_ORIGIN}${path}`;
-  const params = new URLSearchParams({ url, strategy: "mobile", category: "performance" });
-  const key = process.env.PAGESPEED_API_KEY?.trim();
-  if (key) params.set("key", key);
-  const res = await fetch(`https://www.googleapis.com/pagespeedonline/v5/runPagespeed?${params}`, { cache: "no-store", signal: AbortSignal.timeout(45_000) });
+  const res = await fetch(pagespeedUrl(url), { cache: "no-store", signal: AbortSignal.timeout(45_000) });
   const data = (await res.json().catch(() => ({}))) as Psi & { error?: { message?: string } };
   if (!res.ok || !data.lighthouseResult) throw new Error(`PageSpeed ${res.status}: ${data.error?.message ?? "no result"}`);
   const audits = data.lighthouseResult.audits ?? {};

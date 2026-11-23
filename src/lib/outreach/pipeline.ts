@@ -5,8 +5,9 @@
 //   spam complaint) and the on/off switch.
 // - send: replies first; then at most one email per tick, Mon-Fri 9:00-17:00 in the recipient's
 //   time zone, 4-11 minute gaps, the daily limit, and a fair share across niches and countries.
-// - coverage: niches below today's target search their next cell (src/lib/outreach/coverage.ts).
-// - audits, then drafts. Every email-1 draft goes through the automatic checks (checks.ts): sent,
+// - scanning is its own job (discoverTick, pg_cron every 10 minutes): 150+ new businesses a day,
+//   area after area, every day of the week (src/lib/outreach/coverage.ts).
+// - audits (3 side by side), then drafts. Every email-1 draft goes through the automatic checks (checks.ts): sent,
 //   "Needs a look" (expires after 7 days), or rejected.
 // - the daily summary email at 9:00 PKT.
 import { SITE } from "@/lib/site";
@@ -19,7 +20,7 @@ import { classifyReply, type ReplyClass } from "./classify";
 import { postalAddress, waitingForAddress, withAddress } from "./address";
 import { bounceType, readInbox, sendOutreach } from "./mail";
 import { autoCheck, hardChecks } from "./checks";
-import { discoverRun, doneSet, MAX_NEW_PER_DAY, progress, scanArea } from "./coverage";
+import { DAILY_NEW_TARGET, discoverRun, doneSet, MAX_NEW_PER_DAY, progress, scanArea } from "./coverage";
 import { cellLabel } from "./areas";
 import { takesBookings } from "./osm-types";
 import { researchProspect } from "./research";
@@ -27,7 +28,7 @@ import { aiBudget } from "./ai";
 import { blogTopics } from "./topics";
 import { dailyLog } from "./map";
 
-export { MAX_NEW_PER_DAY };
+export { DAILY_NEW_TARGET, MAX_NEW_PER_DAY };
 const DAY = 86_400_000;
 
 /**
@@ -499,21 +500,46 @@ const maybeShortfall = async (state: State, now = Date.now()) => {
 export const PHASES = ["imap", "send", "draft", "audit"] as const;
 export type Phase = (typeof PHASES)[number];
 
+/** Businesses waiting for their check: above this, scanning waits so the audits catch up. */
+export const MAX_BACKLOG = 150;
+/** Audits run side by side in a tick (each one mostly waits on their site and PageSpeed). */
+const AUDITS_AT_ONCE = 3;
+
 /**
- * Should discovery run this tick? The current area keeps scanning until every niche there is done
- * (area by area, owner 2026-11-17); a new area starts only when nothing is left to check or research
- * and the ready buffer is below two days' limit.
+ * Should scanning run now? (owner, 2026-11-23, replaces "only when everything is processed"):
+ * - until 150 new businesses were found in the last 24 hours (DAILY_NEW_TARGET), every day,
+ *   weekends included, so Monday starts with a full buffer (sending stays Mon-Fri);
+ * - after that, only when the ready buffer is low and little is waiting;
+ * - never while 150+ businesses wait for their check, or past the 400-a-day safety cap.
+ * When an area is finished, the next one starts automatically (discoverRun).
  */
-const discoveryPlan = async (state: State, cap: number) => {
+export const discoveryPlan = async (state: State, cap: number) => {
   if (state.found_24h >= MAX_NEW_PER_DAY) return null;
-  const rows = await ox.coverage();
-  const done = doneSet(rows);
-  const area = scanArea(done);
+  if (state.backlog_found >= MAX_BACKLOG) return null;
+  const area = scanArea(doneSet(await ox.coverage()));
   if (!area) return null;
-  const started = rows.some((r) => r.c === area.country && r.r === area.region && r.y === area.city && (r.d ?? "") === area.district);
-  if (started) return `scanning ${cellLabel(area)}`;
-  if (state.backlog_found === 0 && state.to_prepare === 0 && state.ready < bufferTarget(cap)) return `new area ${cellLabel(area)} (buffer ${state.ready}/${bufferTarget(cap)})`;
+  if (state.found_24h < DAILY_NEW_TARGET) return `scanning from ${cellLabel(area)} (${state.found_24h}/${DAILY_NEW_TARGET} found in 24 h)`;
+  if (state.ready < bufferTarget(cap) && state.backlog_found + state.to_prepare < 20) return `buffer low (${state.ready}/${bufferTarget(cap)}): scanning from ${cellLabel(area)}`;
   return null;
+};
+
+/**
+ * The scanning job (pg_cron "outreach-discover" every 10 minutes, plus the daily Vercel Cron), apart
+ * from the 5-minute tick so audits and drafts keep the whole tick and two OpenStreetMap runs never overlap.
+ */
+export const discoverTick = async (budgetMs = 50_000) => {
+  const start = Date.now();
+  const state = await ox.state();
+  const plan = await discoveryPlan(state, dailyCap(state.settings.started_at, state));
+  await ox.cachePut("discover-ran", { at: new Date().toISOString() }).catch(() => {});
+  if (!plan) return { plan: "nothing to scan now", found_24h: state.found_24h, backlog: state.backlog_found };
+  return { plan, results: await discoverRun(start + budgetMs - 3_000) };
+};
+
+/** The scanning job ran in the last 25 minutes. */
+const discoverRanRecently = async () => {
+  const v = await ox.cacheGet<{ at: string }>("discover-ran", 1).catch(() => null);
+  return !!v && Date.now() - Date.parse(v.at) < 25 * 60_000;
 };
 
 /** One scheduler tick. `phases` limits what runs (local tests leave out "send"). */
@@ -559,24 +585,34 @@ export const tick = async (phases: Phase[] = [...PHASES], budgetMs = 50_000) => 
   const target = bufferTarget(cap);
   report.buffer = `${state.ready}/${target}`;
   // Buffer low and businesses already checked: research and draft first, so the queue refills fastest.
-  if (phases.includes("draft") && state.ready < target && state.to_prepare > 0 && left() > 40_000) report.drafts = await draftNew(state, 2, undefined, undefined, start + budgetMs - 5_000);
+  // With many businesses waiting for their check, drafting goes first only every other tick, so audits keep up.
+  const draftFirst = state.backlog_found < 20 || Math.floor(Date.now() / 300_000) % 2 === 0;
+  if (phases.includes("draft") && draftFirst && state.ready < target && state.to_prepare > 0 && left() > 40_000) report.drafts = await draftNew(state, 2, undefined, undefined, start + budgetMs - 5_000);
 
-  if (phases.includes("audit") && left() > 30_000) {
-    const plan = await discoveryPlan(state, cap).catch(() => null);
-    // With a big unchecked list and a low buffer, scanning takes every other tick so audits keep going.
-    const auditTurn = state.backlog_found >= 20 && state.ready < target && Math.floor(Date.now() / 300_000) % 2 === 1;
-    if (plan && !auditTurn) {
-      // Big cities (London) need long Overpass queries: the scan gets the rest of this tick.
-      report.discover = { plan, results: await discoverRun(start + budgetMs - 3_000).catch((e) => `error: ${(e as Error).message}`) };
-    }
+  // Scanning runs in its own job (discoverTick). If that job hasn't run for 25 minutes (not scheduled
+  // yet, or failing), the tick scans instead on every other tick, leaving the other ticks to audits.
+  if (phases.includes("audit") && left() > 35_000 && Math.floor(Date.now() / 300_000) % 2 === 1 && !(await discoverRanRecently())) {
+    report.discover = await discoverTick(left() - 5_000).catch((e) => `error: ${(e as Error).message}`);
   }
+  // Checks run a few businesses side by side.
   if (phases.includes("audit")) {
     const done: string[] = [];
-    // One outreach audit can take ~34 seconds (page, PageSpeed capped at 15 s, contact page, MX), so it only starts with time left.
-    while (left() > 36_000) {
-      const [p] = await ox.toAudit(1);
-      if (!p) break;
-      done.push(`${p.name}: ${await qualify(p as Prospect)}`);
+    // One outreach audit can take ~40 seconds (page, PageSpeed capped at 15 s, contact pages, MX), so a batch only starts with time left.
+    while (left() > 40_000) {
+      const batch = await ox.toAudit(AUDITS_AT_ONCE);
+      if (!batch.length) break;
+      done.push(
+        ...(await Promise.all(
+          batch.map(async (p) => {
+            try {
+              return `${p.name}: ${await qualify(p as Prospect)}`;
+            } catch (e) {
+              await ox.skip(p.id, `Check failed: ${(e as Error).message}`.slice(0, 200)).catch(() => {});
+              return `${p.name}: check failed (${(e as Error).message})`;
+            }
+          }),
+        )),
+      );
     }
     report.audits = done;
   }

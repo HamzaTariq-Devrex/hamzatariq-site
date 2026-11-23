@@ -17,18 +17,20 @@ let lastRequest = 0;
 let deadlineAt = Number.POSITIVE_INFINITY;
 export const setOsmDeadline = (at: number) => (deadlineAt = at);
 
-const osmFetch = async (url: string, init: RequestInit = {}) => {
+const osmFetch = async (url: string, init: RequestInit & { timeoutMs?: number } = {}) => {
   const remaining = deadlineAt - Date.now();
   if (remaining < 3000) throw new Error("No time left for OpenStreetMap in this run.");
   const wait = lastRequest + 1100 - Date.now();
   if (wait > 0) await sleep(wait);
   lastRequest = Date.now();
-  const res = await fetch(url, { ...init, headers: { "User-Agent": USER_AGENT, Accept: "application/json", ...(init.headers ?? {}) }, signal: AbortSignal.timeout(Math.min(75000, remaining)) });
+  const { timeoutMs, ...rest } = init;
+  const res = await fetch(url, { ...rest, headers: { "User-Agent": USER_AGENT, Accept: "application/json", ...(rest.headers ?? {}) }, signal: AbortSignal.timeout(Math.min(timeoutMs ?? 30_000, remaining)) });
   if (!res.ok) throw new Error(`${new URL(url).hostname} answered ${res.status}`);
   return res.json();
 };
 
-type Place = { lat: number; lon: number; area: number | null; name: string };
+/** A town or district: its centre, its OSM area id (when it has a boundary) and its bounding box [south, north, west, east]. */
+type Place = { lat: number; lon: number; area: number | null; name: string; bbox?: [number, number, number, number] | null };
 
 /** City → coordinates and its OSM area id (cached 30 days). */
 export const findCity = async (city: string, country: Country): Promise<Place> => {
@@ -36,56 +38,116 @@ export const findCity = async (city: string, country: Country): Promise<Place> =
   const cached = await ox.cacheGet<Place>(key, 24 * 30);
   if (cached) return cached;
   const url = `https://nominatim.openstreetmap.org/search?${new URLSearchParams({ q: city, countrycodes: country.toLowerCase(), format: "jsonv2", limit: "5", addressdetails: "0" })}`;
-  const rows = (await osmFetch(url)) as { lat: string; lon: string; osm_type: string; osm_id: number; display_name: string; addresstype?: string }[];
+  const rows = (await osmFetch(url)) as { lat: string; lon: string; osm_type: string; osm_id: number; display_name: string; addresstype?: string; boundingbox?: string[] }[];
   if (!rows.length) throw new Error(`OpenStreetMap doesn't know "${city}" in ${country}.`);
   // Prefer the administrative boundary (a relation), which becomes an Overpass area.
   const best = rows.find((r) => r.osm_type === "relation") ?? rows[0];
+  const bb = best.boundingbox?.map(Number);
   const place: Place = {
     lat: Number(best.lat),
     lon: Number(best.lon),
     area: best.osm_type === "relation" ? 3_600_000_000 + best.osm_id : null,
     name: best.display_name,
+    bbox: best.osm_type === "relation" && bb?.length === 4 && bb.every(Number.isFinite) ? [bb[0], bb[1], bb[2], bb[3]] : null,
   };
   await ox.cachePut(key, place);
   return place;
 };
 
-const OVERPASS_ENDPOINTS = ["https://overpass-api.de/api/interpreter", "https://overpass.private.coffee/api/interpreter", "https://maps.mail.ru/osm/tools/overpass/api/interpreter"];
+// Owner, 2026-11-23: the main server is often "at capacity" (502/504/429) for hours, so every tile
+// also tries the public mirrors. They serve the same OpenStreetMap data.
+export const OVERPASS_ENDPOINTS = [
+  "https://overpass-api.de/api/interpreter",
+  "https://overpass.kumi.systems/api/interpreter",
+  "https://overpass.private.coffee/api/interpreter",
+  "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
+];
+/** A server that failed rests for a few minutes in this process (busy servers stay busy for a while). */
+const resting = new Map<string, number>();
+const REST_MS = 3 * 60_000;
+/** One Overpass request never waits longer than this, so one slow server can't use up the run. */
+const REQUEST_MS = 25_000;
+/** Tiles are about this many km wide: small boxes answer fast even when the servers are busy. */
+const TILE_KM = 5.5;
+const MAX_TILES = 16;
+
+/** Every Overpass server failed (busy or timed out). Not the cell's fault: it is tried again later. */
+export class OverpassBusy extends Error {}
 
 export type OsmBusiness = { osmId: string; name: string; tags: Record<string, string>; lat: number; lon: number };
+type Tile = [number, number, number, number]; // south, west, north, east
 
-/** Businesses of one type in the area that have a website, phone or email tag (cached 24 hours). */
-export const findBusinesses = async (type: BusinessType, place: Place, radius = 8000): Promise<OsmBusiness[]> => {
-  const key = `overpass:${type}:${place.area ?? `${place.lat.toFixed(3)},${place.lon.toFixed(3)}${radius === 8000 ? "" : `:${radius}`}`}`;
-  const cached = await ox.cacheGet<OsmBusiness[]>(key, 24);
-  if (cached) return cached;
-  // With an area, search inside it; otherwise 8 km around the city centre.
-  const scope = place.area ? `area(${place.area})->.a;` : "";
-  const filter = place.area ? "(area.a)" : `(around:${radius},${place.lat},${place.lon})`;
-  const union = BUSINESS_TYPES[type].tags.map(([k, v]) => `nwr["${k}"="${v}"]["name"]${filter};`).join("");
-  const query = `[out:json][timeout:60];${scope}(${union})->.p;nwr.p[~"^(website|contact:website|email|contact:email|phone|contact:phone)$"~"."];out center tags 500;`;
-  // The main Overpass server is often busy (502/504/429); the public mirrors serve the same OSM data.
-  let data: { elements: { type: string; id: number; lat?: number; lon?: number; center?: { lat: number; lon: number }; tags?: Record<string, string> }[] } | null = null;
-  let lastError: unknown = null;
-  for (const endpoint of OVERPASS_ENDPOINTS) {
-    if (deadlineAt - Date.now() < 5000) break;
+/** The search box (the boundary's box, else `radius` around the centre) cut into tiles of about TILE_KM. */
+export const tilesFor = (place: Place, radius: number): Tile[] => {
+  const kmLat = 111.32;
+  const kmLon = 111.32 * Math.cos((place.lat * Math.PI) / 180);
+  const [s, n, w, e] = place.bbox ?? [place.lat - radius / 1000 / kmLat, place.lat + radius / 1000 / kmLat, place.lon - radius / 1000 / kmLon, place.lon + radius / 1000 / kmLon];
+  let rows = Math.max(1, Math.ceil(((n - s) * kmLat) / TILE_KM));
+  let cols = Math.max(1, Math.ceil(((e - w) * kmLon) / TILE_KM));
+  // Very large boundaries: bigger tiles rather than hundreds of requests.
+  while (rows * cols > MAX_TILES) {
+    if (rows >= cols) rows--;
+    else cols--;
+  }
+  const out: Tile[] = [];
+  const dLat = (n - s) / rows;
+  const dLon = (e - w) / cols;
+  for (let i = 0; i < rows; i++) for (let j = 0; j < cols; j++) out.push([s + i * dLat, w + j * dLon, s + (i + 1) * dLat, w + (j + 1) * dLon].map((x) => Math.round(x * 1e5) / 1e5) as Tile);
+  return out;
+};
+
+type OverpassJson = { elements: { type: string; id: number; lat?: number; lon?: number; center?: { lat: number; lon: number }; tags?: Record<string, string> }[] };
+
+/** One Overpass query on the first server that answers; resting servers are tried last. */
+const overpass = async (query: string): Promise<OverpassJson> => {
+  const now = Date.now();
+  const order = [...OVERPASS_ENDPOINTS].sort((a, b) => Math.max(now, resting.get(a) ?? 0) - Math.max(now, resting.get(b) ?? 0));
+  const errors: string[] = [];
+  for (const endpoint of order) {
+    const remaining = deadlineAt - Date.now();
+    if (remaining < 6000) break;
     try {
-      data = await osmFetch(endpoint, {
+      return (await osmFetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: new URLSearchParams({ data: query }).toString(),
-      });
-      break;
+        timeoutMs: Math.min(REQUEST_MS, remaining - 2000),
+      })) as OverpassJson;
     } catch (e) {
-      lastError = e;
+      const msg = (e as Error).message;
+      // A 400 is a bad query (our fault), not a busy server.
+      if (/ 400$/.test(msg)) throw e;
+      resting.set(endpoint, Date.now() + REST_MS);
+      errors.push(`${new URL(endpoint).hostname}: ${/abort|timeout/i.test(msg) ? "timed out" : msg.replace(/^\S+ answered /, "")}`);
     }
   }
-  if (!data) throw lastError instanceof Error ? lastError : new Error("Overpass is busy. Try again later.");
-  const list = data.elements
-    .filter((e) => e.tags?.name)
-    .map((e) => ({ osmId: `${e.type}/${e.id}`, name: e.tags!.name, tags: e.tags!, lat: e.lat ?? e.center?.lat ?? place.lat, lon: e.lon ?? e.center?.lon ?? place.lon }));
-  await ox.cachePut(key, list);
-  return list;
+  throw new OverpassBusy(errors.length ? `Overpass busy (${errors.join("; ")})` : "No time left for OpenStreetMap in this run.");
+};
+
+/**
+ * Businesses of one type in the place that have a website, phone or email tag. The place is searched
+ * tile by tile (about 5.5 km boxes); each tile is cached for 7 days, so a run that stops half way
+ * (busy servers, out of time) keeps its finished tiles and the next run continues from there.
+ */
+export const findBusinesses = async (type: BusinessType, place: Place, radius = 8000): Promise<OsmBusiness[]> => {
+  const scope = place.area ? `area(${place.area})->.a;` : "";
+  const inArea = place.area ? "(area.a)" : "";
+  const union = BUSINESS_TYPES[type].tags.map(([k, v]) => `nwr["${k}"="${v}"]["name"]${inArea};`).join("");
+  const byId = new Map<string, OsmBusiness>();
+  for (const tile of tilesFor(place, radius)) {
+    const key = `overpass2:${type}:${place.area ?? "r"}:${tile.join(",")}`;
+    let list = await ox.cacheGet<OsmBusiness[]>(key, 24 * 7);
+    if (!list) {
+      const query = `[out:json][timeout:20][bbox:${tile.join(",")}];${scope}(${union})->.p;nwr.p[~"^(website|contact:website|email|contact:email|phone|contact:phone)$"~"."];out center tags 400;`;
+      const data = await overpass(query);
+      list = data.elements
+        .filter((e) => e.tags?.name)
+        .map((e) => ({ osmId: `${e.type}/${e.id}`, name: e.tags!.name, tags: e.tags!, lat: e.lat ?? e.center?.lat ?? place.lat, lon: e.lon ?? e.center?.lon ?? place.lon }));
+      await ox.cachePut(key, list);
+    }
+    for (const b of list) byId.set(b.osmId, b);
+  }
+  return [...byId.values()];
 };
 
 /** IANA time zone from the country and position (good enough for business hours). */
@@ -220,8 +282,8 @@ export const discoverCell = async (type: string, cell: Cell, budget: number) => 
   if (!isBusinessType(type) || budget <= 0 || waitingForAddress(cell.country)) return 0;
   const place = await findCity(placeQuery(cell), cell.country);
   const timezone = timezoneFor(cell.country, place.lat, place.lon);
-  // A district without a boundary in OSM (most suburbs): 2 km around its centre, not the 8 km of a town.
-  const businesses = await findBusinesses(type, place, cell.district ? 2000 : 8000);
+  // A district without a boundary in OSM (most suburbs): 2.5 km around its centre, not the 8 km of a town.
+  const businesses = await findBusinesses(type, place, cell.district ? 2500 : 8000);
   // Chains: the same name three or more times in one city.
   const key = (n: string) => n.toLowerCase().trim();
   const nameCount = new Map<string, number>();

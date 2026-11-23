@@ -101,7 +101,13 @@ export const runSync = async (budgetMs = 50_000, only?: Step[], force: Step[] = 
     const ok = rows.filter((r) => !("error" in r));
     if (ok.length) await db.saveInspection(ok);
     const failed = rows.find((r) => "error" in r) as { error: string } | undefined;
-    return `${ok.length} inspected${failed ? `, ${rows.length - ok.length} failed (${failed.error})` : ""}`;
+    // Totals, so a run with nothing due (each URL is inspected weekly) doesn't read as "not running".
+    const pages = (await db.allPages()).filter((p) => p.in_sitemap);
+    const inspected = pages.filter((p) => p.inspected_at);
+    const by = new Map<string, number>();
+    for (const p of inspected) by.set(p.coverage_state ?? "no answer", (by.get(p.coverage_state ?? "no answer") ?? 0) + 1);
+    const summary = [...by].sort((a, b) => b[1] - a[1]).map(([k, n]) => `${n} ${k}`).join(", ");
+    return `${ok.length} inspected this run${failed ? `, ${rows.length - ok.length} failed (${failed.error})` : ""} · ${inspected.length}/${pages.length} sitemap URLs inspected in the last 7 days: ${summary || "none yet"}`;
   });
 
   await step("crawl", true, 6_000, async () => {
@@ -126,7 +132,10 @@ export const runSync = async (budgetMs = 50_000, only?: Step[], force: Step[] = 
     const due = await db.linksDue(60);
     const rows = await pool(due, 6, deadline - 4_000, checkLink);
     if (rows.length) await db.saveLinks(rows);
-    return `${found.size} links known, ${rows.length} checked`;
+    const all = await db.allLinks();
+    const checked = all.filter((l) => l.checked_at);
+    const broken = checked.filter((l) => l.status === null || l.status >= 400).length;
+    return `${rows.length} checked this run · ${checked.length}/${all.length} links checked, ${broken} broken or unreachable`;
   });
 
   await step("cwv", true, 30_000, async () => {

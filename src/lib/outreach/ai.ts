@@ -16,7 +16,7 @@ export const BUDGET_SHARE = 0.7;
 /** The quota day: Google resets free-tier daily quotas at midnight Pacific time. */
 export const quotaDay = (now = new Date()) => new Intl.DateTimeFormat("en-CA", { timeZone: "America/Los_Angeles", year: "numeric", month: "2-digit", day: "2-digit" }).format(now);
 /** Next midnight Pacific (approximate within DST changes: +1 hour slack). */
-const nextReset = (now = new Date()) => {
+export const nextReset = (now = new Date()) => {
   const parts = new Intl.DateTimeFormat("en-US", { timeZone: "America/Los_Angeles", hour: "numeric", minute: "numeric", hour12: false }).formatToParts(now);
   const h = Number(parts.find((p) => p.type === "hour")?.value ?? 0) % 24;
   const m = Number(parts.find((p) => p.type === "minute")?.value ?? 0);
@@ -24,7 +24,8 @@ const nextReset = (now = new Date()) => {
 };
 
 type Take = { ok: boolean; reason: "backoff" | "budget" | null; calls: number; limit: number; budget: number; until: string | null };
-export type AiUsage = { today: { calls: number; errors: number; last_error: string | null } | null; learned_limit: number | null; backoff_until: string | null };
+/** `today` is Google's quota day (Pacific); `since_calls` counts calls since `p_since` (the PKT day start, for /admin). */
+export type AiUsage = { today: { calls: number; errors: number; last_error: string | null } | null; learned_limit: number | null; backoff_until: string | null; since_calls?: number; last_24h?: number };
 
 const rpc = async <T>(fn: string, args: Record<string, unknown>) => {
   const db = rpcClient();
@@ -34,7 +35,14 @@ const rpc = async <T>(fn: string, args: Record<string, unknown>) => {
   return data as T;
 };
 
-export const aiUsage = () => rpc<AiUsage>("app_ox_ai_usage", { p_day: quotaDay() });
+const PKT = 5 * 3_600_000;
+/** Start of today in Pakistan time (no daylight saving). */
+const pktDayStart = (now = Date.now()) => new Date(Date.parse(`${new Date(now + PKT).toISOString().slice(0, 10)}T00:00:00Z`) - PKT);
+
+export const aiUsage = () =>
+  rpc<AiUsage>("app_ox_ai_usage", { p_day: quotaDay(), p_since: pktDayStart().toISOString() })
+    // Before migration 20261123090000 the function has no p_since (and no call log).
+    .catch(() => rpc<AiUsage>("app_ox_ai_usage", { p_day: quotaDay() }));
 
 /** Today's budget numbers for /admin and the tick. */
 export const aiBudget = async () => {
@@ -43,7 +51,21 @@ export const aiBudget = async () => {
   const budget = Math.floor(limit * BUDGET_SHARE);
   const used = u.today?.calls ?? 0;
   const backoff = u.backoff_until && Date.parse(u.backoff_until) > Date.now() ? u.backoff_until : null;
-  return { used, budget, limit, limitLearned: u.learned_limit != null, errors: u.today?.errors ?? 0, lastError: u.today?.last_error ?? null, backoff, blocked: backoff ? ("backoff" as const) : used >= budget ? ("budget" as const) : null };
+  // Owner, 2026-11-23: the card showed 0 "today" after research had run, because Google's quota day
+  // (Pacific) had already rolled over at 13:00 PKT. usedPkt is the owner's own day; used stays the budget.
+  return {
+    used,
+    usedPkt: u.since_calls ?? 0,
+    last24h: u.last_24h ?? 0,
+    resetsAt: nextReset().toISOString(),
+    budget,
+    limit,
+    limitLearned: u.learned_limit != null,
+    errors: u.today?.errors ?? 0,
+    lastError: u.today?.last_error ?? null,
+    backoff,
+    blocked: backoff ? ("backoff" as const) : used >= budget ? ("budget" as const) : null,
+  };
 };
 
 export class AiUnavailable extends Error {

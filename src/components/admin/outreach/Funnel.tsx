@@ -19,7 +19,7 @@ type Props = {
   spamBlocks7d: number;
   bounces7d: number;
   offers: Record<string, { drafted: number; sent: number; replied: number; positive: number }>;
-  ai: { used: number; budget: number; limit: number; limitLearned: boolean; backoff: string | null; lastError: string | null; model: string } | null;
+  ai: { used: number; usedPkt: number; last24h: number; resetsAt: string; budget: number; limit: number; limitLearned: boolean; backoff: string | null; lastError: string | null; model: string } | null;
 };
 
 const OFFERS: [string, string][] = [
@@ -27,6 +27,8 @@ const OFFERS: [string, string][] = [
   ["fixes", "Weak site: quick fixes"],
   ["content", "Strong site (70+): SEO + content"],
 ];
+
+const pkt = (iso: string) => new Date(iso).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Karachi" });
 
 const Funnel = ({ today, week, ready, target, cap, spamBlocks7d, bounces7d, ai, offers }: Props) => (
   <section className="adm-card ox-funnel" aria-label="Pipeline funnel">
@@ -38,12 +40,13 @@ const Funnel = ({ today, week, ready, target, cap, spamBlocks7d, bounces7d, ai, 
       </span>
     </div>
     <p className="adm-muted ox-ai">
-      Gemini used today (outreach, {ai?.model ?? "Flash-Lite"}):{" "}
+      Gemini used today (outreach, {ai?.model ?? "Flash-Lite"}, Pakistan time):{" "}
       {ai ? (
         <>
-          <strong className={ai.used >= ai.budget ? "ox-low" : ""}>{ai.used}</strong> / {ai.budget} calls (70% of {ai.limitLearned ? "" : "about "}
-          {ai.limit} free per day; resets at midnight Pacific){ai.backoff ? ` · backing off until ${new Date(ai.backoff).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Karachi" })} PKT` : ""}
-          {ai.used >= ai.budget ? " · paused for today" : ""}. The site chatbot has its own model and quota.
+          <strong>{ai.usedPkt}</strong> calls · last 24 hours: {ai.last24h} · Google&apos;s quota day:{" "}
+          <strong className={ai.used >= ai.budget ? "ox-low" : ""}>{ai.used}</strong> / {ai.budget} (70% of {ai.limitLearned ? "" : "about "}
+          {ai.limit} free per day; resets {pkt(ai.resetsAt)} PKT){ai.backoff ? ` · backing off until ${pkt(ai.backoff)} PKT` : ""}
+          {ai.used >= ai.budget ? " · paused until the reset" : ""}. The site chatbot has its own model and quota.
         </>
       ) : (
         "unknown"

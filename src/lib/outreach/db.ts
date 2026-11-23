@@ -47,7 +47,7 @@ export type Prospect = {
   domain: string | null;
   phone: string | null;
   email: string | null;
-  email_source: "osm" | "contact-page" | "facebook" | null;
+  email_source: "osm" | "contact-page" | "facebook" | "instagram" | null;
   osm_tags: Record<string, string>;
   status: string;
   audit_score: number | null;
@@ -100,7 +100,8 @@ export type DailySummary = {
   pause_reason: string | null;
 };
 
-export type CoverageRow = { t: string; c: Country; r: string; y: string; d: string; done: boolean; n: number };
+/** A coverage cell; `a` attempts, `at` last try, `e` last error. */
+export type CoverageRow = { t: string; c: Country; r: string; y: string; d: string; done: boolean; n: number; a?: number; at?: string | null; e?: string | null };
 
 export type ProspectAudit = { id: string; report_id: string; url: string; final_url: string | null; score: number | null; result: AuditResult | null; expires_at: string };
 
@@ -198,8 +199,10 @@ export const ox = {
   recheckList: () => call<{ id: string; name: string; website: string | null; osm_tags: Record<string, string>; status: string; name_count: number }[]>("app_ox_recheck_list", {}),
   releaseWaiting: () => call<number>("app_ox_release_waiting", {}),
   coverage: () => call<CoverageRow[]>("app_ox_coverage", {}),
-  coverageMark: (type: string, country: string, region: string, city: string, district: string, found: number, error: string | null) =>
-    call<void>("app_ox_coverage_mark", { p_type: type, p_country: country, p_region: region, p_city: city, p_district: district, p_found: found, p_error: error }),
+  /** `attempt` false: an outside outage (busy Overpass); the error is noted but doesn't count towards the 3 tries. */
+  coverageMark: (type: string, country: string, region: string, city: string, district: string, found: number, error: string | null, attempt = true) =>
+    // p_attempt is only sent when false, so a mark also works before migration 20261123090000.
+    call<void>("app_ox_coverage_mark", { p_type: type, p_country: country, p_region: region, p_city: city, p_district: district, p_found: found, p_error: error, ...(attempt ? {} : { p_attempt: false }) }),
   nicheStats: () => call<Record<string, { q: number; backlog: number }>>("app_ox_niche_stats", {}),
   createPreview: (prospect: string) => call<string>("app_ox_preview_create", { p_prospect: prospect }),
   preview: (id: string) => call<Preview | null>("app_ox_preview", { p_id: id }),

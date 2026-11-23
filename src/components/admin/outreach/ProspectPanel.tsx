@@ -42,7 +42,7 @@ const ProspectPanel = ({ p, onClose }: { p: ProspectRow; onClose: () => void }) 
   const details: [string, React.ReactNode][] = [
     ["Type", `${typeLabel(p.business_type)}${p.city ? `, ${p.city}` : ""} (${p.country})`],
     ["Website", p.website ? <a href={p.website} target="_blank" rel="noreferrer">{p.website}</a> : "None listed"],
-    ["Email", p.email ? `${p.email}${p.email_source ? ` (${p.email_source === "osm" ? "OpenStreetMap" : p.email_source === "facebook" ? "Facebook page" : "their website"})` : ""}` : "-"],
+    ["Email", p.email ? `${p.email}${p.email_source ? ` (${p.email_source === "osm" ? "OpenStreetMap" : p.email_source === "facebook" ? "Facebook page" : p.email_source === "instagram" ? "Instagram bio" : "their website"})` : ""}` : "-"],
     ["Phone", p.phone ?? "-"],
     ["Audit score", p.audit_score != null ? `${p.audit_score}/100` : "-"],
     ["Lead score", p.lead_score != null ? `${p.lead_score}/100${p.research?.quality ? ` (active ${p.research.quality.active}, size ${p.research.quality.size}, gain ${p.research.quality.gain})` : ""}` : "-"],

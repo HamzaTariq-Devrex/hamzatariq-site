@@ -1,6 +1,7 @@
 // Qualifies one prospect: audits the website with the existing audit engine (same SSRF guard),
-// reads the site's own home page and contact/about page for a publicly listed email (mailto links
-// or text), its phone/WhatsApp and Instagram links, checks the email domain has a mail server (MX),
+// reads the site's own home page, contact/about/legal pages (linked, or /contact-us, /about-us,
+// /impressum, /terms, /privacy…) and schema.org data for a publicly listed email, then the Facebook
+// page and Instagram bio linked from the site; its phone/WhatsApp and Instagram links, checks the email domain has a mail server (MX),
 // applies the skip rules and scores the lead. No guessed addresses, no third-party lookups.
 import { hasMailServer } from "./mx";
 import { emailProblem } from "./email-check";
@@ -82,36 +83,120 @@ const emailsIn = (html: string) => {
     const e = decodeCfEmail(m[1]).toLowerCase();
     if (/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/.test(e)) out.add(e);
   }
+  // schema.org: "email" in JSON-LD (LocalBusiness, Organization…) and itemprop="email" microdata.
+  for (const sc of root.querySelectorAll('script[type="application/ld+json"]')) for (const e of jsonLdEmails(sc.textContent)) out.add(e);
+  for (const el of root.querySelectorAll('[itemprop="email"]')) {
+    const v = (el.getAttribute("content") ?? el.getAttribute("href") ?? el.textContent).replace(/^mailto:/i, "").trim().toLowerCase();
+    if (/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/.test(v)) out.add(v);
+  }
   return [...out].filter((e) => !emailProblem(e));
+};
+
+/** Every "email" value anywhere in a JSON-LD block (nested @graph, contactPoint…). */
+const jsonLdEmails = (text: string) => {
+  const found: string[] = [];
+  const walk = (v: unknown, depth: number) => {
+    if (depth > 8 || !v || typeof v !== "object") return;
+    if (Array.isArray(v)) return v.forEach((x) => walk(x, depth + 1));
+    for (const [k, x] of Object.entries(v as Record<string, unknown>)) {
+      if (k.toLowerCase() === "email") for (const e of [x].flat()) if (typeof e === "string") found.push(e.replace(/^mailto:/i, "").trim().toLowerCase());
+      else walk(x, depth + 1);
+    }
+  };
+  try {
+    walk(JSON.parse(text), 0);
+  } catch {
+    // broken JSON-LD: ignored
+  }
+  return found.filter((e) => /^[^@\s]+@[^@\s]+\.[a-z]{2,}$/.test(e));
 };
 
 const pickEmail = (emails: string[], domain: string | null) => (domain ? emails.find((e) => e.endsWith(`@${domain}`) || e.endsWith(`.${domain}`)) : undefined) ?? emails[0] ?? null;
 
-/** Publicly listed email: the home page (footer included) first, then the Contact, About and Imprint/legal pages. */
+/** Common contact and legal paths, tried even when the home page doesn't link them (owner, 2026-11-23). */
+const COMMON_PATHS = ["/contact", "/contact-us", "/about", "/about-us", "/impressum", "/terms", "/privacy", "/privacy-policy", "/terms-and-conditions"];
+const MAX_PAGES = 10;
+
+/** Contact, about and legal pages to read: the linked ones first, then the common paths, same site only. */
+export const emailPages = (home: FetchResult) => {
+  const base = new URL(home.url);
+  const urls = new Map<string, URL>();
+  for (const u of contactPages(home)) urls.set(u.toString().replace(/\/$/, ""), u);
+  for (const path of COMMON_PATHS) {
+    const u = new URL(path, base.origin);
+    const key = u.toString().replace(/\/$/, "");
+    if (!urls.has(key) && u.pathname !== base.pathname.replace(/\/$/, "")) urls.set(key, u);
+  }
+  return [...urls.values()].slice(0, MAX_PAGES);
+};
+
+/**
+ * Publicly listed email: the home page (footer and schema.org data included) first, then the Contact,
+ * About and Imprint/legal pages (linked or at the common paths), read four at a time. Never guessed.
+ */
 export const findPublicEmail = async (home: FetchResult, domain: string | null) => {
   const onHome = emailsIn(home.body);
   if (onHome.length) return { email: pickEmail(onHome, domain), noSoliciting: NO_SOLICITING.test(parse(home.body).textContent) };
-  for (const url of contactPages(home)) {
-    let page: FetchResult;
+  const pages = emailPages(home);
+  const read = async (url: URL) => {
     try {
-      page = await safeFetch(url, { maxBytes: 1024 * 1024, timeoutMs: 8000 });
+      const page = await safeFetch(url, { maxBytes: 1024 * 1024, timeoutMs: 6000 });
+      // A missing page that redirects home or to another site is skipped.
+      if (page.status !== 200 || !sameSite(new URL(page.url).hostname, url.hostname)) return null;
+      return { noSoliciting: NO_SOLICITING.test(parse(page.body).textContent), emails: emailsIn(page.body) };
     } catch {
-      continue;
+      return null;
     }
-    if (page.status !== 200) continue;
-    if (NO_SOLICITING.test(parse(page.body).textContent)) return { email: null, noSoliciting: true };
-    const emails = emailsIn(page.body);
-    if (emails.length) return { email: pickEmail(emails, domain), noSoliciting: false };
+  };
+  // In order (contact first); pages are fetched four at a time and the first page with an email wins.
+  for (let i = 0; i < pages.length; i += 4) {
+    const got = await Promise.all(pages.slice(i, i + 4).map(read));
+    for (const g of got) {
+      if (!g) continue;
+      if (g.noSoliciting) return { email: null, noSoliciting: true };
+      if (g.emails.length) return { email: pickEmail(g.emails, domain), noSoliciting: false };
+    }
   }
   return { email: null, noSoliciting: false };
 };
 
+/** Facebook and Instagram profiles linked from their own site (the first of each). */
+export const socialLinks = (home: FetchResult) => {
+  const root = parse(home.body, { comment: false });
+  let facebook: string | null = null;
+  let instagram: string | null = null;
+  for (const a of root.querySelectorAll("a[href]")) {
+    const href = (a.getAttribute("href") ?? "").trim();
+    if (!facebook && /^https?:\/\/(www\.|m\.|business\.)?facebook\.com\/(?!sharer|share|dialog|plugins|tr\b)[^?#]+/i.test(href)) facebook = href;
+    if (!instagram && /instagram\.com\//i.test(href)) instagram = normalizeInstagram(href);
+  }
+  return { facebook, instagram };
+};
+
 /**
- * The email in the business's public Facebook page "About" text, when OSM links the page. Facebook
+ * The email in an Instagram profile's bio, when Instagram shows it to a server (it often answers with a
+ * login page: then nothing is found). Only an address written in the bio text; never guessed.
+ */
+export const instagramEmail = async (profile: string | null, domain: string | null) => {
+  if (!profile) return null;
+  try {
+    const page = await safeFetch(new URL(profile), { maxBytes: 1024 * 1024, timeoutMs: 6000 });
+    if (page.status !== 200) return null;
+    const meta = [...page.body.matchAll(/<meta[^>]+(?:name|property)="(?:og:)?description"[^>]+content="([^"]*)"/gi)].map((m) => m[1]).join(" ");
+    const bio = [...page.body.matchAll(/"biography":"((?:[^"\\]|\\.)*)"/g)].map((m) => m[1]).join(" ");
+    const emails = [...new Set([...`${meta} ${bio}`.matchAll(EMAIL_RE)].map((m) => m[0].toLowerCase()))].filter((e) => !emailProblem(e) && !/instagram|facebook|fbcdn|meta\.com/.test(e));
+    return pickEmail(emails, domain);
+  } catch {
+    return null;
+  }
+};
+
+/**
+ * The email in the business's public Facebook page "About" text, when OSM or their site links the page. Facebook
  * often shows servers a login wall; then nothing is found (never guessed).
  */
-export const facebookEmail = async (tags: Record<string, string>, domain: string | null) => {
-  const raw = (tags["contact:facebook"] ?? tags.facebook ?? "").split(";")[0].trim();
+export const facebookEmail = async (tags: Record<string, string>, domain: string | null, fromSite: string | null = null) => {
+  const raw = (tags["contact:facebook"] ?? tags.facebook ?? fromSite ?? "").split(";")[0].trim();
   if (!raw) return null;
   const url = /^https?:\/\//i.test(raw) ? raw : /^[\w.-]+$/.test(raw) ? `https://www.facebook.com/${raw}` : null;
   try {
@@ -265,7 +350,7 @@ const qualifyOne = async (p: Prospect): Promise<string> => {
 
   // An unusable OSM address (no-reply, placeholder, free-mail look-alike) is dropped; the site may list a real one.
   let email = p.email && !emailProblem(p.email) ? p.email : null;
-  let source: "osm" | "contact-page" | "facebook" | null = email ? "osm" : null;
+  let source: "osm" | "contact-page" | "facebook" | "instagram" | null = email ? "osm" : null;
   if (page) {
     const found = await findPublicEmail(page, p.domain);
     if (found.noSoliciting) return skip(p, "Site asks for no unsolicited email").then(() => "skipped");
@@ -274,11 +359,20 @@ const qualifyOne = async (p: Prospect): Promise<string> => {
       source = "contact-page";
     }
   }
+  // Then the Facebook page (OSM's or the one linked from their site) and the Instagram bio linked from their site.
+  const social = page ? socialLinks(page) : { facebook: null, instagram: null };
   if (!email) {
-    const fb = await facebookEmail(p.osm_tags ?? {}, p.domain);
+    const fb = await facebookEmail(p.osm_tags ?? {}, p.domain, social.facebook);
     if (fb) {
       email = fb;
       source = "facebook";
+    }
+  }
+  if (!email) {
+    const ig = await instagramEmail(social.instagram ?? instagram, p.domain);
+    if (ig) {
+      email = ig;
+      source = "instagram";
     }
   }
   if (email && !(await hasMailServer(email))) email = null; // dead domain or typo: dropped
@@ -302,6 +396,8 @@ const qualifyOne = async (p: Prospect): Promise<string> => {
     await ox.updateProspect(p.id, { status: "whatsapp", skip_reason: null, phone, instagram, audit_score: audit.score, lead_score: score, email: "", flags });
     return `WhatsApp/Instagram queue (${audit.score})`;
   }
-  await ox.updateProspect(p.id, { status: "audited", email, email_source: source, phone, instagram, audit_score: audit.score, lead_score: score, flags, qualified_at: new Date().toISOString() });
+  const row = { status: "audited", email, email_source: source, phone, instagram, audit_score: audit.score, lead_score: score, flags, qualified_at: new Date().toISOString() };
+  // 'instagram' is allowed from migration 20261123090000; before it the source is left empty.
+  await ox.updateProspect(p.id, row).catch((e) => (source === "instagram" ? ox.updateProspect(p.id, { ...row, email_source: null }) : Promise.reject(e)));
   return `audited (${audit.score})`;
 };
