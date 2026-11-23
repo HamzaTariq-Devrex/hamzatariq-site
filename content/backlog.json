@@ -634,8 +634,9 @@
         "who owns the code with an agency?"
       ],
       "angle": "Written by someone who is both: a founder of a small agency who also works directly with clients. A decision table by project type instead of a generic pros/cons list.",
-      "status": "queued",
-      "publishedSlug": null
+      "status": "published",
+      "publishedSlug": "freelance-nextjs-developer-vs-agency",
+      "published": "2026-11-23"
     },
     {
       "keyword": "improve lcp in next.js",
