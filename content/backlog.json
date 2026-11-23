@@ -685,8 +685,9 @@
         "when should a bot hand over to a human?"
       ],
       "angle": "The handoff rules I use (when the bot doesn't know, when a lead is ready) and what the visitor sees, from the live assistant on this site.",
-      "status": "queued",
-      "publishedSlug": null
+      "status": "published",
+      "publishedSlug": "website-chatbot-with-whatsapp-handoff",
+      "published": "2026-11-23"
     },
     {
       "keyword": "ecommerce admin dashboard features",

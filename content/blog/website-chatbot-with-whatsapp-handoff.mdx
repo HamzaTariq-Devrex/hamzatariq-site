@@ -1,0 +1,131 @@
+---
+title: "Website Chatbot With WhatsApp Handoff: The Rules I Use"
+seoTitle: "Website Chatbot With WhatsApp Handoff: 4 Rules"
+description: "A website chatbot with WhatsApp handoff, explained from a live one: the 4 moments the bot steps aside, what the visitor sees each time and what to test first."
+keyword: "website chatbot with whatsapp handoff"
+category: ai-chatbots
+cluster: ai-chatbots
+role: supporting
+intent: learn
+funnel: consideration
+secondary: ["chatbot to whatsapp", "live chat to whatsapp", "whatsapp lead capture"]
+trust: "I built and run the AI assistant on this site, including its WhatsApp, email and lead-form handoff, hold a BS in Artificial Intelligence, and build custom chatbots for clients at Devrex Digital."
+tags: [ai chatbot, whatsapp, lead capture, handoff]
+published: 2026-11-23
+faq:
+  - q: "Do I need the WhatsApp Business API for a chatbot to WhatsApp handoff?"
+    a: "Not for a website chatbot. The bot gives the visitor a WhatsApp button that opens a chat with your number and a message already written. The visitor sends it themselves, so you reply from your normal WhatsApp or WhatsApp Business app."
+  - q: "Will I see what the visitor asked the chatbot?"
+    a: "Yes, in two ways in the setup I build. The WhatsApp message carries the visitor's last questions, and every chat is saved with its transcript, so a lead from the form arrives with the whole conversation."
+  - q: "What happens if the visitor doesn't use WhatsApp?"
+    a: "They get the same handoff by email or through a short form in the chat. The email button writes their questions into the email, and the form saves their name, email, project type and budget."
+  - q: "Can the chatbot reply to customers on WhatsApp itself?"
+    a: "That's a different product: a bot that lives inside WhatsApp. A website chatbot answers on your site and hands real customers to you on WhatsApp, where a person replies."
+  - q: "How much does a website chatbot with WhatsApp handoff cost?"
+    a: "My AI chatbot starts at $350 and usually takes 3–5 days, with handover to WhatsApp or email included. It's quoted after a free call."
+---
+
+A **website chatbot with WhatsApp handoff** is a chat window on your site that answers simple questions itself and sends real customers to your WhatsApp, with their questions already typed in. You reply as a person, from your normal WhatsApp. The bot doesn't message anyone; the visitor taps a button and sends the message.
+
+The hard part isn't the button. It's deciding when the bot should step aside. The assistant I built and run hands over at four moments:
+
+1. **The visitor is ready to start** (asks for a quote, a call or how to hire): a short lead form opens in the chat.
+2. **The bot doesn't know**: it says so and offers WhatsApp, email or the form.
+3. **The AI fails or is slow**: saved answers take over, and anything they can't match goes to a person.
+4. **The visitor just wants to talk to you**: WhatsApp and email buttons sit under the chat after the first message.
+
+The rest of this post shows what the visitor sees at each one, and what to test before you launch yours.
+
+## Can a chatbot send customers to WhatsApp?
+
+Yes, and for a website it's simpler than most guides suggest. WhatsApp opens a chat with any number from a link, and the link can carry a message. So the bot's WhatsApp button is a link with your number and a message built from the conversation.
+
+On my assistant, the message starts with "Hi Hamza! I was chatting with the assistant on your website.", then lists the visitor's last five questions under "My questions:", and ends with "I'd like to discuss my project." The questions go into the link with [encodeURIComponent](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent), so line breaks, question marks and accents arrive intact.
+
+That one detail does most of the work. The visitor doesn't have to explain themselves again, and the first message you receive already tells you what they want.
+
+What you don't need is a WhatsApp Business API account or a monthly widget. Those are for bots that live inside WhatsApp and send messages themselves. A chatbot to WhatsApp handoff on your website only needs your number.
+
+## When should a bot hand over to a human?
+
+When the next useful thing is something only you can do. In practice that's four rules, and one non-rule.
+
+**Hand over when the visitor is ready to buy.** If someone asks for a quote, a call, your availability or how to hire you, the bot answers in a line and the lead form opens. On my assistant, the AI adds a hidden marker to its reply when this happens; the visitor never sees it, but the chat window does and shows the form.
+
+**Hand over when the bot doesn't know.** It should never guess. When the question isn't covered by your content, the reply is fixed: "Hamza will answer this personally. Leave your name and email below and he'll get back to you, or message him on WhatsApp or by email." A clear "I don't know, here's the person" beats a confident wrong answer every time. How the bot decides what it knows is covered in my guide to an [AI chatbot trained on website content](/blog/ai-chatbot-trained-on-website-content).
+
+**Hand over when the AI itself is down.** AI providers have outages and limits. On my assistant, if the AI fails, is out of free quota or doesn't start replying within 7 seconds, the reply comes from 30 saved answers instead. A question none of them matches gets the personal-answer reply above.
+
+**Always leave a way out.** After the visitor's first message, "Get a quote", "WhatsApp" and "Email" buttons sit under the chat. Some people want a person from the start, and they shouldn't have to talk the bot into it.
+
+**Don't hand over off-topic questions.** Coding help, trivia, jokes and homework get one line: "I can only help with questions about Hamza's services and projects." A handoff there would send you messages that were never leads.
+
+## What does the visitor see at each handoff?
+
+This is the part most guides skip. Here's every handoff moment on the live assistant, side by side.
+
+| Moment | What the bot says | What appears |
+| --- | --- | --- |
+| Ready to start | A short answer, and that they can leave details below | Lead form in the chat |
+| Bot doesn't know | "Hamza will answer this personally…" | Lead form, WhatsApp and email |
+| AI fails or is slow | A saved answer, if one matches | Same buttons as always |
+| No saved answer matches | "Hamza will answer this personally…" | Lead form, WhatsApp and email |
+| Off-topic question | "I can only help with questions about Hamza's services and projects." | Nothing extra |
+| Any time after the first message | | "Get a quote", WhatsApp and Email buttons |
+
+The footer of the chat also says "AI can make mistakes. For an exact quote, Hamza replies personally." That sets the right expectation before anything goes wrong.
+
+<FromMyWork title="How the handoff works on my own assistant">
+I built the assistant on my site with Google Gemini and Supabase. It answers only from the site's own pages (44 at launch) and starts replying in 1–2 seconds on the fast model. When Gemini can't answer, 30 saved answers take over, so the chat never goes silent.
+
+Every handoff ends in one of three places: WhatsApp, email or the lead form. The WhatsApp and email buttons both carry the visitor's last questions. The form saves name, email, project type, budget and an optional WhatsApp number in Supabase, together with the chat transcript. Then I get an email notification and the visitor gets an automatic reply.
+
+That optional WhatsApp number matters more than it looks. People who prefer to chat can leave it, and I can message them first, with the whole conversation in front of me.
+</FromMyWork>
+
+## Chatbot to WhatsApp vs live chat to WhatsApp
+
+These get mixed up, and they solve different problems.
+
+| | Chatbot with WhatsApp handoff | Live chat to WhatsApp | Bot inside WhatsApp |
+| --- | --- | --- | --- |
+| Who answers first | The AI, from your content | A person, in a website widget | A bot, inside WhatsApp |
+| When a person joins | At a handoff moment | From the start | When the bot escalates |
+| Where you reply | Your WhatsApp app | The widget's inbox, or WhatsApp | A shared WhatsApp inbox |
+| What you need | Your number | A live chat service | The WhatsApp Business API |
+| Best for | Answering at night, sending you ready leads | Teams that can staff a chat | Businesses with lots of WhatsApp traffic |
+
+Live chat to WhatsApp only helps when someone is free to answer. A chatbot covers the hours when nobody is, and hands over the visitors worth your time. For most small businesses, that's the gap: questions arrive after hours, and people who were ready to buy go somewhere else.
+
+## Should WhatsApp lead capture use a form or the chat?
+
+Both. They catch different people.
+
+- **WhatsApp** suits visitors who want an answer from a person now. They start the conversation, and you see their questions in the first message.
+- **The form** suits visitors who'd rather not chat, or who are browsing at night. Their details are saved with the transcript, so nothing depends on you being online.
+- **Email** is the fallback for people who don't use WhatsApp, with their questions written into the email for them.
+
+The mistake I see in widget setups is WhatsApp lead capture with no record. If the only handoff is a WhatsApp link, you learn nothing about the visitors who didn't tap it. Saving every chat shows you which questions come up, which ones the bot couldn't answer, and which content to add next.
+
+The wider picture (what to automate, what it costs to run, how to measure it) is in my complete guide to [AI chatbots for small business](/blog/ai-chatbot-for-small-business).
+
+## Testing a website chatbot with WhatsApp handoff before launch
+
+Test the handoff like a customer, on your own phone, before anyone else sees it:
+
+- [ ] Your number is in international format in the link, with no plus sign, spaces or dashes.
+- [ ] Tapping WhatsApp on a phone opens the app with the message filled in, and on a laptop opens WhatsApp Web.
+- [ ] The prefilled message includes the questions you just asked, readable, with line breaks.
+- [ ] Asking for a price or a quote opens the form.
+- [ ] A question your content doesn't cover gets the personal-answer reply, not a guess.
+- [ ] An off-topic question gets the one-line reply and no handoff.
+- [ ] Submitting the form sends you the notification email, and the test visitor the automatic reply.
+- [ ] Someone checks WhatsApp after hours, or the form promises a reply time you can keep.
+
+Then read the first week of saved chats. They'll tell you which questions to add to your pages, and which handoffs fire too early or too late.
+
+<MyTake>
+Hand over earlier than feels natural. A bot that keeps a ready customer talking to save you a message is costing you the sale. Make the WhatsApp button visible after the first message, send the visitor's questions with it, and let the bot handle only what it can answer from your own content. And save every chat: the WhatsApp link alone tells you nothing about the people who didn't tap it.
+</MyTake>
+
+If you'd like this on your site, my [AI chatbot service](/services/ai-chatbots) includes handover to WhatsApp or email. It starts at $350 and usually takes 3–5 days; the [AI chatbot for website cost breakdown](/blog/ai-chatbot-for-website-cost) explains what you pay to run it after launch.
