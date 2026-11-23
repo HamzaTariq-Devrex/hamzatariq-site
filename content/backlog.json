@@ -661,7 +661,8 @@
       ],
       "angle": "The changes that cut LCP on a Next.js site with heavy visuals (hero images, fonts, 3D, third-party scripts), in the order they usually help, with a check the reader can run after each.",
       "status": "queued",
-      "publishedSlug": null
+      "publishedSlug": null,
+      "blockedBy": "TODO(owner): measured LCP before/after on a client Next.js site; the planned angle (results on the own site) breaks the never-feature-the-own-site rule; see OWNER_TODO.md"
     },
     {
       "keyword": "website chatbot with whatsapp handoff",
