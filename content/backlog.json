@@ -610,7 +610,8 @@
       ],
       "angle": "The overlap schedule and update routine I use with US, UK and EU clients.",
       "status": "queued",
-      "publishedSlug": null
+      "publishedSlug": null,
+      "blockedBy": "TODO(owner): your real overlap hours with US, UK and EU clients and your update routine (how often, through which channel); see OWNER_TODO.md"
     },
     {
       "keyword": "freelance next.js developer vs agency",
