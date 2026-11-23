@@ -710,8 +710,9 @@
         "can i manage orders without shopify?"
       ],
       "angle": "A feature checklist ranked by how often store owners use each screen, from the dashboards built at Devrex Digital.",
-      "status": "queued",
-      "publishedSlug": null
+      "status": "published",
+      "publishedSlug": "ecommerce-admin-dashboard-features",
+      "published": "2026-11-23"
     },
     {
       "keyword": "supabase vs firebase for business app",
