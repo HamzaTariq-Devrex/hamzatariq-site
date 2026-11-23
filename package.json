@@ -12,7 +12,10 @@
     "typecheck": "tsc --noEmit",
     "postbuild": "node scripts/embed-content.mjs --soft",
     "embed": "node --env-file-if-exists=.env.local scripts/embed-content.mjs",
-    "content:check": "node scripts/content-check.mjs"
+    "content:check": "node scripts/content-check.mjs",
+    "supabase": "node scripts/supabase.mjs",
+    "db:push": "node scripts/supabase.mjs db push --linked",
+    "db:types": "node scripts/supabase.mjs types"
   },
   "dependencies": {
     "@fontsource-variable/bricolage-grotesque": "5.3.0",

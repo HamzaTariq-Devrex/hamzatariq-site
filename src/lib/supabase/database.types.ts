@@ -175,6 +175,21 @@ export type Database = {
           },
         ]
       }
+      outreach_ai_calls: {
+        Row: {
+          at: string
+          id: number
+        }
+        Insert: {
+          at?: string
+          id?: never
+        }
+        Update: {
+          at?: string
+          id?: never
+        }
+        Relationships: []
+      }
       outreach_ai_usage: {
         Row: {
           backoff_until: string | null
@@ -520,6 +535,7 @@ export type Database = {
           name: string
           next_followup_at: string | null
           notes: string | null
+          offer: string | null
           osm_id: string
           osm_tags: Json
           phone: string | null
@@ -561,6 +577,7 @@ export type Database = {
           name: string
           next_followup_at?: string | null
           notes?: string | null
+          offer?: string | null
           osm_id: string
           osm_tags?: Json
           phone?: string | null
@@ -602,6 +619,7 @@ export type Database = {
           name?: string
           next_followup_at?: string | null
           notes?: string | null
+          offer?: string | null
           osm_id?: string
           osm_tags?: Json
           phone?: string | null
@@ -1351,7 +1369,7 @@ export type Database = {
         Returns: Json
       }
       app_ox_ai_usage: {
-        Args: { p_day: string; p_secret: string }
+        Args: { p_day: string; p_secret: string; p_since?: string }
         Returns: Json
       }
       app_ox_cache_get: {
@@ -1365,6 +1383,7 @@ export type Database = {
       app_ox_coverage: { Args: { p_secret: string }; Returns: Json }
       app_ox_coverage_mark: {
         Args: {
+          p_attempt?: boolean
           p_city: string
           p_country: string
           p_district: string
@@ -1412,6 +1431,10 @@ export type Database = {
         Returns: number
       }
       app_ox_niche_stats: { Args: { p_secret: string }; Returns: Json }
+      app_ox_offer_stats: {
+        Args: { p_from: string; p_secret: string }
+        Returns: Json
+      }
       app_ox_preview: {
         Args: { p_id: string; p_secret: string }
         Returns: Json
@@ -1702,6 +1725,7 @@ export type Database = {
         }[]
       }
       is_owner: { Args: never; Returns: boolean }
+      ox_tier: { Args: { p_score: number; p_website: string }; Returns: number }
     }
     Enums: {
       [_ in never]: never
