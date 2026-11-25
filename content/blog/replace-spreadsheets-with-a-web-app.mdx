@@ -115,7 +115,7 @@ This is how I plan an Excel to web application move, or a Google Sheets one. The
 <FromMyWork title="The admin dashboards I build on Supabase">
 At Devrex Digital I design the Supabase layer for each client project (logins, the Postgres database, file storage and the access rules) and build React and TypeScript admin dashboards on top for order and product management. Those dashboards do exactly what a team's order sheet used to do: staff log in, see the orders and products they're responsible for, and update them in one place.
 
-The part that replaces "share the file by link" is the access rules. With [Supabase row level security](https://supabase.com/docs/guides/database/postgres/row-level-security), the database itself decides who can read and change each row, so a staff member who only packs orders never sees the money side, even if a button is left visible by mistake.
+The part that replaces "share the file by link" is the access rules. With [Supabase row level security](https://supabase.com/docs/guides/database/postgres/row-level-security), the database itself decides who can read and change each row, so a staff member who only packs orders never sees the money side, even if a button is left visible by mistake. For why I pick Supabase over Firebase for this, see my [Supabase vs Firebase comparison for business apps](/blog/supabase-vs-firebase-for-business-app).
 </FromMyWork>
 
 ## What stays in a spreadsheet afterwards?

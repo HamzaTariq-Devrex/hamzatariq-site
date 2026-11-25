@@ -735,8 +735,9 @@
         "which is cheaper, supabase or firebase?"
       ],
       "angle": "Why this site's leads, chats and admin run on Supabase with row-level security, with the actual policy pattern.",
-      "status": "queued",
-      "publishedSlug": null
+      "status": "published",
+      "publishedSlug": "supabase-vs-firebase-for-business-app",
+      "published": "2026-11-25"
     },
     {
       "keyword": "how to pay a freelance developer overseas",

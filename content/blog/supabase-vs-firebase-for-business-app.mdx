@@ -1,0 +1,169 @@
+---
+title: "Supabase vs Firebase for a Business App"
+description: "Supabase vs Firebase for a business app, judged by the admin dashboard it must run: a side-by-side table, real access-rule code and what to ask your developer."
+keyword: "supabase vs firebase for business app"
+category: dashboards
+cluster: dashboards
+role: supporting
+intent: compare
+funnel: consideration
+secondary: ["supabase vs firebase", "postgres vs firestore", "supabase row level security"]
+trust: "At Devrex Digital I design the Supabase layer for each project (auth, Postgres schema, storage and access rules) and build the React and TypeScript admin dashboards on top, as the sole frontend developer on 40+ live production websites."
+tags: [supabase, firebase, dashboards, web apps, databases]
+published: 2026-11-25
+faq:
+  - q: "Is Supabase or Firebase better for a small business app?"
+    a: "For most business apps, such as admin dashboards, order systems and staff tools, Supabase fits better, because the data is a set of linked records you filter, total and export, and Postgres is built for that. Firebase is the better pick for a mobile-first app where live sync between phones is the main feature."
+  - q: "Which is cheaper, Supabase or Firebase?"
+    a: "Both have free tiers. On paid plans, Firebase bills each document read, write and delete, so a dashboard that staff refresh all day is hard to predict. Supabase bills a monthly plan per project plus compute and storage, which is easier to budget for a business tool."
+  - q: "Do I need to know SQL to use a Supabase app?"
+    a: "No. Your team works in the admin dashboard your developer builds. SQL matters to the developer, and it helps you later, because any reporting tool or freelancer who knows SQL can read the same data."
+  - q: "Can I move from Firebase to Supabase later?"
+    a: "Yes, but it is a migration project, not a switch. Document data has to be reshaped into tables, the access rules rewritten and the app's data code changed. It is cheaper to choose the right backend before the build."
+  - q: "What does a custom dashboard on Supabase cost?"
+    a: "With me, a custom dashboard starts at $1,200 and takes 2–4 weeks, and a custom web app starts at $2,500 and takes 4–8 weeks. Every project is quoted after a free call."
+---
+
+For **supabase vs firebase for business app** work, my verdict is Supabase for most businesses. A business app is usually an admin dashboard: customers, orders, products and staff, all linked, filtered, totalled and exported. Supabase runs on Postgres, a relational SQL database built for exactly that, and its access rules live inside the database. Choose Firebase when the app is mobile-first and live sync between phones is the main feature, such as chat or field staff working offline.
+
+Here is the side-by-side comparison.
+
+| | Supabase | Firebase |
+| --- | --- | --- |
+| Database | Postgres: tables linked to each other | Firestore: documents in collections |
+| Best at | Filtering, totals, reports, exports | Live sync to phones, offline use |
+| Access rules | Row level security, in the database | Security Rules, a separate rules language |
+| Paid billing | Monthly plan per project, plus compute and storage | Per document read, write and delete |
+| Open source | Yes, and it can be self-hosted | No, it runs on Google Cloud only |
+| Leaving later | Standard Postgres export | Data must be reshaped for any SQL database |
+| Fits | Admin dashboards, stores, staff tools | Mobile apps, chat, real-time features |
+
+## Supabase vs Firebase for a business app: what are you comparing?
+
+Every comparison I read is written for developers: SDKs, edge functions, AI features, setup code. That's useful if you're the one coding. It doesn't tell a founder much about the thing they're paying for.
+
+So compare them on the job. Most business apps I'm asked to quote have the same shape:
+
+- **Records that belong together.** An order has a customer, several products, a status and the staff member handling it.
+- **Screens that slice the data.** Today's orders by city, unpaid invoices, low stock, sales this month.
+- **People with different rights.** The owner sees revenue, a packer sees only the orders to pack, a customer sees only their own account.
+- **Data that leaves the app.** A CSV for the accountant, a report tool, a future developer.
+
+Both platforms can do all four. The question is which one does them by design and which one needs workarounds. The [guide to custom web apps for small business](/blog/custom-web-app-for-small-business) covers when a business needs an app at all; this post assumes you do and you're choosing what it runs on.
+
+## What is the difference between Postgres and Firestore for business data?
+
+This is the real decision, and the rest follows from it. In the **postgres vs firestore** choice, the two store data in different shapes.
+
+**Postgres (Supabase)** keeps data in tables, like well-organised spreadsheets that point at each other. An `orders` table points at a `customers` table and a `products` table. Ask "total sales per customer this month" and the database answers in one query, because the links are part of the design.
+
+**Firestore (Firebase)** keeps data as documents, like folders of separate files. That's flexible and fast for loading one thing at a time, such as a chat thread on a phone. But Firestore has no joins, so connected questions are harder. Developers either copy the customer's name into every order document (and then keep every copy up to date) or load several documents and combine them in the app.
+
+For a dashboard, that matters every day. A new report screen in Postgres is usually a new query. In Firestore it can mean changing how the data is stored. If your data already lives in spreadsheets with columns and IDs, it maps straight into tables; my guide to [replacing spreadsheets with a web app](/blog/replace-spreadsheets-with-a-web-app) walks through that move.
+
+## Is Supabase better than Firebase?
+
+For business apps, usually yes. For every app, no. Here's where each one wins, in plain terms.
+
+**Supabase wins when:**
+
+- The app is mostly screens of records that staff search, filter and update.
+- You need reports, totals and exports, or you'll plug in a reporting tool later.
+- Different people must see different rows, and that has to hold even when new screens are added.
+- You want the option to leave: Postgres is a standard database any developer can run.
+
+**Firebase wins when:**
+
+- The product is a mobile app first and the website second.
+- Live updates between many phones are the core feature, such as a chat or a delivery tracker.
+- The app must keep working offline and sync when the signal comes back.
+- Your team already runs on Google Cloud and wants one bill.
+
+Both platforms also handle logins and file storage, so those rarely decide it. The data model does.
+
+## Which is cheaper, Supabase or Firebase?
+
+Both have a free tier, and for a business app neither free tier is the plan to run on. On Supabase's free plan, a project pauses when it's inactive for a while, which is fine for a test and wrong for the tool your staff open each morning. So compare the paid models.
+
+**Firebase charges per operation.** On its pay-as-you-go plan, every document read, write and delete is billed. A dashboard is a read machine: every time someone opens the orders screen, each order on it is a read, and staff refresh it all day. The bill grows with how often people look, not just with how much data you have, so it's hard to predict before launch.
+
+**Supabase charges per project.** Its paid plans are a monthly fee per project, plus usage for compute, database storage and file storage, with no charge per request. A busy dashboard costs roughly what a quiet one does, as long as the database size and server stay the same.
+
+For a business tool, predictable usually beats cheapest-at-zero. Hosting is only one line of the total, though; the build is the bigger number, and my breakdown of [real custom dashboard prices](/blog/how-much-does-a-custom-dashboard-cost) shows what moves it.
+
+<FromMyWork title="The Supabase layer under the stores and dashboards I build">
+<Figure
+  src="https://www.devrexdigital.site/images/portfolio/v2/nagina.webp"
+  alt="Nagina House of Jewels online store showing bridal and kundan jewellery categories"
+  width={1440}
+  height={1177}
+  caption="Nagina Jewels: an online jewellery store with a large catalogue, built at Devrex Digital."
+/>
+
+At Devrex Digital I design the Supabase layer for each project: the logins, the Postgres schema, file storage and the access rules. Then I build React and TypeScript admin dashboards on top for order and product management.
+
+[The Nagina Jewels store, with its large jewellery catalogue](/work/nagina-jewels), shows why the data model matters. Shoppers browse bridal, kundan, earrings and necklaces in a few taps, and sale campaigns sit up front. Behind that, products belong to categories and campaigns, and orders point at products and customers. Those are linked records, which is what tables and joins are for, and it's why every admin screen is a query rather than a rebuild.
+</FromMyWork>
+
+## How does Supabase row level security keep staff data apart?
+
+**Supabase row level security** (RLS) is a rule written in the database that decides, row by row, who may read or change each record. Because it sits in the database, it applies to every screen, every API call and every feature added later. A new page can't leak data the rules don't allow.
+
+This is the pattern I start from on a staff dashboard: staff see only the orders assigned to them, and admins see all of them.
+
+```sql
+-- Switch the rules on. Without this line, the table is open.
+alter table orders enable row level security;
+
+-- Staff: only orders assigned to the signed-in person.
+create policy "staff read their own orders"
+on orders for select
+to authenticated
+using ( assigned_to = (select auth.uid()) );
+
+-- Admins: every order, checked against the staff table.
+create policy "admins read all orders"
+on orders for select
+to authenticated
+using (
+  (select role from staff where user_id = (select auth.uid())) = 'admin'
+);
+```
+
+In plain words: the first line locks the table. Each policy then opens one door. `auth.uid()` is the ID of the person who is signed in, so the staff rule compares each order's `assigned_to` with that person, and the admin rule looks up their role. Anyone not covered gets nothing, which is the safe default. The [Supabase guide to row level security](https://supabase.com/docs/guides/database/postgres/row-level-security) has the full syntax.
+
+Firebase does the same job with Security Rules, written in their own language and kept apart from the data. They work, but they're a second system to keep in step with the app. In both, the real risk is the same: rules left off or written too loosely. That's why the checklist below starts there.
+
+## Can you leave Supabase or Firebase later?
+
+Leaving Supabase is a normal database move. Supabase is open source and the data is plain Postgres, so a developer can export it with standard tools and run it elsewhere: another host, your own server, or a self-hosted Supabase. The access rules come along, because they're part of the database.
+
+Leaving Firebase is a migration project. Firestore documents have to be reshaped into tables, the Security Rules rewritten, and every part of the app that reads data changed. It's done often, but it costs a build's worth of time. If there's a chance you'll outgrow the platform, choose the portable one up front.
+
+## What should you ask your developer before the build?
+
+None of the comparisons I read gave a list for the person paying. Whichever platform you pick, ask:
+
+- [ ] **Are the access rules switched on for every table?** Ask to see who can read customers, orders and payments, role by role.
+- [ ] **Are there backups, and has a restore been tested?** Supabase's paid plans include [database backups](https://supabase.com/docs/guides/platform/backups); ask how often they run and how a restore works.
+- [ ] **Can I export all the data?** A full export in a standard format, not just a CSV of one screen.
+- [ ] **What will hosting cost at next year's size?** Price it with your expected staff and orders, not today's.
+- [ ] **Who holds the accounts?** Agree in writing who holds the code, hosting and database accounts, and what a handover includes.
+- [ ] **Is it on the free tier?** A business app should run on a paid plan from launch day.
+
+Here's the decision table I use, with my real starting prices:
+
+| Your business app | Choose | From (with me) |
+| --- | --- | --- |
+| Staff admin dashboard for orders, stock or customers | Supabase | $1,200, 2–4 weeks |
+| Online store that needs an admin | Supabase | $1,000, 2–3 weeks |
+| Web app where customers and staff log in | Supabase | $2,500, 4–8 weeks |
+| Mobile-first app built around live sync or offline use | Firebase | Quoted by features |
+
+Terms are 50% upfront and 50% on delivery, with 2 free revision rounds and 30 days of free bug fixes after launch.
+
+<MyTake>
+Pick the backend for the reports you'll want in a year, not for the first screen. Business owners almost always end up asking for "orders by month", "sales by staff member" or "an export for the accountant", and those are one query in Postgres. That's why I build on Supabase by default. If your app is really a mobile app with live sync at its heart, I'll say so on the call, because then Firebase is the honest answer.
+</MyTake>
+
+If you want a quote for a dashboard on Supabase, the [custom dashboard development service page](/services/dashboards) has the packages and how the build works.
