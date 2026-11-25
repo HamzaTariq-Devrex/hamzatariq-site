@@ -760,8 +760,9 @@
         "should i pay a developer upfront?"
       ],
       "angle": "How payment works in practice with the two methods I accept from international clients (Payoneer and bank transfer), how the 50/50 split protects both sides, and the payment questions to settle before work starts.",
-      "status": "queued",
-      "publishedSlug": null
+      "status": "published",
+      "publishedSlug": "how-to-pay-a-freelance-developer-overseas",
+      "published": "2026-11-25"
     },
     {
       "keyword": "cost to hire a next.js developer",
