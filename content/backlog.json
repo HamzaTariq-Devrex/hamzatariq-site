@@ -786,8 +786,9 @@
         "is fixed price or hourly better for a website?"
       ],
       "angle": "Real fixed package prices and delivery times from my own price list, what each package includes, and how add-ons change the total; no invented hourly-rate surveys.",
-      "status": "queued",
-      "publishedSlug": null
+      "status": "published",
+      "publishedSlug": "cost-to-hire-a-nextjs-developer",
+      "published": "2026-11-25"
     },
     {
       "keyword": "react open graph tags not working",
