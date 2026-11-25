@@ -121,12 +121,18 @@ const areaShape = async (cell: Cell): Promise<Shape | null> => {
   const key = `nominatim-shape:${cell.country}:${q.toLowerCase()}`;
   const cached = await store.cacheGet<Shape>(key, 24 * 30).catch(() => null);
   if (cached) return cached;
-  const wait = lastNominatim + 1100 - Date.now();
-  if (wait > 0) await sleep(wait);
-  lastNominatim = Date.now();
   const url = `https://nominatim.openstreetmap.org/search?${new URLSearchParams({ q, countrycodes: cell.country.toLowerCase(), format: "jsonv2", limit: "5", polygon_geojson: "1", polygon_threshold: "0.0005" })}`;
-  const res = await fetch(url, { headers: { "User-Agent": USER_AGENT, Accept: "application/json" }, signal: AbortSignal.timeout(30_000) });
-  if (!res.ok) throw new Error(`Nominatim answered ${res.status} for "${q}"`);
+  let res: Response | null = null;
+  // Busy (429/5xx) or a network error: up to 4 tries, waiting 5, 10, 20 s.
+  for (let attempt = 0; attempt < 4; attempt++) {
+    if (attempt) await sleep(5000 * 2 ** (attempt - 1));
+    const wait = lastNominatim + 1100 - Date.now();
+    if (wait > 0) await sleep(wait);
+    lastNominatim = Date.now();
+    res = await fetch(url, { headers: { "User-Agent": USER_AGENT, Accept: "application/json" }, signal: AbortSignal.timeout(30_000) }).catch(() => null);
+    if (res && (res.ok || (res.status !== 429 && res.status < 500))) break;
+  }
+  if (!res?.ok) throw new Error(`Nominatim answered ${res?.status ?? "nothing"} for "${q}"`);
   const rows = (await res.json()) as { lat: string; lon: string; osm_type: string; osm_id: number; display_name: string; boundingbox?: string[]; geojson?: { type: string; coordinates: unknown } }[];
   if (!rows.length) return null;
   const best = rows.find((r) => r.osm_type === "relation" && /Polygon/.test(r.geojson?.type ?? "")) ?? rows[0];
@@ -205,7 +211,8 @@ const centre = (g: Feature["geometry"]): [number, number] | null => {
 const features = async function* (file: string) {
   const rl = createInterface({ input: createReadStream(file), crlfDelay: Infinity });
   for await (const raw of rl) {
-    const line = raw.replace(/^\x1e/, "").trim();
+    // geojsonseq lines may start with the record separator character (0x1E).
+    const line = (raw.charCodeAt(0) === 0x1e ? raw.slice(1) : raw).trim();
     if (!line) continue;
     try {
       yield JSON.parse(line) as Feature;
