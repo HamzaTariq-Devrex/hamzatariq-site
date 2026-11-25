@@ -4,7 +4,7 @@
 // page and Instagram bio linked from the site; its phone/WhatsApp and Instagram links, checks the email domain has a mail server (MX),
 // applies the skip rules and scores the lead. No guessed addresses, no third-party lookups.
 import { hasMailServer } from "./mx";
-import { emailProblem } from "./email-check";
+import { emailProblem, personFromEmail } from "./email-check";
 import { parse } from "node-html-parser";
 import { runAudit } from "@/lib/audit/run";
 import { AuditFetchError, normalizeUrl, safeFetch, type FetchResult } from "@/lib/audit/safe-fetch";
@@ -111,7 +111,23 @@ const jsonLdEmails = (text: string) => {
   return found.filter((e) => /^[^@\s]+@[^@\s]+\.[a-z]{2,}$/.test(e));
 };
 
-const pickEmail = (emails: string[], domain: string | null) => (domain ? emails.find((e) => e.endsWith(`@${domain}`) || e.endsWith(`.${domain}`)) : undefined) ?? emails[0] ?? null;
+/** General inboxes a business reads (owner, 2026-11-25: preferred after a named person's address). */
+const GENERAL_INBOX = /^(info|hello|contact|enquiries|enquiry|inquiries|hi|office|admin|mail|team|bookings?|reception|studio|shop|sales)$/;
+/**
+ * The best published address (owner, 2026-11-25): on their own domain a person's name first, then
+ * info@/hello@/contact@ and other general inboxes, then any other address on their domain; then a
+ * person-looking address elsewhere (their gmail), then the rest. Never a guessed address.
+ */
+const pickEmail = (emails: string[], domain: string | null, businessName = "") => {
+  const own = (e: string) => !!domain && (e.endsWith(`@${domain}`) || e.endsWith(`.${domain}`));
+  const rank = (e: string) => {
+    const local = e.split("@")[0];
+    const person = !!personFromEmail(e, businessName);
+    if (own(e)) return person ? 0 : GENERAL_INBOX.test(local) ? 1 : 2;
+    return person ? 3 : GENERAL_INBOX.test(local) ? 4 : 5;
+  };
+  return [...emails].sort((a, b) => rank(a) - rank(b))[0] ?? null;
+};
 
 /** Common contact and legal paths, tried even when the home page doesn't link them (owner, 2026-11-23). */
 const COMMON_PATHS = ["/contact", "/contact-us", "/about", "/about-us", "/impressum", "/terms", "/privacy", "/privacy-policy", "/terms-and-conditions"];

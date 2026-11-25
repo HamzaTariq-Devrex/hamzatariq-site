@@ -142,6 +142,38 @@ export type State = {
   last_cold_sent_at: string | null;
 };
 
+/** One business in the imported pool (outreach_pool). */
+export type PoolRow = {
+  osm_id: string;
+  country: Country;
+  niche: string;
+  name: string;
+  lat: number;
+  lon: number;
+  /** areaKey(): country|region|city|district */
+  area_key: string;
+  region: string;
+  city: string;
+  district: string;
+  website: string | null;
+  domain: string | null;
+  email: string | null;
+  phone: string | null;
+  instagram: string | null;
+  facebook: string | null;
+  opening_hours: string | null;
+  tags: Record<string, string>;
+  /** 1 no website + email, 2 website + email, 3 website, 4 no website + social page, 5 phone only. */
+  priority: number;
+};
+
+export type PoolStats = {
+  countries: { country: string; total: number; email: number; website: number; no_website: number; available: number; available_email: number }[];
+  niches: { country: string; niche: string; total: number; email: number; no_website: number; available: number }[];
+  areas: Record<string, { total: number; available: number; available_email: number }>;
+  imported_at: string | null;
+};
+
 export type Funnel = {
   found: number;
   checked: number;
@@ -230,5 +262,11 @@ export const ox = {
     ),
   deleteDraft: (id: string) => call<string | null>("app_ox_delete_draft", { p_id: id }),
   messageForTest: (id: string) => call<{ subject: string; body: string } | null>("app_ox_message_for_test", { p_id: id }),
+  // ---------- Business pool (Geofabrik import, owner 2026-11-25) ----------
+  poolUpsert: (rows: PoolRow[]) => call<{ new: number; updated: number; duplicate_domain: number }>("app_ox_pool_upsert", { p_rows: json(rows) }),
+  poolFinish: (country: string, since: string) => call<number>("app_ox_pool_finish", { p_country: country, p_since: since }),
+  /** The best untaken rows of one area (marked taken), whether the area has pool data at all, and what is left per niche. */
+  poolTake: (areaKey: string, limit: number) => call<{ has_pool: boolean; rows: PoolRow[]; left: Record<string, number> }>("app_ox_pool_take", { p_area_key: areaKey, p_limit: limit }),
+  poolStats: () => call<PoolStats>("app_ox_pool_stats", {}),
   unsubscribe: (token: string, confirm: boolean) => call<{ name: string; done: boolean } | null>("app_ox_unsubscribe", { p_token: token, p_confirm: confirm }),
 };

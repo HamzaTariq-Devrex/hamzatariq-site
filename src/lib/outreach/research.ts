@@ -124,9 +124,15 @@ export const activeSignals = (home: FetchResult, extra: { contactWorks: boolean 
 
 const CLOSED_TAGS = /^(disused|abandoned|was|removed|demolished|razed|closed):/;
 /** No-website businesses: opening hours or a phone on OSM, and nothing saying it closed. */
+/** Why OSM says the place closed (closed/disused/was: tags, an end date, "closed" hours or name), or null. */
+export const osmClosed = (tags: Record<string, string>) => {
+  if (Object.keys(tags).some((k) => CLOSED_TAGS.test(k))) return "OpenStreetMap marks it closed or disused";
+  if (tags.end_date || /^(closed|off)$/i.test(tags.opening_hours ?? "") || /\b(closed|permanently closed)\b/i.test(tags.name ?? "")) return "OpenStreetMap marks it closed";
+  return null;
+};
 export const osmActive = (tags: Record<string, string>) => {
-  if (Object.keys(tags).some((k) => CLOSED_TAGS.test(k))) return { active: false, signals: [], reason: "OpenStreetMap marks it closed or disused" };
-  if (tags.end_date || /^(closed|off)$/i.test(tags.opening_hours ?? "") || /\b(closed|permanently closed)\b/i.test(tags.name ?? "")) return { active: false, signals: [], reason: "OpenStreetMap marks it closed" };
+  const closed = osmClosed(tags);
+  if (closed) return { active: false, signals: [], reason: closed };
   const signals: string[] = [];
   if (tags.opening_hours) signals.push("opening hours on OpenStreetMap");
   if (tags.phone || tags["contact:phone"] || tags["contact:mobile"]) signals.push("phone on OpenStreetMap");
@@ -504,4 +510,34 @@ export const researchProspect = async (p: Prospect, audit: AuditResult | null, d
     line,
     middle: g.middle?.trim().slice(0, 600) || null,
   };
+};
+
+/**
+ * Right before email 1 goes out (owner, 2026-11-25): their home page is opened again. Down (two tries),
+ * now opening another site, parked, closed or dead → the reason, and nothing is sent. No website → null.
+ */
+export const liveSiteProblem = async (p: Pick<Prospect, "website" | "research">): Promise<string | null> => {
+  if (!p.website) return null;
+  let home: FetchResult | null = null;
+  for (let i = 0; i < 2 && !home; i++) {
+    try {
+      home = await safeFetch(normalizeUrl(p.website), { maxBytes: 1536 * 1024, timeoutMs: 10_000 });
+    } catch {
+      if (i === 0) await new Promise((r) => setTimeout(r, 2000));
+    }
+  }
+  if (!home) return "Website didn't load just before sending (2 tries)";
+  const host = (u: string) => {
+    try {
+      return new URL(u).hostname.toLowerCase().replace(/^www\./, "");
+    } catch {
+      return "";
+    }
+  };
+  const from = host(p.website);
+  const to = host(home.url);
+  // A redirect the research already saw (and a person approved in Needs a look) is not new.
+  if (from && to && from !== to && !to.endsWith(`.${from}`) && !from.endsWith(`.${to}`) && to !== p.research?.redirectedTo) return `Website now opens ${to}, another site`;
+  const a = activeSignals(home, { contactWorks: !!p.research?.signals?.includes("working contact page") });
+  return a.active ? null : `Website just before sending: ${a.reason}`;
 };

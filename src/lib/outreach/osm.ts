@@ -1,7 +1,7 @@
 // OpenStreetMap only (free, no key): Nominatim finds the city, Overpass lists businesses of one type
 // inside it that have a website, phone or email tag. Both services ask for an identifying
 // User-Agent, at most 1 request per second and caching, so every response is cached in Supabase.
-import { ox, type Country } from "./db";
+import { ox, type Country, type PoolRow } from "./db";
 import { isPrimeLocation, placeQuery, type Cell } from "./areas";
 import { waitingForAddress } from "./address";
 
@@ -274,6 +274,37 @@ export const domainOf = (url: string | null) => {
   } catch {
     return null;
   }
+};
+
+/**
+ * One business from the imported pool (outreach_pool, owner 2026-11-25) → a prospect. The import
+ * already skipped chains, brands, closed places and prime addresses; the cheap checks run again here
+ * (the brand list may have grown since the import) plus the chain check across all prospects.
+ * Returns the new prospect id, or null when it was skipped or already known.
+ */
+export const addFromPool = async (row: PoolRow): Promise<string | null> => {
+  if (!isBusinessType(row.niche) || waitingForAddress(row.country)) return null;
+  if (isBigOrganisation(row.tags, row.name) || isPrimeLocation(row.tags) || isStoreLocatorPage(row.website)) return null;
+  if ((await ox.nameCount(row.name)) >= CHAIN_LOCATIONS - 1) return null;
+  return ox.addProspect({
+    search_id: null,
+    osm_id: row.osm_id,
+    name: row.name,
+    business_type: row.niche,
+    city: row.city,
+    region: row.region,
+    district: row.district,
+    country: row.country,
+    timezone: timezoneFor(row.country, row.lat, row.lon),
+    website: row.website,
+    domain: row.domain,
+    phone: row.phone,
+    email: row.email,
+    instagram: row.instagram,
+    osm_tags: row.tags,
+    lat: row.lat,
+    lon: row.lon,
+  });
 };
 
 /** Discovery for one coverage cell (niche x city): adds up to `budget` new businesses, returns how many. */

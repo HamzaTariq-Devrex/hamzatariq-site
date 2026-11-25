@@ -5,8 +5,8 @@
 //   spam complaint) and the on/off switch.
 // - send: replies first; then at most one email per tick, Mon-Fri 9:00-17:00 in the recipient's
 //   time zone, 4-11 minute gaps, the daily limit, and a fair share across niches and countries.
-// - scanning is its own job (discoverTick, pg_cron every 10 minutes): 150+ new businesses a day,
-//   area after area, every day of the week (src/lib/outreach/coverage.ts).
+// - scanning is its own job (discoverTick, pg_cron every 10 minutes): 250 new businesses a day from
+//   the imported pool (Geofabrik), area after area, every day of the week (src/lib/outreach/coverage.ts).
 // - audits (3 side by side), then drafts. Every email-1 draft goes through the automatic checks (checks.ts): sent,
 //   "Needs a look" (expires after 7 days), or rejected.
 // - the daily summary email at 9:00 PKT.
@@ -20,10 +20,10 @@ import { classifyReply, type ReplyClass } from "./classify";
 import { postalAddress, waitingForAddress, withAddress } from "./address";
 import { bounceType, readInbox, sendOutreach } from "./mail";
 import { autoCheck, hardChecks } from "./checks";
-import { DAILY_NEW_TARGET, discoverRun, doneSet, MAX_NEW_PER_DAY, progress, scanArea } from "./coverage";
+import { areaKey, DAILY_NEW_TARGET, discoverRun, doneSet, MAX_NEW_PER_DAY, openAreas, progress, scanArea } from "./coverage";
 import { cellLabel } from "./areas";
 import { takesBookings } from "./osm-types";
-import { researchProspect } from "./research";
+import { liveSiteProblem, researchProspect } from "./research";
 import { aiBudget } from "./ai";
 import { blogTopics } from "./topics";
 import { dailyLog } from "./map";
@@ -50,8 +50,32 @@ export const dailyCap = (startedAt: string | null, health?: { last50_sent: numbe
   return Math.max(5, base - cut);
 };
 
-/** Ready drafts to keep in the buffer: two days of the daily limit (owner, 2026-11-17). */
-export const bufferTarget = (cap: number) => cap * 2;
+/** Ready drafts to keep in the buffer: two days of the daily limit, at least 60 (owner, 2026-11-25). */
+export const bufferTarget = (cap: number) => Math.max(60, cap * 2);
+
+/**
+ * First emails per weekday we aim for (owner, 2026-11-25): 20 until week 3, then 30. Never above the
+ * safe daily limit (dailyCap), which still decides how many may go out.
+ */
+export const dailyGoal = (startedAt: string | null, cap: number, now = Date.now()) => {
+  const days = startedAt ? (now - Date.parse(startedAt)) / DAY : 0;
+  return Math.min(cap, days < 14 ? 20 : 30);
+};
+
+/** UK weekday and hour (the first market), for the 14:00 check. */
+const ukClock = (now = new Date()) => {
+  const parts = new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/London", weekday: "short", hour: "numeric", hour12: false }).formatToParts(now);
+  return { weekday: !["Sat", "Sun"].includes(parts.find((x) => x.type === "weekday")?.value ?? ""), hour: Number(parts.find((x) => x.type === "hour")?.value ?? "0") % 24 };
+};
+
+/**
+ * Behind for today (owner, 2026-11-25): on a weekday after 14:00 UK, fewer than half of the goal is
+ * sent or ready. Then scanning also takes leads from the next area.
+ */
+export const behindToday = (state: Pick<State, "sent_24h" | "ready" | "settings">, cap: number, now = new Date()) => {
+  const uk = ukClock(now);
+  return uk.weekday && uk.hour >= 14 && state.sent_24h + state.ready < dailyGoal(state.settings.started_at, cap, now.getTime()) / 2;
+};
 
 /** Never two cold emails less than 4 minutes apart (owner, 2026-11-17). */
 export const MIN_GAP_MS = 4 * 60_000;
@@ -290,6 +314,13 @@ export const sendNext = async (state: State, now = new Date()) => {
   const p = next.prospect;
   // Hard rules again, right before sending: chain/brand, MX, suppression, address; one company domain once.
   const blocked = (await hardChecks(p)) ?? (next.message.step === 0 && (await ox.domainEmailed(p.email!, p.id)) ? "Someone at this email domain was already emailed" : null);
+  // Email 1 only: their home page is opened again right now (down, another site, closed: not sent).
+  const live = blocked ? null : next.message.step === 0 ? await liveSiteProblem(p) : null;
+  if (live) {
+    await ox.updateMessage(next.message.id, { status: "cancelled", error: live });
+    await ox.updateProspect(p.id, { status: "skipped", skip_reason: live.slice(0, 200) });
+    return [...out, `skipped: ${live}`].join("; ");
+  }
   if (blocked) {
     await ox.updateMessage(next.message.id, { status: "cancelled", error: blocked });
     if (next.message.step === 0) await ox.updateProspect(p.id, { status: "skipped", skip_reason: blocked });
@@ -425,20 +456,36 @@ export const funnelLines = (f: Funnel) => [
 export const sendDailySummary = async (now = Date.now()) => {
   const todayStart = pktDayStart(now);
   const from = new Date(todayStart - DAY);
-  const [s, rows, funnel, map] = await Promise.all([
+  const [s, rows, funnel, map, state, pool] = await Promise.all([
     ox.dailySummary(from.toISOString(), new Date(todayStart).toISOString()),
     ox.coverage(),
     ox.funnel(from.toISOString()),
     ox.map().catch(() => null),
+    ox.state(),
+    ox.poolStats().catch(() => null),
   ]);
   const cov = progress(rows);
+  const cap = dailyCap(state.settings.started_at, state, now);
+  const goal = dailyGoal(state.settings.started_at, cap, now);
+  // Businesses in the pool not taken yet, area by area in coverage order (the current area first).
+  const areaLines = pool
+    ? openAreas()
+        .map((a) => ({ a, n: pool.areas[areaKey(a)] }))
+        .filter((x) => x.n && x.n.available > 0)
+        .slice(0, 8)
+        .map((x) => `- ${cellLabel(x.a)} (${x.a.country}): ${x.n.available} not processed yet (${x.n.available_email} with an email on OSM)`)
+    : [];
   const classes = Object.entries(s.by_class)
     .map(([k, v]) => `${k.replace("_", " ")} ${v}`)
     .join(", ");
   const lines = [
     `Yesterday (${pktDate(from.getTime())}, Pakistan time):`,
     ...(map ? dailyLog(map, from.getTime(), todayStart, "Area") : []),
-    `Emails sent: ${s.sent_first} first emails, ${s.sent_followups} follow-ups, ${s.sent_replies} automatic replies.`,
+    `First emails sent: ${s.sent_first} of a goal of ${goal} (safe daily limit ${cap}). Also ${s.sent_followups} follow-ups and ${s.sent_replies} automatic replies.`,
+    `Ready to send now: ${state.ready} checked drafts in the buffer (target ${bufferTarget(cap)}). Waiting: ${state.backlog_found} businesses to check, ${state.to_prepare} to research and draft.`,
+    pool
+      ? `Businesses available, not processed yet: ${pool.countries.map((c) => `${c.country} ${c.available} (${c.available_email} with an email on OSM)`).join(", ")}.${areaLines.length ? `\nNext areas:\n${areaLines.join("\n")}` : ""}`
+      : "",
     `Replies: ${s.replies}${classes ? ` (${classes})` : ""}. Bounces: ${s.bounces}.`,
     s.hot.length
       ? `HOT leads you need to call or answer (${s.hot.length}):\n${s.hot
@@ -481,15 +528,15 @@ const maybeShortfall = async (state: State, now = Date.now()) => {
   if (await ox.cacheGet(key, 48)) return null;
   await ox.cachePut(key, { at: new Date(now).toISOString() });
   const funnel = await ox.funnel(new Date(pktDayStart(now)).toISOString());
-  const cap = dailyCap(state.settings.started_at, state, now);
-  if (funnel.sent >= cap) return `limit reached (${funnel.sent}/${cap})`;
+  const cap = dailyGoal(state.settings.started_at, dailyCap(state.settings.started_at, state, now), now);
+  if (funnel.sent >= cap) return `goal reached (${funnel.sent}/${cap})`;
   const why = [
     state.settings.paused ? `Outreach is paused: ${state.settings.pause_reason ?? "paused"}.` : "",
     state.ready ? `${state.ready} checked emails are still queued; most recipients were outside their 9:00-17:00 weekday window or the 4-11 minute gaps ran out of day.` : "No checked emails were left in the queue (the buffer ran dry).",
     `Waiting: ${state.backlog_found} businesses to check, ${state.to_prepare} to research and draft.`,
   ].filter(Boolean);
   await sendOwnerAlert(`Outreach: only ${funnel.sent} of ${cap} emails sent today`, [
-    `Today (${pktDate(now)}, Pakistan time) ${funnel.sent} first emails went out against a daily limit of ${cap}.`,
+    `Today (${pktDate(now)}, Pakistan time) ${funnel.sent} first emails went out against a goal of ${cap}.`,
     ...why,
     `Funnel today:\n${funnelLines(funnel).join("\n")}`,
     `${SITE.url}/admin/prospects`,
@@ -501,9 +548,9 @@ export const PHASES = ["imap", "send", "draft", "audit"] as const;
 export type Phase = (typeof PHASES)[number];
 
 /** Businesses waiting for their check: above this, scanning waits so the audits catch up. */
-export const MAX_BACKLOG = 150;
+export const MAX_BACKLOG = 200;
 /** Audits run side by side in a tick (each one mostly waits on their site and PageSpeed). */
-const AUDITS_AT_ONCE = 3;
+const AUDITS_AT_ONCE = 4;
 
 /**
  * Should scanning run now? (owner, 2026-11-23, replaces "only when everything is processed"):
@@ -518,6 +565,7 @@ export const discoveryPlan = async (state: State, cap: number) => {
   if (state.backlog_found >= MAX_BACKLOG) return null;
   const area = scanArea(doneSet(await ox.coverage()));
   if (!area) return null;
+  if (behindToday(state, cap)) return `behind at 14:00 UK (${state.sent_24h} sent + ${state.ready} ready): taking from ${cellLabel(area)} and the next area`;
   if (state.found_24h < DAILY_NEW_TARGET) return `scanning from ${cellLabel(area)} (${state.found_24h}/${DAILY_NEW_TARGET} found in 24 h)`;
   if (state.ready < bufferTarget(cap) && state.backlog_found + state.to_prepare < 20) return `buffer low (${state.ready}/${bufferTarget(cap)}): scanning from ${cellLabel(area)}`;
   return null;
@@ -530,10 +578,11 @@ export const discoveryPlan = async (state: State, cap: number) => {
 export const discoverTick = async (budgetMs = 50_000) => {
   const start = Date.now();
   const state = await ox.state();
-  const plan = await discoveryPlan(state, dailyCap(state.settings.started_at, state));
+  const cap = dailyCap(state.settings.started_at, state);
+  const plan = await discoveryPlan(state, cap);
   await ox.cachePut("discover-ran", { at: new Date().toISOString() }).catch(() => {});
   if (!plan) return { plan: "nothing to scan now", found_24h: state.found_24h, backlog: state.backlog_found };
-  return { plan, results: await discoverRun(start + budgetMs - 3_000) };
+  return { plan, results: await discoverRun(start + budgetMs - 3_000, undefined, Number.POSITIVE_INFINITY, behindToday(state, cap)) };
 };
 
 /** The scanning job ran in the last 25 minutes. */

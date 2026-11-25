@@ -1,0 +1,42 @@
+# Weekly outreach business import (owner, 2026-11-25): Geofabrik country extracts (UK, Australia,
+# New Zealand, GCC states cut to our UAE areas) → osmium filter → outreach_pool in Supabase, written
+# through https://hamzatariq.site/api/outreach/pool with the CRON_SECRET repository secret.
+# The tick's scanning job then takes businesses area by area from the pool (no Overpass needed).
+# The extracts live in the runner's temp folder only; they are never committed or uploaded.
+name: Outreach import
+
+on:
+  schedule:
+    # Mondays 01:30 UTC (Geofabrik builds its extracts overnight).
+    - cron: "30 1 * * 1"
+  workflow_dispatch:
+    inputs:
+      countries:
+        description: "Countries (space separated: GB AU NZ AE). Empty = all."
+        required: false
+        default: ""
+
+concurrency:
+  group: outreach-import
+  cancel-in-progress: false
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install osmium
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq osmium-tool
+      - name: Install packages
+        run: npm ci --no-audit --no-fund --ignore-scripts
+      - name: Import
+        env:
+          POOL_API: https://hamzatariq.site/api/outreach/pool
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          COUNTRIES: ${{ github.event.inputs.countries }}
+        run: npx --yes tsx@4 scripts/outreach-import.ts $COUNTRIES

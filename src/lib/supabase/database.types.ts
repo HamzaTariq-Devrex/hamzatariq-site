@@ -345,6 +345,84 @@ export type Database = {
           },
         ]
       }
+      outreach_pool: {
+        Row: {
+          area_key: string
+          city: string
+          country: string
+          district: string
+          domain: string | null
+          email: string | null
+          facebook: string | null
+          gone: boolean
+          imported_at: string
+          instagram: string | null
+          lat: number
+          lon: number
+          name: string
+          niche: string
+          opening_hours: string | null
+          osm_id: string
+          phone: string | null
+          priority: number
+          region: string
+          seen_at: string
+          tags: Json
+          taken_at: string | null
+          website: string | null
+        }
+        Insert: {
+          area_key: string
+          city: string
+          country: string
+          district?: string
+          domain?: string | null
+          email?: string | null
+          facebook?: string | null
+          gone?: boolean
+          imported_at?: string
+          instagram?: string | null
+          lat: number
+          lon: number
+          name: string
+          niche: string
+          opening_hours?: string | null
+          osm_id: string
+          phone?: string | null
+          priority?: number
+          region: string
+          seen_at?: string
+          tags?: Json
+          taken_at?: string | null
+          website?: string | null
+        }
+        Update: {
+          area_key?: string
+          city?: string
+          country?: string
+          district?: string
+          domain?: string | null
+          email?: string | null
+          facebook?: string | null
+          gone?: boolean
+          imported_at?: string
+          instagram?: string | null
+          lat?: number
+          lon?: number
+          name?: string
+          niche?: string
+          opening_hours?: string | null
+          osm_id?: string
+          phone?: string | null
+          priority?: number
+          region?: string
+          seen_at?: string
+          tags?: Json
+          taken_at?: string | null
+          website?: string | null
+        }
+        Relationships: []
+      }
       outreach_searches: {
         Row: {
           active: boolean
@@ -1433,6 +1511,19 @@ export type Database = {
       app_ox_niche_stats: { Args: { p_secret: string }; Returns: Json }
       app_ox_offer_stats: {
         Args: { p_from: string; p_secret: string }
+        Returns: Json
+      }
+      app_ox_pool_finish: {
+        Args: { p_country: string; p_secret: string; p_since: string }
+        Returns: number
+      }
+      app_ox_pool_stats: { Args: { p_secret: string }; Returns: Json }
+      app_ox_pool_take: {
+        Args: { p_area_key: string; p_limit: number; p_secret: string }
+        Returns: Json
+      }
+      app_ox_pool_upsert: {
+        Args: { p_rows: Json; p_secret: string }
         Returns: Json
       }
       app_ox_preview: {
