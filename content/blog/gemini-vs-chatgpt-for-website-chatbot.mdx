@@ -1,0 +1,118 @@
+---
+title: "Gemini vs ChatGPT for a Website Chatbot"
+description: "Gemini vs ChatGPT for website chatbot builds: free tiers, data terms, reply speed I measured, and which to pick for a small business bot, with real prices."
+keyword: "gemini vs chatgpt for website chatbot"
+category: ai-chatbots
+cluster: ai-chatbots
+role: supporting
+intent: compare
+funnel: consideration
+secondary: ["gemini api chatbot", "openai api chatbot", "best llm for customer support bot"]
+trust: "I built and run an AI assistant on Google Gemini and Supabase (44 pages embedded at launch, 30 saved answers for when the AI is unavailable), hold a BS in Artificial Intelligence, and build custom chatbots for clients at Devrex Digital."
+tags: [ai chatbot, gemini, chatgpt, openai, llm]
+published: 2026-11-27
+faq:
+  - q: "Is Gemini free to use for a website chatbot?"
+    a: "The Gemini API has a free tier, so a small bot can run without a bill. Its limits are low and change over time, and Google may use free-tier content to improve its products, so a bot that handles private customer details should run on the paid tier."
+  - q: "Can I use my ChatGPT Plus subscription to power a website chatbot?"
+    a: "No. A ChatGPT subscription covers the ChatGPT app. A chatbot on your own site runs on OpenAI's API, which has its own account and is billed by usage, separately from any subscription."
+  - q: "Which is better for customer support, Gemini or ChatGPT?"
+    a: "For a bot that answers from your own pages, both are good enough. What decides it is the free-tier limits, the data terms, reply speed and how the bot behaves when the AI is down or doesn't know the answer."
+  - q: "Can I switch from Gemini to OpenAI later?"
+    a: "Yes, if the bot is built for it. Keep the instructions, the search over your content and the fallback answers in your own code, so changing the model is a small change. The one part to redo is the embeddings, because each provider's vectors only match their own."
+  - q: "How much does a custom website chatbot cost?"
+    a: "With me, an AI chatbot starts at $350 and is usually live in 3–5 days. Running costs depend on traffic and the AI provider's pricing; a small site can often stay on a free tier."
+---
+
+For a **Gemini vs ChatGPT for website chatbot** decision, my verdict: for a small business bot that answers from its own pages, start on the Gemini API. Its free tier lets a small site run the bot without a bill, and the fast model replied quickly when I measured it. Pick OpenAI's API (the models behind ChatGPT) when you already pay for it, your team builds on its tools, or the bot handles private customer details and you'd rather not run on any free tier. Answer quality is close enough that it shouldn't decide it.
+
+| | Gemini API (Google) | OpenAI API (ChatGPT's models) |
+| --- | --- | --- |
+| Free use for a live bot | Yes, a free tier with low daily limits | No free allowance like Gemini's; paid per use |
+| Data on the free tier | Google may use it to improve its products | No free tier to worry about |
+| Embeddings for your own pages | Yes, from the same account | Yes, from the same account |
+| Streaming replies | Yes | Yes |
+| Billing | Free tier, then pay as you go | Pay as you go, separate from a ChatGPT subscription |
+| Best fit | Small sites, testing, low traffic | Teams already on OpenAI, busier bots on a paid plan |
+
+## Gemini vs ChatGPT for website chatbot builds: what really differs
+
+Most comparisons test the ChatGPT and Gemini apps on essays, code and trivia. A website chatbot isn't the app. It's your own chat window that sends each question to the provider's API, along with the passages from your site that answer it. The API has its own pricing, limits and terms, and those decide more than which model writes the nicer poem.
+
+So the useful questions are these:
+
+1. **Can it run free, and on what terms?** A small business site might get a handful of chats a day. Whether those cost nothing matters.
+2. **How fast does the reply start?** A visitor waiting several seconds for the first word closes the chat.
+3. **What happens to the messages?** Visitors type names, emails and order details into chat boxes.
+4. **What happens when the AI is down or out of quota?** Every provider has limits and outages.
+
+On all four, the API account matters more than the model's name.
+
+## Which AI model is best for a website chatbot?
+
+The best LLM for a customer support bot is the one that answers fast, stays inside your content and doesn't break your budget, not the one at the top of a benchmark. A bot that answers "What do you charge?" or "Do you ship to the UK?" from your own pages doesn't need the most powerful model either provider sells.
+
+What makes the answers good is the setup around the model:
+
+- **Search over your own pages.** The bot finds the right passages first and the model only words the answer. My guide to an [AI chatbot trained on your website content](/blog/ai-chatbot-trained-on-website-content) explains how that works.
+- **Strict instructions.** State only what the pages say, never invent prices or results, and send the visitor to a person when the answer isn't there.
+- **A fast model, not the biggest one.** The bigger models think longer before the first word. For short answers from your own text, that wait buys nothing.
+
+Both providers do all of this. A Gemini API chatbot and an OpenAI API chatbot built the same way give very similar answers.
+
+## Is Gemini free to use?
+
+Yes, the Gemini API has a free tier, and that's the main reason I start small bots there. Google's [Gemini Developer API pricing page](https://ai.google.dev/gemini-api/docs/pricing) lists free input and output tokens with limited access to some models, then pay-as-you-go pricing above that.
+
+Two catches matter for a business:
+
+- **The limits are low and they change.** Google's [Gemini API rate limits page](https://ai.google.dev/gemini-api/docs/rate-limits) lists them per model and per day. When I measured the fast model on the free tier, it allowed 20 replies a day. That's enough for a small site or a test, not for a busy store.
+- **Free-tier content may be used to improve Google's products.** The pricing page marks this "Yes" for the free tier and "No" for the paid tier. If visitors type order numbers, health questions or anything private, run the bot on the paid tier or on another provider's paid plan.
+
+<FromMyWork title="What I measured on the Gemini free tier">
+The assistant I built and run answers visitor questions on Google Gemini, with Supabase and pgvector to search **44 pages** embedded at launch. I tested the free tier before choosing a model.
+
+- **The fast model** (`gemini-3.5-flash` with minimal thinking) started replying in **1–2 seconds** and allowed **20 replies a day** on the free tier.
+- **The Flash-Lite models**, which you'd expect to be quicker, took **13–40 seconds** per reply on the free tier. That's far too slow for a chat window, so I didn't add one as a second model.
+- **When the quota runs out**, the bot doesn't show an error. If Gemini fails, is out of quota or doesn't start replying within 7 seconds, an offline bank of **30 saved answers** replies instead, with no AI call. Questions it can't match get "Hamza will answer this personally" and the lead form.
+
+That last part is why a free tier works at all: the visitor never sees the limit. You can try it with the chat button on this page.
+</FromMyWork>
+
+## Can I put ChatGPT on my website with a ChatGPT subscription?
+
+No. A ChatGPT Plus or Team subscription is for the ChatGPT app. To put a chat window on your own site, the bot calls OpenAI's API, which has its own developer account and is billed by how much you use, separately from any subscription. A custom GPT built inside ChatGPT stays inside ChatGPT; it doesn't become a widget on your site.
+
+The same goes for Google: a Gemini app subscription doesn't pay for the Gemini API. The API has its own free tier and its own billing.
+
+## When should I pick the OpenAI API instead of Gemini?
+
+Gemini isn't always the right start. I'd point a client to an OpenAI API chatbot in these cases:
+
+| Your situation | Pick | Why |
+| --- | --- | --- |
+| Small site, a few chats a day, public info only | Gemini, free tier | Runs without a bill; the fallback covers quota days |
+| Visitors share private details (orders, health, accounts) | Either, on a paid plan | Keep customer messages off any free tier |
+| Your team already builds on OpenAI or pays for its API | OpenAI | One account, one bill, tools your team knows |
+| Busy store or many chats a day | Either, on a paid plan | Free daily limits won't cover it; compare the paid prices for your traffic |
+| You want to switch later | Either, built so the model is one setting | Only the embeddings need redoing |
+
+The last row is the one I care about most. I keep the instructions, the search over your pages and the saved answers in the site's own code, so the model is a single setting. If prices or limits change, switching is a small job, not a rebuild.
+
+<MyTake>
+For most small businesses I recommend starting on the Gemini API's free tier with a fast model, a strict "only answer from these pages" rule and a set of saved answers for when the quota runs out. Move to a paid plan, with Google or OpenAI, the day the bot starts handling private details or the free limit stops covering your traffic. Don't pick a provider from a benchmark table: run your own 20 real customer questions through both and time the first word.
+</MyTake>
+
+## What does a website chatbot cost to build and run?
+
+Building it is a one-off price. With me, an AI chatbot starts at $350 and is usually live in 3–5 days, quoted after a free call. Payment is 50% upfront and 50% on delivery, with 2 free revision rounds and 30 days of free bug fixes after launch. The [AI chatbot cost breakdown](/blog/ai-chatbot-for-website-cost) has the full picture.
+
+Running it is the AI provider's bill, which depends on your traffic and their current prices. A small site on Gemini's free tier can pay nothing; a busy bot on a paid plan pays per use. Check before you build:
+
+- [ ] How many chats a day you expect, from your contact form or WhatsApp volume
+- [ ] Whether visitors will type private details into the chat
+- [ ] What the bot says when the AI is down or out of quota
+- [ ] Who gets the conversation when the bot can't answer
+- [ ] That changing the model later is one setting, not a rebuild
+
+Handing over to a person matters as much as the model; my [rules for a website chatbot with WhatsApp handoff](/blog/website-chatbot-with-whatsapp-handoff) cover that part. For the bigger picture, start with [AI chatbots for small business: the complete guide](/blog/ai-chatbot-for-small-business). If you'd like me to build one on your content, the [AI chatbot service page](/services/ai-chatbots) has the details.

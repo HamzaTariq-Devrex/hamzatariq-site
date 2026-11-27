@@ -837,8 +837,9 @@
         "is gemini free to use?"
       ],
       "angle": "Why I chose Gemini for this site's bot, with my own free-tier measurements (20 replies a day, first token in 1–2 s, Flash-Lite at 13–40 s) instead of benchmark tables.",
-      "status": "queued",
-      "publishedSlug": null
+      "status": "published",
+      "publishedSlug": "gemini-vs-chatgpt-for-website-chatbot",
+      "published": "2026-11-27"
     },
     {
       "keyword": "ecommerce site with customer accounts",

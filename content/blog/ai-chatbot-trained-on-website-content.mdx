@@ -99,7 +99,7 @@ These three get mixed up in sales pitches. For a business website, they solve di
 | Fine-tuning | Retraining a model on your examples | Only through a custom build | Retrain each time facts change | Teaching a style or format, not facts |
 | Whole site pasted into the prompt | Every page sent with every question | Yes | Edit the prompt | Tiny sites only; slow and costly per reply |
 
-A custom GPT for website use is the one people ask me about most. A custom GPT is made for use inside ChatGPT. To put a chat window on your own site, the bot has to be built on an AI provider's API, and that build is what a RAG chatbot is. Fine-tuning is the wrong tool for facts: prices and policies change, and you'd retrain every time.
+A custom GPT for website use is the one people ask me about most. A custom GPT is made for use inside ChatGPT. To put a chat window on your own site, the bot has to be built on an AI provider's API, and that build is what a RAG chatbot is. Fine-tuning is the wrong tool for facts: prices and policies change, and you'd retrain every time. Which provider's API to build on is a separate choice, and my [Gemini vs ChatGPT guide for website chatbots](/blog/gemini-vs-chatgpt-for-website-chatbot) walks through it.
 
 <MyTake>
 For a business website, a RAG chatbot is the right choice almost every time: it's the only option that answers on your site, from your current content, without retraining. Spend the effort on the content, not the model. A bot that reads clear, complete pages with a cheap model gives better answers than an expensive model reading vague pages. And never launch one without a fallback for when the AI is down, because that's exactly when a ready-to-buy visitor gets an error.
