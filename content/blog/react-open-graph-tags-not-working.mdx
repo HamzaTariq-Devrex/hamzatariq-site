@@ -1,0 +1,177 @@
+---
+title: "React Open Graph Tags Not Working? Why Links Show No Preview"
+seoTitle: "React Open Graph Tags Not Working? The Fix"
+description: "React Open Graph tags not working? Why WhatsApp and Slack show no preview, the server-side fix, and five Next.js mistakes that still break link cards."
+keyword: "react open graph tags not working"
+category: react-nextjs-seo
+cluster: react-seo
+role: supporting
+intent: fix
+funnel: awareness
+secondary: ["og tags react", "whatsapp link preview not showing", "react helmet og tags", "next.js opengraph image"]
+trust: "I've shipped 40+ live production websites in React and Next.js as the sole frontend developer on each build, and I built the free SEO audit tool that reads a page's raw HTML the way a link preview crawler does."
+tags: [react, open graph, link previews, next.js, seo]
+published: 2026-11-27
+faq:
+  - q: "How do I refresh a link preview that is cached?"
+    a: "Fix the tags first, then ask each app to fetch the page again: Facebook's Sharing Debugger has a Scrape Again button and LinkedIn has the Post Inspector. WhatsApp has no public tool, so test with a fresh URL, such as the same link with a query string added, and old chats may keep the old card."
+  - q: "What size should an Open Graph image be?"
+    a: "Use a wide image, a little under twice as wide as it is tall, saved as a PNG or JPG and kept small; the exact size is in the checklist in this post. That shape works for the large cards on Facebook, LinkedIn, X and WhatsApp. Put the important words in the middle, because some apps crop the edges."
+  - q: "Why does my link preview show the wrong title?"
+    a: "The crawler reads the first HTML your server sends, not the page after React runs. On a client-rendered React app that HTML has the one title from index.html, so every link shows it. Server-rendered pages send each page's own title."
+  - q: "Do I need both Open Graph and Twitter tags?"
+    a: "X falls back to the Open Graph tags when its own are missing, so Open Graph covers most of it. I still add twitter:card set to summary_large_image, because without it X shows a small card. Next.js adds both when you use its image files."
+  - q: "How much does it cost to fix link previews on a React site?"
+    a: "With me, an SEO audit with a prioritized fix list starts at $150, a technical SEO setup starts at $500, and a React (Vite/CRA) to Next.js migration for SEO starts at $800. Each is quoted after a free call."
+---
+
+When **React Open Graph tags are not working**, the fix is almost always the same: put the `og:title`, `og:description`, `og:image` and `og:url` tags into the HTML your server sends for each page, not into the page after React runs. WhatsApp, Slack, LinkedIn, Facebook and X read only that first HTML and never run your JavaScript. On a client-rendered React app the tags you set with react-helmet don't exist yet when they look, so the link shows no image or the wrong title. Server-render the pages (Next.js does this per page) and use absolute image URLs.
+
+Find your symptom here first:
+
+| What you see | Most likely cause | Fix |
+| --- | --- | --- |
+| No card at all, or the same title on every link | Tags added by JavaScript (react-helmet) | Send the tags in the server HTML |
+| Right title, no image | Relative image URL, or the image is blocked, too big or redirects | Absolute `https://` URL that opens without a login |
+| Image works on one page, not another | A page's own `openGraph` replaced the layout's | Repeat the image, or use an `opengraph-image` file |
+| Old title or image after you fixed it | The app cached the first card | Re-scrape, or test with a fresh URL |
+| Broken only on preview links | The preview deploy needs a login | Test on the live domain |
+
+## React Open Graph tags not working: the two-minute check
+
+You don't need developer tools for this. Do it on a page whose preview is broken.
+
+1. Open the page in a desktop browser, right-click and choose "View page source" (not Inspect).
+2. Press Ctrl+F and search for `og:image`. If there's no match, the crawler gets no image. That's your answer.
+3. If it is there, copy the `content` value and open it in a private window. It should start with `https://`, show the image straight away and not ask you to sign in.
+4. Search for `og:title` and compare it with a second page. If both pages carry the same title, the tags are coming from `index.html`, not from each page.
+5. Paste the link into a WhatsApp chat with yourself, wait a few seconds and look at the card before you send it.
+
+If step 2 finds nothing but you can see the tags under Inspect, the tags are there only after JavaScript runs. Every fix below starts from that.
+
+## Do social crawlers run JavaScript?
+
+No. Link preview crawlers download the HTML, read the tags in the `<head>` and stop. They don't start a browser, so anything React adds later is invisible to them.
+
+Google is the exception, and even Google does it in two steps. Its [JavaScript SEO basics guide](https://developers.google.com/search/docs/crawling-indexing/javascript/javascript-seo-basics) describes crawling the HTML first and rendering the JavaScript later, when resources allow. That's why a client-rendered page can slowly appear in Google with the right title while every chat app still shows a blank card. The two problems have one cause. My [comparison of React vs Next.js for SEO](/blog/react-vs-nextjs-for-seo) shows side by side what a crawler gets from each.
+
+Even the Next.js source code says so. Next.js keeps a list of crawlers that only read HTML, and WhatsApp, facebookexternalhit, Twitterbot, LinkedInBot and Slackbot are on it. For them, Next.js puts the metadata straight into the `<head>` instead of streaming it in later, as it can for a normal browser.
+
+## Does react-helmet work for OG tags?
+
+For link previews, no. React-helmet (and react-helmet-async, its maintained fork) writes the tags into the page in the browser, after the JavaScript has loaded and run. In the browser's Inspect panel they look perfect, which is why so many people think their **og tags react** setup is fine.
+
+The crawler never gets that far. It sees the `index.html` file every URL shares, with its one title and, usually, no image. So react helmet og tags help Google a little, after its render step, and do nothing for WhatsApp or Slack.
+
+There are three ways around it:
+
+- **Server-render the pages.** Each URL sends finished HTML with its own tags. In Next.js this is the default for every page.
+- **Prerender at build time.** A build step saves the HTML of each route with the tags in it. It works for a small site whose pages don't change between builds.
+- **Fill the tags on the server.** A small server swaps placeholders in `index.html` for the right title and image per URL. It fixes previews, but the page body is still empty for crawlers, and you now maintain a second copy of your routes.
+
+I explain the same trade-offs for whole sites in [Create React App SEO problems and how to fix them](/blog/create-react-app-seo-problems), and the [React SEO guide for React and Next.js sites](/blog/react-seo-guide) covers why tags set by JavaScript fall short in Google too.
+
+## Why doesn't my link show a preview on WhatsApp?
+
+When the **WhatsApp link preview is not showing** but other apps work, check WhatsApp's own rules. Meta's WhatsApp link preview documentation lists them:
+
+- The four tags `og:title`, `og:description`, `og:url` and `og:image` must be in the `<head>`.
+- The `<head>` must sit within the first `300 KB` of the page. A large block of inline CSS or a script above the tags can push them past that point, and WhatsApp stops reading before it reaches them. Put the meta tags at the top of the head.
+- The image URL must be absolute, the file under `600 KB` and at least `300 px` wide. A heavy PNG straight from a design tool often fails this.
+- `og:url` should be the clean address of the page, without tracking or session parameters.
+
+WhatsApp also builds the card in the sender's app, so a phone with a poor connection may simply give up. Test from a good connection before you change code.
+
+## How do I set up Open Graph images in Next.js?
+
+Use the built-in file convention. Add a file called `opengraph-image.tsx` next to a page, and Next.js turns it into an image and writes the `og:image` tags, with width, height, type and alt, into that page's HTML. A file in a deeper folder wins over one higher up, so one file per page type is enough. The [Next.js opengraph-image documentation](https://nextjs.org/docs/app/api-reference/file-conventions/metadata/opengraph-image) lists every option.
+
+Here's a working next.js opengraph image for blog posts, which draws the post title on a plain background:
+
+```tsx
+// app/blog/[slug]/opengraph-image.tsx
+import { ImageResponse } from "next/og";
+import { getPost } from "@/lib/blog";
+
+export const size = { width: 1200, height: 630 };
+export const contentType = "image/png";
+export const alt = "Blog post cover";
+
+export default async function Image({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const post = await getPost(slug);
+  return new ImageResponse(
+    (
+      <div style={{ display: "flex", width: "100%", height: "100%", padding: 72, alignItems: "flex-end", background: "#0b0a1a", color: "#fff", fontSize: 64 }}>
+        {post.title}
+      </div>
+    ),
+    size
+  );
+}
+```
+
+And set the base address once in the root layout, so every relative URL becomes absolute:
+
+```tsx
+// app/layout.tsx
+export const metadata = {
+  metadataBase: new URL("https://example.com"),
+  openGraph: { siteName: "Example Store", type: "website" },
+  twitter: { card: "summary_large_image" },
+};
+```
+
+Every page on this site gets its preview card the same way. My [Next.js SEO checklist](/blog/nextjs-seo-checklist) has the other tags each page needs.
+
+## Still no preview after moving to Next.js? Check these five
+
+A move to Next.js fixes the cause, but I keep seeing the same five mistakes afterwards.
+
+1. **No `metadataBase`.** Without it, Next.js has to guess the site address for relative image URLs. In the Next.js source, the guess is the preview's own address on a Vercel preview, the production address on Vercel production, and `localhost` almost everywhere else, including most other hosts. A crawler can't open `localhost`, so the card has no image.
+2. **A page's `openGraph` replaces the layout's.** Next.js merges metadata one level deep. If the layout sets `openGraph.images` and a page sets `openGraph: { title }`, the page's object replaces the whole layout object and the image is gone. Repeat the shared fields, or use `opengraph-image` files, which don't have this problem.
+3. **Testing on a preview deploy.** Preview links on Vercel are often protected by a login. The crawler gets the login page, not your tags. Always test previews on the live domain.
+4. **Relative or redirected image URLs.** `/og.png` means nothing to a crawler, and an image behind a `www` or `http` redirect may not load in every app. Point the tag at the final address.
+5. **Pages that still render in the browser.** A page marked `"use client"` that fetches its data in `useEffect`, or a migration that stopped at a client-only export, still sends an empty shell. View page source on that page, not only on the home page.
+
+<FromMyWork title="Where a broken preview costs real orders">
+<Figure
+  src="https://www.devrexdigital.site/images/portfolio/v2/dulhahouse.webp"
+  alt="Dulhahouse groom-wear store home page with sherwani and prince coat collections"
+  width={1440}
+  height={1299}
+  caption="Dulhahouse: ceremonial collections presented like lookbooks, with WhatsApp ordering and worldwide shipping."
+/>
+
+[The Dulhahouse groom-wear store](/work/dulhahouse), built at Devrex Digital, sells sherwanis, prince coats and waistcoats, shows each collection like a lookbook and takes orders on WhatsApp. On a store like this, a product link is the thing customers send each other in chats. A card with the outfit's photo and name helps start that conversation. A grey box with the shop's name on every link doesn't.
+
+So on stores I check the preview of a product page, a collection page and the home page, not just the home page. My [free SEO audit tool](/tools/free-seo-audit) helps with the first part: it fetches the raw HTML without running JavaScript, the way a link preview does, and flags missing titles, descriptions and app shells.
+</FromMyWork>
+
+Before you call it fixed, run through this list on two or three page types:
+
+- [ ] `og:title`, `og:description`, `og:image` and `og:url` appear in "View page source"
+- [ ] Each page has its own title and description, not the one from `index.html`
+- [ ] The `og:image` URL starts with `https://`, opens in a private window and isn't behind a redirect
+- [ ] The image is a PNG or JPG of `1200 × 630` and under `600 KB`
+- [ ] `metadataBase` is set to the live domain in the root layout
+- [ ] The preview was tested on the live domain, not a preview deploy
+- [ ] A fresh WhatsApp message shows the card before you press send
+
+<MyTake>
+Don't spend a week on react-helmet workarounds for previews. A server that patches placeholders into `index.html` fixes the card and nothing else: Google still gets an empty page, and every new route needs a second entry on the server. If the site has public pages you want shared and found, move them to server-rendered Next.js pages, where each page's tags and image come from the same data as the page itself. The exception is an app behind a login: nobody shares those pages publicly, so a single generic card is fine.
+</MyTake>
+
+## What does it cost to fix link previews on a React site?
+
+These are my real starting prices. Each project is quoted after a free call.
+
+| Your situation | What I do | From |
+| --- | --- | --- |
+| Not sure why previews or rankings are broken | SEO audit: report and prioritized fix list | $150, 2–3 days |
+| Already on Next.js, previews or tags wrong | Technical SEO setup for React/Next.js | $500 |
+| Client-rendered React (Vite or CRA) site | React (Vite/CRA) to Next.js migration for SEO | $800 |
+
+Payment is 50% upfront and 50% on delivery, with 2 free revision rounds and 30 days of free bug fixes after launch. A preview fix shows the moment a crawler fetches the page again, but apps that cached the old card can keep showing it in old chats.
+
+If you'd like me to check your pages and fix the tags, the [React SEO services page](/services/react-nextjs-seo) has the details.

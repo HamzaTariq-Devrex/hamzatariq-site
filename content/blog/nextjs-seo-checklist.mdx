@@ -188,7 +188,7 @@ const jsonLd = (data: object) => ({
 <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(productSchema)} />
 ```
 
-**Social images.** Add an `opengraph-image.tsx` file next to a page and Next.js generates the image and the meta tags for it. One file per page type (post, product, service) is enough; each page fills in its own title.
+**Social images.** Add an `opengraph-image.tsx` file next to a page and Next.js generates the image and the meta tags for it. One file per page type (post, product, service) is enough; each page fills in its own title. If shared links still show no image, my [fixes for Open Graph tags that don't show a preview](/blog/react-open-graph-tags-not-working) cover the usual causes.
 
 **Images and fonts.** `next/image` with a width and height reserves the space, so the page doesn't jump while it loads. Give the main image at the top `priority` and nothing else. Load fonts with `next/font`, which self-hosts them, and keep `display: "swap"` so text shows at once in a fallback font. These are the **Next.js SEO best practices** for speed that matter most in real audits; the rest of speed work is in the [React SEO guide](/blog/react-seo-guide).
 

@@ -46,7 +46,7 @@ Both use the same React components. The question is where the page gets built.
 
 **Server-side rendering** (or static generation, which does the same thing ahead of time at build) means the server sends the page already built. The browser shows it at once, then React takes over for the clicks and menus.
 
-Google can run JavaScript, but it does it in two steps. It crawls the HTML first, then puts the page in a queue to render the JavaScript later. Google's own [JavaScript SEO basics guide](https://developers.google.com/search/docs/crawling-indexing/javascript/javascript-seo-basics) describes this crawl, render and index process. Anything that fails in the render step, like a slow API call or a script error, leaves Google with the empty shell. Many other crawlers and the link previews in chat apps never run JavaScript at all, so they only ever see the shell.
+Google can run JavaScript, but it does it in two steps. It crawls the HTML first, then puts the page in a queue to render the JavaScript later. Google's own [JavaScript SEO basics guide](https://developers.google.com/search/docs/crawling-indexing/javascript/javascript-seo-basics) describes this crawl, render and index process. Anything that fails in the render step, like a slow API call or a script error, leaves Google with the empty shell. Many other crawlers and the link previews in chat apps never run JavaScript at all, so they only ever see the shell. That's why a React link shared on WhatsApp often shows no card, as I explain in [why React Open Graph tags don't show a preview](/blog/react-open-graph-tags-not-working).
 
 Next.js renders on the server by default. Plain React renders in the browser by default. That default is the whole SEO difference.
 

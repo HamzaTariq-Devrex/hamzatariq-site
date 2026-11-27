@@ -812,8 +812,9 @@
         "do social crawlers run javascript?"
       ],
       "angle": "Explains why social crawlers never see client-rendered tags, and shows the Next.js opengraph-image setup this site uses for every page.",
-      "status": "queued",
-      "publishedSlug": null
+      "status": "published",
+      "publishedSlug": "react-open-graph-tags-not-working",
+      "published": "2026-11-27"
     },
     {
       "keyword": "gemini vs chatgpt for website chatbot",

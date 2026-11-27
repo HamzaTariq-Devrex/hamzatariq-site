@@ -44,7 +44,7 @@ A standard CRA build has one HTML file, `public/index.html`. The server sends it
 1. **An empty first page.** The HTML has a `<div id="root"></div>` and a script tag. Google crawls that first and queues the page to run the JavaScript later, as Google's own JavaScript SEO documentation explains. If the render fails or an API call is slow, Google keeps the empty version.
 2. **One title for every URL.** Whatever is in `public/index.html` (often still "React App") is the title of the home page, every product and every post. Google sees many pages with one name and treats them as near copies.
 3. **Soft `404` errors.** A typo in the address still answers "OK" with the same shell, because the server can't know which routes exist. Google reports these as soft `404` errors and wastes crawl time on them.
-4. **No canonical tag or social image per page.** A shared link in WhatsApp or Slack shows a blank card, because those previews read only the first HTML and never run JavaScript.
+4. **No canonical tag or social image per page.** A shared link in WhatsApp or Slack shows a blank card, because those previews read only the first HTML and never run JavaScript. My guide to [React Open Graph tags not working](/blog/react-open-graph-tags-not-working) shows how to check and fix those cards.
 5. **No sitemap.** CRA doesn't make one, so new pages wait until Google finds a link to them.
 6. **One big JavaScript bundle.** The visitor sees nothing until the script loads and runs, which hurts load speed on phones.
 
