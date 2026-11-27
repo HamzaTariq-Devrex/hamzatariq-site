@@ -1,0 +1,125 @@
+---
+title: "Ecommerce Site With Customer Accounts: What It Takes"
+seoTitle: "Ecommerce Site With Customer Accounts: Cost"
+description: "An ecommerce site with customer accounts starts at $2,000 vs $1,000 without. What the account area includes, when guest checkout is enough, and what to scope."
+keyword: "ecommerce site with customer accounts"
+category: nextjs-websites
+cluster: ecommerce
+role: supporting
+intent: buy
+funnel: decision
+secondary: ["user login ecommerce", "customer accounts online store", "order history page"]
+trust: "I've shipped 40+ live production websites as the sole frontend developer on each build, including custom stores for brands at Devrex Digital, where my team has worked with 45+ brands."
+tags: [ecommerce, customer accounts, guest checkout, next.js, online store]
+published: 2026-11-27
+faq:
+  - q: "Do customers need an account to buy from my store?"
+    a: "No, and they shouldn't have to. Guest checkout with just an email and an address should always be there. Accounts are an extra for returning customers, offered after the order, never a wall in front of it."
+  - q: "How much does an ecommerce site with customer accounts cost?"
+    a: "With me, a full ecommerce app with user logins, accounts and orders starts at $2,000, compared with $1,000 for an ecommerce store with an admin dashboard. Both are quoted after a free call, because the final price depends on features."
+  - q: "Can I add customer accounts to my store later?"
+    a: "Yes, if the store is built on a real database of orders from the start. Orders placed as a guest can then be linked to an account by email when the customer signs up. Plan it on the first call so nothing has to be rebuilt."
+  - q: "Is sign-in with an email link safer than passwords?"
+    a: "It removes the password, so there's nothing to reuse or leak, and customers don't need a reset flow. The trade-off is that they need access to their inbox to sign in. Many stores offer both."
+  - q: "What do I have to look after once customers have accounts?"
+    a: "You hold personal data, so you need a privacy page that says what you keep, a way for customers to delete their account, and someone to keep the sign-in system updated. With me, the first 30 days of bug fixes after launch are free; ongoing maintenance is quoted separately."
+---
+
+An **ecommerce site with customer accounts** costs more than a store with guest checkout only. With me, an ecommerce store with an admin dashboard starts at $1,000, and a full ecommerce app with user logins, accounts and order history starts at $2,000. So accounts are roughly a $1,000 step up, quoted after a free call. They're worth it when customers come back and need something only an account gives them: past orders, quick reorders, saved addresses or member prices. If most buyers order once, guest checkout is enough.
+
+| | Ecommerce store with admin dashboard | Full ecommerce app |
+| --- | --- | --- |
+| From | $1,000 | $2,000 |
+| Delivery | 2–3 weeks | Planned on the free call, by features |
+| Pages included | Up to 10, unlimited products | Up to 15 |
+| Checkout | Guest checkout | Guest checkout plus customer accounts |
+| Customer logins and order history | No | Yes |
+| Admin dashboard for products and orders | Yes | Yes, plus customers |
+
+Extra pages beyond the package are $50 each, content editing (CMS) is +$150 and a second language is +$250, on either package.
+
+## Do customers need accounts to buy?
+
+No. Forcing an account before checkout is one of the reasons shoppers leave a cart, which is why every serious guide, including the platform vendors' own, says to keep guest checkout. A first-time buyer wants to pay, not pick a password.
+
+So in every store I build, the order works without an account: name, email, phone, address, payment. Accounts, when a store has them, are offered in two quiet places:
+
+- **On the order confirmation page.** "Save your details for next time" with one field for a password, or a sign-in link sent by email. The customer has already bought, so there's nothing to lose.
+- **In the header.** A small "Sign in" for people who already have an account.
+
+The rule is simple: an account should be something customers choose because it saves them time, not something they need to get past.
+
+## What's in the account area of an ecommerce site with customer accounts?
+
+In my packages, the full ecommerce app is the one with customer accounts, and the account area is most of what the extra price pays for. "User login" sounds like one feature, but on a store it's a small product of its own. Here's what the account side covers when I scope it:
+
+1. **Sign-up and sign-in.** Email and password, a sign-in link sent by email, or both. Google sign-in when it suits the customers.
+2. **Password reset and email checks.** A working "forgot password" flow and a confirmed email address, so orders and receipts reach a real inbox.
+3. **An order history page.** Every past order with date, items, total and status, and a page per order with its details.
+4. **Order status.** Placed, confirmed, shipped, delivered, updated from the admin dashboard so customers don't have to message you to ask.
+5. **Saved addresses and contact details.** Filled in at checkout so the second order takes a minute.
+6. **Reorder.** One button that puts a past order back in the cart, which matters for anything people buy again.
+7. **Account settings and deletion.** Change name, email and password, and delete the account.
+8. **The admin side.** A customers list with each customer's orders, so you can answer "where's my order?" in seconds.
+
+Google's web.dev team has a practical guide to [sign-in form best practices](https://web.dev/articles/sign-in-form-best-practices) that covers the details customers notice, such as letting the browser fill in saved passwords. For the login system itself, a managed service such as [Supabase Auth](https://supabase.com/docs/guides/auth) handles passwords, email links and social sign-in, so none of it has to be written from scratch.
+
+For what the store owner's side should include beyond customers, my guide to [ecommerce admin dashboard features](/blog/ecommerce-admin-dashboard-features) goes through products, stock and orders.
+
+## When are customer accounts worth it?
+
+The extra cost pays off only when customers come back and the account saves them real effort. This is how I'd decide for the most common kinds of store:
+
+| Your store | Accounts? | Why |
+| --- | --- | --- |
+| One-off or occasional buys (bridal wear, furniture, gifts) | Usually no | Customers buy once or twice a year; guest checkout and a WhatsApp chat cover it |
+| Repeat buys of the same items (pet food, skincare, refills) | Yes | Reorder and saved addresses save time on every order |
+| Many orders per customer that need tracking | Yes | An order history page cuts "where's my order?" messages |
+| Member or wholesale prices | Yes | Prices have to depend on who is signed in |
+| Orders mostly taken on WhatsApp or by phone | No | The account would sit empty; spend the money on the catalogue |
+| Not sure yet | Start without | Build on a proper order database so accounts can be added later |
+
+Customer accounts in an online store also give you a customer list with order history, which is useful for repeat-buyer offers. You get most of that list from guest orders too, because every order already carries an email address. Marketing to it still needs the customer's consent, accounts or not.
+
+<FromMyWork title="A store that sells without a single login">
+<Figure
+  src="https://www.devrexdigital.site/images/portfolio/v2/auraluxebags.webp"
+  alt="AuraLuxebags online store home page with handcrafted bag collections"
+  width={1440}
+  height={1307}
+  caption="AuraLuxebags: handcrafted collections, customized bags and sale campaigns."
+/>
+
+[The AuraLuxebags handcrafted bag store](/work/auraluxebags), built at Devrex Digital, sells hand-knit and crochet bags and hand-painted and embroidered totes, and takes custom orders. Its features, as listed in my portfolio, are handcrafted collections, customized bags, sale campaigns and a brand story page. None of those needs a customer login: a shopper browses a collection, picks a bag or asks for a custom one, and pays.
+
+That's the question I ask on every first call. If none of a store's features depends on knowing who the customer is, the store package does the job, and the budget goes into the catalogue and the design instead. If the client names reorders, member prices or order tracking, that's the point where the full app earns its price.
+</FromMyWork>
+
+## What do customer accounts commit you to?
+
+Accounts aren't only a build cost. Once customers sign in, you hold their personal data, and that comes with jobs that a guest-only store has fewer of:
+
+- **A privacy page that matches reality.** It says what you store (name, email, addresses, orders) and why.
+- **Account deletion.** Customers in many countries can ask you to delete their data. The account settings page should let them do it themselves.
+- **Security updates.** The sign-in system needs updates over time. Using a managed login service means you aren't storing passwords yourself, but someone still has to keep the store's code current.
+- **Support questions.** "I can't sign in" becomes a new kind of message. Email sign-in links and a working reset flow keep these rare.
+
+With me, every project includes 2 free revision rounds and 30 days of free bug fixes after launch; ongoing maintenance is quoted separately. Payment is 50% upfront and 50% on delivery.
+
+<MyTake>
+Most of the store owners I talk to don't need accounts at launch. They need guest checkout that works on a phone, clear product pages and fast replies on WhatsApp. I recommend starting with the store package on a proper order database, then adding accounts when repeat customers start asking for their order history. The exception is any store whose prices or products depend on who the customer is, such as wholesale or member pricing: there, accounts are the product, so build them from day one.
+</MyTake>
+
+## Can I add customer accounts later?
+
+Yes, if the first build is ready for it. What makes it easy:
+
+- [ ] Orders are saved in a real database with the customer's email, not just sent as emails
+- [ ] Each order has a status that the admin dashboard can change
+- [ ] Guest orders can be linked to a new account by matching the email address
+- [ ] Checkout already collects the details an account would save
+- [ ] The privacy page can be extended without rewriting it
+
+Done that way, adding a user login to an ecommerce store later is an upgrade of the same store, not a rebuild. Done badly, with orders that only exist in an inbox, it means starting the order system again.
+
+For the full cost picture beyond accounts, see the [ecommerce website cost breakdown](/blog/ecommerce-website-cost-breakdown), and for the whole planning process, the [custom ecommerce website guide](/blog/custom-ecommerce-website-guide). When you're ready to scope your store, the [Next.js website service page](/services/nextjs-websites) has both packages and what's in them.

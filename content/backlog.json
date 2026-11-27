@@ -862,8 +862,9 @@
         "what does a full ecommerce app include?"
       ],
       "angle": "When accounts are worth it and when guest checkout is better, with the real price difference between my store and full-app packages.",
-      "status": "queued",
-      "publishedSlug": null
+      "status": "published",
+      "publishedSlug": "ecommerce-site-with-customer-accounts",
+      "published": "2026-11-27"
     },
     {
       "keyword": "order management system for small business",
